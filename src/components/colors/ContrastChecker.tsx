@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useCallback } from 'react';
@@ -37,11 +38,10 @@ const ColorControlGroup = ({ hsl, setHsl, title }: { hsl: HslColor, setHsl: (hsl
         <div className="space-y-4">
             <h3 className="text-xl font-semibold">{title}</h3>
             <div className="flex gap-4 items-center">
-                 <div className="h-10 w-10 rounded-md border border-current/50" style={{ backgroundColor: color }} />
                  <HexColorInput
                     color={color}
                     onChange={handleHexChange}
-                    className="flex-1 p-2 rounded-md bg-transparent border border-current/50 text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="flex-1 p-2 rounded-md bg-transparent text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-ring"
                     prefixed
                 />
             </div>
@@ -137,7 +137,7 @@ export const ContrastChecker = () => {
         >
             <div className="flex-grow flex items-center justify-center p-8 relative">
                 <div className="absolute top-8 left-8 right-8 z-10 flex justify-end">
-                     <Card className="bg-background/10 border-current/20 text-current backdrop-blur-sm max-w-2xl">
+                     <Card className="bg-background/10 text-current backdrop-blur-sm max-w-2xl">
                         <CardHeader>
                             <div className='flex justify-between items-start'>
                                 <div>
@@ -146,7 +146,7 @@ export const ContrastChecker = () => {
                                         Based on WCAG 2.1 guidelines.
                                     </CardDescription>
                                 </div>
-                                <div className="bg-current/10 text-current p-2 rounded-lg text-center border border-current/20">
+                                <div className="bg-current/10 text-current p-2 rounded-lg text-center">
                                     <p className="text-2xl font-bold">{contrastRatio.toFixed(2)}</p>
                                     <p className="text-xs text-current/80">Contrast Ratio</p>
                                 </div>
@@ -176,7 +176,7 @@ export const ContrastChecker = () => {
                 <div className="max-w-4xl mx-auto">
                      <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-semibold">Color Controls</h2>
-                        <Button onClick={handleRandomize} variant="outline" className="border-current/50 hover:bg-current/10">
+                        <Button onClick={handleRandomize} variant="ghost" className="hover:bg-current/10">
                             <Dices className="mr-2" />
                             Randomize
                         </Button>
@@ -184,7 +184,7 @@ export const ContrastChecker = () => {
                     <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-8">
                         <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} title="Text Color" />
                          <div className="flex h-full items-center justify-center pt-8">
-                            <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors" className="border-current/50 hover:bg-current/10">
+                            <Button onClick={handleSwap} size="icon" variant="ghost" aria-label="Swap Colors" className="hover:bg-current/10">
                                 <ArrowRightLeft />
                             </Button>
                         </div>
