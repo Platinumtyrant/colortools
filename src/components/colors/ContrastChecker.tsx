@@ -127,56 +127,54 @@ export const ContrastChecker = () => {
 
     return (
         <main 
-            className="relative grid min-h-[calc(100vh-65px)] w-full transition-colors duration-200 lg:grid-cols-2"
-            style={{ backgroundColor: bgColor }}
+            className="relative flex flex-col min-h-[calc(100vh-65px)] w-full transition-colors duration-200"
+            style={{ 
+                backgroundColor: bgColor,
+                color: textColor,
+                '--primary': primaryHsl,
+                '--ring': primaryHsl,
+            } as React.CSSProperties}
         >
-            <div className="flex items-center justify-center p-8">
-                <h1 className="text-[20vw] lg:text-[15vw] font-bold select-none" style={{ color: textColor }}>Aa</h1>
+            <div className="flex-grow flex items-center justify-center p-8 relative">
+                <div className="absolute top-8 left-8 right-8 z-10">
+                     <Card className="bg-background/10 border-current/20 text-current backdrop-blur-sm max-w-2xl mx-auto">
+                        <CardHeader>
+                            <div className='flex justify-between items-start'>
+                                <div>
+                                    <CardTitle>WCAG Conformance</CardTitle>
+                                    <CardDescription className="text-current/80">
+                                        Based on WCAG 2.1 guidelines.
+                                    </CardDescription>
+                                </div>
+                                <div className="bg-current/10 text-current p-2 rounded-lg text-center border border-current/20">
+                                    <p className="text-2xl font-bold">{contrastRatio.toFixed(2)}</p>
+                                    <p className="text-xs text-current/80">Contrast Ratio</p>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                <div className="font-bold text-current/80 hidden md:block">Conformance</div>
+                                <div className="font-bold text-current/80">Normal Text (16pt)</div>
+                                <div className="font-bold text-current/80">Large Text (18pt+)</div>
+                                
+                                <div className="font-bold flex items-center justify-center">AA</div>
+                                <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
+                                <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
+
+                                <div className="font-bold flex items-center justify-center">AAA</div>
+                                <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
+                                <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
+                           </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                <h1 className="text-[30vw] lg:text-[25vw] font-bold select-none">Aa</h1>
             </div>
 
-            <div 
-                className="relative flex flex-col gap-8 p-8"
-                style={{ 
-                    color: textColor,
-                    '--primary': primaryHsl,
-                    '--ring': primaryHsl,
-                } as React.CSSProperties}
-            >
-                <div className="absolute inset-0 bg-black/10 -z-10 lg:hidden" />
-                <Card className="bg-background/10 border-current/20 text-current backdrop-blur-sm">
-                    <CardHeader>
-                        <div className='flex justify-between items-start'>
-                            <div>
-                                <CardTitle>WCAG Conformance</CardTitle>
-                                <CardDescription className="text-current/80">
-                                    Based on WCAG 2.1 guidelines.
-                                </CardDescription>
-                            </div>
-                            <div className="bg-current/10 text-current p-2 rounded-lg text-center border border-current/20">
-                                <p className="text-2xl font-bold">{contrastRatio.toFixed(2)}</p>
-                                <p className="text-xs text-current/80">Contrast Ratio</p>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                            <div className="font-bold text-current/80 hidden md:block">Conformance</div>
-                            <div className="font-bold text-current/80">Normal Text (16pt)</div>
-                            <div className="font-bold text-current/80">Large Text (18pt+)</div>
-                            
-                            <div className="font-bold flex items-center justify-center">AA</div>
-                            <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
-                            <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
-
-                            <div className="font-bold flex items-center justify-center">AAA</div>
-                            <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
-                            <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
-                       </div>
-                    </CardContent>
-                </Card>
-
-                <div className="flex flex-col gap-8 rounded-lg border border-current/20 bg-background/10 p-6 backdrop-blur-sm">
-                    <div className="flex justify-between items-center">
+            <div className="flex-shrink-0 p-6">
+                <div className="max-w-4xl mx-auto">
+                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-semibold">Color Controls</h2>
                         <Button onClick={handleRandomize} variant="outline" className="border-current/50 hover:bg-current/10">
                             <Dices className="mr-2" />
