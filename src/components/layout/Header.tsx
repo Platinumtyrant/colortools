@@ -12,7 +12,7 @@ export function Header() {
             Palette Builder
           </Link>
           <Link href="/mesh-gradient" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-            Mesh Gradient
+            Gradient Builder
           </Link>
         </nav>
       </div>
