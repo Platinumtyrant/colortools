@@ -37,11 +37,11 @@ const ColorControlGroup = ({ hsl, setHsl, title }: { hsl: HslColor, setHsl: (hsl
         <div className="space-y-4">
             <h3 className="text-xl font-semibold">{title}</h3>
             <div className="flex gap-4 items-center">
-                 <div className="h-10 w-10 rounded-md border" style={{ backgroundColor: color }} />
+                 <div className="h-10 w-10 rounded-md border border-current/50" style={{ backgroundColor: color }} />
                  <HexColorInput
                     color={color}
                     onChange={handleHexChange}
-                    className="flex-1 p-2 rounded-md bg-input border border-border text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="flex-1 p-2 rounded-md bg-transparent border border-current/50 text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-ring"
                     prefixed
                 />
             </div>
@@ -80,6 +80,11 @@ export const ContrastChecker = () => {
 
     const textColor = useMemo(() => colord(textHsl).toHex(), [textHsl]);
     const bgColor = useMemo(() => colord(bgHsl).toHex(), [bgHsl]);
+
+    const primaryHsl = useMemo(() => {
+        const { h, s, l } = colord(textColor).toHsl();
+        return `${h} ${s}% ${l}%`;
+    }, [textColor]);
 
     const contrastRatio = useMemo(() => {
         return colord(textColor).contrast(bgColor);
@@ -121,67 +126,74 @@ export const ContrastChecker = () => {
     }, []);
 
     return (
-        <div className="flex flex-col items-center gap-8 w-full">
-            <Card 
-                className="w-full max-w-6xl transition-colors duration-200"
-                style={{ backgroundColor: bgColor, color: textColor }}
+        <main 
+            className="relative grid min-h-[calc(100vh-65px)] w-full transition-colors duration-200 lg:grid-cols-2"
+            style={{ backgroundColor: bgColor }}
+        >
+            <div className="flex items-center justify-center p-8">
+                <h1 className="text-[20vw] lg:text-[15vw] font-bold select-none" style={{ color: textColor }}>Aa</h1>
+            </div>
+
+            <div 
+                className="relative flex flex-col gap-8 p-8"
+                style={{ 
+                    color: textColor,
+                    '--primary': primaryHsl,
+                    '--ring': primaryHsl,
+                } as React.CSSProperties}
             >
-                <CardContent className="flex items-center justify-center p-8 h-64">
-                    <h1 className="text-8xl font-bold select-none">Aa</h1>
-                </CardContent>
-            </Card>
-
-            <Card className="w-full max-w-6xl">
-                <CardHeader>
-                    <div className='flex justify-between items-center'>
-                        <CardTitle>WCAG Conformance</CardTitle>
-                        <div className="bg-card text-card-foreground p-2 rounded-lg text-center border border-border">
-                            <p className="text-2xl font-bold">{contrastRatio.toFixed(2)}</p>
-                            <p className="text-xs text-muted-foreground">Contrast Ratio</p>
+                <div className="absolute inset-0 bg-black/10 -z-10 lg:hidden" />
+                <Card className="bg-background/10 border-current/20 text-current backdrop-blur-sm">
+                    <CardHeader>
+                        <div className='flex justify-between items-start'>
+                            <div>
+                                <CardTitle>WCAG Conformance</CardTitle>
+                                <CardDescription className="text-current/80">
+                                    Based on WCAG 2.1 guidelines.
+                                </CardDescription>
+                            </div>
+                            <div className="bg-current/10 text-current p-2 rounded-lg text-center border border-current/20">
+                                <p className="text-2xl font-bold">{contrastRatio.toFixed(2)}</p>
+                                <p className="text-xs text-current/80">Contrast Ratio</p>
+                            </div>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                        <div className="font-bold text-muted-foreground hidden md:block">Conformance</div>
-                        <div className="font-bold text-muted-foreground">Normal Text (16pt)</div>
-                        <div className="font-bold text-muted-foreground">Large Text (18pt+)</div>
-                        
-                        <div className="font-bold flex items-center justify-center">AA</div>
-                        <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
-                        <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
+                    </CardHeader>
+                    <CardContent>
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div className="font-bold text-current/80 hidden md:block">Conformance</div>
+                            <div className="font-bold text-current/80">Normal Text (16pt)</div>
+                            <div className="font-bold text-current/80">Large Text (18pt+)</div>
+                            
+                            <div className="font-bold flex items-center justify-center">AA</div>
+                            <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
+                            <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
 
-                        <div className="font-bold flex items-center justify-center">AAA</div>
-                        <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
-                        <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
-                   </div>
-                   <p className="text-xs text-muted-foreground mt-4 text-center">
-                    Based on WCAG 2.1 guidelines. Large text is defined as 18pt (24px) or 14pt (18.66px) bold.
-                   </p>
-                </CardContent>
-            </Card>
-            
-            <Card className="w-full max-w-6xl">
-                <CardHeader>
+                            <div className="font-bold flex items-center justify-center">AAA</div>
+                            <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
+                            <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
+                       </div>
+                    </CardContent>
+                </Card>
+
+                <div className="flex flex-col gap-8 rounded-lg border border-current/20 bg-background/10 p-6 backdrop-blur-sm">
                     <div className="flex justify-between items-center">
-                        <CardTitle>Color Controls</CardTitle>
-                        <Button onClick={handleRandomize} variant="outline">
+                        <h2 className="text-2xl font-semibold">Color Controls</h2>
+                        <Button onClick={handleRandomize} variant="outline" className="border-current/50 hover:bg-current/10">
                             <Dices className="mr-2" />
                             Randomize
                         </Button>
                     </div>
-                    <CardDescription>Adjust the text and background colors using the sliders or HEX input.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-8">
-                    <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} title="Text Color" />
-                     <div className="flex h-full items-center justify-center pt-8">
-                        <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors">
-                            <ArrowRightLeft />
-                        </Button>
+                    <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-8">
+                        <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} title="Text Color" />
+                         <div className="flex h-full items-center justify-center pt-8">
+                            <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors" className="border-current/50 hover:bg-current/10">
+                                <ArrowRightLeft />
+                            </Button>
+                        </div>
+                        <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} title="Background Color" />
                     </div>
-                    <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} title="Background Color" />
-                </CardContent>
-            </Card>
-        </div>
+                </div>
+            </div>
+        </main>
     )
 }
