@@ -15,6 +15,7 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
   const hex = colord(color).toHex();
   const rgb = colord(color).toRgb();
   const hsl = colord(color).toHsl();
+  const name = colord(color).toName({ closest: true });
 
   const handleCopy = (text: string, type: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -59,7 +60,11 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
         )}
       </div>
       {showValues && (
-        <div className="bg-[#1b1b1b] p-2 text-white text-xs flex flex-col justify-center h-28 gap-1 rounded-b-md">
+        <div className="bg-[#1b1b1b] p-2 text-white text-xs flex flex-col justify-center h-32 gap-1 rounded-b-md">
+          <div className="flex justify-between items-center cursor-pointer" onClick={() => handleCopy(name || '', 'Name')}>
+            <span className="text-gray-400 flex-shrink-0 mr-2">Name:</span>
+            <span className="font-semibold text-right break-all capitalize">{name}</span>
+          </div>
           <div className="flex justify-between items-center cursor-pointer" onClick={() => handleCopy(hex, 'HEX')}>
             <span className="text-gray-400 flex-shrink-0 mr-2">HEX:</span>
             <span className="font-semibold text-right break-all">{hex}</span>

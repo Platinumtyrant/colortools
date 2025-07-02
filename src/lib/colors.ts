@@ -4,8 +4,9 @@ import labPlugin from 'colord/plugins/lab';
 import lchPlugin from 'colord/plugins/lch';
 import a11yPlugin from 'colord/plugins/a11y';
 import mixPlugin from 'colord/plugins/mix';
+import namesPlugin from 'colord/plugins/names';
 
-extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin]);
+extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
 export const getComplementary = (color: string) => {
   const hsl = colord(color).toHsl();
