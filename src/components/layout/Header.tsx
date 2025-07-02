@@ -17,6 +17,9 @@ export function Header() {
           <Link href="/contrast-checker" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Contrast Checker
           </Link>
+          <Link href="/library" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            Library
+          </Link>
         </nav>
       </div>
     </header>
