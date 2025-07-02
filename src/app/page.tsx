@@ -21,15 +21,18 @@ import { ColorList } from '@/components/colors/ColorList';
 import { ImagePlaceholder } from '@/components/colors/ImagePlaceholder';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function ColorPaletteBuilderPage() {
-  const [mainColor, setMainColor] = useState('#FFFFFF');
+  const [mainColor, setMainColor] = useState('#ff0000');
   const [paletteColors, setPaletteColors] = useState<string[]>([]);
   
   const [activeTab, setActiveTab] = useState('palette-builder');
   const [activeSwatchTab, setActiveSwatchTab] = useState('green');
   const [activeHarmonyType, setActiveHarmonyType] = useState('complementary');
-  const [variationSteps, setVariationSteps] = useState(5);
+  const [tintSteps, setTintSteps] = useState(5);
+  const [shadeSteps, setShadeSteps] = useState(5);
+  const [toneSteps, setToneSteps] = useState(5);
   const [openVariations, setOpenVariations] = useState(['tints']);
 
   const { toast } = useToast();
@@ -77,9 +80,9 @@ export default function ColorPaletteBuilderPage() {
     handleCopySuccess('Color removed from palette!');
   }, [handleCopySuccess]);
 
-  const currentTints = getTints(mainColor, variationSteps);
-  const currentShades = getShades(mainColor, variationSteps);
-  const currentTones = getTones(mainColor, variationSteps);
+  const currentTints = getTints(mainColor, tintSteps);
+  const currentShades = getShades(mainColor, shadeSteps);
+  const currentTones = getTones(mainColor, toneSteps);
   const currentSwatchColors = swatches[activeSwatchTab as keyof typeof swatches] || [];
 
   const getActiveHarmonyColors = useCallback(() => {
@@ -279,40 +282,44 @@ export default function ColorPaletteBuilderPage() {
           </div>
 
           <div>
-            <div className="bg-card p-4 rounded-lg shadow-xl mb-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">Variations</h2>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Steps: {variationSteps}</span>
-                  <Button variant="outline" size="sm" onClick={() => setVariationSteps(s => Math.max(2, s - 1))} disabled={variationSteps <= 2}>
-                    Less
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setVariationSteps(s => Math.min(20, s + 1))} disabled={variationSteps >= 20}>
-                    More
-                  </Button>
-                </div>
-              </div>
-            </div>
             <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
               <AccordionItem value="tints" className="border-none">
-                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
-                  Tints ({currentTints.length} colors)
+                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between items-center">
+                  <span>Tints ({currentTints.length} colors)</span>
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
+                      <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
                   <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="shades" className="border-none">
-                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
-                  Shades ({currentShades.length} colors)
+                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between items-center">
+                  <span>Shades ({currentShades.length} colors)</span>
+                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
+                      <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
                   <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="tones" className="border-none">
-                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
-                  Tones ({currentTones.length} colors)
+                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between items-center">
+                  <span>Tones ({currentTones.length} colors)</span>
+                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
+                      <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
+                  </div>
                 </AccordionTrigger>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
                   <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
