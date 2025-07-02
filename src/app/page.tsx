@@ -214,7 +214,7 @@ export default function ColorPaletteBuilderPage() {
               </button>
             </div>
 
-            <div className="flex flex-wrap w-full rounded-md overflow-hidden mb-4 border border-gray-700">
+            <div className="flex flex-wrap w-full rounded-md overflow-hidden mb-4">
               {paletteColors.map((color) => (
                 <div
                   key={color}
