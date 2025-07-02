@@ -10,7 +10,7 @@ import nearestColor from 'nearest-color';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
-const colorMap = colorNameList.reduce((o: { [key: string]: string }, { name, hex }) => {
+const colorMap = colorNameList.reduce((o: { [key: string]: string }, { name, hex }: { name: string; hex: string }) => {
     o[name] = hex;
     return o;
 }, {});
