@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 extend([a11yPlugin]);
 
-const ColorControlGroup = ({ hsl, setHsl, title }: { hsl: HslColor, setHsl: (hsl: HslColor) => void, title: string }) => {
+const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslColor) => void }) => {
     const color = useMemo(() => colord(hsl).toHex(), [hsl]);
 
     const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
@@ -36,7 +36,6 @@ const ColorControlGroup = ({ hsl, setHsl, title }: { hsl: HslColor, setHsl: (hsl
 
     return (
         <div className="space-y-4">
-            <h3 className="text-xl font-semibold">{title}</h3>
             <div className="flex gap-4 items-center">
                  <HexColorInput
                     color={color}
@@ -135,8 +134,8 @@ export const ContrastChecker = () => {
                 '--ring': primaryHsl,
             } as React.CSSProperties}
         >
-            <div className="flex-grow flex items-center justify-center p-8 relative">
-                <div className="absolute top-8 left-8 right-8 z-10 flex justify-end">
+            <div className="flex-grow flex items-end justify-start p-8 relative">
+                <div className="absolute top-8 right-8 z-10 flex justify-end">
                      <Card className="bg-background/10 text-current backdrop-blur-sm max-w-2xl">
                         <CardHeader>
                             <div className='flex justify-between items-start'>
@@ -169,26 +168,22 @@ export const ContrastChecker = () => {
                         </CardContent>
                     </Card>
                 </div>
-                <h1 className="text-[30vw] lg:text-[25vw] font-bold select-none">Aa</h1>
+                <h1 className="text-[28vw] lg:text-[22vw] font-bold select-none">Aa</h1>
             </div>
 
             <div className="flex-shrink-0 p-6">
                 <div className="max-w-4xl mx-auto">
-                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-semibold">Color Controls</h2>
-                        <Button onClick={handleRandomize} variant="ghost" className="hover:bg-current/10">
-                            <Dices className="mr-2" />
-                            Randomize
-                        </Button>
-                    </div>
                     <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-8">
-                        <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} title="Text Color" />
-                         <div className="flex h-full items-center justify-center pt-8">
+                        <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} />
+                        <div className="flex flex-col h-full items-center justify-center pt-8 gap-4">
+                            <Button onClick={handleRandomize} size="icon" variant="ghost" aria-label="Randomize Colors" className="hover:bg-current/10">
+                                <Dices />
+                            </Button>
                             <Button onClick={handleSwap} size="icon" variant="ghost" aria-label="Swap Colors" className="hover:bg-current/10">
                                 <ArrowRightLeft />
                             </Button>
                         </div>
-                        <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} title="Background Color" />
+                        <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} />
                     </div>
                 </div>
             </div>
