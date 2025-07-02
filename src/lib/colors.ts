@@ -5,27 +5,10 @@ import lchPlugin from 'colord/plugins/lch';
 import a11yPlugin from 'colord/plugins/a11y';
 import mixPlugin from 'colord/plugins/mix';
 import namesPlugin from 'colord/plugins/names';
-import colorNameList from 'color-name-list';
-import nearestColor from 'nearest-color';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
-// Handle module interoperability issue.
-// The imported `colorNameList` might be an object with a `default` property containing the array.
-const actualColorList = (colorNameList as any).default || colorNameList;
-
-const colorMap = (actualColorList as { name: string; hex: string }[]).reduce((o: { [key: string]: string }, { name, hex }) => {
-    o[name] = hex;
-    return o;
-}, {});
-
-const findNearestColor = nearestColor.from(colorMap);
-
 export const getDescriptiveColorName = (hexColor: string): string => {
-    const foundColor = findNearestColor(hexColor);
-    if (foundColor && typeof foundColor === 'object' && foundColor.name) {
-      return foundColor.name;
-    }
     return colord(hexColor).toName({ closest: true }) || hexColor;
 };
 
