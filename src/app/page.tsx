@@ -22,6 +22,7 @@ import { ImagePlaceholder } from '@/components/colors/ImagePlaceholder';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ScaleGenerator } from '@/components/colors/ScaleGenerator';
 
 export default function ColorPaletteBuilderPage() {
   const [mainColor, setMainColor] = useState('#ff0000');
@@ -131,10 +132,10 @@ export default function ColorPaletteBuilderPage() {
 
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column: Palette Controls */}
-        <div className="lg:w-1/3">
+        <div className="lg:col-span-1">
           <div className="bg-card p-6 shadow-xl lg:sticky top-8">
             <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
             <div
@@ -204,7 +205,7 @@ export default function ColorPaletteBuilderPage() {
         </div>
         
         {/* Right Column: Color Tools */}
-        <div className="lg:w-2/3 space-y-8">
+        <div className="lg:col-span-2 space-y-8">
           <div className="bg-card p-6 shadow-xl">
             <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
               <button
@@ -212,6 +213,12 @@ export default function ColorPaletteBuilderPage() {
                 onClick={() => setActiveTab('palette-builder')}
               >
                 Palette Builder
+              </button>
+              <button
+                className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'scale' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                onClick={() => setActiveTab('scale')}
+              >
+                Scale
               </button>
               <button
                 className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
@@ -279,16 +286,22 @@ export default function ColorPaletteBuilderPage() {
                 </div>
               </div>
             )}
+             {activeTab === 'scale' && (
+              <ScaleGenerator 
+                onSetActiveColor={setMainColor}
+                onCopySuccess={handleCopySuccess}
+              />
+            )}
           </div>
 
           <div>
             <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
-              <AccordionItem value="tints" className="border-none group">
-                <div className="bg-card p-4 shadow-xl flex justify-between items-center rounded-lg group-data-[state=open]:rounded-b-none">
+               <AccordionItem value="tints" className="border-none group">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
                   <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
                     <span>Tints ({currentTints.length} colors)</span>
                   </AccordionTrigger>
-                  <div className="flex items-center gap-2">
+                   <div className="flex items-center gap-2">
                       <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
                       <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
@@ -300,7 +313,7 @@ export default function ColorPaletteBuilderPage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="shades" className="border-none group">
-                <div className="bg-card p-4 shadow-xl flex justify-between items-center rounded-lg group-data-[state=open]:rounded-b-none">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
                    <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
                     <span>Shades ({currentShades.length} colors)</span>
                    </AccordionTrigger>
@@ -316,7 +329,7 @@ export default function ColorPaletteBuilderPage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="tones" className="border-none group">
-                <div className="bg-card p-4 shadow-xl flex justify-between items-center rounded-lg group-data-[state=open]:rounded-b-none">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
                    <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
                     <span>Tones ({currentTones.length} colors)</span>
                    </AccordionTrigger>
