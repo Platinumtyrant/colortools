@@ -199,7 +199,7 @@ export default function ColorPaletteBuilderPage() {
 
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/3 lg:sticky top-4 bg-card p-6 rounded-lg shadow-xl">
+          <div className="w-full lg:w-1/3 lg:sticky lg:top-4 lg:self-start bg-card p-6 rounded-lg shadow-xl lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
             <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
             <div
               className="w-full h-40 rounded-md mb-4 relative overflow-hidden group"
