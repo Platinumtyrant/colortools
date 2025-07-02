@@ -28,12 +28,14 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
 
   return (
     <div
-      className="relative flex flex-col rounded-md overflow-hidden shadow-xl transition-all duration-300 w-full h-auto aspect-[3/4] group"
-      style={{ backgroundColor: hex }}
+      className="relative flex flex-col rounded-md shadow-xl transition-all duration-300 w-full h-auto aspect-[3/4] group"
     >
-      <div className="flex-1 min-h-[120px] flex items-center justify-center relative">
+      <div 
+        className="flex-1 min-h-[120px] flex items-center justify-center relative rounded-t-md"
+        style={{ backgroundColor: hex }}
+      >
         <div
-          className="absolute inset-0 cursor-pointer"
+          className="absolute inset-0 cursor-pointer rounded-t-md"
           onClick={() => {
             if (onSetActiveColor) {
               onSetActiveColor(hex);
@@ -57,7 +59,7 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
         )}
       </div>
       {showValues && (
-        <div className="bg-[#1b1b1b] p-2 text-white text-xs flex flex-col justify-center h-28 gap-1">
+        <div className="bg-[#1b1b1b] p-2 text-white text-xs flex flex-col justify-center h-28 gap-1 rounded-b-md">
           <div className="flex justify-between items-center cursor-pointer" onClick={() => handleCopy(hex, 'HEX')}>
             <span className="text-gray-400 flex-shrink-0 mr-2">HEX:</span>
             <span className="font-semibold text-right break-all">{hex}</span>
