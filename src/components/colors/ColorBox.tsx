@@ -57,18 +57,18 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
         )}
       </div>
       {showValues && (
-        <div className="bg-[#1b1b1b] p-2 text-white text-sm flex flex-col justify-around h-28">
-          <div className="flex justify-between items-center cursor-pointer py-1" onClick={() => handleCopy(hex, 'HEX')}>
-            <span className="text-gray-400 w-1/3 flex-shrink-0">HEX:</span>
-            <span className="font-semibold flex-1 text-left break-all">{hex}</span>
+        <div className="bg-[#1b1b1b] p-2 text-white text-xs flex flex-col justify-center h-28 gap-1">
+          <div className="flex justify-between items-center cursor-pointer" onClick={() => handleCopy(hex, 'HEX')}>
+            <span className="text-gray-400 flex-shrink-0 mr-2">HEX:</span>
+            <span className="font-semibold text-right break-all">{hex}</span>
           </div>
-          <div className="flex justify-between items-center cursor-pointer py-1" onClick={() => handleCopy(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'RGB')}>
-            <span className="text-gray-400 w-1/3 flex-shrink-0">RGB:</span>
-            <span className="font-semibold flex-1 text-left break-all">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
+          <div className="flex justify-between items-center cursor-pointer" onClick={() => handleCopy(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'RGB')}>
+            <span className="text-gray-400 flex-shrink-0 mr-2">RGB:</span>
+            <span className="font-semibold text-right break-all">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
           </div>
-          <div className="flex justify-between items-center cursor-pointer py-1" onClick={() => handleCopy(`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`, 'HSL')}>
-            <span className="text-gray-400 w-1/3 flex-shrink-0">HSL:</span>
-            <span className="font-semibold flex-1 text-left break-all">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+          <div className="flex justify-between items-center cursor-pointer" onClick={() => handleCopy(`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`, 'HSL')}>
+            <span className="text-gray-400 flex-shrink-0 mr-2">HSL:</span>
+            <span className="font-semibold text-right break-all">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
           </div>
         </div>
       )}
