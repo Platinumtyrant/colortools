@@ -163,7 +163,7 @@ export default function ColorPaletteBuilderPage() {
                       e.stopPropagation();
                       handleRemoveColorFromPalette(color);
                     }}
-                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Remove color"
                   >
                     X

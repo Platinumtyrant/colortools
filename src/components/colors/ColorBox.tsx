@@ -29,7 +29,7 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
 
   return (
     <div
-      className="relative flex flex-col rounded-md shadow-xl transition-all duration-300 w-full h-auto aspect-[3/4] group"
+      className="relative flex flex-col rounded-md shadow-xl transition-all duration-300 w-full h-64 group"
     >
       <div 
         className="flex-1 min-h-[120px] flex items-center justify-center relative rounded-t-md"
@@ -52,7 +52,7 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
               e.stopPropagation();
               onRemove(color);
             }}
-            className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-1 right-1 bg-black bg-opacity-50 text-white w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
             title="Remove color"
           >
             X

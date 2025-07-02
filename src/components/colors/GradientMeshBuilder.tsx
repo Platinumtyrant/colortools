@@ -150,7 +150,7 @@ export const GradientMeshBuilder = () => {
                         {points.map((point) => (
                             <div
                                 key={point.id}
-                                className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-white/75 shadow-lg pointer-events-none"
+                                className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg pointer-events-none"
                                 style={{
                                     left: `${point.x}%`,
                                     top: `${point.y}%`,
@@ -187,7 +187,7 @@ export const GradientMeshBuilder = () => {
                                     <Card key={point.id} className="p-4 space-y-3 bg-card-foreground/5">
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: point.color }} />
+                                                <div className="w-4 h-4 border" style={{ backgroundColor: point.color }} />
                                                 <h3 className="text-sm font-semibold">Point {index + 1}</h3>
                                             </div>
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 2}>
