@@ -63,7 +63,7 @@ export default function ColorPaletteBuilderPage() {
   const handleAddColorToPalette = useCallback(() => {
     setPaletteColors(prevColors => {
       const newColors = [...prevColors];
-      if (newColors.length >= 9) {
+      if (newColors.length >= 10) {
         newColors.shift();
       }
       newColors.push(mainColor);
@@ -151,7 +151,7 @@ export default function ColorPaletteBuilderPage() {
                 <div
                   key={color}
                   className="relative flex h-12 cursor-pointer transition-transform duration-100 group"
-                  style={{ backgroundColor: color, flexBasis: `${100 / Math.min(paletteColors.length, 9)}%`, width: `${100 / Math.min(paletteColors.length, 9)}%` }}
+                  style={{ backgroundColor: color, flexBasis: `${100 / Math.min(paletteColors.length, 10)}%`, width: `${100 / Math.min(paletteColors.length, 10)}%` }}
                   onClick={() => handlePaletteColorClick(color)}
                   title={`Set ${color} as active`}
                 >
@@ -173,7 +173,7 @@ export default function ColorPaletteBuilderPage() {
               onClick={handleAddColorToPalette}
               className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors mb-4"
             >
-              Add Current Color to Palette ({paletteColors.length}/9)
+              Add Current Color to Palette ({paletteColors.length}/10)
             </button>
 
             <div className="text-white text-sm mb-4">
@@ -283,9 +283,13 @@ export default function ColorPaletteBuilderPage() {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-white">Variations</h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Steps:</span>
-                  <Button variant={variationSteps === 5 ? 'secondary' : 'ghost'} size="sm" onClick={() => setVariationSteps(5)}>5</Button>
-                  <Button variant={variationSteps === 10 ? 'secondary' : 'ghost'} size="sm" onClick={() => setVariationSteps(10)}>10</Button>
+                  <span className="text-sm text-muted-foreground">Steps: {variationSteps}</span>
+                  <Button variant="outline" size="sm" onClick={() => setVariationSteps(s => Math.max(2, s - 1))} disabled={variationSteps <= 2}>
+                    Less
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setVariationSteps(s => Math.min(20, s + 1))} disabled={variationSteps >= 20}>
+                    More
+                  </Button>
                 </div>
               </div>
             </div>
