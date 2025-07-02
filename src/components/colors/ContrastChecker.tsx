@@ -136,8 +136,8 @@ export const ContrastChecker = () => {
             } as React.CSSProperties}
         >
             <div className="flex-grow flex items-center justify-center p-8 relative">
-                <div className="absolute top-8 left-8 right-8 z-10">
-                     <Card className="bg-background/10 border-current/20 text-current backdrop-blur-sm max-w-2xl mx-auto">
+                <div className="absolute top-8 left-8 right-8 z-10 flex justify-end">
+                     <Card className="bg-background/10 border-current/20 text-current backdrop-blur-sm max-w-2xl">
                         <CardHeader>
                             <div className='flex justify-between items-start'>
                                 <div>
