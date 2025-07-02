@@ -182,7 +182,7 @@ export const GradientMeshBuilder = () => {
                                 </Button>
                                 <span className="text-sm text-muted-foreground">{points.length} / 6 points</span>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-3 gap-4">
                                 {points.map((point, index) => (
                                     <Card key={point.id} className="p-4 space-y-3 bg-card-foreground/5">
                                         <div className="flex justify-between items-center">
