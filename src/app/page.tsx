@@ -135,21 +135,21 @@ export default function ColorPaletteBuilderPage() {
         
         {/* Left Column: Palette Controls */}
         <div className="lg:w-1/3">
-          <div className="bg-card p-6 rounded-lg shadow-xl lg:sticky top-8">
+          <div className="bg-card p-6 shadow-xl lg:sticky top-8">
             <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
             <div
-              className="w-full h-40 rounded-md mb-4 relative overflow-hidden group"
+              className="w-full h-40 mb-4 relative overflow-hidden group"
               style={{ backgroundColor: mainColor }}
             >
               <button
-                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"
+                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 onClick={() => handleCopySuccess(`Active color copied: ${mainColor}`)}
               >
                 Copy Active Color
               </button>
             </div>
 
-            <div className="flex flex-wrap w-full rounded-md overflow-hidden mb-4">
+            <div className="flex flex-wrap w-full  overflow-hidden mb-4">
               {paletteColors.map((color) => (
                 <div
                   key={color}
@@ -174,7 +174,7 @@ export default function ColorPaletteBuilderPage() {
 
             <button
               onClick={handleAddColorToPalette}
-              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors mb-4"
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold  transition-colors mb-4"
             >
               Add Current Color to Palette ({paletteColors.length}/10)
             </button>
@@ -196,7 +196,7 @@ export default function ColorPaletteBuilderPage() {
 
             <button
               onClick={handleSaveToLibrary}
-              className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition-colors"
+              className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold  transition-colors"
             >
               Save to Library
             </button>
@@ -205,7 +205,7 @@ export default function ColorPaletteBuilderPage() {
         
         {/* Right Column: Color Tools */}
         <div className="lg:w-2/3 space-y-8">
-          <div className="bg-card p-6 rounded-lg shadow-xl">
+          <div className="bg-card p-6 shadow-xl">
             <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
               <button
                 className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'palette-builder' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
@@ -238,7 +238,7 @@ export default function ColorPaletteBuilderPage() {
                   {currentSwatchColors.map((color, index) => (
                     <div
                       key={index}
-                      className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110 rounded-sm"
+                      className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110"
                       style={{ backgroundColor: color }}
                       onClick={() => setMainColor(color)}
                       title={`Set ${color} as active`}
@@ -259,22 +259,22 @@ export default function ColorPaletteBuilderPage() {
                   <div className="flex flex-col gap-2">
                     <label className="text-sm text-gray-400">HSL</label>
                     <div className="flex gap-2">
-                      <input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm text-gray-400">RGB</label>
                     <div className="flex gap-2">
-                      <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm text-gray-400">HEX</label>
-                    <HexColorInput color={hex} onChange={handleHexChange} className="w-full p-2 rounded-md bg-gray-700 border border-gray-600 text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary" />
+                    <HexColorInput color={hex} onChange={handleHexChange} className="w-full p-2  bg-gray-700 border border-gray-600 text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary" />
                   </div>
                 </div>
               </div>
@@ -283,44 +283,50 @@ export default function ColorPaletteBuilderPage() {
 
           <div>
             <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
-              <AccordionItem value="tints" className="border-none">
-                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between items-center">
-                  <span>Tints ({currentTints.length} colors)</span>
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <AccordionItem value="tints" className="border-none group">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center rounded-lg group-data-[state=open]:rounded-b-none">
+                  <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                    <span>Tints ({currentTints.length} colors)</span>
+                  </AccordionTrigger>
+                  <div className="flex items-center gap-2">
                       <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
                       <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
                   </div>
-                </AccordionTrigger>
+                </div>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
                   <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="shades" className="border-none">
-                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between items-center">
-                  <span>Shades ({currentShades.length} colors)</span>
-                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <AccordionItem value="shades" className="border-none group">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center rounded-lg group-data-[state=open]:rounded-b-none">
+                   <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                    <span>Shades ({currentShades.length} colors)</span>
+                   </AccordionTrigger>
+                   <div className="flex items-center gap-2">
                       <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
                       <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
                   </div>
-                </AccordionTrigger>
+                </div>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
                   <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="tones" className="border-none">
-                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between items-center">
-                  <span>Tones ({currentTones.length} colors)</span>
-                   <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <AccordionItem value="tones" className="border-none group">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center rounded-lg group-data-[state=open]:rounded-b-none">
+                   <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                    <span>Tones ({currentTones.length} colors)</span>
+                   </AccordionTrigger>
+                   <div className="flex items-center gap-2">
                       <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
                       <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
                       <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
                   </div>
-                </AccordionTrigger>
+                </div>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
                   <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
                 </AccordionContent>
@@ -328,7 +334,7 @@ export default function ColorPaletteBuilderPage() {
             </Accordion>
           </div>
 
-          <section className="bg-card p-6 rounded-lg shadow-xl">
+          <section className="bg-card p-6 shadow-xl">
             <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
             <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
               {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
@@ -344,7 +350,7 @@ export default function ColorPaletteBuilderPage() {
             <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
           </section>
 
-          <section className="bg-card p-6 rounded-lg shadow-xl">
+          <section className="bg-card p-6 shadow-xl">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
               Images
             </h2>
