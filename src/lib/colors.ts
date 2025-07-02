@@ -66,26 +66,35 @@ export const getRectangular = (color: string) => {
 
 export const getTints = (color: string, steps = 5) => {
   const tints: string[] = [];
-  for (let i = 0; i <= steps; i++) {
-    tints.push(colord(color).lighten(i * (1 / steps)).toHex());
+  if (steps <= 1) {
+    return [colord(color).toHex()];
   }
-  return tints;
+  for (let i = 0; i < steps; i++) {
+    tints.push(colord(color).lighten(i / (steps - 1)).toHex());
+  }
+  return [...new Set(tints)];
 };
 
 export const getShades = (color: string, steps = 5) => {
   const shades: string[] = [];
-  for (let i = 0; i <= steps; i++) {
-    shades.push(colord(color).darken(i * (1 / steps)).toHex());
+  if (steps <= 1) {
+    return [colord(color).toHex()];
   }
-  return shades;
+  for (let i = 0; i < steps; i++) {
+    shades.push(colord(color).darken(i / (steps - 1)).toHex());
+  }
+  return [...new Set(shades)];
 };
 
 export const getTones = (color: string, steps = 5) => {
   const tones: string[] = [];
-  for (let i = 0; i <= steps; i++) {
-    tones.push(colord(color).mix('gray', i * (1 / steps)).toHex());
+  if (steps <= 1) {
+    return [colord(color).toHex()];
   }
-  return tones;
+  for (let i = 0; i < steps; i++) {
+    tones.push(colord(color).mix('gray', i / (steps - 1)).toHex());
+  }
+  return [...new Set(tones)];
 };
 
 export const swatches = {
