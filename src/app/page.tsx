@@ -2,15 +2,91 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { suggestPaletteColors } from "@/ai/flows/suggest-palette-colors";
-import type { SuggestPaletteColorsOutput } from "@/ai/flows/suggest-palette-colors";
 
 import { PaletteGenerator } from "@/components/palettes/PaletteGenerator";
 import { Palette } from "@/components/palettes/Palette";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Heart, Trash2, Share2, Copy } from "lucide-react";
+
+// Color generation utilities
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
+
+function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h = 0,
+    s,
+    l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0; // achromatic
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+    h /= 6;
+  }
+
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
+  s /= 100;
+  l /= 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return { r: 255 * f(0), g: 255 * f(8), b: 255 * f(4) };
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  return ('#' + [r, g, b].map(x => {
+    const hex = Math.round(x).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  }).join('')).toUpperCase();
+}
+
+function generatePalette(baseColor: string, numColors: number): string[] {
+    const rgb = hexToRgb(baseColor);
+    if (!rgb) return Array(numColors).fill(baseColor.toUpperCase());
+
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    const palette: string[] = [];
+    const hueStep = 360 / numColors;
+
+    for (let i = 0; i < numColors; i++) {
+        const newHue = (hsl.h + i * hueStep) % 360;
+        const newRgb = hslToRgb(newHue, hsl.s, hsl.l);
+        palette.push(rgbToHex(newRgb.r, newRgb.g, newRgb.b));
+    }
+    
+    palette[0] = baseColor.toUpperCase();
+    
+    return palette;
+}
 
 export default function Home() {
   const { toast } = useToast();
@@ -18,7 +94,6 @@ export default function Home() {
   const [numColors, setNumColors] = useState<number>(5);
   const [generatedPalettes, setGeneratedPalettes] = useState<string[][]>([]);
   const [savedPalettes, setSavedPalettes] = useState<string[][]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -31,23 +106,9 @@ export default function Home() {
     }
   }, []);
 
-  const handleGenerate = async () => {
-    setIsLoading(true);
-    try {
-      const result: SuggestPaletteColorsOutput = await suggestPaletteColors({ baseColor, numColors });
-      if (result && result.colors) {
-        setGeneratedPalettes(prev => [result.colors, ...prev]);
-      }
-    } catch (error) {
-      console.error("AI generation failed:", error);
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem with the AI generation.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleGenerate = () => {
+    const newPalette = generatePalette(baseColor, numColors);
+    setGeneratedPalettes(prev => [newPalette, ...prev]);
   };
 
   const updateLocalStorage = (palettes: string[][]) => {
@@ -131,7 +192,7 @@ export default function Home() {
         <header className="mb-10">
           <h1 className="text-5xl font-bold text-primary font-headline">Palette Prodigy</h1>
           <p className="text-muted-foreground mt-2 text-lg">
-            Create stunning color palettes with the power of AI.
+            Create stunning color palettes with ease.
           </p>
         </header>
 
@@ -141,7 +202,6 @@ export default function Home() {
           numColors={numColors}
           setNumColors={setNumColors}
           handleGenerate={handleGenerate}
-          isLoading={isLoading}
         />
         
         <div className="mt-12">
@@ -171,9 +231,6 @@ export default function Home() {
                 />
               ))}
             </div>
-          )}
-          {isLoading && generatedPalettes.length === 0 && (
-             <div className="text-center text-muted-foreground pt-10">Generating your masterpiece...</div>
           )}
         </div>
       </main>
