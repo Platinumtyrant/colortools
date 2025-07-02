@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
@@ -8,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface Point {
@@ -182,38 +182,41 @@ export const GradientMeshBuilder = () => {
                                 </Button>
                                 <span className="text-sm text-muted-foreground">{points.length} / 6 points</span>
                             </div>
-                            <Accordion type="single" collapsible defaultValue="point-1" className="w-full">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {points.map((point, index) => (
-                                    <AccordionItem value={`point-${point.id}`} key={point.id}>
-                                        <AccordionTrigger>
+                                    <Card key={point.id} className="p-4 space-y-3 bg-card-foreground/5">
+                                        <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: point.color }} />
-                                                Point {index + 1}
+                                                <h3 className="text-sm font-semibold">Point {index + 1}</h3>
                                             </div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="space-y-4 pt-4">
-                                            <div className="flex justify-center">
-                                              <HexColorPicker color={point.color} onChange={(c) => handlePointChange(point.id, { color: c })} />
-                                            </div>
-                                            <div className="p-2 rounded-md bg-gray-700 border border-gray-600 text-white w-full text-center font-mono">{point.color}</div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor={`spread-${point.id}`}>Spread: {point.spread}%</Label>
-                                                <Slider
-                                                    id={`spread-${point.id}`}
-                                                    min={0}
-                                                    max={100}
-                                                    step={1}
-                                                    value={[point.spread]}
-                                                    onValueChange={(value) => handlePointChange(point.id, { spread: value[0] })}
-                                                />
-                                            </div>
-                                            <Button variant="outline" size="sm" className="w-full" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 2}>
-                                                <Trash2 className="mr-2 h-4 w-4" /> Remove Point
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 2}>
+                                                <Trash2 className="h-3 w-3" />
+                                                <span className="sr-only">Remove Point</span>
                                             </Button>
-                                        </AccordionContent>
-                                    </AccordionItem>
+                                        </div>
+                                        <div className="flex justify-center">
+                                            <HexColorPicker
+                                                className="!w-full" 
+                                                color={point.color} 
+                                                onChange={(c) => handlePointChange(point.id, { color: c })} 
+                                            />
+                                        </div>
+                                        <div className="p-2 rounded-md bg-muted/50 border text-center font-mono text-xs">{point.color}</div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor={`spread-${point.id}`} className="text-xs">Spread: {point.spread}%</Label>
+                                            <Slider
+                                                id={`spread-${point.id}`}
+                                                min={0}
+                                                max={100}
+                                                step={1}
+                                                value={[point.spread]}
+                                                onValueChange={(value) => handlePointChange(point.id, { spread: value[0] })}
+                                            />
+                                        </div>
+                                    </Card>
                                 ))}
-                            </Accordion>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
