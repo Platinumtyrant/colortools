@@ -14,6 +14,9 @@ export function Header() {
           <Link href="/mesh-gradient" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Gradient Builder
           </Link>
+          <Link href="/contrast-checker" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            Contrast Checker
+          </Link>
         </nav>
       </div>
     </header>
