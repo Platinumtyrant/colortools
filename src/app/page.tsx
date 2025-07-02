@@ -319,8 +319,10 @@ export default function ColorPaletteBuilderPage() {
 
               {activeTab === 'color-picker' && (
                 <div className="flex flex-col md:flex-row gap-4 items-center">
-                  <div className="w-full md:w-1/2">
-                    <HexColorPicker color={mainColor} onChange={setMainColor} className="!w-full h-64 mb-4" />
+                  <div className="w-full md:w-1/2 flex justify-center items-start">
+                    <div className="w-full max-w-[280px]">
+                      <HexColorPicker color={mainColor} onChange={setMainColor} />
+                    </div>
                   </div>
                   <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
                     <div className="flex flex-col gap-2">

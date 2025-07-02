@@ -26,7 +26,9 @@ const MeshPointControl = ({
         <div className="space-y-4">
             <div className="space-y-2 flex flex-col items-center">
                 <h3 className="text-sm font-medium text-gray-400">{label}</h3>
-                <HexColorPicker color={color} onChange={setColor} className="!w-full !h-auto" />
+                <div className="w-full">
+                    <HexColorPicker color={color} onChange={setColor} />
+                </div>
                 <div className="p-2 rounded-md bg-gray-700 border border-gray-600 text-white w-full text-center font-mono">{color}</div>
             </div>
              <div className="space-y-2">
