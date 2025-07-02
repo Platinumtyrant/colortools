@@ -10,7 +10,11 @@ import nearestColor from 'nearest-color';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
-const colorMap = (colorNameList as { name: string; hex: string }[]).reduce((o: { [key: string]: string }, { name, hex }) => {
+// Handle module interoperability issue.
+// The imported `colorNameList` might be an object with a `default` property containing the array.
+const actualColorList = (colorNameList as any).default || colorNameList;
+
+const colorMap = (actualColorList as { name: string; hex: string }[]).reduce((o: { [key: string]: string }, { name, hex }) => {
     o[name] = hex;
     return o;
 }, {});
