@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { colord, extend } from 'colord';
+import { colord, extend, type HslColor } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
 import { HexColorInput } from 'react-colorful';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,46 +13,63 @@ import { cn } from '@/lib/utils';
 
 extend([a11yPlugin]);
 
-const ColorEditor = ({ color, setColor, title }: { color: string, setColor: (color: string) => void, title: string }) => {
-  const c = colord(color);
-  const hsl = c.toHsl();
-  const uiTextColor = useMemo(() => (c.isDark() ? '#FFFFFF' : '#000000'), [c]);
+const ColorEditor = ({ hsl, setHsl, title }: { hsl: HslColor, setHsl: (hsl: HslColor) => void, title: string }) => {
+    const color = useMemo(() => colord(hsl).toHex(), [hsl]);
+    const c = colord(color);
+    const uiTextColor = useMemo(() => (c.isDark() ? '#FFFFFF' : '#000000'), [c]);
 
-  const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
-    const newHsl = { ...hsl, [key]: value };
-    setColor(colord(newHsl).toHex());
-  }, [hsl, setColor]);
+    const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
+        setHsl({ ...hsl, [key]: value });
+    }, [hsl, setHsl]);
 
-  return (
-    <div className="flex-1 p-6 md:p-8 transition-colors duration-200 w-full" style={{ backgroundColor: color }}>
-      <div className="space-y-6 max-w-xs mx-auto">
-        <h2 className="text-3xl font-bold text-center" style={{ color: uiTextColor }}>{title}</h2>
-        <div className="flex flex-col gap-2">
-          <Label style={{ color: uiTextColor }}>HEX</Label>
-          <HexColorInput
-            color={color}
-            onChange={setColor}
-            className="w-full p-2 rounded-md bg-white/20 border border-black/20 text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-primary"
-            style={{ color: uiTextColor }}
-            prefixed
-          />
+    const handleHexChange = useCallback((newHex: string) => {
+        if (colord(newHex).isValid()) {
+            const newColor = colord(newHex);
+            const newHsl = newColor.toHsl();
+            
+            // For grayscale colors, preserve the hue from the state
+            // This allows changing hue for black/white/gray and seeing the effect
+            // once saturation/lightness is moved away from the extremes.
+            if (newHsl.s === 0 || newHsl.l === 0 || newHsl.l === 100) {
+                setHsl({ h: hsl.h, s: newHsl.s, l: newHsl.l, a: newHsl.a });
+            } else {
+                setHsl(newHsl);
+            }
+        }
+    }, [hsl, setHsl]);
+
+
+    return (
+        <div className="flex-1 p-6 md:p-8 transition-colors duration-200 w-full" style={{ backgroundColor: color }}>
+            <div className="space-y-6 max-w-xs mx-auto">
+                <h2 className="text-3xl font-bold text-center" style={{ color: uiTextColor }}>{title}</h2>
+                <div className="flex flex-col gap-2">
+                    <Label style={{ color: uiTextColor }}>HEX</Label>
+                    <HexColorInput
+                        color={color}
+                        onChange={handleHexChange}
+                        className="w-full p-2 rounded-md bg-white/20 border border-black/20 text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-primary"
+                        style={{ color: uiTextColor }}
+                        prefixed
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label style={{ color: uiTextColor }}>Hue</Label>
+                    <Slider value={[hsl.h]} onValueChange={([v]) => handleHslChange('h', v)} max={360} step={1} />
+                </div>
+                <div className="space-y-2">
+                    <Label style={{ color: uiTextColor }}>Saturation</Label>
+                    <Slider value={[hsl.s]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
+                </div>
+                <div className="space-y-2">
+                    <Label style={{ color: uiTextColor }}>Lightness</Label>
+                    <Slider value={[hsl.l]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
+                </div>
+            </div>
         </div>
-        <div className="space-y-2">
-          <Label style={{ color: uiTextColor }}>Hue</Label>
-          <Slider value={[hsl.h]} onValueChange={([v]) => handleHslChange('h', v)} max={360} step={1} />
-        </div>
-        <div className="space-y-2">
-          <Label style={{ color: uiTextColor }}>Saturation</Label>
-          <Slider value={[hsl.s]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
-        </div>
-        <div className="space-y-2">
-          <Label style={{ color: uiTextColor }}>Lightness</Label>
-          <Slider value={[hsl.l]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
+
 
 const ResultBadge = ({ passed, text }: { passed: boolean, text: string }) => {
   const Icon = passed ? CheckCircle2 : XCircle;
@@ -68,8 +85,11 @@ const ResultBadge = ({ passed, text }: { passed: boolean, text: string }) => {
 }
 
 export const ContrastChecker = () => {
-    const [textColor, setTextColor] = useState('#FFFFFF');
-    const [bgColor, setBgColor] = useState('#1a1a1a');
+    const [textHsl, setTextHsl] = useState<HslColor>(colord('#FFFFFF').toHsl());
+    const [bgHsl, setBgHsl] = useState<HslColor>(colord('#1a1a1a').toHsl());
+
+    const textColor = useMemo(() => colord(textHsl).toHex(), [textHsl]);
+    const bgColor = useMemo(() => colord(bgHsl).toHex(), [bgHsl]);
 
     const contrastRatio = useMemo(() => {
         return colord(textColor).contrast(bgColor);
@@ -87,15 +107,16 @@ export const ContrastChecker = () => {
     }), [textColor, bgColor]);
     
     const handleSwap = useCallback(() => {
-        setTextColor(bgColor);
-        setBgColor(textColor);
-    }, [textColor, bgColor]);
+        const temp = textHsl;
+        setTextHsl(bgHsl);
+        setBgHsl(temp);
+    }, [textHsl, bgHsl]);
 
     return (
         <div className="flex flex-col items-center gap-8 w-full">
             <Card className="w-full max-w-6xl p-0 overflow-hidden">
                 <div className="relative flex flex-col md:flex-row w-full items-stretch min-h-[400px]">
-                    <ColorEditor color={textColor} setColor={setTextColor} title="Text Color" />
+                    <ColorEditor hsl={textHsl} setHsl={setTextHsl} title="Text Color" />
                     
                     <div className="order-first md:order-none my-4 md:my-0 h-16 md:h-auto md:absolute left-1/2 top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-10 flex flex-col items-center justify-center gap-2">
                         <div className="bg-card text-card-foreground p-4 rounded-lg shadow-2xl text-center border border-border">
@@ -107,7 +128,7 @@ export const ContrastChecker = () => {
                         </Button>
                     </div>
 
-                    <ColorEditor color={bgColor} setColor={setBgColor} title="Background Color" />
+                    <ColorEditor hsl={bgHsl} setHsl={setBgHsl} title="Background Color" />
                 </div>
             </Card>
 
