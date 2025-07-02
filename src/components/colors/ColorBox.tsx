@@ -1,6 +1,7 @@
 "use client";
 
 import { colord } from "colord";
+import { getDescriptiveColorName } from "@/lib/colors";
 
 interface ColorBoxProps {
   color: string;
@@ -15,7 +16,7 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
   const hex = colord(color).toHex();
   const rgb = colord(color).toRgb();
   const hsl = colord(color).toHsl();
-  const name = colord(color).toName({ closest: true });
+  const name = getDescriptiveColorName(hex);
 
   const handleCopy = (text: string, type: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -29,14 +30,14 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
 
   return (
     <div
-      className="relative flex flex-col rounded-md shadow-xl transition-all duration-300 w-full h-64 group"
+      className="relative flex flex-col shadow-xl transition-all duration-300 w-full h-64 group"
     >
       <div 
-        className="flex-1 min-h-[120px] flex items-center justify-center relative rounded-t-md"
+        className="flex-1 min-h-[120px] flex items-center justify-center relative "
         style={{ backgroundColor: hex }}
       >
         <div
-          className="absolute inset-0 cursor-pointer rounded-t-md"
+          className="absolute inset-0 cursor-pointer "
           onClick={() => {
             if (onSetActiveColor) {
               onSetActiveColor(hex);
@@ -60,7 +61,7 @@ export const ColorBox = ({ color, showValues = true, onSetActiveColor, isMainPal
         )}
       </div>
       {showValues && (
-        <div className="bg-[#1b1b1b] p-2 text-white text-xs flex flex-col justify-center h-32 gap-1 rounded-b-md">
+        <div className="bg-[#1b1b1b] p-2 text-white text-xs flex flex-col justify-center h-32 gap-1 ">
           <div className="flex justify-between items-center cursor-pointer" onClick={() => handleCopy(name || '', 'Name')}>
             <span className="text-gray-400 flex-shrink-0 mr-2">Name:</span>
             <span className="font-semibold text-right break-all capitalize">{name}</span>
