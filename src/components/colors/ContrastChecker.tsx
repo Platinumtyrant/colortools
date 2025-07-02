@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { ArrowRightLeft, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowRightLeft, CheckCircle2, XCircle, Dices } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 extend([a11yPlugin]);
@@ -102,47 +102,44 @@ export const ContrastChecker = () => {
         setBgHsl(temp);
     }, [textHsl, bgHsl]);
 
+    const handleRandomize = useCallback(() => {
+        let newTextColor, newBgColor, contrast;
+        do {
+            newTextColor = colord(`hsl(${Math.random() * 360}, ${Math.random() * 100}%, ${Math.random() * 100}%)`);
+            newBgColor = colord(`hsl(${Math.random() * 360}, ${Math.random() * 100}%, ${Math.random() * 100}%)`);
+            
+            if (Math.abs(newTextColor.toHsl().l - newBgColor.toHsl().l) < 30) {
+                contrast = 0;
+                continue;
+            }
+
+            contrast = newTextColor.contrast(newBgColor.toHex());
+        } while (contrast < 4.5);
+
+        setTextHsl(newTextColor.toHsl());
+        setBgHsl(newBgColor.toHsl());
+    }, []);
+
     return (
         <div className="flex flex-col items-center gap-8 w-full">
             <Card 
-                className="w-full max-w-6xl p-8 transition-colors duration-200"
+                className="w-full max-w-6xl transition-colors duration-200"
                 style={{ backgroundColor: bgColor, color: textColor }}
             >
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold" style={{ fontWeight: 700 }}>Large Text (18pt / 24px bold)</h2>
-                    <p className="text-lg mt-2">Normal text (16pt / 16px)</p>
-                </div>
-                <div className="mt-6">
-                    <p>
-                        The quick brown fox jumps over the lazy dog. This sentence contains all letters of the alphabet. It's often used for testing fonts and text rendering. You can adjust the colors below to see how the contrast ratio changes and whether it meets accessibility standards.
-                    </p>
-                </div>
-            </Card>
-
-            <div className="flex items-center gap-4">
-                <div className="bg-card text-card-foreground p-4 rounded-lg shadow-lg text-center border border-border">
-                    <p className="text-4xl font-bold">{contrastRatio.toFixed(2)}</p>
-                    <p className="text-xs text-muted-foreground">Contrast Ratio</p>
-                </div>
-                <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors">
-                    <ArrowRightLeft />
-                </Button>
-            </div>
-            
-            <Card className="w-full max-w-6xl">
-                <CardHeader>
-                    <CardTitle>Color Controls</CardTitle>
-                    <CardDescription>Adjust the text and background colors using the sliders or HEX input.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-8">
-                    <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} title="Text Color" />
-                    <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} title="Background Color" />
+                <CardContent className="flex items-center justify-center p-8 h-64">
+                    <h1 className="text-8xl font-bold select-none">Aa</h1>
                 </CardContent>
             </Card>
 
             <Card className="w-full max-w-6xl">
                 <CardHeader>
-                    <CardTitle>WCAG Conformance</CardTitle>
+                    <div className='flex justify-between items-center'>
+                        <CardTitle>WCAG Conformance</CardTitle>
+                        <div className="bg-card text-card-foreground p-2 rounded-lg text-center border border-border">
+                            <p className="text-2xl font-bold">{contrastRatio.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">Contrast Ratio</p>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
@@ -161,6 +158,28 @@ export const ContrastChecker = () => {
                    <p className="text-xs text-muted-foreground mt-4 text-center">
                     Based on WCAG 2.1 guidelines. Large text is defined as 18pt (24px) or 14pt (18.66px) bold.
                    </p>
+                </CardContent>
+            </Card>
+            
+            <Card className="w-full max-w-6xl">
+                <CardHeader>
+                    <div className="flex justify-between items-center">
+                        <CardTitle>Color Controls</CardTitle>
+                        <Button onClick={handleRandomize} variant="outline">
+                            <Dices className="mr-2" />
+                            Randomize
+                        </Button>
+                    </div>
+                    <CardDescription>Adjust the text and background colors using the sliders or HEX input.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-8">
+                    <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} title="Text Color" />
+                     <div className="flex h-full items-center justify-center pt-8">
+                        <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors">
+                            <ArrowRightLeft />
+                        </Button>
+                    </div>
+                    <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} title="Background Color" />
                 </CardContent>
             </Card>
         </div>
