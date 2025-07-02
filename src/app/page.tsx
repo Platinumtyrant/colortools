@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
 import { colord } from 'colord';
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,7 @@ import {
 } from '@/lib/colors';
 import { ColorList } from '@/components/colors/ColorList';
 import { ImagePlaceholder } from '@/components/colors/ImagePlaceholder';
+import { GradientMeshBuilder } from '@/components/colors/GradientMeshBuilder';
 
 export default function ColorPaletteBuilderPage() {
   const [mainColor, setMainColor] = useState('#DB073D');
@@ -268,18 +269,24 @@ export default function ColorPaletteBuilderPage() {
 
           <div className="lg:w-2/3 space-y-8">
             <div className="bg-card p-6 rounded-lg shadow-xl">
-              <div className="flex border-b border-gray-700 mb-4">
+              <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
                 <button
-                  className={`py-2 px-4 text-sm font-medium ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                  className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
                   onClick={() => setActiveTab('swatches')}
                 >
                   Swatches
                 </button>
                 <button
-                  className={`py-2 px-4 text-sm font-medium ${activeTab === 'color-picker' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                  className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'color-picker' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
                   onClick={() => setActiveTab('color-picker')}
                 >
                   Color Picker
+                </button>
+                <button
+                  className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'mesh-gradient' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                  onClick={() => setActiveTab('mesh-gradient')}
+                >
+                  Mesh Gradient
                 </button>
               </div>
 
@@ -338,6 +345,9 @@ export default function ColorPaletteBuilderPage() {
                     </div>
                   </div>
                 </div>
+              )}
+              {activeTab === 'mesh-gradient' && (
+                <GradientMeshBuilder />
               )}
             </div>
 
