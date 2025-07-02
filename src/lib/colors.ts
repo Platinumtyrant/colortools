@@ -71,9 +71,9 @@ export const getTints = (color: string, steps = 5) => {
     return [colord(color).toHex()];
   }
   for (let i = 0; i < steps; i++) {
-    tints.push(colord(color).lighten(i / (steps - 1)).toHex());
+    tints.push(colord(color).mix('white', i / (steps - 1)).toHex());
   }
-  return [...new Set(tints)];
+  return tints;
 };
 
 export const getShades = (color: string, steps = 5) => {
@@ -82,9 +82,9 @@ export const getShades = (color: string, steps = 5) => {
     return [colord(color).toHex()];
   }
   for (let i = 0; i < steps; i++) {
-    shades.push(colord(color).darken(i / (steps - 1)).toHex());
+    shades.push(colord(color).mix('black', i / (steps - 1)).toHex());
   }
-  return [...new Set(shades)];
+  return shades;
 };
 
 export const getTones = (color: string, steps = 5) => {
@@ -95,7 +95,7 @@ export const getTones = (color: string, steps = 5) => {
   for (let i = 0; i < steps; i++) {
     tones.push(colord(color).mix('gray', i / (steps - 1)).toHex());
   }
-  return [...new Set(tones)];
+  return tones;
 };
 
 export const swatches = {
