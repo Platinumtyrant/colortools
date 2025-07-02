@@ -195,12 +195,13 @@ export default function ColorPaletteBuilderPage() {
   return (
     <div className="min-h-screen bg-background text-gray-300 font-sans flex flex-col items-center">
       <header className="w-full bg-card py-4 shadow-md text-center">
-        <p className="text-2xl font-bold text-white">Color Palette Builder</p>
+        <p className="text-2xl font-bold text-white">Palette Prodigy</p>
       </header>
 
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/3 lg:sticky lg:top-4 lg:self-start bg-card p-6 rounded-lg shadow-xl lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+        <div className={`flex gap-8 ${activeTab === 'mesh-gradient' ? 'flex-col' : 'flex-col lg:flex-row'}`}>
+          
+          <div className={`${activeTab === 'mesh-gradient' ? 'hidden' : 'w-full lg:w-1/3 lg:sticky lg:top-4 lg:self-start bg-card p-6 rounded-lg shadow-xl lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto'}`}>
             <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
             <div
               className="w-full h-40 rounded-md mb-4 relative overflow-hidden group"
@@ -267,7 +268,7 @@ export default function ColorPaletteBuilderPage() {
             </button>
           </div>
 
-          <div className="lg:w-2/3 space-y-8">
+          <div className={`space-y-8 ${activeTab === 'mesh-gradient' ? 'w-full' : 'lg:w-2/3'}`}>
             <div className="bg-card p-6 rounded-lg shadow-xl">
               <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
                 <button
@@ -353,39 +354,43 @@ export default function ColorPaletteBuilderPage() {
               )}
             </div>
 
-            <ColorList colors={currentTints} title={`Tints (${currentTints.length} colors)`} onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-            <ColorList colors={currentShades} title={`Shades (${currentShades.length} colors)`} onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-            <ColorList colors={currentTones} title={`Tones (${currentTones.length} colors)`} onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+            {activeTab !== 'mesh-gradient' && (
+              <>
+                <ColorList colors={currentTints} title={`Tints (${currentTints.length} colors)`} onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                <ColorList colors={currentShades} title={`Shades (${currentShades.length} colors)`} onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                <ColorList colors={currentTones} title={`Tones (${currentTones.length} colors)`} onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
 
-            <section className="bg-card p-6 rounded-lg shadow-xl">
-              <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
-              <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
-                {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
-                  <button
-                    key={harmony}
-                    className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyTab === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                    onClick={() => setActiveHarmonyTab(harmony)}
-                  >
-                    {harmony.replace('-', ' ')}
-                  </button>
-                ))}
-              </div>
-              <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-            </section>
+                <section className="bg-card p-6 rounded-lg shadow-xl">
+                  <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
+                  <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
+                    {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
+                      <button
+                        key={harmony}
+                        className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyTab === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                        onClick={() => setActiveHarmonyTab(harmony)}
+                      >
+                        {harmony.replace('-', ' ')}
+                      </button>
+                    ))}
+                  </div>
+                  <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                </section>
 
-            <section className="bg-card p-6 rounded-lg shadow-xl">
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-                Images
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <ImagePlaceholder width="200" height="150" text="Mountains" data-ai-hint="mountains" />
-                <ImagePlaceholder width="200" height="150" text="Beach" data-ai-hint="beach" />
-                <ImagePlaceholder width="200" height="150" text="Forest" data-ai-hint="forest" />
-                <ImagePlaceholder width="200" height="150" text="City" data-ai-hint="city" />
-                <ImagePlaceholder width="200" height="150" text="Desert" data-ai-hint="desert" />
-                <ImagePlaceholder width="200" height="150" text="Winter" data-ai-hint="winter" />
-              </div>
-            </section>
+                <section className="bg-card p-6 rounded-lg shadow-xl">
+                  <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+                    Images
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <ImagePlaceholder width="200" height="150" text="Mountains" data-ai-hint="mountains" />
+                    <ImagePlaceholder width="200" height="150" text="Beach" data-ai-hint="beach" />
+                    <ImagePlaceholder width="200" height="150" text="Forest" data-ai-hint="forest" />
+                    <ImagePlaceholder width="200" height="150" text="City" data-ai-hint="city" />
+                    <ImagePlaceholder width="200" height="150" text="Desert" data-ai-hint="desert" />
+                    <ImagePlaceholder width="200" height="150" text="Winter" data-ai-hint="winter" />
+                  </div>
+                </section>
+              </>
+            )}
           </div>
         </div>
       </main>
