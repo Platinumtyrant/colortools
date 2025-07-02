@@ -199,220 +199,226 @@ export default function ColorPaletteBuilderPage() {
 
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
-      <div className="bg-card p-6 rounded-lg shadow-xl mb-8">
-        <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
-        <div
-          className="w-full h-40 rounded-md mb-4 relative overflow-hidden group"
-          style={{ backgroundColor: mainColor }}
-        >
-          <button
-            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"
-            onClick={() => handleCopySuccess(`Active color copied: ${mainColor}`)}
-          >
-            Copy Active Color
-          </button>
-        </div>
-
-        <div className="flex flex-wrap w-full rounded-md overflow-hidden mb-4">
-          {paletteColors.map((color) => (
+      <div className="flex flex-col lg:flex-row gap-8">
+        
+        {/* Left Column: Palette Controls */}
+        <div className="lg:w-1/3">
+          <div className="bg-card p-6 rounded-lg shadow-xl lg:sticky top-8">
+            <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
             <div
-              key={color}
-              className="relative flex h-12 cursor-pointer transition-transform duration-100 group"
-              style={{ backgroundColor: color, flexBasis: `${100 / Math.min(paletteColors.length, 10)}%`, width: `${100 / Math.min(paletteColors.length, 10)}%` }}
-              onClick={() => handlePaletteColorClick(color)}
-              title={`Set ${color} as active`}
+              className="w-full h-40 rounded-md mb-4 relative overflow-hidden group"
+              style={{ backgroundColor: mainColor }}
             >
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveColorFromPalette(color);
-                }}
-                className="absolute top-0 right-0 bg-black bg-opacity-50 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Remove color"
+                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"
+                onClick={() => handleCopySuccess(`Active color copied: ${mainColor}`)}
               >
-                X
+                Copy Active Color
               </button>
             </div>
-          ))}
-        </div>
 
-        <button
-          onClick={handleAddColorToPalette}
-          className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors mb-4"
-        >
-          Add Current Color to Palette ({paletteColors.length}/10)
-        </button>
-
-        <div className="text-white text-sm mb-4">
-          <div className="flex justify-between items-center py-1">
-            <span className="text-gray-400">HEX:</span>
-            <span className="font-semibold text-left">{hex}</span>
-          </div>
-          <div className="flex justify-between items-center py-1">
-            <span className="text-gray-400">RGB:</span>
-            <span className="font-semibold text-left">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
-          </div>
-          <div className="flex justify-between items-center py-1">
-            <span className="text-gray-400">HSL:</span>
-            <span className="font-semibold text-left">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
-          </div>
-        </div>
-
-        <button
-          onClick={exportPaletteAsSvg}
-          className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition-colors"
-        >
-          Export Palette as SVG
-        </button>
-      </div>
-
-      <div className="space-y-8">
-        <div className="bg-card p-6 rounded-lg shadow-xl">
-          <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
-            <button
-              className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'palette-builder' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-              onClick={() => setActiveTab('palette-builder')}
-            >
-              Palette Builder
-            </button>
-            <button
-              className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-              onClick={() => setActiveTab('swatches')}
-            >
-              Swatches
-            </button>
-          </div>
-
-          {activeTab === 'swatches' && (
-            <div>
-              <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
-                {Object.keys(swatches).map(hue => (
+            <div className="flex flex-wrap w-full rounded-md overflow-hidden mb-4">
+              {paletteColors.map((color) => (
+                <div
+                  key={color}
+                  className="relative flex h-12 cursor-pointer transition-transform duration-100 group"
+                  style={{ backgroundColor: color, flexBasis: `${100 / Math.min(paletteColors.length, 10)}%`, width: `${100 / Math.min(paletteColors.length, 10)}%` }}
+                  onClick={() => handlePaletteColorClick(color)}
+                  title={`Set ${color} as active`}
+                >
                   <button
-                    key={hue}
-                    className={`py-2 px-4 text-xs sm:text-sm font-medium capitalize flex-shrink-0 ${activeSwatchTab === hue ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                    onClick={() => setActiveSwatchTab(hue)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveColorFromPalette(color);
+                    }}
+                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove color"
                   >
-                    {hue}
+                    X
                   </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1">
-                {currentSwatchColors.map((color, index) => (
-                  <div
-                    key={index}
-                    className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110 rounded-sm"
-                    style={{ backgroundColor: color }}
-                    onClick={() => setMainColor(color)}
-                    title={`Set ${color} as active`}
-                  ></div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
 
-          {activeTab === 'palette-builder' && (
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="w-full md:w-1/2 flex justify-center items-start">
-                <div className="w-full max-w-[280px]">
-                  <HexColorPicker color={mainColor} onChange={setMainColor} />
-                </div>
-              </div>
-              <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm text-gray-400">HSL</label>
-                  <div className="flex gap-2">
-                    <input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                    <input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                    <input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm text-gray-400">RGB</label>
-                  <div className="flex gap-2">
-                    <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                    <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                    <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm text-gray-400">HEX</label>
-                  <HexColorInput color={hex} onChange={handleHexChange} className="w-full p-2 rounded-md bg-gray-700 border border-gray-600 text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary" />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+            <button
+              onClick={handleAddColorToPalette}
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors mb-4"
+            >
+              Add Current Color to Palette ({paletteColors.length}/10)
+            </button>
 
-        <div>
-          <div className="bg-card p-4 rounded-lg shadow-xl mb-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white">Variations</h2>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Steps:</span>
-                <Button variant={variationSteps === 5 ? 'secondary' : 'ghost'} size="sm" onClick={() => setVariationSteps(5)}>5</Button>
-                <Button variant={variationSteps === 10 ? 'secondary' : 'ghost'} size="sm" onClick={() => setVariationSteps(10)}>10</Button>
+            <div className="text-white text-sm mb-4">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-gray-400">HEX:</span>
+                <span className="font-semibold text-left">{hex}</span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-gray-400">RGB:</span>
+                <span className="font-semibold text-left">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-gray-400">HSL:</span>
+                <span className="font-semibold text-left">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
               </div>
             </div>
+
+            <button
+              onClick={exportPaletteAsSvg}
+              className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition-colors"
+            >
+              Export Palette as SVG
+            </button>
           </div>
-          <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
-            <AccordionItem value="tints" className="border-none">
-              <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
-                Tints ({currentTints.length} colors)
-              </AccordionTrigger>
-              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="shades" className="border-none">
-              <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
-                Shades ({currentShades.length} colors)
-              </AccordionTrigger>
-              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="tones" className="border-none">
-              <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
-                Tones ({currentTones.length} colors)
-              </AccordionTrigger>
-              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
         </div>
-
-        <section className="bg-card p-6 rounded-lg shadow-xl">
-          <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
-          <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
-            {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
+        
+        {/* Right Column: Color Tools */}
+        <div className="lg:w-2/3 space-y-8">
+          <div className="bg-card p-6 rounded-lg shadow-xl">
+            <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
               <button
-                key={harmony}
-                className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyType === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveHarmonyType(harmony)}
+                className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'palette-builder' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                onClick={() => setActiveTab('palette-builder')}
               >
-                {harmony.replace('-', ' ')}
+                Palette Builder
               </button>
-            ))}
-          </div>
-          <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-        </section>
+              <button
+                className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                onClick={() => setActiveTab('swatches')}
+              >
+                Swatches
+              </button>
+            </div>
 
-        <section className="bg-card p-6 rounded-lg shadow-xl">
-          <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-            Images
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            <ImagePlaceholder width="200" height="150" text="Mountains" data-ai-hint="mountains" />
-            <ImagePlaceholder width="200" height="150" text="Beach" data-ai-hint="beach" />
-            <ImagePlaceholder width="200" height="150" text="Forest" data-ai-hint="forest" />
-            <ImagePlaceholder width="200" height="150" text="City" data-ai-hint="city" />
-            <ImagePlaceholder width="200" height="150" text="Desert" data-ai-hint="desert" />
-            <ImagePlaceholder width="200" height="150" text="Winter" data-ai-hint="winter" />
+            {activeTab === 'swatches' && (
+              <div>
+                <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
+                  {Object.keys(swatches).map(hue => (
+                    <button
+                      key={hue}
+                      className={`py-2 px-4 text-xs sm:text-sm font-medium capitalize flex-shrink-0 ${activeSwatchTab === hue ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                      onClick={() => setActiveSwatchTab(hue)}
+                    >
+                      {hue}
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1">
+                  {currentSwatchColors.map((color, index) => (
+                    <div
+                      key={index}
+                      className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110 rounded-sm"
+                      style={{ backgroundColor: color }}
+                      onClick={() => setMainColor(color)}
+                      title={`Set ${color} as active`}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'palette-builder' && (
+              <div className="flex flex-col md:flex-row gap-4 items-center">
+                <div className="w-full md:w-1/2 flex justify-center items-start">
+                  <div className="w-full max-w-[280px]">
+                    <HexColorPicker color={mainColor} onChange={setMainColor} />
+                  </div>
+                </div>
+                <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm text-gray-400">HSL</label>
+                    <div className="flex gap-2">
+                      <input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm text-gray-400">RGB</label>
+                    <div className="flex gap-2">
+                      <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                      <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3 p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm text-gray-400">HEX</label>
+                    <HexColorInput color={hex} onChange={handleHexChange} className="w-full p-2 rounded-md bg-gray-700 border border-gray-600 text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </section>
+
+          <div>
+            <div className="bg-card p-4 rounded-lg shadow-xl mb-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-white">Variations</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Steps:</span>
+                  <Button variant={variationSteps === 5 ? 'secondary' : 'ghost'} size="sm" onClick={() => setVariationSteps(5)}>5</Button>
+                  <Button variant={variationSteps === 10 ? 'secondary' : 'ghost'} size="sm" onClick={() => setVariationSteps(10)}>10</Button>
+                </div>
+              </div>
+            </div>
+            <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
+              <AccordionItem value="tints" className="border-none">
+                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
+                  Tints ({currentTints.length} colors)
+                </AccordionTrigger>
+                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                  <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="shades" className="border-none">
+                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
+                  Shades ({currentShades.length} colors)
+                </AccordionTrigger>
+                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                  <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="tones" className="border-none">
+                <AccordionTrigger className="bg-card p-4 rounded-lg shadow-xl text-xl font-bold text-white justify-between">
+                  Tones ({currentTones.length} colors)
+                </AccordionTrigger>
+                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                  <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+
+          <section className="bg-card p-6 rounded-lg shadow-xl">
+            <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
+            <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
+              {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
+                <button
+                  key={harmony}
+                  className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyType === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                  onClick={() => setActiveHarmonyType(harmony)}
+                >
+                  {harmony.replace('-', ' ')}
+                </button>
+              ))}
+            </div>
+            <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+          </section>
+
+          <section className="bg-card p-6 rounded-lg shadow-xl">
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+              Images
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <ImagePlaceholder width="200" height="150" text="Mountains" data-ai-hint="mountains" />
+              <ImagePlaceholder width="200" height="150" text="Beach" data-ai-hint="beach" />
+              <ImagePlaceholder width="200" height="150" text="Forest" data-ai-hint="forest" />
+              <ImagePlaceholder width="200" height="150" text="City" data-ai-hint="city" />
+              <ImagePlaceholder width="200" height="150" text="Desert" data-ai-hint="desert" />
+              <ImagePlaceholder width="200" height="150" text="Winter" data-ai-hint="winter" />
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );
-
-    
+}
