@@ -23,8 +23,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button';
 
 export default function ColorPaletteBuilderPage() {
-  const [mainColor, setMainColor] = useState('#DB073D');
-  const [paletteColors, setPaletteColors] = useState(['#DB073D', '#DBA507', '#8EC7D2', '#0D6986', '#07485B']);
+  const [mainColor, setMainColor] = useState('#FFFFFF');
+  const [paletteColors, setPaletteColors] = useState<string[]>([]);
   
   const [activeTab, setActiveTab] = useState('palette-builder');
   const [activeSwatchTab, setActiveSwatchTab] = useState('green');
