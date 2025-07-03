@@ -32,6 +32,11 @@ const matrices = {
         [0.95, 0.05,  0],
         [0,    0.433, 0.567],
         [0,    0.475, 0.525]
+    ],
+    deuteranomaly: [
+        [0.80, 0.20, 0.0],
+        [0.258, 0.742, 0.0],
+        [0.0, 0.142, 0.858]
     ]
 };
 
@@ -42,7 +47,7 @@ function applyMatrix(rgb: { r: number, g: number, b: number }, matrix: number[][
     return { r, g, b };
 }
 
-export type SimulationType = 'normal' | 'protan' | 'deutan' | 'tritan';
+export type SimulationType = 'normal' | 'protan' | 'deutan' | 'tritan' | 'deuteranomaly';
 
 export function simulate(hex: string, type: SimulationType): string {
   if (!hex || typeof hex !== 'string') return '#000000';

@@ -14,8 +14,9 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, TestTube2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 
 export interface PaletteColor {
@@ -67,6 +68,7 @@ export default function PaletteGeneratorPage() {
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
   const [colorblindSafe, setColorblindSafe] = useState(false);
+  const [analysisRequested, setAnalysisRequested] = useState(false);
   
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
 
@@ -186,6 +188,11 @@ export default function PaletteGeneratorPage() {
   
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
 
+  // When the user changes the palette, hide the analysis until they click "Analyze" again.
+  useEffect(() => {
+    setAnalysisRequested(false);
+  }, [paletteHexes]);
+
   const processedPalette = useMemo(() => {
     if (paletteHexes.length < 2) return paletteHexes;
 
@@ -199,6 +206,7 @@ export default function PaletteGeneratorPage() {
   }, [paletteHexes, correctLightness, useBezier]);
 
   const simulatedPalette = useMemo(() => {
+    if (paletteHexes.length === 0) return [];
     return (correctLightness ? processedPalette : paletteHexes).map(color => simulate(color, simulationType));
   }, [processedPalette, paletteHexes, simulationType, correctLightness]);
   
@@ -255,7 +263,6 @@ export default function PaletteGeneratorPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        {isPaletteColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
                         <Label className="text-sm">Simulate:</Label>
                         <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex items-center border rounded-md p-0.5">
                             <RadioGroupItem value="normal" id="normal" className="sr-only" />
@@ -263,6 +270,9 @@ export default function PaletteGeneratorPage() {
                             
                             <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
                             <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deut.</Label>
+
+                             <RadioGroupItem value="deuteranomaly" id="deuteranomaly" className="sr-only" />
+                            <Label htmlFor="deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deut-y.</Label>
                             
                             <RadioGroupItem value="protan" id="protan" className="sr-only" />
                             <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Prot.</Label>
@@ -270,23 +280,35 @@ export default function PaletteGeneratorPage() {
                             <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
                             <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Trit.</Label>
                         </RadioGroup>
+                        <Button onClick={() => setAnalysisRequested(true)}>Analyze</Button>
                     </div>
                 </div>
-                <div className="flex h-16 w-full overflow-hidden rounded-md border">
-                    {simulatedPalette.map((color, index) => (
-                    <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                    ))}
-                </div>
-                <div className="grid md:grid-cols-3 gap-8 pt-4">
-                    <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
-                    <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
-                    <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
+                {analysisRequested ? (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                    {isPaletteColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
+                    <div className="flex h-16 w-full overflow-hidden rounded-md border">
+                        {simulatedPalette.map((color, index) => (
+                        <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                        ))}
                     </div>
+                    <div className="grid md:grid-cols-3 gap-8 pt-4">
+                        <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
+                        <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
+                        <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="flex h-[292px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center">
+                    <TestTube2 className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-medium">Run analysis</h3>
+                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                        Click the "Analyze" button to view the palette analysis and colorblindness simulation.
+                    </p>
+                  </div>
+                )}
                 </CardContent>
             </Card>
         </div>
     </div>
   );
 }
-
-    
