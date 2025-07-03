@@ -101,7 +101,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, a
   return (
     <Card className="bg-card/50 overflow-hidden h-full flex flex-col">
       <CardContent className="p-0 flex flex-col flex-grow">
-        <div className="flex flex-grow">
+        <div className="flex flex-grow min-w-0">
           {palette.map((color) => (
             <ColorColumn
               key={color.id}
@@ -119,3 +119,5 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, a
     </Card>
   );
 };
+
+    

@@ -114,12 +114,32 @@ export default function PaletteGeneratorPage() {
   }, [numColors, generationType, generationCycle]);
 
   useEffect(() => {
-    regeneratePalette();
+    // Initial generation
+    regeneratePalette(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numColors]);
+  }, []);
+
+  const handleNumColorsChange = (newNumColors: number) => {
+    const currentNumColors = palette.length;
+
+    if (newNumColors > currentNumColors) {
+      const numToAdd = newNumColors - currentNumColors;
+      const newColors: PaletteColor[] = Array.from({ length: numToAdd }, (_, i) => ({
+        id: Date.now() + i,
+        hex: getRandomColor(),
+        locked: false,
+      }));
+      setPalette(prev => [...prev, ...newColors]);
+    } else if (newNumColors < currentNumColors) {
+      const numToRemove = currentNumColors - newNumColors;
+      setPalette(prev => prev.slice(0, prev.length - numToRemove));
+    }
+    setNumColors(newNumColors);
+  };
 
   const handleReset = useCallback(() => {
     setPalette([]);
+    setNumColors(5);
     // Use a timeout to ensure the state is cleared before regenerating
     setTimeout(() => regeneratePalette(true), 0);
     toast({ title: "Palette Reset" });
@@ -138,7 +158,9 @@ export default function PaletteGeneratorPage() {
         toast({ title: "Minimum 2 colors required.", variant: "destructive" });
         return;
     }
-    setPalette(prev => prev.filter(c => c.id !== id));
+    const newPalette = palette.filter(c => c.id !== id);
+    setPalette(newPalette);
+    setNumColors(newPalette.length);
   };
 
   const handleSavePalette = () => {
@@ -189,7 +211,7 @@ export default function PaletteGeneratorPage() {
               onRandomize={() => regeneratePalette(true)}
               onReset={handleReset}
               numColors={numColors}
-              setNumColors={setNumColors}
+              setNumColors={handleNumColorsChange}
               generationType={generationType}
               setGenerationType={setGenerationType}
               isGenerationLocked={isGenerationLocked}
@@ -251,3 +273,5 @@ export default function PaletteGeneratorPage() {
     </div>
   );
 }
+
+    
