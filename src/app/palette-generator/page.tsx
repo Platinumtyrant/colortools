@@ -67,6 +67,7 @@ export default function PaletteGeneratorPage() {
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
+  const [colorblindSafe, setColorblindSafe] = useState(false);
   
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
 
@@ -86,30 +87,26 @@ export default function PaletteGeneratorPage() {
       const newHexes = generatePalette({ 
         numColors, 
         type: currentType, 
-        lockedColors: lockedHexes.length > 0 ? lockedHexes : [getRandomColor()] 
+        lockedColors: lockedHexes.length > 0 ? lockedHexes : [getRandomColor()],
+        colorblindSafe,
       });
 
-      const finalPalette = Array.from({ length: numColors }, (_, i) => {
+      const newPalette: PaletteColor[] = [];
+      let newHexIndex = 0;
+
+      for (let i = 0; i < numColors; i++) {
         const lockedColorInPosition = lockedColors.find(lc => prevPalette.findIndex(p => p.id === lc.id) === i);
-        if (lockedColorInPosition) {
-          return lockedColorInPosition;
-        }
-        
-        const existingColor = prevPalette[i];
-        if (existingColor && !existingColor.locked) {
-            return { ...existingColor, hex: newHexes[i] };
-        }
-        
-        return {
-            id: Date.now() + i, 
-            hex: newHexes[i],
-            locked: false
-        };
-      });
 
-      return finalPalette;
+        if (lockedColorInPosition) {
+            newPalette.push(lockedColorInPosition);
+        } else {
+            const unlockedColor = prevPalette[i] ? prevPalette[i] : { id: Date.now() + i, locked: false };
+            newPalette.push({ ...unlockedColor, hex: newHexes[newHexIndex++] });
+        }
+      }
+      return newPalette;
     });
-  }, [numColors, generationType, generationCycle]);
+  }, [numColors, generationType, generationCycle, colorblindSafe]);
 
   useEffect(() => {
     // Initial generation
@@ -121,22 +118,41 @@ export default function PaletteGeneratorPage() {
     const currentNumColors = palette.length;
   
     if (newNumColors > currentNumColors) {
-      const numToAdd = newNumColors - currentNumColors;
-      const newHexes = generatePalette({
+      const lockedHexes = palette.filter(c => c.locked).map(c => c.hex);
+      const generatedHexes = generatePalette({
         numColors: newNumColors,
         type: generationType,
-        lockedColors: palette.filter(c => c.locked).map(c => c.hex)
+        lockedColors: lockedHexes.length > 0 ? lockedHexes : palette.map(p => p.hex),
+        colorblindSafe,
       });
-      const additionalColors = newHexes.slice(currentNumColors);
 
-      const newColors: PaletteColor[] = additionalColors.map((hex, i) => ({
-        id: Date.now() + i,
-        hex: hex,
-        locked: false,
-      }));
-      setPalette(prev => [...prev, ...newColors]);
+      const additionalColors: PaletteColor[] = [];
+      const numToAdd = newNumColors - currentNumColors;
+      const paletteHexes = palette.map(p => p.hex);
+      const newHexes = generatedHexes.filter(h => !paletteHexes.includes(h)).slice(0, numToAdd);
+      
+      for(let i = 0; i < numToAdd; i++) {
+        additionalColors.push({
+            id: Date.now() + i,
+            hex: newHexes[i] || getRandomColor(),
+            locked: false,
+        });
+      }
+      setPalette(prev => [...prev, ...additionalColors]);
     } else if (newNumColors < currentNumColors) {
-      setPalette(prev => prev.slice(0, newNumColors));
+      // Find the last unlocked color and remove it
+      setPalette(prev => {
+        const newPalette = [...prev];
+        for (let i = newPalette.length - 1; i >= 0; i--) {
+            if (!newPalette[i].locked) {
+                newPalette.splice(i, 1);
+                return newPalette;
+            }
+        }
+        // If all are locked, remove the last one
+        newPalette.pop();
+        return newPalette;
+      });
     }
     setNumColors(newNumColors);
   };
@@ -144,6 +160,7 @@ export default function PaletteGeneratorPage() {
   const handleReset = useCallback(() => {
     setPalette([]);
     setNumColors(5);
+    setColorblindSafe(false);
     // Use a timeout to ensure the state is cleared before regenerating
     setTimeout(() => regeneratePalette(true), 0);
     toast({ title: "Palette Reset" });
@@ -182,9 +199,7 @@ export default function PaletteGeneratorPage() {
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
 
   const processedPalette = useMemo(() => {
-    if (paletteHexes.length < 2) {
-      return paletteHexes;
-    }
+    if (paletteHexes.length < 2) return paletteHexes;
 
     const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
     let scale = chroma.scale(interpolator).mode('lch');
@@ -201,7 +216,7 @@ export default function PaletteGeneratorPage() {
   
   const graphData = useMemo(() => getGraphData(correctLightness ? processedPalette : paletteHexes), [processedPalette, paletteHexes, correctLightness]);
   
-  const isColorblindSafe = useMemo(() => {
+  const isPaletteColorblindSafe = useMemo(() => {
     if (simulatedPalette.length < 2) return true;
     for (let i = 0; i < simulatedPalette.length - 1; i++) {
         const contrast = chroma.contrast(simulatedPalette[i], simulatedPalette[i+1]);
@@ -222,6 +237,8 @@ export default function PaletteGeneratorPage() {
               generationType={generationType}
               setGenerationType={setGenerationType}
               isGenerationLocked={isGenerationLocked}
+              colorblindSafe={colorblindSafe}
+              setColorblindSafe={setColorblindSafe}
             />
         </div>
         <div className="flex-grow flex flex-col min-h-0">
@@ -251,7 +268,7 @@ export default function PaletteGeneratorPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        {isColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
+                        {isPaletteColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
                         <Label className="text-sm">Simulate:</Label>
                         <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex items-center border rounded-md p-0.5">
                             <RadioGroupItem value="normal" id="normal" className="sr-only" />
