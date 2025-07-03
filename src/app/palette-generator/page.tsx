@@ -1,20 +1,19 @@
-
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { PaletteGenerator } from '@/components/palettes/PaletteGenerator';
 import { Palette } from '@/components/palettes/Palette';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
 import { generatePaletteFromLibrary, type GenerationType } from '@/lib/palette-generator';
+import { Save } from 'lucide-react';
 
 export default function PaletteGeneratorPage() {
   const [baseColor, setBaseColor] = useState('#007bff');
   const [numColors, setNumColors] = useState(5);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
-  const [generatedPalettes, setGeneratedPalettes] = useState<string[][]>([]);
+  const [currentPalette, setCurrentPalette] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -22,7 +21,7 @@ export default function PaletteGeneratorPage() {
     setError(null);
     try {
       const result = generatePaletteFromLibrary({ baseColor, numColors, type: generationType });
-      setGeneratedPalettes(prev => [result, ...prev]);
+      setCurrentPalette(result);
     } catch (e: any) {
       setError(e.message);
       toast({
@@ -32,12 +31,22 @@ export default function PaletteGeneratorPage() {
       });
     }
   }, [baseColor, numColors, generationType, toast]);
+  
+  // Generate initial palette on load
+  useEffect(() => {
+    handleGeneratePalette();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleSavePalette = (palette: string[]) => {
+  const handleSavePalette = useCallback(() => {
+    if (currentPalette.length === 0) {
+      toast({ title: "Cannot save an empty palette", variant: "destructive" });
+      return;
+    }
     try {
       const savedPalettesJSON = localStorage.getItem('saved_palettes');
       const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-      savedPalettes.push(palette);
+      savedPalettes.push(currentPalette);
       localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
       toast({
         title: "Palette Saved!",
@@ -50,12 +59,7 @@ export default function PaletteGeneratorPage() {
         variant: "destructive",
       });
     }
-  };
-
-  const handleDeletePalette = (index: number) => {
-    setGeneratedPalettes(prev => prev.filter((_, i) => i !== index));
-    toast({ title: "Palette Removed" });
-  };
+  }, [currentPalette, toast]);
 
   return (
     <main className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8">
@@ -71,26 +75,22 @@ export default function PaletteGeneratorPage() {
       
       {error && (
         <Alert variant="destructive">
-          <Terminal className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      <div className="space-y-6">
-        {generatedPalettes.map((palette, index) => (
-          <Palette 
-            key={index}
-            palette={palette}
+      {currentPalette.length > 0 && (
+         <Palette 
+            palette={currentPalette}
             actions={
-              <>
-                <Button variant="outline" onClick={() => handleSavePalette(palette)}>Save</Button>
-                <Button variant="destructive" onClick={() => handleDeletePalette(index)}>Delete</Button>
-              </>
+              <Button variant="outline" onClick={handleSavePalette}>
+                <Save className="mr-2 h-4 w-4" />
+                Save to Library
+              </Button>
             }
           />
-        ))}
-      </div>
+      )}
     </main>
   );
 }
