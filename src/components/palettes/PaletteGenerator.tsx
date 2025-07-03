@@ -7,10 +7,11 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GenerationType } from "@/lib/palette-generator";
 import { Button } from "@/components/ui/button";
-import { Dices } from "lucide-react";
+import { Dices, RotateCcw } from "lucide-react";
 
 interface PaletteGeneratorProps {
   onRandomize: () => void;
+  onReset: () => void;
   numColors: number;
   setNumColors: (num: number) => void;
   generationType: GenerationType;
@@ -20,6 +21,7 @@ interface PaletteGeneratorProps {
 
 export const PaletteGenerator = ({
   onRandomize,
+  onReset,
   numColors,
   setNumColors,
   generationType,
@@ -37,11 +39,17 @@ export const PaletteGenerator = ({
       <CardContent>
         <div className="grid md:grid-cols-3 gap-6 items-end">
           <div className="space-y-2">
-            <Label htmlFor="randomizer">Randomize</Label>
-             <Button onClick={onRandomize} id="randomizer" className="w-full">
-                <Dices className="mr-2 h-4 w-4" />
-                Generate New Palette
-            </Button>
+            <Label>Actions</Label>
+            <div className="flex gap-2">
+              <Button onClick={onRandomize} className="w-full">
+                  <Dices className="mr-2 h-4 w-4" />
+                  Randomize
+              </Button>
+              <Button onClick={onReset} variant="outline" className="w-full">
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Reset
+              </Button>
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -62,7 +70,9 @@ export const PaletteGenerator = ({
                 <SelectItem value="shades">Shades</SelectItem>
               </SelectContent>
             </Select>
-            {isGenerationLocked && <p className="text-xs text-muted-foreground mt-1">Unlock all colors to change strategy.</p>}
+            <p className="text-xs text-muted-foreground mt-1 h-4">
+              {isGenerationLocked ? "Unlock all colors to change strategy." : ""}
+            </p>
           </div>
 
           <div className="space-y-2">

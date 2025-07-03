@@ -31,39 +31,40 @@ export default function PaletteGeneratorPage() {
   const { toast } = useToast();
 
   const regeneratePalette = useCallback((
-    lockedHex: string[], 
     count: number,
     type: GenerationType,
     baseForGeneration: string[]
-    ) => {
+  ) => {
+    const lockedHexes = new Set(palette.filter(p => p.locked).map(p => p.hex));
+    
     const newHexPalette = generatePalette({
-        numColors: count,
-        type: type,
-        lockedColors: baseForGeneration,
+      numColors: count * 2,
+      type: type,
+      lockedColors: baseForGeneration,
     });
+
+    const newColorPool = newHexPalette.filter(c => !lockedHexes.has(c));
+    let newColorIndex = 0;
+
+    const getNextColor = () => {
+        const color = newColorPool[newColorIndex];
+        newColorIndex++;
+        return color || getRandomColor();
+    };
     
     const finalPalette: PaletteColor[] = [];
-    const usedNewHex: string[] = [];
-    const lockedInPalette = palette.filter(p => p.locked);
-    
-    lockedInPalette.forEach(p => {
-        if (finalPalette.length < count) {
-            finalPalette.push(p);
-            usedNewHex.push(p.hex);
+    for (let i = 0; i < count; i++) {
+        const oldColor = palette[i];
+        if (oldColor && oldColor.locked) {
+            finalPalette.push(oldColor);
+        } else {
+            const newHex = getNextColor();
+            const id = oldColor ? oldColor.id : getNextId();
+            finalPalette.push({ id, hex: newHex, locked: false });
         }
-    });
-    
-    let newColorIndex = 0;
-    while(finalPalette.length < count && newColorIndex < newHexPalette.length) {
-        const newHex = newHexPalette[newColorIndex];
-        if (!finalPalette.some(p => p.hex === newHex)) {
-            finalPalette.push({ id: getNextId(), hex: newHex, locked: false });
-        }
-        newColorIndex++;
     }
-
-    setPalette(finalPalette.slice(0, count));
-
+    
+    setPalette(finalPalette);
   }, [palette]);
   
   // Effect for regeneration when numColors changes
@@ -75,8 +76,8 @@ export default function PaletteGeneratorPage() {
     if (lockedColors.length > 0) {
       type = GENERATION_MODES[generationCycleIndex];
     }
-    const baseForGeneration = lockedColors.length > 0 ? lockedColors : [palette[0].hex];
-    regeneratePalette(lockedColors, numColors, type, baseForGeneration);
+    const baseForGeneration = lockedColors.length > 0 ? lockedColors : [palette[0]?.hex || getRandomColor()];
+    regeneratePalette(numColors, type, baseForGeneration);
     
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numColors]);
@@ -101,10 +102,17 @@ export default function PaletteGeneratorPage() {
     }
     
     const baseForGeneration = lockedColors.length > 0 ? lockedColors : [getRandomColor()];
-    regeneratePalette(lockedColors, numColors, type, baseForGeneration);
+    regeneratePalette(numColors, type, baseForGeneration);
 
     toast({ title: lockedColors.length > 0 ? `Generated '${type}' palette` : "Generated new random palette" });
   }, [palette, numColors, baseGenerationType, generationCycleIndex, toast, regeneratePalette]);
+
+  const handleReset = useCallback(() => {
+    setGenerationCycleIndex(0);
+    const initialHexPalette = generatePalette({ numColors, type: 'analogous', lockedColors: [getRandomColor()] });
+    setPalette(initialHexPalette.map(hex => ({ id: getNextId(), hex, locked: false })));
+    toast({ title: "Palette Reset" });
+  }, [numColors, toast]);
 
   const handleColorChange = (id: number, newHex: string) => {
     setPalette(p => p.map(c => c.id === id ? { ...c, hex: newHex } : c));
@@ -158,6 +166,7 @@ export default function PaletteGeneratorPage() {
     <main className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8 flex flex-col h-[calc(100vh-100px)]">
       <PaletteGenerator
         onRandomize={handleRandomize}
+        onReset={handleReset}
         numColors={numColors}
         setNumColors={setNumColors}
         generationType={baseGenerationType}
