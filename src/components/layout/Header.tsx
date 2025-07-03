@@ -11,6 +11,9 @@ export function Header() {
           <Link href="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Palette Builder
           </Link>
+          <Link href="/scale" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            Scale Generator
+          </Link>
           <Link href="/mesh-gradient" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Gradient Builder
           </Link>

@@ -21,7 +21,6 @@ import { ColorList } from '@/components/colors/ColorList';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScaleGenerator } from '@/components/colors/ScaleGenerator';
 
 export default function ColorPaletteBuilderPage() {
   const [mainColor, setMainColor] = useState('#ff0000');
@@ -214,12 +213,6 @@ export default function ColorPaletteBuilderPage() {
                 Palette Builder
               </button>
               <button
-                className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'scale' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('scale')}
-              >
-                Scale
-              </button>
-              <button
                 className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
                 onClick={() => setActiveTab('swatches')}
               >
@@ -284,12 +277,6 @@ export default function ColorPaletteBuilderPage() {
                   </div>
                 </div>
               </div>
-            )}
-             {activeTab === 'scale' && (
-              <ScaleGenerator 
-                onSetActiveColor={setMainColor}
-                onCopySuccess={handleCopySuccess}
-              />
             )}
           </div>
 
