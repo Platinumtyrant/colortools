@@ -36,6 +36,9 @@ export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onC
 
   const handleCardClick = () => {
     setIsFlipped(!isFlipped);
+    if (onSetActiveColor) {
+      onSetActiveColor(color);
+    }
   };
 
   return (
