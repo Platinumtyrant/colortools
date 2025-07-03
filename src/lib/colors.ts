@@ -5,6 +5,7 @@ import lchPlugin from 'colord/plugins/lch';
 import a11yPlugin from 'colord/plugins/a11y';
 import mixPlugin from 'colord/plugins/mix';
 import namesPlugin from 'colord/plugins/names';
+import chroma from 'chroma-js';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
@@ -103,12 +104,20 @@ export const getTones = (color: string, steps = 5) => {
   return tones;
 };
 
+const greenAnchors = ['#dcfce7', '#4ade80', '#16a34a', '#14532d'];
+const blueAnchors = ['#dbeafe', '#60a5fa', '#2563eb', '#1e3a8a'];
+const redAnchors = ['#fee2e2', '#f87171', '#dc2626', '#7f1d1d'];
+const orangeAnchors = ['#ffedd5', '#fb923c', '#ea580c', '#7c2d12'];
+const purpleAnchors = ['#f5d0fe', '#c084fc', '#9333ea', '#581c87'];
+const yellowAnchors = ['#fefce8', '#facc15', '#ca8a04', '#713f12'];
+const grayAnchors = ['#f8fafc', '#9ca3af', '#4b5563', '#111827'];
+
 export const swatches = {
-  green: ['#bedb39', '#a8c545', '#bdd684', '#95ab63', '#a9cf54', '#96ca2d', '#b5e655', '#bdf271', '#8bc34a', '#588f27', '#689f38', '#91c46c', '#beeb9f', '#b1ff91', '#33691e', '#96ed89', '#43a047', '#66bb6a', '#2e7d32', '#45bf55', '#79bd8f', '#168039', '#67cc8e', '#468966', '#289976', '#1f8a70', '#1bbc9b', '#00a388', '#00796b', '#26a69a', '#009688', '#04756f', '#287d7d'],
-  blue: ['#e3f2fd', '#bbdefb', '#90caf9', '#64b5f6', '#42a5f5', '#2196f3', '#1976d2', '#1565c0', '#0d47a1', '#82b1ff', '#448aff', '#2979ff', '#2962ff'],
-  red: ['#ffebee', '#ffcdd2', '#ef9a9a', '#e57373', '#ef5350', '#f44336', '#e53935', '#d32f2f', '#c62828', '#b71c1c', '#ff8a80', '#ff5252', '#ff1744', '#d50000'],
-  orange: ['#fff3e0', '#ffe0b2', '#ffcc80', '#ffb74d', '#ffa726', '#ff9800', '#fb8c00', '#f57c00', '#ef6c00', '#e65100', '#ffd180', '#ffab40', '#ff9100', '#ff6d00'],
-  purple: ['#f3e5f5', '#e1bee7', '#ce93d8', '#ba68c8', '#ab47bc', '#9c27b0', '#8e24aa', '#7b1fa2', '#6a1b9a', '#4a148c', '#ea80fc', '#e040fb', '#d500f9', '#aa00ff'],
-  yellow: ['#fffde7', '#fff9c4', '#fff59d', '#fff176', '#ffee58', '#ffeb3b', '#fdd835', '#fbc02d', '#f9a825', '#f57f17', '#ffff8d', '#ffff00', '#ffea00', '#ffd600'],
-  gray: ['#f5f5f5', '#eeeeee', '#e0e0e0', '#bdbdbd', '#9e9e9e', '#757575', '#616161', '#424242', '#212121', '#fafafa', '#f0f0f0', '#e8e8e8', '#dcdcdc', '#d4d4d4', '#c8c8c8', '#a0a0a0', '#808080', '#606060', '#404040', '#202020', '#000000'],
+  green: chroma.scale(greenAnchors).mode('lch').colors(50),
+  blue: chroma.scale(blueAnchors).mode('lch').colors(50),
+  red: chroma.scale(redAnchors).mode('lch').colors(50),
+  orange: chroma.scale(orangeAnchors).mode('lch').colors(50),
+  purple: chroma.scale(purpleAnchors).mode('lch').colors(50),
+  yellow: chroma.scale(yellowAnchors).mode('lch').colors(50),
+  gray: chroma.scale(grayAnchors).mode('lch').colors(50),
 };
