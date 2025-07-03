@@ -9,44 +9,55 @@ extend([mixPlugin]);
 export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades';
 
 interface GenerationOptions {
-    baseColor: string;
     numColors: number;
     type: GenerationType;
+    lockedColors?: string[];
 }
 
-export function generatePaletteFromLibrary(options: GenerationOptions): string[] {
-    const { baseColor, numColors, type } = options;
+export function getRandomColor(): string {
+  return chroma.random().hex();
+}
 
-    if (!chroma.valid(baseColor)) {
+export function generatePalette(options: GenerationOptions): string[] {
+    const { numColors, type, lockedColors } = options;
+
+    const colorsToScale = (lockedColors && lockedColors.length > 0) ? lockedColors : [getRandomColor()];
+    
+    if (colorsToScale.some(c => !chroma.valid(c))) {
         throw new Error("Invalid base color provided.");
     }
-
+    
     switch (type) {
         case 'analogous': {
-            const baseHsl = colord(baseColor).toHsl();
+            const base = colorsToScale[0];
+            const baseHsl = colord(base).toHsl();
             const firstAnalogous = colord({ ...baseHsl, h: (baseHsl.h - 30 + 360) % 360 }).toHex();
             const secondAnalogous = colord({ ...baseHsl, h: (baseHsl.h + 30) % 360 }).toHex();
-            return chroma.scale([firstAnalogous, baseColor, secondAnalogous]).mode('lch').colors(numColors);
+            const fullScale = [...colorsToScale, firstAnalogous, secondAnalogous].sort((a,b) => colord(a).toHsl().h - colord(b).toHsl().h);
+            return chroma.scale(fullScale).mode('lch').colors(numColors);
         }
         case 'triadic': {
-            const baseHsl = colord(baseColor).toHsl();
+            const base = colorsToScale[0];
+            const baseHsl = colord(base).toHsl();
             const secondColor = colord({ ...baseHsl, h: (baseHsl.h + 120) % 360 }).toHex();
             const thirdColor = colord({ ...baseHsl, h: (baseHsl.h + 240) % 360 }).toHex();
-            return chroma.scale([baseColor, secondColor, thirdColor].sort((a,b) => colord(a).toHsl().h - colord(b).toHsl().h)).mode('lch').colors(numColors);
+            const fullScale = [...colorsToScale, secondColor, thirdColor].sort((a,b) => colord(a).toHsl().h - colord(b).toHsl().h);
+            return chroma.scale(fullScale).mode('lch').colors(numColors);
         }
         case 'complementary': {
-            const baseHsl = colord(baseColor).toHsl();
+            const base = colorsToScale[0];
+            const baseHsl = colord(base).toHsl();
             const complement = colord({ ...baseHsl, h: (baseHsl.h + 180) % 360 }).toHex();
-            return chroma.scale([baseColor, complement]).mode('lch').colors(numColors);
+            const fullScale = [...colorsToScale, complement].sort((a,b) => colord(a).toHsl().h - colord(b).toHsl().h);
+            return chroma.scale(fullScale).mode('lch').colors(numColors);
         }
         case 'tints': {
-            return getTints(baseColor, numColors);
+            return getTints(colorsToScale[0], numColors);
         }
         case 'shades': {
-            return getShades(baseColor, numColors);
+            return getShades(colorsToScale[0], numColors);
         }
         default:
-            // Fallback to a default scale if type is unrecognized
-            return chroma.scale(['#fafa6e','#2A4858']).mode('lch').colors(numColors);
+            return chroma.scale(colorsToScale).mode('lch').colors(numColors);
     }
 }
