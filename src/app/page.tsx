@@ -157,7 +157,7 @@ export default function ColorPaletteBuilderPage() {
     setPaletteColors([]); // Clear palette after saving
   }, [paletteColors, toast]);
 
-  const responsiveGridClasses = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3";
+  const responsiveGridClasses = "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
   return (
     <main className="w-full p-4 md:p-8">
@@ -300,7 +300,7 @@ export default function ColorPaletteBuilderPage() {
                     <AccordionItem value="tints" className="border-none group">
                         <div className="bg-card p-4 shadow-xl flex justify-between items-center">
                             <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                                <span>Tints ({currentTints.length} colors)</span>
+                                <span>Tints</span>
                             </AccordionTrigger>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
@@ -316,7 +316,7 @@ export default function ColorPaletteBuilderPage() {
                     <AccordionItem value="shades" className="border-none group">
                         <div className="bg-card p-4 shadow-xl flex justify-between items-center">
                             <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                                <span>Shades ({currentShades.length} colors)</span>
+                                <span>Shades</span>
                             </AccordionTrigger>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
@@ -332,7 +332,7 @@ export default function ColorPaletteBuilderPage() {
                     <AccordionItem value="tones" className="border-none group">
                         <div className="bg-card p-4 shadow-xl flex justify-between items-center">
                             <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                                <span>Tones ({currentTones.length} colors)</span>
+                                <span>Tones</span>
                             </AccordionTrigger>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
