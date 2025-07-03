@@ -151,7 +151,7 @@ export default function PaletteGeneratorPage() {
   }, [regeneratePalette, toast]);
 
   const handleColorChange = (id: number, newHex: string) => {
-    setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
+    setPalette(prev => adjustForColorblindSafety(prev.map(c => c.id === id ? { ...c, hex: newHex } : c)));
   };
 
   const handleLockToggle = (id: number) => {
@@ -250,21 +250,21 @@ export default function PaletteGeneratorPage() {
                     </div>
                     <div className="flex items-center gap-4">
                         <Label className="text-sm">Simulate:</Label>
-                        <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex items-center border rounded-md p-0.5">
+                        <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
                             <RadioGroupItem value="normal" id="normal" className="sr-only" />
-                            <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                            <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
                             
                             <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
-                            <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deut.</Label>
+                            <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranopia</Label>
 
                              <RadioGroupItem value="deuteranomaly" id="deuteranomaly" className="sr-only" />
-                            <Label htmlFor="deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deut-y.</Label>
+                            <Label htmlFor="deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
                             
                             <RadioGroupItem value="protan" id="protan" className="sr-only" />
-                            <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Prot.</Label>
+                            <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protanopia</Label>
 
                             <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
-                            <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Trit.</Label>
+                            <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritanopia</Label>
                         </RadioGroup>
                     </div>
                 </div>
