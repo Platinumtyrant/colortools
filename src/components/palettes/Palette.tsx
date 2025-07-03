@@ -6,7 +6,7 @@ import type { PaletteColor } from '@/app/palette-generator/page';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
-import { Lock, Unlock, Trash2, Copy } from 'lucide-react';
+import { Lock, Unlock, Trash2, Copy, Plus } from 'lucide-react';
 import chroma from 'chroma-js';
 
 interface InteractivePaletteProps {
@@ -14,6 +14,7 @@ interface InteractivePaletteProps {
   onColorChange: (id: number, newHex: string) => void;
   onLockToggle: (id: number) => void;
   onRemoveColor: (id: number) => void;
+  onAddColor: () => void;
   actions: React.ReactNode;
 }
 
@@ -96,11 +97,11 @@ const ColorColumn = ({ color, onColorChange, onLockToggle, onRemoveColor }: {
     );
 };
 
-export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, actions }: InteractivePaletteProps) => {
+export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, onAddColor, actions }: InteractivePaletteProps) => {
   return (
     <Card className="bg-card/50 overflow-hidden h-full flex flex-col">
       <CardContent className="p-0 flex flex-col flex-grow min-w-0">
-        <div className="flex flex-grow">
+        <div className="flex flex-grow min-w-0">
           {palette.map((color) => (
             <ColorColumn
               key={color.id}
@@ -110,6 +111,13 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, a
               onRemoveColor={onRemoveColor}
             />
           ))}
+           {palette.length < 10 && (
+            <div className="flex-initial w-24 flex items-center justify-center p-2 sm:p-4 bg-background border-l">
+              <Button onClick={onAddColor} size="icon" variant="outline" className="h-12 w-12 rounded-full" title="Add color">
+                <Plus className="h-6 w-6" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
       <CardFooter className="justify-end gap-2 p-4 pt-4 border-t">

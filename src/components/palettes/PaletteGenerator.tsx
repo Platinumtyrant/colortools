@@ -3,7 +3,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GenerationType } from "@/lib/palette-generator";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,6 @@ import { Dices, RotateCcw } from "lucide-react";
 interface PaletteGeneratorProps {
   onRandomize: () => void;
   onReset: () => void;
-  numColors: number;
-  setNumColors: (num: number) => void;
   generationType: GenerationType;
   setGenerationType: (type: GenerationType) => void;
   isGenerationLocked: boolean;
@@ -25,8 +22,6 @@ interface PaletteGeneratorProps {
 export const PaletteGenerator = ({
   onRandomize,
   onReset,
-  numColors,
-  setNumColors,
   generationType,
   setGenerationType,
   isGenerationLocked,
@@ -42,7 +37,7 @@ export const PaletteGenerator = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 gap-x-6 gap-y-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 items-center">
           <div className="space-y-2">
             <Label>Actions</Label>
             <div className="flex gap-2">
@@ -57,25 +52,6 @@ export const PaletteGenerator = ({
             </div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="numColors">Number of Colors: {numColors}</Label>
-            <div className="flex items-center gap-2">
-                <Slider
-                id="numColors"
-                min={2}
-                max={10}
-                step={1}
-                value={[numColors]}
-                onValueChange={(value) => setNumColors(value[0])}
-                className="flex-1"
-                />
-                <div className="flex items-center gap-1">
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setNumColors(numColors - 1)} disabled={numColors <= 2}>-</Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setNumColors(numColors + 1)} disabled={numColors >= 10}>+</Button>
-                </div>
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="generationType">Generation Type</Label>
             <div className="relative">
@@ -99,7 +75,7 @@ export const PaletteGenerator = ({
             </div>
           </div>
           
-          <div className="flex items-center space-x-2 pt-6">
+          <div className="flex items-center space-x-2 pt-5">
             <Checkbox
               id="colorblindSafe"
               checked={colorblindSafe}
