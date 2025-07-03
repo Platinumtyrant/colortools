@@ -99,9 +99,16 @@ export default function ScalePage() {
     try {
       if (keyColors.some(c => !chroma.valid(c))) return [];
       
-      let scale = useBezier 
-        ? chroma.scale(chroma.bezier(keyColors)) 
-        : chroma.scale(keyColors);
+      // chroma.bezier(keyColors) returns an interpolator function.
+      // This interpolator function then has a .scale() method to create a scale.
+      // chroma.scale() itself expects colors or an existing scale, not an interpolator directly.
+      let scale;
+      if (useBezier) {
+        const bezierInterpolator = chroma.bezier(keyColors);
+        scale = bezierInterpolator.scale();
+      } else {
+        scale = chroma.scale(keyColors);
+      }
 
       if (correctLightness) {
         scale = scale.correctLightness();

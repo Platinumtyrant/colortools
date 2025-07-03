@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Noto_Sans } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/Header";
 import { SidebarNav } from "@/components/layout/SidebarNav";
@@ -9,19 +10,23 @@ export const metadata: Metadata = {
   description: "A powerful color palette and gradient mesh builder.",
 };
 
+const notoSans = Noto_Sans({
+  subsets: ['latin'],
+  weight: ['700'],
+  variable: '--font-noto-sans',
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`${notoSans.variable} dark`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#111111" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@700&display=swap" rel="stylesheet" />
+        {/* Google Font links removed, handled by next/font */}
       </head>
       <body className="font-headline antialiased">
         <div className="flex min-h-screen w-full flex-col bg-muted/40">

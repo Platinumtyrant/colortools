@@ -27,7 +27,7 @@ export const PaletteGenerator = ({
       <CardHeader>
         <CardTitle>Generate a New Palette</CardTitle>
         <CardDescription>
-          Pick a base color, choose how many colors you want, and we'll generate a beautiful palette for you.
+          Pick a base color, choose how many colors you want, and we&apos;ll generate a beautiful palette for you.
         </CardDescription>
       </CardHeader>
       <CardContent>
