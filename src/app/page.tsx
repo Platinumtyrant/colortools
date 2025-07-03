@@ -129,226 +129,220 @@ export default function ColorPaletteBuilderPage() {
   }, [paletteColors, toast]);
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <main className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8">
+      <div className="flex flex-col gap-8">
         
-        {/* Left Column: Palette Controls */}
-        <div className="lg:col-span-1">
-          <div className="bg-card p-6 shadow-xl lg:sticky top-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
-            <div
-              className="w-full h-40 mb-4 relative overflow-hidden group"
-              style={{ backgroundColor: mainColor }}
-            >
-              <button
-                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                onClick={() => handleCopySuccess(`Active color copied: ${mainColor}`)}
-              >
-                Copy Active Color
-              </button>
-            </div>
-
-            <div className="flex flex-wrap w-full  overflow-hidden mb-4">
-              {paletteColors.map((color) => (
-                <div
-                  key={color}
-                  className="relative flex h-12 cursor-pointer transition-transform duration-100 group"
-                  style={{ backgroundColor: color, flexBasis: `${100 / Math.min(paletteColors.length, 10)}%`, width: `${100 / Math.min(paletteColors.length, 10)}%` }}
-                  onClick={() => handlePaletteColorClick(color)}
-                  title={`Set ${color} as active`}
-                >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveColorFromPalette(color);
-                    }}
-                    className="absolute top-0 right-0 bg-black bg-opacity-50 text-white w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove color"
-                  >
-                    X
-                  </button>
-                </div>
-              ))}
-            </div>
-
+        <div className="bg-card p-6 shadow-xl">
+          <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
+          <div
+            className="w-full h-40 mb-4 relative overflow-hidden group"
+            style={{ backgroundColor: mainColor }}
+          >
             <button
-              onClick={handleAddColorToPalette}
-              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold  transition-colors mb-4"
+              className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              onClick={() => handleCopySuccess(`Active color copied: ${mainColor}`)}
             >
-              Add Current Color to Palette ({paletteColors.length}/10)
-            </button>
-
-            <div className="text-white text-sm mb-4">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400">HEX:</span>
-                <span className="font-semibold text-left">{hex}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400">RGB:</span>
-                <span className="font-semibold text-left">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400">HSL:</span>
-                <span className="font-semibold text-left">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleSaveToLibrary}
-              className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold  transition-colors"
-            >
-              Save to Library
+              Copy Active Color
             </button>
           </div>
-        </div>
-        
-        {/* Right Column: Color Tools */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-card p-6 shadow-xl">
-            <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
-              <button
-                className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'palette-builder' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('palette-builder')}
+
+          <div className="flex flex-wrap w-full  overflow-hidden mb-4">
+            {paletteColors.map((color) => (
+              <div
+                key={color}
+                className="relative flex h-12 cursor-pointer transition-transform duration-100 group"
+                style={{ backgroundColor: color, flexBasis: `${100 / Math.min(paletteColors.length, 10)}%`, width: `${100 / Math.min(paletteColors.length, 10)}%` }}
+                onClick={() => handlePaletteColorClick(color)}
+                title={`Set ${color} as active`}
               >
-                Palette Builder
-              </button>
-              <button
-                className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveTab('swatches')}
-              >
-                Swatches
-              </button>
-            </div>
-
-            {activeTab === 'swatches' && (
-              <div>
-                <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
-                  {Object.keys(swatches).map(hue => (
-                    <button
-                      key={hue}
-                      className={`py-2 px-4 text-xs sm:text-sm font-medium capitalize flex-shrink-0 ${activeSwatchTab === hue ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                      onClick={() => setActiveSwatchTab(hue)}
-                    >
-                      {hue}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1">
-                  {currentSwatchColors.map((color, index) => (
-                    <div
-                      key={index}
-                      className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110"
-                      style={{ backgroundColor: color }}
-                      onClick={() => setMainColor(color)}
-                      title={`Set ${color} as active`}
-                    ></div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'palette-builder' && (
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="w-full md:w-1/2 flex justify-center items-start">
-                  <div className="w-full max-w-[280px]">
-                    <HexColorPicker color={mainColor} onChange={setMainColor} />
-                  </div>
-                </div>
-                <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-gray-400">HSL</label>
-                    <div className="flex gap-2">
-                      <input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-gray-400">RGB</label>
-                    <div className="flex gap-2">
-                      <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                      <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm text-gray-400">HEX</label>
-                    <HexColorInput color={hex} onChange={handleHexChange} className="w-full p-2  bg-gray-700 border border-gray-600 text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
-               <AccordionItem value="tints" className="border-none group">
-                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
-                  <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                    <span>Tints ({currentTints.length} colors)</span>
-                  </AccordionTrigger>
-                   <div className="flex items-center gap-2">
-                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
-                      <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
-                  </div>
-                </div>
-                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                  <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="shades" className="border-none group">
-                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
-                   <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                    <span>Shades ({currentShades.length} colors)</span>
-                   </AccordionTrigger>
-                   <div className="flex items-center gap-2">
-                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
-                      <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
-                  </div>
-                </div>
-                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                  <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="tones" className="border-none group">
-                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
-                   <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                    <span>Tones ({currentTones.length} colors)</span>
-                   </AccordionTrigger>
-                   <div className="flex items-center gap-2">
-                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
-                      <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
-                  </div>
-                </div>
-                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                  <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-
-          <section className="bg-card p-6 shadow-xl">
-            <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
-            <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
-              {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
                 <button
-                  key={harmony}
-                  className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyType === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                  onClick={() => setActiveHarmonyType(harmony)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveColorFromPalette(color);
+                  }}
+                  className="absolute top-0 right-0 bg-black bg-opacity-50 text-white w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Remove color"
                 >
-                  {harmony.replace('-', ' ')}
+                  X
                 </button>
-              ))}
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleAddColorToPalette}
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold  transition-colors mb-4"
+          >
+            Add Current Color to Palette ({paletteColors.length}/10)
+          </button>
+
+          <div className="text-white text-sm mb-4">
+            <div className="flex justify-between items-center py-1">
+              <span className="text-gray-400">HEX:</span>
+              <span className="font-semibold text-left">{hex}</span>
             </div>
-            <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-          </section>
+            <div className="flex justify-between items-center py-1">
+              <span className="text-gray-400">RGB:</span>
+              <span className="font-semibold text-left">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
+            </div>
+            <div className="flex justify-between items-center py-1">
+              <span className="text-gray-400">HSL:</span>
+              <span className="font-semibold text-left">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleSaveToLibrary}
+            className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold  transition-colors"
+          >
+            Save to Library
+          </button>
         </div>
+        
+        <div className="bg-card p-6 shadow-xl">
+          <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
+            <button
+              className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'palette-builder' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+              onClick={() => setActiveTab('palette-builder')}
+            >
+              Palette Builder
+            </button>
+            <button
+              className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'swatches' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+              onClick={() => setActiveTab('swatches')}
+            >
+              Swatches
+            </button>
+          </div>
+
+          {activeTab === 'swatches' && (
+            <div>
+              <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
+                {Object.keys(swatches).map(hue => (
+                  <button
+                    key={hue}
+                    className={`py-2 px-4 text-xs sm:text-sm font-medium capitalize flex-shrink-0 ${activeSwatchTab === hue ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                    onClick={() => setActiveSwatchTab(hue)}
+                  >
+                    {hue}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1">
+                {currentSwatchColors.map((color, index) => (
+                  <div
+                    key={index}
+                    className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110"
+                    style={{ backgroundColor: color }}
+                    onClick={() => setMainColor(color)}
+                    title={`Set ${color} as active`}
+                  ></div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'palette-builder' && (
+            <div className="flex flex-col md:flex-row gap-4 items-center">
+              <div className="w-full md:w-1/2 flex justify-center items-start">
+                <div className="w-full max-w-[280px]">
+                  <HexColorPicker color={mainColor} onChange={setMainColor} />
+                </div>
+              </div>
+              <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm text-gray-400">HSL</label>
+                  <div className="flex gap-2">
+                    <input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                    <input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                    <input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm text-gray-400">RGB</label>
+                  <div className="flex gap-2">
+                    <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                    <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                    <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm text-gray-400">HEX</label>
+                  <HexColorInput color={hex} onChange={handleHexChange} className="w-full p-2  bg-gray-700 border border-gray-600 text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
+              <AccordionItem value="tints" className="border-none group">
+              <div className="bg-card p-4 shadow-xl flex justify-between items-center">
+                <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                  <span>Tints ({currentTints.length} colors)</span>
+                </AccordionTrigger>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
+                    <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
+                </div>
+              </div>
+              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="shades" className="border-none group">
+              <div className="bg-card p-4 shadow-xl flex justify-between items-center">
+                  <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                  <span>Shades ({currentShades.length} colors)</span>
+                  </AccordionTrigger>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
+                    <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
+                </div>
+              </div>
+              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="tones" className="border-none group">
+              <div className="bg-card p-4 shadow-xl flex justify-between items-center">
+                  <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                  <span>Tones ({currentTones.length} colors)</span>
+                  </AccordionTrigger>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
+                    <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
+                </div>
+              </div>
+              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        <section className="bg-card p-6 shadow-xl">
+          <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
+          <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
+            {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
+              <button
+                key={harmony}
+                className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyType === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                onClick={() => setActiveHarmonyType(harmony)}
+              >
+                {harmony.replace('-', ' ')}
+              </button>
+            ))}
+          </div>
+          <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+        </section>
       </div>
     </main>
   );
