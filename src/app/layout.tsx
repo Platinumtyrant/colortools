@@ -3,6 +3,7 @@ import { Noto_Sans } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/Header";
 import { SidebarNav } from "@/components/layout/SidebarNav";
+import { Sidebar, SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,18 +27,19 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#111111" />
-        {/* Google Font links removed, handled by next/font */}
       </head>
       <body className="font-headline antialiased">
-        <div className="flex min-h-screen w-full flex-col bg-muted/40">
-            <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
-                <SidebarNav />
-            </aside>
-            <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-                <Header />
-                <main>{children}</main>
-            </div>
-        </div>
+        <SidebarProvider defaultOpen={true}>
+          <Sidebar>
+              <SidebarNav />
+          </Sidebar>
+          <SidebarInset>
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+          </SidebarInset>
+        </SidebarProvider>
         <Toaster />
       </body>
     </html>
