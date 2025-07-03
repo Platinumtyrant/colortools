@@ -139,8 +139,8 @@ export const GradientMeshBuilder = () => {
 
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
-            <CardContent className="grid lg:grid-cols-3 gap-8 p-0">
-                <div className="lg:col-span-2 space-y-4">
+            <CardContent className="grid lg:grid-cols-2 gap-8 p-0">
+                <div className="lg:col-span-1 space-y-4">
                     <div
                         ref={previewRef}
                         className="relative w-full aspect-video rounded-lg border border-border cursor-move"
