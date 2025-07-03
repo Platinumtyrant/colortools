@@ -3,15 +3,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Palette, Layers, Library, LayoutDashboard, Brush, SlidersHorizontal } from "lucide-react";
+import { Palette, Layers, Library, Brush, SlidersHorizontal, Contrast } from "lucide-react";
 import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 const menuItems = [
     { href: '/', label: 'Palette Builder', icon: Palette },
     { href: '/mesh-gradient', label: 'Gradient Builder', icon: Layers },
     { href: '/palette-generator', label: 'Palette Generator', icon: SlidersHorizontal },
+    { href: '/contrast-checker', label: 'Contrast Checker', icon: Contrast },
     { href: '/library', label: 'Library', icon: Library },
-    { href: '/dashboard-example', label: 'Dashboard Example', icon: LayoutDashboard },
 ];
 
 export function SidebarNav() {
