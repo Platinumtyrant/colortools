@@ -72,34 +72,34 @@ export const getRectangular = (color: string) => {
 };
 
 export const getTints = (color: string, steps = 5) => {
-  const tints: string[] = [];
   if (steps <= 1) {
-    return [colord(color).toHex()];
+    return [chroma(color).hex()];
   }
+  const tints: string[] = [];
   for (let i = 0; i < steps; i++) {
-    tints.push(colord(color).mix('white', i / (steps - 1)).toHex());
+    tints.push(chroma.mix(color, 'white', i / (steps - 1)).hex());
   }
   return tints;
 };
 
 export const getShades = (color: string, steps = 5) => {
-  const shades: string[] = [];
   if (steps <= 1) {
-    return [colord(color).toHex()];
+    return [chroma(color).hex()];
   }
+  const shades: string[] = [];
   for (let i = 0; i < steps; i++) {
-    shades.push(colord(color).mix('black', i / (steps - 1)).toHex());
+    shades.push(chroma.mix(color, 'black', i / (steps - 1)).hex());
   }
   return shades;
 };
 
 export const getTones = (color: string, steps = 5) => {
-  const tones: string[] = [];
   if (steps <= 1) {
-    return [colord(color).toHex()];
+    return [chroma(color).hex()];
   }
+  const tones: string[] = [];
   for (let i = 0; i < steps; i++) {
-    tones.push(colord(color).mix('gray', i / (steps - 1)).toHex());
+    tones.push(chroma.mix(color, 'gray', i / (steps - 1)).hex());
   }
   return tones;
 };

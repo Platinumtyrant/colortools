@@ -1,11 +1,7 @@
 
-import { colord, extend } from 'colord';
-import mixPlugin from 'colord/plugins/mix';
 import chroma from 'chroma-js';
 import { getTints, getShades } from './colors';
 import { simulate, type SimulationType } from './colorblind';
-
-extend([mixPlugin]);
 
 export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades';
 
@@ -81,30 +77,48 @@ export function generatePalette(options: GenerationOptions): string[] {
     
     let initialPalette: string[];
 
+    const sortbyHue = (a: string, b: string) => {
+        const hA = chroma(a).hsl()[0];
+        const hB = chroma(b).hsl()[0];
+        return (isNaN(hA) ? 0 : hA) - (isNaN(hB) ? 0 : hB);
+    };
+
     switch (type) {
         case 'analogous': {
             const base = colorsToScale[0];
-            const baseHsl = colord(base).toHsl();
-            const firstAnalogous = colord({ ...baseHsl, h: (baseHsl.h - 30 + 360) % 360 }).toHex();
-            const secondAnalogous = colord({ ...baseHsl, h: (baseHsl.h + 30) % 360 }).toHex();
-            const fullScale = [...colorsToScale, firstAnalogous, secondAnalogous].sort((a,b) => colord(a).toHsl().h - colord(b).toHsl().h);
+            const baseHsl = chroma(base).hsl();
+            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
+            const s = baseHsl[1];
+            const l = baseHsl[2];
+
+            const firstAnalogous = chroma.hsl((h - 30 + 360) % 360, s, l).hex();
+            const secondAnalogous = chroma.hsl((h + 30) % 360, s, l).hex();
+            const fullScale = [...colorsToScale, firstAnalogous, secondAnalogous].sort(sortbyHue);
             initialPalette = chroma.scale(fullScale).mode('lch').colors(numColors);
             break;
         }
         case 'triadic': {
             const base = colorsToScale[0];
-            const baseHsl = colord(base).toHsl();
-            const secondColor = colord({ ...baseHsl, h: (baseHsl.h + 120) % 360 }).toHex();
-            const thirdColor = colord({ ...baseHsl, h: (baseHsl.h + 240) % 360 }).toHex();
-            const fullScale = [...colorsToScale, secondColor, thirdColor].sort((a,b) => colord(a).toHsl().h - colord(b).toHsl().h);
+            const baseHsl = chroma(base).hsl();
+            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
+            const s = baseHsl[1];
+            const l = baseHsl[2];
+
+            const secondColor = chroma.hsl((h + 120) % 360, s, l).hex();
+            const thirdColor = chroma.hsl((h + 240) % 360, s, l).hex();
+            const fullScale = [...colorsToScale, secondColor, thirdColor].sort(sortbyHue);
             initialPalette = chroma.scale(fullScale).mode('lch').colors(numColors);
             break;
         }
         case 'complementary': {
             const base = colorsToScale[0];
-            const baseHsl = colord(base).toHsl();
-            const complement = colord({ ...baseHsl, h: (baseHsl.h + 180) % 360 }).toHex();
-            const fullScale = [...colorsToScale, complement].sort((a,b) => colord(a).toHsl().h - colord(b).toHsl().h);
+            const baseHsl = chroma(base).hsl();
+            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
+            const s = baseHsl[1];
+            const l = baseHsl[2];
+
+            const complement = chroma.hsl((h + 180) % 360, s, l).hex();
+            const fullScale = [...colorsToScale, complement].sort(sortbyHue);
             initialPalette = chroma.scale(fullScale).mode('lch').colors(numColors);
             break;
         }
