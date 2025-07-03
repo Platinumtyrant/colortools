@@ -64,15 +64,20 @@ export default function ColorPaletteBuilderPage() {
 
   const handleAddColorToPalette = useCallback(() => {
     setPaletteColors(prevColors => {
+      if (prevColors.includes(mainColor)) {
+        handleCopySuccess('Color already in palette.');
+        return prevColors;
+      }
       const newColors = [...prevColors];
       if (newColors.length >= 10) {
-        newColors.shift();
+        toast({ title: "Palette full", description: "You can have a maximum of 10 colors.", variant: "destructive" });
+        return prevColors;
       }
       newColors.push(mainColor);
-      return [...new Set(newColors)];
+      return newColors;
     });
     handleCopySuccess('Color added to palette!');
-  }, [mainColor, handleCopySuccess]);
+  }, [mainColor, handleCopySuccess, toast]);
 
   const handleRemoveColorFromPalette = useCallback((colorToRemove: string) => {
     setPaletteColors(prevColors => prevColors.filter(color => color !== colorToRemove));
@@ -133,73 +138,6 @@ export default function ColorPaletteBuilderPage() {
       <div className="flex flex-col gap-8">
         
         <div className="bg-card p-6 shadow-xl">
-          <h2 className="text-xl font-semibold text-white mb-4">Current Palette</h2>
-          <div
-            className="w-full h-40 mb-4 relative overflow-hidden group"
-            style={{ backgroundColor: mainColor }}
-          >
-            <button
-              className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              onClick={() => handleCopySuccess(`Active color copied: ${mainColor}`)}
-            >
-              Copy Active Color
-            </button>
-          </div>
-
-          <div className="flex flex-wrap w-full  overflow-hidden mb-4">
-            {paletteColors.map((color) => (
-              <div
-                key={color}
-                className="relative flex h-12 cursor-pointer transition-transform duration-100 group"
-                style={{ backgroundColor: color, flexBasis: `${100 / Math.min(paletteColors.length, 10)}%`, width: `${100 / Math.min(paletteColors.length, 10)}%` }}
-                onClick={() => handlePaletteColorClick(color)}
-                title={`Set ${color} as active`}
-              >
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveColorFromPalette(color);
-                  }}
-                  className="absolute top-0 right-0 bg-black bg-opacity-50 text-white w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Remove color"
-                >
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <button
-            onClick={handleAddColorToPalette}
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold  transition-colors mb-4"
-          >
-            Add Current Color to Palette ({paletteColors.length}/10)
-          </button>
-
-          <div className="text-white text-sm mb-4">
-            <div className="flex justify-between items-center py-1">
-              <span className="text-gray-400">HEX:</span>
-              <span className="font-semibold text-left">{hex}</span>
-            </div>
-            <div className="flex justify-between items-center py-1">
-              <span className="text-gray-400">RGB:</span>
-              <span className="font-semibold text-left">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
-            </div>
-            <div className="flex justify-between items-center py-1">
-              <span className="text-gray-400">HSL:</span>
-              <span className="font-semibold text-left">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleSaveToLibrary}
-            className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-semibold  transition-colors"
-          >
-            Save to Library
-          </button>
-        </div>
-        
-        <div className="bg-card p-6 shadow-xl">
           <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
             <button
               className={`py-2 px-4 text-sm font-medium flex-shrink-0 ${activeTab === 'palette-builder' ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
@@ -243,13 +181,64 @@ export default function ColorPaletteBuilderPage() {
           )}
 
           {activeTab === 'palette-builder' && (
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="w-full md:w-1/2 flex justify-center items-start">
-                <div className="w-full max-w-[280px]">
-                  <HexColorPicker color={mainColor} onChange={setMainColor} />
-                </div>
+            <div className="flex flex-col md:flex-row gap-8 items-start">
+              <div className="w-full md:w-1/2 flex flex-col gap-4">
+                  <div className="w-full">
+                    <HexColorPicker color={mainColor} onChange={setMainColor} className="w-full"/>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm text-gray-400">Current Palette</label>
+                    <div className="flex flex-wrap w-full h-16 border rounded-md overflow-hidden bg-muted/20">
+                      {paletteColors.length === 0 && <div className="flex items-center justify-center w-full text-sm text-muted-foreground">Add colors to start...</div>}
+                      {paletteColors.map((color) => (
+                        <div
+                          key={color}
+                          className="relative flex h-full cursor-pointer transition-transform duration-100 group"
+                          style={{ backgroundColor: color, flexBasis: `${100 / Math.max(paletteColors.length, 1)}%`, width: `${100 / Math.max(paletteColors.length, 1)}%` }}
+                          onClick={() => handlePaletteColorClick(color)}
+                          title={`Set ${color} as active`}
+                        >
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRemoveColorFromPalette(color); }}
+                            className="absolute top-0 right-0 bg-black bg-opacity-50 text-white w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Remove color"
+                          >X</button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button onClick={handleAddColorToPalette} className="w-full">
+                      Add to Palette ({paletteColors.length}/10)
+                    </Button>
+                    <Button onClick={handleSaveToLibrary} variant="secondary" className="w-full">
+                      Save to Library
+                    </Button>
+                  </div>
               </div>
+
               <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
+                
+                <div className="flex gap-4 items-center p-2 border rounded-md">
+                    <div className="w-16 h-16 rounded-md" style={{ backgroundColor: mainColor }}/>
+                    <div className="text-white text-sm flex-1 space-y-1">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-400">HEX:</span>
+                            <span className="font-semibold text-left font-mono">{hex}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-400">RGB:</span>
+                            <span className="font-semibold text-left font-mono">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-400">HSL:</span>
+                            <span className="font-semibold text-left font-mono">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="flex flex-col gap-2">
                   <label className="text-sm text-gray-400">HSL</label>
                   <div className="flex gap-2">
