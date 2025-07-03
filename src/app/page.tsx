@@ -18,7 +18,6 @@ import {
   swatches 
 } from '@/lib/colors';
 import { ColorList } from '@/components/colors/ColorList';
-import { ImagePlaceholder } from '@/components/colors/ImagePlaceholder';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -361,20 +360,6 @@ export default function ColorPaletteBuilderPage() {
               ))}
             </div>
             <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
-          </section>
-
-          <section className="bg-card p-6 shadow-xl">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-              Images
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <ImagePlaceholder width="200" height="150" text="Mountains" data-ai-hint="mountains" />
-              <ImagePlaceholder width="200" height="150" text="Beach" data-ai-hint="beach" />
-              <ImagePlaceholder width="200" height="150" text="Forest" data-ai-hint="forest" />
-              <ImagePlaceholder width="200" height="150" text="City" data-ai-hint="city" />
-              <ImagePlaceholder width="200" height="150" text="Desert" data-ai-hint="desert" />
-              <ImagePlaceholder width="200" height="150" text="Winter" data-ai-hint="winter" />
-            </div>
           </section>
         </div>
       </div>
