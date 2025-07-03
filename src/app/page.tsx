@@ -259,9 +259,7 @@ export default function ColorPaletteBuilderPage() {
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div className="space-y-8">
+
                 <section className="bg-card p-6 shadow-xl">
                     <h2 className="text-2xl font-bold text-white mb-4">Swatches</h2>
                     <div>
@@ -289,7 +287,9 @@ export default function ColorPaletteBuilderPage() {
                         </div>
                     </div>
                 </section>
-                
+            </div>
+            
+            <div className="space-y-8">
                 <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
                     <AccordionItem value="tints" className="border-none group">
                         <div className="bg-card p-4 shadow-xl flex justify-between items-center">
