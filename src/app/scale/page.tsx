@@ -98,13 +98,15 @@ export default function ScalePage() {
   const generatedPalette = useMemo(() => {
     try {
       if (keyColors.some(c => !chroma.valid(c))) return [];
-      let scale = chroma.scale(keyColors);
-      if (useBezier) {
-        scale = scale.bezier();
-      }
+      
+      let scale = useBezier 
+        ? chroma.scale(chroma.bezier(keyColors)) 
+        : chroma.scale(keyColors);
+
       if (correctLightness) {
         scale = scale.correctLightness();
       }
+      
       return scale.mode('lch').colors(numColors);
     } catch (e) {
       console.error("Error generating color scale:", e);
