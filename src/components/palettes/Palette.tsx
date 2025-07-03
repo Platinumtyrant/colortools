@@ -23,7 +23,7 @@ export const Palette = ({ palette, actions }: PaletteProps) => {
   return (
     <Card className="bg-card/50 overflow-hidden">
       <CardContent className="p-0">
-        <div className="flex h-32">
+        <div className="flex h-48">
           {palette.map((color) => (
             <div
               key={color}
