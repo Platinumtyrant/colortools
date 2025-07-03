@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -113,7 +112,7 @@ export default function LibraryPage() {
   return (
     <main className="flex-1 w-full p-4 md:p-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-grow">
+        <div className="flex-grow max-w-3xl">
           {selectedPalette ? (
             <Card className="bg-card">
                 <CardHeader>
@@ -125,6 +124,7 @@ export default function LibraryPage() {
                         title="" 
                         onSetActiveColor={() => {}} 
                         onCopySuccess={handleCopySuccess}
+                        gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4"
                     />
                 </CardContent>
                 <CardFooter className="justify-end gap-2">
