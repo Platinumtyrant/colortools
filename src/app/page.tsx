@@ -274,16 +274,18 @@ export default function ColorPaletteBuilderPage() {
                             </button>
                             ))}
                         </div>
-                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1 h-[450px] overflow-y-auto">
-                            {currentSwatchColors.map((color, index) => (
-                            <div
-                                key={index}
-                                className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110"
-                                style={{ backgroundColor: color }}
-                                onClick={() => setMainColor(color)}
-                                title={`Set ${color} as active`}
-                            ></div>
-                            ))}
+                        <div className="h-[450px] overflow-y-auto">
+                            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1 p-1">
+                                {currentSwatchColors.map((color, index) => (
+                                <div
+                                    key={index}
+                                    className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110"
+                                    style={{ backgroundColor: color }}
+                                    onClick={() => setMainColor(color)}
+                                    title={`Set ${color} as active`}
+                                ></div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </section>
