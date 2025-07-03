@@ -157,7 +157,7 @@ export default function ColorPaletteBuilderPage() {
     setPaletteColors([]); // Clear palette after saving
   }, [paletteColors, toast]);
 
-  const responsiveGridClasses = "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+  const responsiveGridClasses = "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
 
   return (
     <main className="w-full p-4 md:p-8">
