@@ -28,7 +28,7 @@ export const PaletteGenerator = ({
       <CardHeader>
         <CardTitle>Generate a New Palette</CardTitle>
         <CardDescription>
-          Use the controls to generate a palette. Lock colors to preserve them during randomization.
+          Use the controls to generate a palette. Lock colors to preserve them.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -38,7 +38,7 @@ export const PaletteGenerator = ({
             <div className="flex gap-2">
               <Button onClick={onRandomize} className="w-full">
                   <Dices className="mr-2 h-4 w-4" />
-                  Randomize
+                  Mix
               </Button>
               <Button onClick={onReset} variant="outline" className="w-full">
                   <RotateCcw className="mr-2 h-4 w-4" />

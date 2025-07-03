@@ -24,54 +24,84 @@ export function getRandomColor(): string {
 /**
  * Iterates through a palette and adjusts colors to meet a minimum contrast
  * ratio under various colorblindness simulations, respecting locked colors.
+ * This version uses forward and backward passes to ensure stability.
  */
 export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor[] {
   if (palette.length < 2) {
     return palette;
   }
-  let adjustedPalette = palette.map(p => ({ ...p })); // Deep copy to avoid mutation
+  const adjustedPalette = palette.map(p => ({ ...p }));
   const simulationTypes: SimulationType[] = ['protan', 'deutan', 'tritan', 'deuteranomaly'];
   const minContrast = 1.5;
-  const maxPasses = 15;
-  const adjustmentStep = 5; // Adjust lightness by 5 on a 0-100 scale
+  const maxPasses = 10; // Each pass includes a forward and backward run
+  const adjustmentStep = 4;
 
   for (let pass = 0; pass < maxPasses; pass++) {
-    let wasAdjusted = false;
-    for (let i = 0; i < adjustedPalette.length - 1; i++) {
-      let isPairSafe = true;
-      for (const type of simulationTypes) {
-        const simColor1 = simulate(adjustedPalette[i].hex, type);
-        const simColor2 = simulate(adjustedPalette[i + 1].hex, type);
-        if (chroma.contrast(simColor1, simColor2) < minContrast) {
-          isPairSafe = false;
-          break;
-        }
-      }
+    let adjustmentsMade = false;
 
-      if (!isPairSafe) {
-        wasAdjusted = true;
-        const color1 = chroma(adjustedPalette[i].hex);
-        const color2 = chroma(adjustedPalette[i + 1].hex);
-        const l1 = color1.get('lch.l');
-        const l2 = color2.get('lch.l');
-        
-        // Try to adjust the second color if it's not locked.
-        if (!adjustedPalette[i + 1].locked) {
-            const newL = l1 > l2 ? l2 - adjustmentStep : l2 + adjustmentStep;
-            adjustedPalette[i + 1].hex = color2.set('lch.l', Math.max(0, Math.min(100, newL))).hex();
-        } 
-        // Else if the first color is not locked, adjust it.
-        else if (!adjustedPalette[i].locked) {
-            const newL = l2 > l1 ? l1 - adjustmentStep : l1 + adjustmentStep;
-            adjustedPalette[i].hex = color1.set('lch.l', Math.max(0, Math.min(100, newL))).hex();
+    // Forward pass: Adjusts color[i+1] based on color[i]
+    for (let i = 0; i < adjustedPalette.length - 1; i++) {
+        const color1 = adjustedPalette[i];
+        const color2 = adjustedPalette[i + 1];
+
+        if (color2.locked) continue;
+
+        let isUnsafe = false;
+        for (const type of simulationTypes) {
+            const sim1 = simulate(color1.hex, type);
+            const sim2 = simulate(color2.hex, type);
+            if (chroma.contrast(sim1, sim2) < minContrast) {
+                isUnsafe = true;
+                break;
+            }
         }
-        // If both are locked, we skip and cannot make an adjustment for this pair.
-      }
+
+        if (isUnsafe) {
+            adjustmentsMade = true;
+            const lch1 = chroma(color1.hex).lch();
+            const lch2 = chroma(color2.hex).lch();
+            const lightness1 = lch1[0];
+            let lightness2 = lch2[0];
+            
+            lightness2 += (lightness2 >= lightness1 ? adjustmentStep : -adjustmentStep);
+            adjustedPalette[i + 1].hex = chroma.lch(Math.max(0, Math.min(100, lightness2)), lch2[1], lch2[2]).hex();
+        }
     }
-    if (!wasAdjusted) {
-      break; 
+
+    // Backward pass: Adjusts color[i] based on color[i+1]
+    for (let i = adjustedPalette.length - 2; i >= 0; i--) {
+        const color1 = adjustedPalette[i];
+        const color2 = adjustedPalette[i + 1];
+
+        if (color1.locked) continue;
+
+        let isUnsafe = false;
+        for (const type of simulationTypes) {
+            const sim1 = simulate(color1.hex, type);
+            const sim2 = simulate(color2.hex, type);
+            if (chroma.contrast(sim1, sim2) < minContrast) {
+                isUnsafe = true;
+                break;
+            }
+        }
+
+        if (isUnsafe) {
+            adjustmentsMade = true;
+            const lch1 = chroma(color1.hex).lch();
+            const lch2 = chroma(color2.hex).lch();
+            let lightness1 = lch1[0];
+            const lightness2 = lch2[0];
+            
+            lightness1 += (lightness1 >= lightness2 ? adjustmentStep : -adjustmentStep);
+            adjustedPalette[i].hex = chroma.lch(Math.max(0, Math.min(100, lightness1)), lch1[1], lch1[2]).hex();
+        }
+    }
+
+    if (!adjustmentsMade) {
+      break;
     }
   }
+
   return adjustedPalette;
 }
 
