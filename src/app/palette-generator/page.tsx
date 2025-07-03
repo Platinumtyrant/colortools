@@ -4,7 +4,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import chroma from 'chroma-js';
 import { useToast } from '@/hooks/use-toast';
-import { generatePalette, getRandomColor, type GenerationType } from '@/lib/palette-generator';
+import { generatePalette, getRandomColor, type GenerationType, adjustForColorblindSafety } from '@/lib/palette-generator';
+import type { PaletteColor } from '@/lib/palette-generator';
 import { simulate, type SimulationType } from '@/lib/colorblind';
 import { Palette } from '@/components/palettes/Palette';
 import { PaletteGenerator } from '@/components/palettes/PaletteGenerator';
@@ -18,12 +19,6 @@ import { CheckCircle2, TestTube2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
-
-export interface PaletteColor {
-  id: number;
-  hex: string;
-  locked: boolean;
-}
 
 // Helper to get graph data
 const getGraphData = (colors: string[]) => {
@@ -67,7 +62,7 @@ export default function PaletteGeneratorPage() {
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
-  const [colorblindSafe, setColorblindSafe] = useState(false);
+  const [colorblindSafe, setColorblindSafe] = useState(true);
   const [analysisRequested, setAnalysisRequested] = useState(false);
   
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
@@ -90,10 +85,9 @@ export default function PaletteGeneratorPage() {
         numColors, 
         type: currentType, 
         lockedColors: lockedHexes.length > 0 ? lockedHexes : [getRandomColor()],
-        colorblindSafe,
       });
 
-      const newPalette: PaletteColor[] = [];
+      let newPalette: PaletteColor[] = [];
       let newHexIndex = 0;
       
       for (let i = 0; i < numColors; i++) {
@@ -104,6 +98,10 @@ export default function PaletteGeneratorPage() {
             const newId = originalColor?.id || Date.now() + i;
             newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
         }
+      }
+      
+      if (colorblindSafe) {
+        return adjustForColorblindSafety(newPalette);
       }
       return newPalette;
     });
@@ -145,13 +143,18 @@ export default function PaletteGeneratorPage() {
         };
 
         newPalette.splice(index, 0, newColor);
+        
+        if (colorblindSafe) {
+            return adjustForColorblindSafety(newPalette);
+        }
+
         return newPalette;
     });
-  }, [toast]);
+  }, [toast, colorblindSafe]);
 
   const handleReset = useCallback(() => {
     setPalette([]);
-    setColorblindSafe(false);
+    setColorblindSafe(true);
     // Use a timeout to ensure the state is cleared before regenerating
     setTimeout(() => regeneratePalette(true), 0);
     toast({ title: "Palette Reset" });

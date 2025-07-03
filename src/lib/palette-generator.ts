@@ -5,11 +5,16 @@ import { simulate, type SimulationType } from './colorblind';
 
 export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades';
 
+export interface PaletteColor {
+  id: number;
+  hex: string;
+  locked: boolean;
+}
+
 interface GenerationOptions {
     numColors: number;
     type: GenerationType;
     lockedColors?: string[];
-    colorblindSafe?: boolean;
 }
 
 export function getRandomColor(): string {
@@ -18,25 +23,25 @@ export function getRandomColor(): string {
 
 /**
  * Iterates through a palette and adjusts colors to meet a minimum contrast
- * ratio under various colorblindness simulations.
+ * ratio under various colorblindness simulations, respecting locked colors.
  */
-function adjustForColorblindSafety(palette: string[]): string[] {
+export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor[] {
   if (palette.length < 2) {
     return palette;
   }
-  let adjustedPalette = [...palette];
-  const simulationTypes: SimulationType[] = ['protan', 'deutan', 'tritan'];
-  const minContrast = 1.5; // Slightly increased for better safety
-  const maxPasses = 10;
-  const adjustmentStep = 5; // Adjust lightness by 5%
+  let adjustedPalette = palette.map(p => ({ ...p })); // Deep copy to avoid mutation
+  const simulationTypes: SimulationType[] = ['protan', 'deutan', 'tritan', 'deuteranomaly'];
+  const minContrast = 1.5;
+  const maxPasses = 15;
+  const adjustmentStep = 5; // Adjust lightness by 5 on a 0-100 scale
 
   for (let pass = 0; pass < maxPasses; pass++) {
     let wasAdjusted = false;
     for (let i = 0; i < adjustedPalette.length - 1; i++) {
       let isPairSafe = true;
       for (const type of simulationTypes) {
-        const simColor1 = simulate(adjustedPalette[i], type);
-        const simColor2 = simulate(adjustedPalette[i + 1], type);
+        const simColor1 = simulate(adjustedPalette[i].hex, type);
+        const simColor2 = simulate(adjustedPalette[i + 1].hex, type);
         if (chroma.contrast(simColor1, simColor2) < minContrast) {
           isPairSafe = false;
           break;
@@ -45,20 +50,26 @@ function adjustForColorblindSafety(palette: string[]): string[] {
 
       if (!isPairSafe) {
         wasAdjusted = true;
-        const colorToAdjust = chroma(adjustedPalette[i + 1]);
-        const lightness1 = chroma(adjustedPalette[i]).get('lch.l');
-        const lightness2 = colorToAdjust.get('lch.l');
+        const color1 = chroma(adjustedPalette[i].hex);
+        const color2 = chroma(adjustedPalette[i + 1].hex);
+        const l1 = color1.get('lch.l');
+        const l2 = color2.get('lch.l');
         
-        // Push lightness away from the other color
-        const newLightness = (lightness2 > lightness1) 
-            ? lightness2 + adjustmentStep 
-            : lightness2 - adjustmentStep;
-
-        adjustedPalette[i + 1] = colorToAdjust.set('lch.l', Math.max(0, Math.min(100, newLightness))).hex();
+        // Try to adjust the second color if it's not locked.
+        if (!adjustedPalette[i + 1].locked) {
+            const newL = l1 > l2 ? l2 - adjustmentStep : l2 + adjustmentStep;
+            adjustedPalette[i + 1].hex = color2.set('lch.l', Math.max(0, Math.min(100, newL))).hex();
+        } 
+        // Else if the first color is not locked, adjust it.
+        else if (!adjustedPalette[i].locked) {
+            const newL = l2 > l1 ? l1 - adjustmentStep : l1 + adjustmentStep;
+            adjustedPalette[i].hex = color1.set('lch.l', Math.max(0, Math.min(100, newL))).hex();
+        }
+        // If both are locked, we skip and cannot make an adjustment for this pair.
       }
     }
     if (!wasAdjusted) {
-      break; // Palette is stable and safe
+      break; 
     }
   }
   return adjustedPalette;
@@ -66,7 +77,7 @@ function adjustForColorblindSafety(palette: string[]): string[] {
 
 
 export function generatePalette(options: GenerationOptions): string[] {
-    const { numColors, type, lockedColors, colorblindSafe } = options;
+    const { numColors, type, lockedColors } = options;
 
     const colorsToScale = (lockedColors && lockedColors.length > 0) ? lockedColors : [getRandomColor()];
     
@@ -133,12 +144,6 @@ export function generatePalette(options: GenerationOptions): string[] {
             initialPalette = chroma.scale(colorsToScale).mode('lch').colors(numColors);
             break;
     }
-    
-    if (colorblindSafe) {
-        return adjustForColorblindSafety(initialPalette);
-    }
 
     return initialPalette;
 }
-
-    
