@@ -19,7 +19,7 @@ export const ColorList = ({ colors, title, onSetActiveColor, isMainPalette = fal
   return (
     <section className="mb-8">
       {title && <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>}
-      <div className={gridClassName ?? defaultGridClasses}>
+      <div className={gridClassName ? gridClassName : defaultGridClasses}>
         {colors.map((color, index) => (
           <ColorBox
             key={index}

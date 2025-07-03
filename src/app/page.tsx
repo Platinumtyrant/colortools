@@ -161,7 +161,7 @@ export default function ColorPaletteBuilderPage() {
 
   return (
     <main className="flex-1 w-full p-4 md:p-8">
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 max-w-7xl mx-auto">
         
         <div className="bg-card p-6 shadow-xl">
           <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
@@ -303,7 +303,7 @@ export default function ColorPaletteBuilderPage() {
           )}
         </div>
 
-        <div className="space-y-8 max-w-5xl mx-auto w-full">
+        <div className="space-y-8 w-full">
           <div>
             <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
                 <AccordionItem value="tints" className="border-none group">
