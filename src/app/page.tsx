@@ -158,7 +158,7 @@ export default function ColorPaletteBuilderPage() {
   }, [paletteColors, toast]);
 
   return (
-    <main className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8">
+    <main className="flex-1 w-full p-4 md:p-8">
       <div className="flex flex-col gap-8">
         
         <div className="bg-card p-6 shadow-xl">
