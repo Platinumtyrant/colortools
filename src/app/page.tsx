@@ -4,7 +4,6 @@ import React, { useState, useCallback } from 'react';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
 import { colord } from 'colord';
 import { useToast } from "@/hooks/use-toast";
-import * as AccordionPrimitive from "@radix-ui/react-accordion"
 import { 
   getComplementary,
   getAnalogous,
@@ -20,10 +19,9 @@ import {
 import { ColorList } from '@/components/colors/ColorList';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 
 export default function ColorPaletteBuilderPage() {
@@ -165,7 +163,7 @@ export default function ColorPaletteBuilderPage() {
         
         <div className="flex-shrink-0 lg:w-2/5 space-y-4">
             <div className="sticky top-8 space-y-4 self-start">
-                <div className="bg-card p-6 shadow-xl w-full">
+                <Card className="p-6 shadow-xl w-full">
                     <h2 className="text-2xl font-bold text-white mb-4">Palette Builder</h2>
                     <div className="flex flex-col md:flex-row gap-8 items-start">
                         <div className="w-full md:w-1/2 flex flex-col gap-4">
@@ -260,7 +258,7 @@ export default function ColorPaletteBuilderPage() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </Card>
 
                 <section className="bg-card p-6 shadow-xl">
                     <h2 className="text-2xl font-bold text-white mb-4">Swatches</h2>
@@ -293,86 +291,50 @@ export default function ColorPaletteBuilderPage() {
         </div>
         
         <div className="lg:w-3/5 space-y-8">
-            <AccordionPrimitive.Root type="multiple" className="w-full space-y-8">
-                <Card asChild>
-                    <AccordionPrimitive.Item value="tints" className="border-b-0">
-                        <AccordionPrimitive.Header className="flex">
-                            <div className="bg-card p-4 flex justify-between items-center w-full">
-                                <AccordionPrimitive.Trigger className="w-full data-[state=open]:[&>svg]:rotate-180">
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-2xl font-bold text-white">Tints</h2>
-                                        <ChevronDown className="h-5 w-5 transition-transform duration-200" />
-                                    </div>
-                                </AccordionPrimitive.Trigger>
-                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
-                                    <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
-                                </div>
+            <Card asChild>
+                <Tabs defaultValue="tints" className="w-full">
+                    <CardHeader>
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="tints">Tints</TabsTrigger>
+                            <TabsTrigger value="shades">Shades</TabsTrigger>
+                            <TabsTrigger value="tones">Tones</TabsTrigger>
+                        </TabsList>
+                    </CardHeader>
+                    <TabsContent value="tints">
+                        <CardContent className="space-y-4">
+                             <div className="flex items-center gap-4 justify-end">
+                                <span className="text-sm font-normal text-muted-foreground">Steps:</span>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
+                                <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
                             </div>
-                        </AccordionPrimitive.Header>
-                        <AccordionPrimitive.Content>
-                            <div className="bg-card p-6 pt-2">
-                                <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
+                            <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
+                        </CardContent>
+                    </TabsContent>
+                     <TabsContent value="shades">
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center gap-4 justify-end">
+                                <span className="text-sm font-normal text-muted-foreground">Steps:</span>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
+                                <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
                             </div>
-                        </AccordionPrimitive.Content>
-                    </AccordionPrimitive.Item>
-                </Card>
-
-                 <Card asChild>
-                    <AccordionPrimitive.Item value="shades" className="border-b-0">
-                        <AccordionPrimitive.Header className="flex">
-                            <div className="bg-card p-4 flex justify-between items-center w-full">
-                                <AccordionPrimitive.Trigger className="w-full data-[state=open]:[&>svg]:rotate-180">
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-2xl font-bold text-white">Shades</h2>
-                                        <ChevronDown className="h-5 w-5 transition-transform duration-200" />
-                                    </div>
-                                </AccordionPrimitive.Trigger>
-                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
-                                    <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
-                                </div>
+                            <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
+                        </CardContent>
+                    </TabsContent>
+                    <TabsContent value="tones">
+                        <CardContent className="space-y-4">
+                           <div className="flex items-center gap-4 justify-end">
+                                <span className="text-sm font-normal text-muted-foreground">Steps:</span>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
+                                <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
                             </div>
-                        </AccordionPrimitive.Header>
-                        <AccordionPrimitive.Content>
-                             <div className="bg-card p-6 pt-2">
-                                <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
-                            </div>
-                        </AccordionPrimitive.Content>
-                    </AccordionPrimitive.Item>
-                </Card>
-
-                <Card asChild>
-                    <AccordionPrimitive.Item value="tones" className="border-b-0">
-                        <AccordionPrimitive.Header className="flex">
-                            <div className="bg-card p-4 flex justify-between items-center w-full">
-                                <AccordionPrimitive.Trigger className="w-full data-[state=open]:[&>svg]:rotate-180">
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-2xl font-bold text-white">Tones</h2>
-                                        <ChevronDown className="h-5 w-5 transition-transform duration-200" />
-                                    </div>
-                                </AccordionPrimitive.Trigger>
-                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
-                                    <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
-                                </div>
-                            </div>
-                        </AccordionPrimitive.Header>
-                        <AccordionPrimitive.Content>
-                             <div className="bg-card p-6 pt-2">
-                                <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
-                            </div>
-                        </AccordionPrimitive.Content>
-                    </AccordionPrimitive.Item>
-                </Card>
-            </AccordionPrimitive.Root>
-
+                            <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
+                        </CardContent>
+                    </TabsContent>
+                </Tabs>
+            </Card>
 
             <section className="bg-card p-6 shadow-xl">
                 <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
@@ -390,7 +352,6 @@ export default function ColorPaletteBuilderPage() {
                 <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
             </section>
         </div>
-
     </main>
   );
 }
