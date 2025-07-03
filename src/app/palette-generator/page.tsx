@@ -66,6 +66,7 @@ export default function PaletteGeneratorPage() {
 
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
   const [correctLightness, setCorrectLightness] = useState(true);
+  const [useBezier, setUseBezier] = useState(true);
   
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
 
@@ -94,22 +95,19 @@ export default function PaletteGeneratorPage() {
           return lockedColorInPosition;
         }
         
-        // Find an unlocked color from the new palette that hasn't been used yet.
-        const newColorHex = newHexes[i];
-        let id = i + 1;
-        const existingColor = prevPalette.find(p => p.id === id);
-        if(existingColor && !existingColor.locked) {
-            return { ...existingColor, hex: newColorHex };
+        const existingColor = prevPalette[i];
+        if (existingColor && !existingColor.locked) {
+            return { ...existingColor, hex: newHexes[i] };
         }
         
         return {
-            id: Date.now() + i, // Ensure unique ID
-            hex: newColorHex,
+            id: Date.now() + i, 
+            hex: newHexes[i],
             locked: false
         };
       });
 
-      return finalPalette.slice(0, numColors);
+      return finalPalette;
     });
   }, [numColors, generationType, generationCycle]);
 
@@ -121,18 +119,24 @@ export default function PaletteGeneratorPage() {
 
   const handleNumColorsChange = (newNumColors: number) => {
     const currentNumColors = palette.length;
-
+  
     if (newNumColors > currentNumColors) {
       const numToAdd = newNumColors - currentNumColors;
-      const newColors: PaletteColor[] = Array.from({ length: numToAdd }, (_, i) => ({
+      const newHexes = generatePalette({
+        numColors: newNumColors,
+        type: generationType,
+        lockedColors: palette.filter(c => c.locked).map(c => c.hex)
+      });
+      const additionalColors = newHexes.slice(currentNumColors);
+
+      const newColors: PaletteColor[] = additionalColors.map((hex, i) => ({
         id: Date.now() + i,
-        hex: getRandomColor(),
+        hex: hex,
         locked: false,
       }));
       setPalette(prev => [...prev, ...newColors]);
     } else if (newNumColors < currentNumColors) {
-      const numToRemove = currentNumColors - newNumColors;
-      setPalette(prev => prev.slice(0, prev.length - numToRemove));
+      setPalette(prev => prev.slice(0, newNumColors));
     }
     setNumColors(newNumColors);
   };
@@ -178,15 +182,18 @@ export default function PaletteGeneratorPage() {
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
 
   const processedPalette = useMemo(() => {
-    if (paletteHexes.length === 0) {
-      return [];
+    if (paletteHexes.length < 2) {
+      return paletteHexes;
     }
-    let scale = chroma.scale(paletteHexes).mode('lch');
+
+    const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
+    let scale = chroma.scale(interpolator).mode('lch');
+    
     if (correctLightness) {
       scale = scale.correctLightness();
     }
     return scale.colors(paletteHexes.length);
-  }, [paletteHexes, correctLightness]);
+  }, [paletteHexes, correctLightness, useBezier]);
 
   const simulatedPalette = useMemo(() => {
     return (correctLightness ? processedPalette : paletteHexes).map(color => simulate(color, simulationType));
@@ -217,7 +224,7 @@ export default function PaletteGeneratorPage() {
               isGenerationLocked={isGenerationLocked}
             />
         </div>
-        <div className="flex-grow flex flex-col min-h-0 min-w-0">
+        <div className="flex-grow flex flex-col min-h-0">
              <Palette
               palette={palette}
               onColorChange={handleColorChange}
@@ -234,6 +241,10 @@ export default function PaletteGeneratorPage() {
                 <CardContent className="space-y-6">
                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
+                            <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                            <Label htmlFor="useBezier">Bezier interpolation</Label>
+                        </div>
                         <div className="flex items-center space-x-2">
                             <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
                             <Label htmlFor="correctLightness">Correct lightness</Label>
@@ -273,5 +284,3 @@ export default function PaletteGeneratorPage() {
     </div>
   );
 }
-
-    
