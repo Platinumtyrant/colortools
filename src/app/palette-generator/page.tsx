@@ -17,7 +17,7 @@ export default function PaletteGeneratorPage() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleGeneratePalette = useCallback(() => {
+  useEffect(() => {
     setError(null);
     try {
       const result = generatePaletteFromLibrary({ baseColor, numColors, type: generationType });
@@ -31,12 +31,6 @@ export default function PaletteGeneratorPage() {
       });
     }
   }, [baseColor, numColors, generationType, toast]);
-  
-  // Generate initial palette on load
-  useEffect(() => {
-    handleGeneratePalette();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleSavePalette = useCallback(() => {
     if (currentPalette.length === 0) {
@@ -62,7 +56,7 @@ export default function PaletteGeneratorPage() {
   }, [currentPalette, toast]);
 
   return (
-    <main className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+    <main className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8 flex flex-col h-full">
       <PaletteGenerator 
         baseColor={baseColor}
         setBaseColor={setBaseColor}
@@ -70,7 +64,6 @@ export default function PaletteGeneratorPage() {
         setNumColors={setNumColors}
         generationType={generationType}
         setGenerationType={setGenerationType}
-        handleGenerate={handleGeneratePalette}
       />
       
       {error && (
@@ -81,15 +74,17 @@ export default function PaletteGeneratorPage() {
       )}
 
       {currentPalette.length > 0 && (
-         <Palette 
-            palette={currentPalette}
-            actions={
-              <Button variant="outline" onClick={handleSavePalette}>
-                <Save className="mr-2 h-4 w-4" />
-                Save to Library
-              </Button>
-            }
-          />
+         <div className="flex-grow min-h-[40vh]">
+            <Palette 
+                palette={currentPalette}
+                actions={
+                <Button variant="outline" onClick={handleSavePalette}>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save to Library
+                </Button>
+                }
+            />
+         </div>
       )}
     </main>
   );

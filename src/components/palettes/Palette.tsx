@@ -21,9 +21,9 @@ export const Palette = ({ palette, actions }: PaletteProps) => {
   };
 
   return (
-    <Card className="bg-card/50 overflow-hidden">
-      <CardContent className="p-0">
-        <div className="flex h-48">
+    <Card className="bg-card/50 overflow-hidden h-full flex flex-col">
+      <CardContent className="p-0 flex flex-col flex-grow">
+        <div className="flex flex-grow">
           {palette.map((color) => (
             <div
               key={color}

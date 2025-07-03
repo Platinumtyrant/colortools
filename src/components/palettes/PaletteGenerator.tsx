@@ -2,11 +2,9 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
-import { Wand2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GenerationType } from "@/lib/palette-generator";
 
@@ -17,7 +15,6 @@ interface PaletteGeneratorProps {
   setNumColors: (num: number) => void;
   generationType: GenerationType;
   setGenerationType: (type: GenerationType) => void;
-  handleGenerate: () => void;
 }
 
 export const PaletteGenerator = ({
@@ -27,18 +24,17 @@ export const PaletteGenerator = ({
   setNumColors,
   generationType,
   setGenerationType,
-  handleGenerate,
 }: PaletteGeneratorProps) => {
   return (
     <Card className="bg-card border-border shadow-lg">
       <CardHeader>
         <CardTitle>Generate a New Palette</CardTitle>
         <CardDescription>
-          Pick a base color, choose how many colors you want, and we&apos;ll generate a beautiful palette for you.
+          Adjust the controls below to generate a palette in real-time.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+        <div className="grid md:grid-cols-3 gap-6 items-end">
           <div className="space-y-2">
             <Label htmlFor="baseColor">Base Color</Label>
             <ColorPicker color={baseColor} setColor={setBaseColor} />
@@ -71,11 +67,6 @@ export const PaletteGenerator = ({
               onValueChange={(value) => setNumColors(value[0])}
             />
           </div>
-
-          <Button size="lg" onClick={handleGenerate} className="w-full lg:w-auto justify-self-stretch lg:justify-self-end">
-            <Wand2 className="mr-2 h-4 w-4" />
-            Generate Palette
-          </Button>
         </div>
       </CardContent>
     </Card>
