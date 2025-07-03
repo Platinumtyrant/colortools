@@ -77,7 +77,7 @@ export default function PaletteGeneratorPage() {
       const numColors = prevPalette.length || 5;
 
       let currentType = generationType;
-      if (isRandomizing && lockedHexes.length > 0) {
+      if (isRandomizing && lockedColors.length > 0) {
         const nextType = generationCycle[0];
         setGenerationCycle(prevCycle => [...prevCycle.slice(1), prevCycle[0]]);
         setGenerationType(nextType);
@@ -93,15 +93,14 @@ export default function PaletteGeneratorPage() {
 
       const newPalette: PaletteColor[] = [];
       let newHexIndex = 0;
-
+      
       for (let i = 0; i < numColors; i++) {
-        const lockedColorInPosition = lockedColors.find(lc => prevPalette.findIndex(p => p.id === lc.id) === i);
-
-        if (lockedColorInPosition) {
-            newPalette.push(lockedColorInPosition);
+        const originalColor = prevPalette[i];
+        if (originalColor?.locked) {
+            newPalette.push(originalColor);
         } else {
-            const unlockedColor = prevPalette[i] ? prevPalette[i] : { id: Date.now() + i, locked: false };
-            newPalette.push({ ...unlockedColor, hex: newHexes[newHexIndex++] });
+            const newId = originalColor?.id || Date.now() + i;
+            newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
         }
       }
       return newPalette;
@@ -114,35 +113,39 @@ export default function PaletteGeneratorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleAddColor = useCallback(() => {
-    if (palette.length >= 10) {
-        toast({ title: "Maximum 10 colors reached.", variant: "destructive" });
-        return;
-    }
+  const handleAddColor = useCallback((index: number) => {
+    setPalette(prev => {
+        if (prev.length >= 10) {
+            toast({ title: "Maximum 10 colors reached.", variant: "destructive" });
+            return prev;
+        }
 
-    const newNumColors = palette.length + 1;
-    const lockedHexes = palette.filter(c => c.locked).map(c => c.hex);
-    const baseColors = lockedHexes.length > 0 ? lockedHexes : palette.map(p => p.hex);
+        const newPalette = [...prev];
+        const colorBefore = prev[index - 1]?.hex || null;
+        const colorAfter = prev[index]?.hex || null;
+        
+        let newHex: string;
 
-    const generatedHexes = generatePalette({
-        numColors: newNumColors,
-        type: generationType,
-        lockedColors: baseColors,
-        colorblindSafe,
+        if (colorBefore && colorAfter) {
+            newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'lch').hex();
+        } else if (colorBefore) {
+            newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
+        } else if (colorAfter) {
+            newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
+        } else {
+            newHex = getRandomColor();
+        }
+
+        const newColor: PaletteColor = {
+            id: Date.now(),
+            hex: newHex,
+            locked: false,
+        };
+
+        newPalette.splice(index, 0, newColor);
+        return newPalette;
     });
-
-    const currentHexes = new Set(palette.map(p => p.hex));
-    const newHex = generatedHexes.find(hex => !currentHexes.has(hex));
-
-    const newColor: PaletteColor = {
-        id: Date.now(),
-        hex: newHex || getRandomColor(), 
-        locked: false,
-    };
-    
-    setPalette(prev => [...prev, newColor]);
-
-  }, [palette, generationType, colorblindSafe, toast]);
+  }, [toast]);
 
   const handleReset = useCallback(() => {
     setPalette([]);
@@ -285,3 +288,5 @@ export default function PaletteGeneratorPage() {
     </div>
   );
 }
+
+    

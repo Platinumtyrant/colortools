@@ -1,5 +1,7 @@
+
 "use client";
 
+import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { PaletteColor } from '@/app/palette-generator/page';
@@ -14,7 +16,7 @@ interface InteractivePaletteProps {
   onColorChange: (id: number, newHex: string) => void;
   onLockToggle: (id: number) => void;
   onRemoveColor: (id: number) => void;
-  onAddColor: () => void;
+  onAddColor: (index: number) => void;
   actions: React.ReactNode;
 }
 
@@ -101,23 +103,30 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
   return (
     <Card className="bg-card/50 overflow-hidden h-full flex flex-col">
       <CardContent className="p-0 flex flex-col flex-grow min-w-0">
-        <div className="flex flex-grow min-w-0">
-          {palette.map((color) => (
-            <ColorColumn
-              key={color.id}
-              color={color}
-              onColorChange={onColorChange}
-              onLockToggle={onLockToggle}
-              onRemoveColor={onRemoveColor}
-            />
+        <div className="flex flex-grow min-w-0 group/palette">
+          {palette.map((color, index) => (
+            <React.Fragment key={color.id}>
+              <ColorColumn
+                color={color}
+                onColorChange={onColorChange}
+                onLockToggle={onLockToggle}
+                onRemoveColor={onRemoveColor}
+              />
+              {index < palette.length - 1 && palette.length < 10 && (
+                <div className="flex-shrink-0 w-0 relative flex items-center justify-center">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute z-10 h-8 w-8 rounded-full opacity-0 group-hover/palette:opacity-100 transition-opacity -translate-x-1/2 bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                    onClick={() => onAddColor(index + 1)}
+                    title="Add color between"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </React.Fragment>
           ))}
-           {palette.length < 10 && (
-            <div className="flex-initial w-24 flex items-center justify-center p-2 sm:p-4 bg-background border-l">
-              <Button onClick={onAddColor} size="icon" variant="outline" className="h-12 w-12 rounded-full" title="Add color">
-                <Plus className="h-6 w-6" />
-              </Button>
-            </div>
-          )}
         </div>
       </CardContent>
       <CardFooter className="justify-end gap-2 p-4 pt-4 border-t">
@@ -126,3 +135,5 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
     </Card>
   );
 };
+
+    

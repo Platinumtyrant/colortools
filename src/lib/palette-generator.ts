@@ -24,42 +24,41 @@ function adjustForColorblindSafety(palette: string[]): string[] {
   if (palette.length < 2) {
     return palette;
   }
-  const adjustedPalette = [...palette];
+  let adjustedPalette = [...palette];
   const simulationTypes: SimulationType[] = ['protan', 'deutan', 'tritan'];
-  const minContrast = 1.2;
+  const minContrast = 1.5; // Slightly increased for better safety
+  const maxPasses = 10;
+  const adjustmentStep = 5; // Adjust lightness by 5%
 
-  for (let i = 0; i < adjustedPalette.length - 1; i++) {
-    let attempts = 0;
-    const maxAttempts = 30; // Safety break to prevent infinite loops
-
-    while (attempts < maxAttempts) {
+  for (let pass = 0; pass < maxPasses; pass++) {
+    let wasAdjusted = false;
+    for (let i = 0; i < adjustedPalette.length - 1; i++) {
       let isPairSafe = true;
-      // Check the color pair against all simulation types
       for (const type of simulationTypes) {
         const simColor1 = simulate(adjustedPalette[i], type);
         const simColor2 = simulate(adjustedPalette[i + 1], type);
         if (chroma.contrast(simColor1, simColor2) < minContrast) {
           isPairSafe = false;
-          break; // This simulation type failed, no need to check others for this attempt
+          break;
         }
       }
 
-      if (isPairSafe) {
-        break; // The pair is safe across all simulations, move to the next pair
-      }
-      
-      // The pair is not safe, so adjust color i+1's lightness
-      const colorToAdjust = chroma(adjustedPalette[i + 1]);
-      const lightness1 = chroma(adjustedPalette[i]).get('lch.l');
-      const lightness2 = colorToAdjust.get('lch.l');
-      
-      // Move lightness away from the other color's lightness to increase contrast
-      const lightnessDelta = 2;
-      const newLightness = (lightness2 > lightness1) ? lightness2 + lightnessDelta : lightness2 - lightnessDelta;
+      if (!isPairSafe) {
+        wasAdjusted = true;
+        const colorToAdjust = chroma(adjustedPalette[i + 1]);
+        const lightness1 = chroma(adjustedPalette[i]).get('lch.l');
+        const lightness2 = colorToAdjust.get('lch.l');
+        
+        // Push lightness away from the other color
+        const newLightness = (lightness2 > lightness1) 
+            ? lightness2 + adjustmentStep 
+            : lightness2 - adjustmentStep;
 
-      adjustedPalette[i + 1] = colorToAdjust.set('lch.l', Math.max(0, Math.min(100, newLightness))).hex();
-      
-      attempts++;
+        adjustedPalette[i + 1] = colorToAdjust.set('lch.l', Math.max(0, Math.min(100, newLightness))).hex();
+      }
+    }
+    if (!wasAdjusted) {
+      break; // Palette is stable and safe
     }
   }
   return adjustedPalette;
@@ -141,3 +140,5 @@ export function generatePalette(options: GenerationOptions): string[] {
 
     return initialPalette;
 }
+
+    
