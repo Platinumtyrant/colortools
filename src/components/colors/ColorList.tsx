@@ -9,9 +9,10 @@ interface ColorListProps {
   isMainPalette?: boolean;
   onRemove?: (color: string) => void;
   onCopySuccess: (message: string) => void;
+  onAdd?: (color: string) => void;
 }
 
-export const ColorList = ({ colors, title, onSetActiveColor, isMainPalette = false, onRemove, onCopySuccess }: ColorListProps) => {
+export const ColorList = ({ colors, title, onSetActiveColor, isMainPalette = false, onRemove, onCopySuccess, onAdd }: ColorListProps) => {
   return (
     <section className="mb-8">
       {title && <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>}
@@ -24,6 +25,7 @@ export const ColorList = ({ colors, title, onSetActiveColor, isMainPalette = fal
             isMainPalette={isMainPalette}
             onRemove={onRemove}
             onCopySuccess={onCopySuccess}
+            onAdd={onAdd}
           />
         ))}
       </div>

@@ -21,6 +21,7 @@ import { ColorList } from '@/components/colors/ColorList';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Trash2 } from 'lucide-react';
 
 export default function ColorPaletteBuilderPage() {
   const [mainColor, setMainColor] = useState('#ff0000');
@@ -62,7 +63,7 @@ export default function ColorPaletteBuilderPage() {
     }
   }, []);
 
-  const handleAddColorToPalette = useCallback(() => {
+  const handleAddCurrentColorToPalette = useCallback(() => {
     setPaletteColors(prevColors => {
       if (prevColors.includes(mainColor)) {
         handleCopySuccess('Color already in palette.');
@@ -79,10 +80,33 @@ export default function ColorPaletteBuilderPage() {
     handleCopySuccess('Color added to palette!');
   }, [mainColor, handleCopySuccess, toast]);
 
+  const handleAddSpecificColorToPalette = useCallback((color: string) => {
+    setPaletteColors(prevColors => {
+      if (prevColors.includes(color)) {
+        toast({ title: "Color already in palette." });
+        return prevColors;
+      }
+      if (prevColors.length >= 10) {
+        toast({ title: "Palette full", description: "You can have a maximum of 10 colors.", variant: "destructive" });
+        return prevColors;
+      }
+      const newColors = [...prevColors, color];
+      return newColors;
+    });
+    handleCopySuccess('Color added to palette!');
+  }, [toast, handleCopySuccess]);
+
   const handleRemoveColorFromPalette = useCallback((colorToRemove: string) => {
     setPaletteColors(prevColors => prevColors.filter(color => color !== colorToRemove));
     handleCopySuccess('Color removed from palette!');
   }, [handleCopySuccess]);
+
+  const handleClearPalette = useCallback(() => {
+    if (paletteColors.length > 0) {
+      setPaletteColors([]);
+      toast({ title: "Palette Cleared!" });
+    }
+  }, [paletteColors, toast]);
 
   const currentTints = getTints(mainColor, tintSteps);
   const currentShades = getShades(mainColor, shadeSteps);
@@ -188,7 +212,20 @@ export default function ColorPaletteBuilderPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-sm text-gray-400">Current Palette</label>
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm text-gray-400">Current Palette</label>
+                      {paletteColors.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleClearPalette}
+                          className="h-7 w-7"
+                          title="Clear Palette"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                     <div className="flex flex-wrap w-full h-16 border rounded-md overflow-hidden bg-muted/20">
                       {paletteColors.length === 0 && <div className="flex items-center justify-center w-full text-sm text-muted-foreground">Add colors to start...</div>}
                       {paletteColors.map((color) => (
@@ -210,7 +247,7 @@ export default function ColorPaletteBuilderPage() {
                   </div>
 
                   <div className="flex gap-4">
-                    <Button onClick={handleAddColorToPalette} className="w-full">
+                    <Button onClick={handleAddCurrentColorToPalette} className="w-full">
                       Add to Palette ({paletteColors.length}/10)
                     </Button>
                     <Button onClick={handleSaveToLibrary} variant="secondary" className="w-full">
@@ -279,7 +316,7 @@ export default function ColorPaletteBuilderPage() {
                 </div>
               </div>
               <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="shades" className="border-none group">
@@ -295,7 +332,7 @@ export default function ColorPaletteBuilderPage() {
                 </div>
               </div>
               <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="tones" className="border-none group">
@@ -311,7 +348,7 @@ export default function ColorPaletteBuilderPage() {
                 </div>
               </div>
               <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+                <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -330,7 +367,7 @@ export default function ColorPaletteBuilderPage() {
               </button>
             ))}
           </div>
-          <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} />
+          <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
         </section>
       </div>
     </main>

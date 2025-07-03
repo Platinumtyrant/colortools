@@ -4,6 +4,7 @@ import { useState } from "react";
 import { colord } from "colord";
 import { getDescriptiveColorName } from "@/lib/colors";
 import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
 
 interface ColorBoxProps {
   color: string;
@@ -11,9 +12,10 @@ interface ColorBoxProps {
   isMainPalette?: boolean;
   onRemove?: (color: string) => void;
   onCopySuccess: (message: string) => void;
+  onAdd?: (color: string) => void;
 }
 
-export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onCopySuccess }: ColorBoxProps) => {
+export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onCopySuccess, onAdd }: ColorBoxProps) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   const hex = colord(color).toHex();
@@ -33,8 +35,6 @@ export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onC
   };
 
   const handleCardClick = () => {
-    // For this test, clicking a card flips it.
-    // The `onSetActiveColor` functionality can be re-integrated later if needed.
     setIsFlipped(!isFlipped);
   };
 
@@ -48,9 +48,21 @@ export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onC
       >
         {/* Front of the card */}
         <div
-          className="absolute w-full h-full backface-hidden"
+          className="absolute w-full h-full backface-hidden flex items-center justify-center"
           style={{ backgroundColor: hex }}
         >
+          {onAdd && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if(onAdd) onAdd(color);
+              }}
+              className="bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover/card:opacity-100 transition-opacity z-10 shadow-lg hover:bg-primary/90"
+              title="Add to palette"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          )}
           {isMainPalette && onRemove && (
             <button
               onClick={(e) => {
