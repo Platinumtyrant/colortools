@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { ColorPicker } from "./ColorPicker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GenerationType } from "@/lib/palette-generator";
+import { Button } from "@/components/ui/button";
 
 interface PaletteGeneratorProps {
   baseColor: string;
@@ -58,14 +59,21 @@ export const PaletteGenerator = ({
 
           <div className="space-y-2">
             <Label htmlFor="numColors">Number of Colors: {numColors}</Label>
-            <Slider
-              id="numColors"
-              min={2}
-              max={10}
-              step={1}
-              value={[numColors]}
-              onValueChange={(value) => setNumColors(value[0])}
-            />
+            <div className="flex items-center gap-2">
+                <Slider
+                id="numColors"
+                min={2}
+                max={10}
+                step={1}
+                value={[numColors]}
+                onValueChange={(value) => setNumColors(value[0])}
+                className="flex-1"
+                />
+                <div className="flex items-center gap-1">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setNumColors(numColors - 1)} disabled={numColors <= 2}>-</Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setNumColors(numColors + 1)} disabled={numColors >= 10}>+</Button>
+                </div>
+            </div>
           </div>
         </div>
       </CardContent>
