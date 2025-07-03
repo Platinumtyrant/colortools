@@ -23,6 +23,9 @@ export function Header() {
           <Link href="/library" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             Library
           </Link>
+          <Link href="/dashboard-example" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+            Dashboard Example
+          </Link>
         </nav>
       </div>
     </header>
