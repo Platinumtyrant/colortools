@@ -39,7 +39,7 @@ export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onC
   };
 
   return (
-    <div className="w-full aspect-[9/16] perspective cursor-pointer group/card" onClick={handleCardClick} title="Click to flip">
+    <div className="w-full aspect-[2/3] perspective cursor-pointer group/card" onClick={handleCardClick} title="Click to flip">
       <div
         className={cn(
           "relative w-full h-full shadow-xl transition-transform duration-500 preserve-3d",
