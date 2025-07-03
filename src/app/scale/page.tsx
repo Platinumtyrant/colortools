@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -15,7 +14,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
-
+import { ContrastChecker } from '@/components/colors/ContrastChecker';
 
 // Helper to get graph data
 const getGraphData = (colors: string[]) => {
@@ -50,7 +49,7 @@ const ChartDisplay = ({ data, title, color }: { data: { name: number; value: num
   </div>
 );
 
-export default function ScalePage() {
+export default function ColorToolsPage() {
   const [keyColors, setKeyColors] = useState<string[]>(['#00429d', '#96ffea', '#ffffe0']);
   const [numColors, setNumColors] = useState(9);
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
@@ -99,9 +98,6 @@ export default function ScalePage() {
     try {
       if (keyColors.some(c => !chroma.valid(c))) return [];
       
-      // chroma.bezier(keyColors) returns an interpolator function.
-      // This interpolator function then has a .scale() method to create a scale.
-      // chroma.scale() itself expects colors or an existing scale, not an interpolator directly.
       let scale;
       if (useBezier) {
         const bezierInterpolator = chroma.bezier(keyColors);
@@ -138,84 +134,92 @@ export default function ScalePage() {
 
 
   return (
-    <main className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Scale Generator</CardTitle>
-          <CardDescription>Create beautiful, complex color scales and check them for accessibility.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label className="text-base font-medium mb-4 block">1. Key Colors</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {keyColors.map((color, index) => (
-                <div key={index} className="flex items-center gap-2 relative group">
-                  <Input type="color" value={color} onChange={(e) => handleKeyColorChange(index, e.target.value)} className="w-10 h-10 p-1 cursor-pointer" />
-                  <Input type="text" value={color} onChange={(e) => handleKeyColorChange(index, e.target.value)} onBlur={(e) => handleKeyColorBlur(index, e.target.value)} className="font-mono uppercase" />
-                  <Button variant="ghost" size="icon" onClick={() => removeKeyColor(index)} className="h-6 w-6" disabled={keyColors.length <= 2}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+    <main className="w-full max-w-none p-4 md:p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="lg:col-span-1 space-y-8">
+            <Card>
+                <CardHeader>
+                <CardTitle>Scale Generator</CardTitle>
+                <CardDescription>Create beautiful, complex color scales from a set of key colors.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                <div>
+                    <Label className="text-base font-medium mb-4 block">1. Key Colors</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {keyColors.map((color, index) => (
+                        <div key={index} className="flex items-center gap-2 relative group">
+                        <Input type="color" value={color} onChange={(e) => handleKeyColorChange(index, e.target.value)} className="w-10 h-10 p-1 cursor-pointer" />
+                        <Input type="text" value={color} onChange={(e) => handleKeyColorChange(index, e.target.value)} onBlur={(e) => handleKeyColorBlur(index, e.target.value)} className="font-mono uppercase" />
+                        <Button variant="ghost" size="icon" onClick={() => removeKeyColor(index)} className="h-6 w-6" disabled={keyColors.length <= 2}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                        </div>
+                    ))}
+                    <Button variant="outline" onClick={addKeyColor} disabled={keyColors.length >= 8}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Color
+                    </Button>
+                    </div>
                 </div>
-              ))}
-              <Button variant="outline" onClick={addKeyColor} disabled={keyColors.length >= 8}>
-                <Plus className="mr-2 h-4 w-4" /> Add Color
-              </Button>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="numColors" className="text-base font-medium">2. Number of Colors: {numColors}</Label>
-            <Slider id="numColors" min={2} max={24} step={1} value={[numColors]} onValueChange={(value) => setNumColors(value[0])} />
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-           <CardTitle>3. Check and configure the resulting palette</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
-                <Label htmlFor="correctLightness">Correct lightness</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="bezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                <Label htmlFor="bezier">Bezier interpolation</Label>
-              </div>
-            </div>
-             <div className="flex items-center gap-4">
-               {isColorblindSafe && <span className="flex items-center text-sm text-green-400"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
-                <Label className="text-sm">Simulate:</Label>
-                <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex items-center border rounded-md p-0.5">
-                    <RadioGroupItem value="normal" id="normal" className="sr-only" />
-                    <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>normal</Label>
-                    
-                    <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
-                    <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>deut.</Label>
-                    
-                    <RadioGroupItem value="protan" id="protan" className="sr-only" />
-                    <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>prot.</Label>
+                <div className="space-y-2">
+                    <Label htmlFor="numColors" className="text-base font-medium">2. Number of Colors: {numColors}</Label>
+                    <Slider id="numColors" min={2} max={24} step={1} value={[numColors]} onValueChange={(value) => setNumColors(value[0])} />
+                </div>
+                </CardContent>
+            </Card>
+            
+            <Card>
+                <CardHeader>
+                <CardTitle>3. Resulting Palette</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
+                        <Label htmlFor="correctLightness">Correct lightness</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="bezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                        <Label htmlFor="bezier">Bezier interpolation</Label>
+                    </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                    {isColorblindSafe && <span className="flex items-center text-sm text-green-400"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
+                        <Label className="text-sm">Simulate:</Label>
+                        <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex items-center border rounded-md p-0.5">
+                            <RadioGroupItem value="normal" id="normal" className="sr-only" />
+                            <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>normal</Label>
+                            
+                            <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
+                            <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>deut.</Label>
+                            
+                            <RadioGroupItem value="protan" id="protan" className="sr-only" />
+                            <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>prot.</Label>
 
-                    <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
-                    <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>trit.</Label>
-                </RadioGroup>
+                            <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
+                            <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>trit.</Label>
+                        </RadioGroup>
+                    </div>
+                </div>
+                <div className="flex h-16 w-full overflow-hidden rounded-md border">
+                    {simulatedPalette.map((color, index) => (
+                    <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                    ))}
+                </div>
+                <div className="grid md:grid-cols-3 gap-8 pt-4">
+                    <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
+                    <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
+                    <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+        <div className="lg:col-span-1">
+            <div className="sticky top-20">
+                <ContrastChecker />
             </div>
-          </div>
-          <div className="flex h-16 w-full overflow-hidden rounded-md border">
-            {simulatedPalette.map((color, index) => (
-              <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-            ))}
-          </div>
-           <div className="grid md:grid-cols-3 gap-8 pt-4">
-              <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
-              <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
-              <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
-            </div>
-        </CardContent>
-      </Card>
-
+        </div>
+      </div>
     </main>
   );
 }

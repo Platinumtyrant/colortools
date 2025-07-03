@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useCallback } from 'react';
@@ -27,8 +26,6 @@ const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslCo
             const newHsl = newColor.toHsl();
             
             if (newHsl.s === 0 || newHsl.l === 0 || newHsl.l === 100) {
-                // Corrected: HslColor does not have an 'a' property.
-                // The component state 'hsl' is HslColor, so alpha is not managed here.
                 setHsl({ h: hsl.h, s: newHsl.s, l: newHsl.l });
             } else {
                 setHsl(newHsl);
@@ -42,20 +39,20 @@ const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslCo
                  <HexColorInput
                     color={color}
                     onChange={handleHexChange}
-                    className="flex-1 p-2 rounded-md bg-transparent text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="flex-1 p-2 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
                     prefixed
                 />
             </div>
             <div className="space-y-2">
-                <Label>Hue</Label>
+                <Label className="text-xs">Hue</Label>
                 <Slider value={[hsl.h]} onValueChange={([v]) => handleHslChange('h', v)} max={360} step={1} />
             </div>
             <div className="space-y-2">
-                <Label>Saturation</Label>
+                <Label className="text-xs">Saturation</Label>
                 <Slider value={[hsl.s]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
             </div>
             <div className="space-y-2">
-                <Label>Lightness</Label>
+                <Label className="text-xs">Lightness</Label>
                 <Slider value={[hsl.l]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
             </div>
         </div>
@@ -66,10 +63,10 @@ const ResultBadge = ({ passed, text }: { passed: boolean, text: string }) => {
   const Icon = passed ? CheckCircle2 : XCircle;
   return (
     <div className={cn(
-      "flex items-center justify-center gap-2 p-2 rounded-md font-medium text-sm",
-      passed ? 'bg-green-600/20 text-green-300' : 'bg-red-600/20 text-red-300'
+      "flex items-center justify-center gap-1.5 p-1.5 rounded-md font-medium text-xs",
+      passed ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
     )}>
-      <Icon className="h-5 w-5" />
+      <Icon className="h-4 w-4" />
       <span>{text}</span>
     </div>
   )
@@ -81,11 +78,6 @@ export const ContrastChecker = () => {
 
     const textColor = useMemo(() => colord(textHsl).toHex(), [textHsl]);
     const bgColor = useMemo(() => colord(bgHsl).toHex(), [bgHsl]);
-
-    const primaryHsl = useMemo(() => {
-        const { h, s, l } = colord(textColor).toHsl();
-        return `${h} ${s}% ${l}%`;
-    }, [textColor]);
 
     const contrastRatio = useMemo(() => {
         return colord(textColor).contrast(bgColor);
@@ -127,68 +119,62 @@ export const ContrastChecker = () => {
     }, []);
 
     return (
-        <main 
-            className="relative flex flex-col min-h-[calc(100vh-65px)] w-full transition-colors duration-200"
-            style={{ 
-                backgroundColor: bgColor,
-                color: textColor,
-                '--primary': primaryHsl,
-                '--ring': primaryHsl,
-            } as React.CSSProperties}
-        >
-            <div className="flex-grow flex items-end justify-start p-8 relative">
-                <div className="absolute top-8 right-8 z-10 flex justify-end">
-                     <Card className="bg-background/10 text-current backdrop-blur-sm max-w-2xl">
-                        <CardHeader>
-                            <div className='flex justify-between items-start'>
-                                <div>
-                                    <CardTitle>WCAG Conformance</CardTitle>
-                                    <CardDescription className="text-current/80">
-                                        Based on WCAG 2.1 guidelines.
-                                    </CardDescription>
-                                </div>
-                                <div className="bg-current/10 text-current p-2 rounded-lg text-center">
-                                    <p className="text-2xl font-bold">{contrastRatio.toFixed(2)}</p>
-                                    <p className="text-xs text-current/80">Contrast Ratio</p>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                                <div className="font-bold text-current/80 hidden md:block">Conformance</div>
-                                <div className="font-bold text-current/80">Normal Text (16pt)</div>
-                                <div className="font-bold text-current/80">Large Text (18pt+)</div>
-                                
-                                <div className="font-bold flex items-center justify-center">AA</div>
-                                <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
-                                <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
-
-                                <div className="font-bold flex items-center justify-center">AAA</div>
-                                <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
-                                <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
-                           </div>
-                        </CardContent>
-                    </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>Contrast Checker</CardTitle>
+                <CardDescription>Check color contrast for WCAG compliance.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                 <div 
+                    className="relative flex flex-col h-64 w-full transition-colors duration-200 rounded-lg border p-4 items-center justify-center"
+                    style={{ backgroundColor: bgColor, color: textColor }}
+                >
+                    <h2 className="text-7xl font-bold select-none">Aa</h2>
+                    <p className="font-semibold">Some sample text</p>
                 </div>
-                <h1 className="text-[28vw] lg:text-[22vw] font-bold select-none">Aa</h1>
-            </div>
-
-            <div className="flex-shrink-0 p-6">
-                <div className="max-w-4xl mx-auto">
-                    <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-8">
-                        <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} />
-                        <div className="flex flex-col h-full items-center justify-center pt-8 gap-4">
-                            <Button onClick={handleRandomize} size="icon" variant="ghost" aria-label="Randomize Colors" className="hover:bg-current/10">
-                                <Dices />
-                            </Button>
-                            <Button onClick={handleSwap} size="icon" variant="ghost" aria-label="Swap Colors" className="hover:bg-current/10">
-                                <ArrowRightLeft />
-                            </Button>
+                
+                <div className="bg-muted/50 p-4 rounded-lg">
+                    <div className='flex justify-between items-center mb-4'>
+                        <div className="font-semibold">WCAG Conformance</div>
+                        <div className="bg-background text-foreground p-2 rounded-lg text-center border">
+                            <p className="text-xl font-bold">{contrastRatio.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">Ratio</p>
                         </div>
+                    </div>
+                     <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div className="font-bold text-muted-foreground"></div>
+                        <div className="font-bold text-muted-foreground">Normal Text</div>
+                        <div className="font-bold text-muted-foreground">Large Text</div>
+                        
+                        <div className="font-bold flex items-center justify-center">AA</div>
+                        <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
+                        <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
+
+                        <div className="font-bold flex items-center justify-center">AAA</div>
+                        <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
+                        <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
+                   </div>
+                </div>
+
+                <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-4">
+                    <div className="space-y-2">
+                        <Label>Text Color</Label>
+                        <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} />
+                    </div>
+                    <div className="flex flex-col h-full items-center justify-center pt-8 gap-2">
+                        <Button onClick={handleRandomize} size="icon" variant="outline" aria-label="Randomize Colors">
+                            <Dices className="h-4 w-4" />
+                        </Button>
+                        <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors">
+                            <ArrowRightLeft className="h-4 w-4" />
+                        </Button>
+                    </div>
+                     <div className="space-y-2">
+                        <Label>Background Color</Label>
                         <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} />
                     </div>
                 </div>
-            </div>
-        </main>
-    )
+            </CardContent>
+        </Card>
+    );
 }
