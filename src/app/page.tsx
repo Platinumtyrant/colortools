@@ -159,7 +159,7 @@ export default function ColorPaletteBuilderPage() {
 
   return (
     <main className="flex-1 w-full p-4 md:p-8">
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 max-w-7xl mx-auto">
         
         <div className="bg-card p-6 shadow-xl">
           <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
@@ -301,7 +301,7 @@ export default function ColorPaletteBuilderPage() {
           )}
         </div>
 
-        <div className="w-full max-w-3xl mx-auto space-y-8">
+        <div className="space-y-8">
           <div>
             <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
                 <AccordionItem value="tints" className="border-none group">
@@ -317,7 +317,7 @@ export default function ColorPaletteBuilderPage() {
                   </div>
                 </div>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                  <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+                  <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" />
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="shades" className="border-none group">
@@ -333,7 +333,7 @@ export default function ColorPaletteBuilderPage() {
                   </div>
                 </div>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                  <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+                  <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" />
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="tones" className="border-none group">
@@ -349,7 +349,7 @@ export default function ColorPaletteBuilderPage() {
                   </div>
                 </div>
                 <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                  <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+                  <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -368,7 +368,7 @@ export default function ColorPaletteBuilderPage() {
                 </button>
               ))}
             </div>
-            <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+            <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" />
           </section>
         </div>
       </div>
