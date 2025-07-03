@@ -15,6 +15,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 
 export interface PaletteColor {
@@ -87,28 +88,26 @@ export default function PaletteGeneratorPage() {
         lockedColors: lockedHexes.length > 0 ? lockedHexes : [getRandomColor()] 
       });
 
-      const newPalette: PaletteColor[] = newHexes.map((hex, index) => {
-          const existingLockedColor = lockedColors.find(lc => lc.hex === hex && !newHexes.slice(0, index).includes(hex));
-          if (existingLockedColor) {
-              return existingLockedColor;
-          }
-          const unlockedColor = prevPalette.find(c => !c.locked && c.id === index + 1);
-          return {
-              id: unlockedColor ? unlockedColor.id : (prevPalette[index]?.id || index + 1),
-              hex: hex,
-              locked: false
-          };
-      });
-
-      // Simple re-mapping to ensure IDs are consistent and positions of locked colors are respected
       const finalPalette = Array.from({ length: numColors }, (_, i) => {
         const lockedColorInPosition = lockedColors.find(lc => prevPalette.findIndex(p => p.id === lc.id) === i);
         if (lockedColorInPosition) {
           return lockedColorInPosition;
         }
-        return newPalette.find(p => !p.locked && !finalPalette.some(fp => fp && fp.id === p.id)) || newPalette[i];
-      }).map((p, i) => ({ ...p, id: i + 1 }));
-
+        
+        // Find an unlocked color from the new palette that hasn't been used yet.
+        const newColorHex = newHexes[i];
+        let id = i + 1;
+        const existingColor = prevPalette.find(p => p.id === id);
+        if(existingColor && !existingColor.locked) {
+            return { ...existingColor, hex: newColorHex };
+        }
+        
+        return {
+            id: Date.now() + i, // Ensure unique ID
+            hex: newColorHex,
+            locked: false
+        };
+      });
 
       return finalPalette.slice(0, numColors);
     });
@@ -157,6 +156,9 @@ export default function PaletteGeneratorPage() {
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
 
   const processedPalette = useMemo(() => {
+    if (paletteHexes.length === 0) {
+      return [];
+    }
     let scale = chroma.scale(paletteHexes).mode('lch');
     if (correctLightness) {
       scale = scale.correctLightness();
