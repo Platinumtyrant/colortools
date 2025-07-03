@@ -301,74 +301,76 @@ export default function ColorPaletteBuilderPage() {
           )}
         </div>
 
-        <div>
-          <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
-              <AccordionItem value="tints" className="border-none group">
-              <div className="bg-card p-4 shadow-xl flex justify-between items-center">
-                <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                  <span>Tints ({currentTints.length} colors)</span>
-                </AccordionTrigger>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
-                    <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
-                </div>
-              </div>
-              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="shades" className="border-none group">
-              <div className="bg-card p-4 shadow-xl flex justify-between items-center">
+        <div className="w-full max-w-3xl mx-auto space-y-8">
+          <div>
+            <Accordion type="multiple" value={openVariations} onValueChange={setOpenVariations} className="w-full space-y-4">
+                <AccordionItem value="tints" className="border-none group">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
                   <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                  <span>Shades ({currentShades.length} colors)</span>
+                    <span>Tints ({currentTints.length} colors)</span>
                   </AccordionTrigger>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
-                    <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.max(1, s - 1))} disabled={tintSteps <= 1}>-</Button>
+                      <Input type="number" value={tintSteps} onChange={(e) => setTintSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setTintSteps(s => Math.min(40, s + 1))} disabled={tintSteps >= 40}>+</Button>
+                  </div>
                 </div>
-              </div>
-              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="tones" className="border-none group">
-              <div className="bg-card p-4 shadow-xl flex justify-between items-center">
-                  <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
-                  <span>Tones ({currentTones.length} colors)</span>
-                  </AccordionTrigger>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
-                    <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
+                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                  <ColorList colors={currentTints} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="shades" className="border-none group">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
+                    <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                    <span>Shades ({currentShades.length} colors)</span>
+                    </AccordionTrigger>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.max(1, s - 1))} disabled={shadeSteps <= 1}>-</Button>
+                      <Input type="number" value={shadeSteps} onChange={(e) => setShadeSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShadeSteps(s => Math.min(40, s + 1))} disabled={shadeSteps >= 40}>+</Button>
+                  </div>
                 </div>
-              </div>
-              <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
-                <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-
-        <section className="bg-card p-6 shadow-xl">
-          <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
-          <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
-            {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
-              <button
-                key={harmony}
-                className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyType === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                onClick={() => setActiveHarmonyType(harmony)}
-              >
-                {harmony.replace('-', ' ')}
-              </button>
-            ))}
+                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                  <ColorList colors={currentShades} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="tones" className="border-none group">
+                <div className="bg-card p-4 shadow-xl flex justify-between items-center">
+                    <AccordionTrigger className="p-0 text-xl font-bold text-white flex-1 hover:no-underline">
+                    <span>Tones ({currentTones.length} colors)</span>
+                    </AccordionTrigger>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-normal text-muted-foreground mr-2">Steps:</span>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.max(1, s - 1))} disabled={toneSteps <= 1}>-</Button>
+                      <Input type="number" value={toneSteps} onChange={(e) => setToneSteps(Math.max(1, Math.min(40, parseInt(e.target.value) || 1)))} className="w-20 h-10 text-center" min="1" max="40"/>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setToneSteps(s => Math.min(40, s + 1))} disabled={toneSteps >= 40}>+</Button>
+                  </div>
+                </div>
+                <AccordionContent className="p-6 pt-4 bg-card rounded-b-lg -mt-2">
+                  <ColorList colors={currentTones} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
-          <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} />
-        </section>
+
+          <section className="bg-card p-6 shadow-xl">
+            <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
+            <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
+              {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
+                <button
+                  key={harmony}
+                  className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyType === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                  onClick={() => setActiveHarmonyType(harmony)}
+                >
+                  {harmony.replace('-', ' ')}
+                </button>
+              ))}
+            </div>
+            <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4" />
+          </section>
+        </div>
       </div>
     </main>
   );
