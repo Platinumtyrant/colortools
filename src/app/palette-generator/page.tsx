@@ -1,195 +1,216 @@
 
 "use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { PaletteGenerator } from '@/components/palettes/PaletteGenerator';
-import { Palette } from '@/components/palettes/Palette';
-import { useToast } from "@/hooks/use-toast";
-import { generatePalette, getRandomColor, type GenerationType } from '@/lib/palette-generator';
-import { Save } from 'lucide-react';
+import React, { useState, useMemo, useCallback } from 'react';
+import chroma from 'chroma-js';
+import { useToast } from '@/hooks/use-toast';
+import { simulate, type SimulationType } from '@/lib/colorblind';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
 
-const GENERATION_MODES: GenerationType[] = ['analogous', 'complementary', 'triadic', 'tints', 'shades'];
-
-export interface PaletteColor {
-  id: number;
-  hex: string;
-  locked: boolean;
-}
-
-let nextId = 0;
-const getNextId = () => {
-    nextId += 1;
-    return nextId;
+// Helper to get graph data
+const getGraphData = (colors: string[]) => {
+  if (!colors || colors.length === 0) return { lightness: [], saturation: [], hue: [] };
+  const lch = colors.map(c => chroma(c).lch());
+  return {
+    lightness: lch.map((c, i) => ({ name: i + 1, value: c[0] })),
+    saturation: lch.map((c, i) => ({ name: i + 1, value: c[1] })),
+    hue: lch.map((c, i) => ({ name: i + 1, value: isNaN(c[2]) ? 0 : c[2] })),
+  };
 };
 
+// Graph Component
+const ChartDisplay = ({ data, title, color }: { data: { name: number; value: number }[], title: string, color: string }) => (
+  <div>
+    <h3 className="text-sm font-medium text-muted-foreground mb-2">{title}</h3>
+    <ResponsiveContainer width="100%" height={150}>
+      <LineChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: 'hsl(var(--background))',
+            borderColor: 'hsl(var(--border))',
+          }}
+        />
+        <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 4, stroke: color, fill: color }}  />
+        <Line type="linear" dataKey="value" stroke="hsl(var(--muted-foreground))" strokeWidth={1} dot={false} activeDot={false} strokeDasharray="4 4" className="opacity-50" />
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+);
+
 export default function PaletteGeneratorPage() {
-  const [palette, setPalette] = useState<PaletteColor[]>([]);
-  const [numColors, setNumColors] = useState(5);
-  const [baseGenerationType, setBaseGenerationType] = useState<GenerationType>('analogous');
-  const [generationCycleIndex, setGenerationCycleIndex] = useState(0);
+  const [keyColors, setKeyColors] = useState<string[]>(['#00429d', '#96ffea', '#ffffe0']);
+  const [numColors, setNumColors] = useState(9);
+  const [simulationType, setSimulationType] = useState<SimulationType>('normal');
+  const [useBezier, setUseBezier] = useState(true);
+  const [correctLightness, setCorrectLightness] = useState(true);
+
   const { toast } = useToast();
 
-  const regeneratePalette = useCallback((
-    count: number,
-    type: GenerationType,
-    baseForGeneration: string[]
-  ) => {
-    const lockedHexes = new Set(palette.filter(p => p.locked).map(p => p.hex));
-    
-    const newHexPalette = generatePalette({
-      numColors: count * 2,
-      type: type,
-      lockedColors: baseForGeneration,
-    });
-
-    const newColorPool = newHexPalette.filter(c => !lockedHexes.has(c));
-    let newColorIndex = 0;
-
-    const getNextColor = () => {
-        const color = newColorPool[newColorIndex];
-        newColorIndex++;
-        return color || getRandomColor();
-    };
-    
-    const finalPalette: PaletteColor[] = [];
-    for (let i = 0; i < count; i++) {
-        const oldColor = palette[i];
-        if (oldColor && oldColor.locked) {
-            finalPalette.push(oldColor);
-        } else {
-            const newHex = getNextColor();
-            const id = oldColor ? oldColor.id : getNextId();
-            finalPalette.push({ id, hex: newHex, locked: false });
-        }
-    }
-    
-    setPalette(finalPalette);
-  }, [palette]);
-  
-  // Effect for regeneration when numColors changes
-  useEffect(() => {
-    if (palette.length === 0) return; // Don't run on initial mount before palette is set
-
-    const lockedColors = palette.filter(p => p.locked).map(p => p.hex);
-    let type = baseGenerationType;
-    if (lockedColors.length > 0) {
-      type = GENERATION_MODES[generationCycleIndex];
-    }
-    const baseForGeneration = lockedColors.length > 0 ? lockedColors : [palette[0]?.hex || getRandomColor()];
-    regeneratePalette(numColors, type, baseForGeneration);
-    
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numColors]);
-
-  // Initial generation on mount
-  useEffect(() => {
-    const initialHexPalette = generatePalette({ numColors: 5, type: 'analogous', lockedColors: [getRandomColor()] });
-    setPalette(initialHexPalette.map(hex => ({ id: getNextId(), hex, locked: false })));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleRandomize = useCallback(() => {
-    const lockedColors = palette.filter(p => p.locked).map(p => p.hex);
-    
-    let nextCycleIndex = generationCycleIndex;
-    let type = baseGenerationType;
-
-    if (lockedColors.length > 0) {
-      type = GENERATION_MODES[nextCycleIndex];
-      nextCycleIndex = (generationCycleIndex + 1) % GENERATION_MODES.length;
-      setGenerationCycleIndex(nextCycleIndex);
-    }
-    
-    const baseForGeneration = lockedColors.length > 0 ? lockedColors : [getRandomColor()];
-    regeneratePalette(numColors, type, baseForGeneration);
-
-    toast({ title: lockedColors.length > 0 ? `Generated '${type}' palette` : "Generated new random palette" });
-  }, [palette, numColors, baseGenerationType, generationCycleIndex, toast, regeneratePalette]);
-
-  const handleReset = useCallback(() => {
-    setGenerationCycleIndex(0);
-    const initialHexPalette = generatePalette({ numColors, type: 'analogous', lockedColors: [getRandomColor()] });
-    setPalette(initialHexPalette.map(hex => ({ id: getNextId(), hex, locked: false })));
-    toast({ title: "Palette Reset" });
-  }, [numColors, toast]);
-
-  const handleColorChange = (id: number, newHex: string) => {
-    setPalette(p => p.map(c => c.id === id ? { ...c, hex: newHex } : c));
-  };
-  
-  const handleLockToggle = (id: number) => {
-    setPalette(p => p.map(c => c.id === id ? { ...c, locked: !c.locked } : c));
-    const currentlyLockedCount = palette.filter(p => p.locked).length;
-    const isTogglingLastLock = currentlyLockedCount === 1 && palette.find(p => p.id === id)?.locked;
-    if (isTogglingLastLock) {
-      setGenerationCycleIndex(0);
+  const handleKeyColorChange = (index: number, newColor: string) => {
+    const newKeyColors = [...keyColors];
+    if (/^#[0-9a-f]{6}$/i.test(newColor) || /^#[0-9a-f]{3}$/i.test(newColor)) {
+      newKeyColors[index] = newColor;
+      setKeyColors(newKeyColors);
     }
   };
 
-  const handleRemoveColor = (id: number) => {
-    if (palette.length <= 2) {
-      toast({ title: "Minimum 2 colors required", variant: 'destructive' });
+  const handleKeyColorBlur = (index: number, newColor: string) => {
+    const newKeyColors = [...keyColors];
+    if (chroma.valid(newColor)) {
+      newKeyColors[index] = chroma(newColor).hex();
+      setKeyColors(newKeyColors);
+    } else {
+      toast({ title: "Invalid Color", description: "Reverting to previous color.", variant: "destructive" });
+      setKeyColors([...keyColors]);
+    }
+  }
+
+  const addKeyColor = () => {
+    if (keyColors.length >= 8) {
+      toast({ title: "Maximum of 8 key colors reached." });
       return;
     }
-    setPalette(p => p.filter(c => c.id !== id));
-    setNumColors(n => n - 1);
+    setKeyColors([...keyColors, '#ffffff']);
   };
-  
-  const handleSavePalette = useCallback(() => {
-    const currentPaletteHex = palette.map(p => p.hex);
-    if (currentPaletteHex.length === 0) {
-      toast({ title: "Cannot save an empty palette", variant: "destructive" });
+
+  const removeKeyColor = (index: number) => {
+    if (keyColors.length <= 2) {
+      toast({ title: "A minimum of 2 key colors is required." });
       return;
     }
+    const newKeyColors = keyColors.filter((_, i) => i !== index);
+    setKeyColors(newKeyColors);
+  };
+
+  const generatedPalette = useMemo(() => {
     try {
-      const savedPalettesJSON = localStorage.getItem('saved_palettes');
-      const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-      savedPalettes.push(currentPaletteHex);
-      localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
-      toast({
-        title: "Palette Saved!",
-        description: "Your new palette has been saved to the library.",
-      });
-    } catch (error) {
-      console.error("Failed to save palette:", error);
-      toast({
-        title: "Error Saving Palette",
-        variant: "destructive",
-      });
+      if (keyColors.some(c => !chroma.valid(c))) return [];
+      
+      let scale;
+      if (useBezier) {
+        const bezierInterpolator = chroma.bezier(keyColors);
+        scale = bezierInterpolator.scale();
+      } else {
+        scale = chroma.scale(keyColors);
+      }
+
+      if (correctLightness) {
+        scale = scale.correctLightness();
+      }
+      
+      return scale.mode('lch').colors(numColors);
+    } catch (e) {
+      console.error("Error generating color scale:", e);
+      return [];
     }
-  }, [palette, toast]);
+  }, [keyColors, numColors, useBezier, correctLightness]);
+
+  const simulatedPalette = useMemo(() => {
+    return generatedPalette.map(color => simulate(color, simulationType));
+  }, [generatedPalette, simulationType]);
+
+  const graphData = useMemo(() => getGraphData(generatedPalette), [generatedPalette]);
   
-  const hasLockedColors = palette.some(p => p.locked);
+  const isColorblindSafe = useMemo(() => {
+    if (simulatedPalette.length < 2) return true;
+    for (let i = 0; i < simulatedPalette.length - 1; i++) {
+        const contrast = chroma.contrast(simulatedPalette[i], simulatedPalette[i+1]);
+        if (contrast < 1.1) return false;
+    }
+    return true;
+  }, [simulatedPalette]);
+
 
   return (
-    <main className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8 flex flex-col h-[calc(100vh-100px)]">
-      <PaletteGenerator
-        onRandomize={handleRandomize}
-        onReset={handleReset}
-        numColors={numColors}
-        setNumColors={setNumColors}
-        generationType={baseGenerationType}
-        setGenerationType={setBaseGenerationType}
-        isGenerationLocked={hasLockedColors}
-      />
-      
-      {palette.length > 0 && (
-         <div className="flex-grow min-h-0">
-            <Palette 
-                palette={palette}
-                onColorChange={handleColorChange}
-                onLockToggle={handleLockToggle}
-                onRemoveColor={handleRemoveColor}
-                actions={
-                  <Button variant="outline" onClick={handleSavePalette}>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save to Library
-                  </Button>
-                }
-            />
-         </div>
-      )}
+    <main className="w-full max-w-4xl mx-auto p-4 md:p-8 space-y-8">
+        <Card>
+            <CardHeader>
+            <CardTitle>Palette Generator</CardTitle>
+            <CardDescription>Create beautiful, complex color scales from a set of key colors.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+            <div>
+                <Label className="text-base font-medium mb-4 block">1. Key Colors</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {keyColors.map((color, index) => (
+                    <div key={index} className="flex items-center gap-2 relative group">
+                    <Input type="color" value={color} onChange={(e) => handleKeyColorChange(index, e.target.value)} className="w-10 h-10 p-1 cursor-pointer" />
+                    <Input type="text" value={color} onChange={(e) => handleKeyColorChange(index, e.target.value)} onBlur={(e) => handleKeyColorBlur(index, e.target.value)} className="font-mono uppercase" />
+                    <Button variant="ghost" size="icon" onClick={() => removeKeyColor(index)} className="h-6 w-6" disabled={keyColors.length <= 2}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                    </div>
+                ))}
+                <Button variant="outline" onClick={addKeyColor} disabled={keyColors.length >= 8}>
+                    <Plus className="mr-2 h-4 w-4" /> Add Color
+                </Button>
+                </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="numColors" className="text-base font-medium">2. Number of Colors: {numColors}</Label>
+                <Slider id="numColors" min={2} max={24} step={1} value={[numColors]} onValueChange={(value) => setNumColors(value[0])} />
+            </div>
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader>
+            <CardTitle>Resulting Palette</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
+                    <Label htmlFor="correctLightness">Correct lightness</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="bezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                    <Label htmlFor="bezier">Bezier interpolation</Label>
+                </div>
+                </div>
+                <div className="flex items-center gap-4">
+                {isColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
+                    <Label className="text-sm">Simulate:</Label>
+                    <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex items-center border rounded-md p-0.5">
+                        <RadioGroupItem value="normal" id="normal" className="sr-only" />
+                        <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>normal</Label>
+                        
+                        <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
+                        <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>deut.</Label>
+                        
+                        <RadioGroupItem value="protan" id="protan" className="sr-only" />
+                        <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>prot.</Label>
+
+                        <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
+                        <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>trit.</Label>
+                    </RadioGroup>
+                </div>
+            </div>
+            <div className="flex h-16 w-full overflow-hidden rounded-md border">
+                {simulatedPalette.map((color, index) => (
+                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                ))}
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 pt-4">
+                <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
+                <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
+                <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
+                </div>
+            </CardContent>
+        </Card>
     </main>
   );
 }
