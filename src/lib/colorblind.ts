@@ -1,7 +1,6 @@
-
 "use client";
 
-import { protan, deutan, tritan } from 'color-blind';
+import * as colorBlind from 'color-blind';
 
 export type SimulationType = 'normal' | 'protan' | 'deutan' | 'tritan';
 
@@ -10,11 +9,11 @@ export function simulate(hex: string, type: SimulationType): string {
   try {
     switch (type) {
       case 'protan':
-        return protan(hex);
+        return colorBlind.protan(hex);
       case 'deutan':
-        return deutan(hex);
+        return colorBlind.deutan(hex);
       case 'tritan':
-        return tritan(hex);
+        return colorBlind.tritan(hex);
       case 'normal':
       default:
         return hex;
