@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -39,7 +38,7 @@ const ColorColumn = ({ color, onColorChange, onLockToggle, onRemoveColor }: {
 
     return (
         <div 
-            className="flex-1 flex flex-col justify-between p-2 sm:p-4 transition-all duration-300 group"
+            className="flex-1 min-w-0 flex flex-col justify-between p-2 sm:p-4 transition-all duration-300 group"
             style={{ backgroundColor: color.hex, color: textColor }}
         >
             <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -100,8 +99,8 @@ const ColorColumn = ({ color, onColorChange, onLockToggle, onRemoveColor }: {
 export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, actions }: InteractivePaletteProps) => {
   return (
     <Card className="bg-card/50 overflow-hidden h-full flex flex-col">
-      <CardContent className="p-0 flex flex-col flex-grow">
-        <div className="flex flex-grow min-w-0">
+      <CardContent className="p-0 flex flex-col flex-grow min-w-0">
+        <div className="flex flex-grow">
           {palette.map((color) => (
             <ColorColumn
               key={color.id}
@@ -119,5 +118,3 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, a
     </Card>
   );
 };
-
-    
