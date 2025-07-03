@@ -195,7 +195,7 @@ export default function PaletteGeneratorPage() {
               isGenerationLocked={isGenerationLocked}
             />
         </div>
-        <div className="flex-grow flex flex-col min-h-0">
+        <div className="flex-grow flex flex-col min-h-0 min-w-0">
              <Palette
               palette={palette}
               onColorChange={handleColorChange}
