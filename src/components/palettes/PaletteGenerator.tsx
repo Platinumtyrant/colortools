@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { GenerationType } from "@/lib/palette-generator";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Dices, RotateCcw } from "lucide-react";
 
 interface PaletteGeneratorProps {
@@ -15,8 +14,6 @@ interface PaletteGeneratorProps {
   generationType: GenerationType;
   setGenerationType: (type: GenerationType) => void;
   isGenerationLocked: boolean;
-  colorblindSafe: boolean;
-  setColorblindSafe: (safe: boolean) => void;
 }
 
 export const PaletteGenerator = ({
@@ -25,8 +22,6 @@ export const PaletteGenerator = ({
   generationType,
   setGenerationType,
   isGenerationLocked,
-  colorblindSafe,
-  setColorblindSafe
 }: PaletteGeneratorProps) => {
   return (
     <Card className="bg-card border-border shadow-lg">
@@ -37,7 +32,7 @@ export const PaletteGenerator = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 items-center">
           <div className="space-y-2">
             <Label>Actions</Label>
             <div className="flex gap-2">
@@ -73,17 +68,6 @@ export const PaletteGenerator = ({
               </Select>
                {isGenerationLocked && <p className="text-xs text-muted-foreground mt-1 h-4 absolute -bottom-4">Unlock all colors to change strategy.</p>}
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-2 pt-5">
-            <Checkbox
-              id="colorblindSafe"
-              checked={colorblindSafe}
-              onCheckedChange={(checked) => setColorblindSafe(!!checked)}
-            />
-            <Label htmlFor="colorblindSafe" className="font-normal leading-none">
-              Ensure colorblind safety
-            </Label>
           </div>
         </div>
       </CardContent>
