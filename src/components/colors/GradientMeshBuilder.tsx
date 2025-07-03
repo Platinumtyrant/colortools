@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { HexColorPicker } from 'react-colorful';
-import { colord } from 'colord';
+// import { colord } from 'colord'; // Unused import
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

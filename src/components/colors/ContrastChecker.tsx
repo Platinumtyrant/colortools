@@ -27,7 +27,9 @@ const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslCo
             const newHsl = newColor.toHsl();
             
             if (newHsl.s === 0 || newHsl.l === 0 || newHsl.l === 100) {
-                setHsl({ h: hsl.h, s: newHsl.s, l: newHsl.l, a: newHsl.a });
+                // Corrected: HslColor does not have an 'a' property.
+                // The component state 'hsl' is HslColor, so alpha is not managed here.
+                setHsl({ h: hsl.h, s: newHsl.s, l: newHsl.l });
             } else {
                 setHsl(newHsl);
             }

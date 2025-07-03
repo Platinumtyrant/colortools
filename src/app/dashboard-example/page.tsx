@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import {
   Activity,
-  ArrowUpRight,
+  // ArrowUpRight, // Unused
   CircleUser,
-  CreditCard,
-  DollarSign,
+  // CreditCard, // Unused
+  // DollarSign, // Unused
   Menu,
   Package2,
   Search,
-  Users,
+  // Users, // Unused
 } from 'lucide-react';
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'; // Unused
+// import { Badge } from '@/components/ui/badge'; // Unused
+import { Area, AreaChart, Bar, BarChart } from 'recharts'; // CartesianGrid, XAxis are unused
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -26,8 +26,8 @@ import {
 } from '@/components/ui/card';
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
+  // ChartTooltip, // Unused
+  // ChartTooltipContent, // Unused
 } from '@/components/ui/chart';
 import {
   DropdownMenu,

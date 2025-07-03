@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Noto Sans', 'sans-serif'],
-        headline: ['Noto Sans', 'sans-serif'],
+        body: ['Noto Sans', 'sans-serif'], // Assuming Noto Sans is also the body font, or adjust as needed
+        headline: ['var(--font-noto-sans)', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
