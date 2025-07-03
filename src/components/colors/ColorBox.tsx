@@ -67,8 +67,10 @@ export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onC
 
         {/* Back of the card */}
         <div
-          className="absolute w-full h-full bg-card backface-hidden rotate-y-180 p-3 text-white text-xs flex flex-col justify-center gap-1"
+          className="absolute w-full h-full backface-hidden rotate-y-180"
+          style={{ backgroundColor: hex }}
         >
+          <div className="relative w-full h-full p-3 text-white text-xs flex flex-col justify-center gap-1 bg-black/70">
             <h3 className="font-bold text-base capitalize mb-2">{name}</h3>
             <div className="space-y-1" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-between items-center cursor-pointer p-1 hover:bg-white/10 rounded-sm" onClick={(e) => handleCopy(e, hex, 'HEX')}>
@@ -84,6 +86,7 @@ export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onC
                     <span className="font-mono font-semibold text-right break-all">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
                 </div>
             </div>
+          </div>
         </div>
       </div>
     </div>
