@@ -76,8 +76,8 @@ const ResultBadge = ({ passed, text }: { passed: boolean, text: string }) => {
 }
 
 export const ContrastChecker = () => {
-    const [textHsl, setTextHsl] = useState<HslColor>(colord('#FFFFFF').toHsl());
-    const [bgHsl, setBgHsl] = useState<HslColor>(colord('#1a1a1a').toHsl());
+    const [textHsl, setTextHsl] = useState<HslColor>(colord('#1a1a1a').toHsl());
+    const [bgHsl, setBgHsl] = useState<HslColor>(colord('#ffffff').toHsl());
 
     const textColor = useMemo(() => colord(textHsl).toHex(), [textHsl]);
     const bgColor = useMemo(() => colord(bgHsl).toHex(), [bgHsl]);

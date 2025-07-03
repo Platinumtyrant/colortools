@@ -23,10 +23,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${notoSans.variable} dark`}>
+    <html lang="en" className={`${notoSans.variable}`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#111111" />
+        <meta name="theme-color" content="#ffffff" />
       </head>
       <body className="font-headline antialiased">
         <SidebarProvider defaultOpen={true}>
