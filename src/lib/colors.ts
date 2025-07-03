@@ -113,11 +113,11 @@ const yellowAnchors = ['#fefce8', '#facc15', '#ca8a04', '#713f12'];
 const grayAnchors = ['#f8fafc', '#9ca3af', '#4b5563', '#111827'];
 
 export const swatches = {
-  green: chroma.scale(greenAnchors).mode('lch').colors(50),
-  blue: chroma.scale(blueAnchors).mode('lch').colors(50),
-  red: chroma.scale(redAnchors).mode('lch').colors(50),
-  orange: chroma.scale(orangeAnchors).mode('lch').colors(50),
-  purple: chroma.scale(purpleAnchors).mode('lch').colors(50),
-  yellow: chroma.scale(yellowAnchors).mode('lch').colors(50),
-  gray: chroma.scale(grayAnchors).mode('lch').colors(50),
+  green: chroma.scale(greenAnchors).mode('lch').colors(60),
+  blue: chroma.scale(blueAnchors).mode('lch').colors(60),
+  red: chroma.scale(redAnchors).mode('lch').colors(60),
+  orange: chroma.scale(orangeAnchors).mode('lch').colors(60),
+  purple: chroma.scale(purpleAnchors).mode('lch').colors(60),
+  yellow: chroma.scale(yellowAnchors).mode('lch').colors(60),
+  gray: chroma.scale(grayAnchors).mode('lch').colors(60),
 };
