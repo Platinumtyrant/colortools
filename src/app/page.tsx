@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle2, Contrast, Circle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
@@ -67,10 +68,19 @@ const getGraphData = (colors: string[]) => {
 };
 
 // Graph Component
-const ChartDisplay = ({ data, title, color }: { data: { name: number; value: number }[], title: string, color: string }) => (
+const ChartDisplay = ({ data, title, color, description }: { data: { name: number; value: number }[], title: string, color: string, description: string }) => (
   <div>
-    <h3 className="text-sm font-medium text-muted-foreground mb-2">{title}</h3>
-    <ResponsiveContainer width="100%" height={150}>
+    <TooltipProvider>
+      <ShadTooltip>
+        <TooltipTrigger asChild>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2 cursor-help underline decoration-dotted decoration-from-font">{title}</h3>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-xs">{description}</p>
+        </TooltipContent>
+      </ShadTooltip>
+    </TooltipProvider>
+    <ResponsiveContainer width="100%" height={120}>
       <LineChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
@@ -364,9 +374,9 @@ export default function UnifiedBuilderPage() {
                 ))}
             </div>
             <div className="grid grid-cols-1 gap-8 pt-4">
-                <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
-                <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
-                <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
+                <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" description="How light or dark the color is, from black (0) to white (100)." />
+                <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" description="The intensity of the color, from gray (0) to a pure, vivid color." />
+                <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" description="The color's position on the color wheel, measured in degrees (0-360)." />
             </div>
         </motion.div>
     </div>
