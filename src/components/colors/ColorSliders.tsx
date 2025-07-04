@@ -6,6 +6,7 @@ import { colord } from 'colord';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Circle } from 'lucide-react';
 
 interface ColorSlidersProps {
     hsl: HSLColor;
@@ -53,7 +54,7 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
         <div className="space-y-3">
             {title && <Label>{title}</Label>}
             <div className="flex items-center gap-4">
-                 <div className="h-10 w-10 flex-shrink-0 rounded-full border" style={{ backgroundColor: color }} />
+                 <Circle className="h-10 w-10 flex-shrink-0" fill={color} strokeWidth={1} stroke="hsl(var(--border))" />
                  <Input
                     value={inputValue.toUpperCase()}
                     onChange={handleInputChange}
