@@ -4,6 +4,7 @@
 import React, { useState, useCallback } from 'react';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
 import { colord } from 'colord';
+import chroma from 'chroma-js';
 import { useToast } from "@/hooks/use-toast";
 import { 
   getComplementary,
@@ -48,6 +49,9 @@ export default function ColorPaletteBuilderPage() {
   const rgb = colord(mainColor).toRgb();
   const hex = colord(mainColor).toHex();
   const colorName = getDescriptiveColorName(hex);
+  const cmyk = chroma(mainColor).cmyk();
+  const lab = colord(mainColor).toLab();
+  const lch = colord(mainColor).toLch();
 
   const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
     const newHsl = { ...hsl, [key]: value };
@@ -112,6 +116,25 @@ export default function ColorPaletteBuilderPage() {
     }
   }, [paletteColors, toast]);
 
+  const handleSaveToLibrary = useCallback(() => {
+    if (paletteColors.length === 0) {
+      toast({
+        title: "Cannot save empty palette",
+        variant: "destructive",
+      });
+      return;
+    }
+    const savedPalettesJSON = localStorage.getItem('saved_palettes');
+    const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
+    savedPalettes.push(paletteColors);
+    localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
+    toast({
+      title: "Palette Saved!",
+      description: "Your palette has been saved to the library.",
+    });
+    setPaletteColors([]); // Clear palette after saving
+  }, [paletteColors, toast]);
+
   const currentTints = getTints(mainColor, tintSteps);
   const currentShades = getShades(mainColor, shadeSteps);
   const currentTones = getTones(mainColor, toneSteps);
@@ -141,25 +164,6 @@ export default function ColorPaletteBuilderPage() {
   const handlePaletteColorClick = useCallback((color: string) => {
     setMainColor(color);
   }, []);
-
-  const handleSaveToLibrary = useCallback(() => {
-    if (paletteColors.length === 0) {
-      toast({
-        title: "Cannot save empty palette",
-        variant: "destructive",
-      });
-      return;
-    }
-    const savedPalettesJSON = localStorage.getItem('saved_palettes');
-    const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-    savedPalettes.push(paletteColors);
-    localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
-    toast({
-      title: "Palette Saved!",
-      description: "Your palette has been saved to the library.",
-    });
-    setPaletteColors([]); // Clear palette after saving
-  }, [paletteColors, toast]);
 
   const responsiveGridClasses = "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5";
 
@@ -244,6 +248,18 @@ export default function ColorPaletteBuilderPage() {
                                         <div className="flex justify-between items-center whitespace-nowrap gap-2">
                                             <span className="text-muted-foreground">HSL:</span>
                                             <span className="font-semibold text-left font-mono">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center whitespace-nowrap gap-2">
+                                            <span className="text-muted-foreground">CMYK:</span>
+                                            <span className="font-semibold text-left font-mono">{cmyk.map(v => (v * 100).toFixed(0)).join(', ')}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center whitespace-nowrap gap-2">
+                                            <span className="text-muted-foreground">LAB:</span>
+                                            <span className="font-semibold text-left font-mono">{`${lab.l.toFixed(0)}, ${lab.a.toFixed(0)}, ${lab.b.toFixed(0)}`}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center whitespace-nowrap gap-2">
+                                            <span className="text-muted-foreground">LCH:</span>
+                                            <span className="font-semibold text-left font-mono">{`${lch.l.toFixed(0)}, ${lch.c.toFixed(0)}, ${lch.h.toFixed(0)}`}</span>
                                         </div>
                                     </div>
                                 </div>
