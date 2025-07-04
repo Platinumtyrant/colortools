@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Noto_Sans } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
-import { Header } from "@/components/layout/Header";
-import { SidebarNav } from "@/components/layout/SidebarNav";
-import { Sidebar, SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { SidebarExtensionProvider } from "@/contexts/SidebarExtensionContext";
 import "./globals.css";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 export const metadata: Metadata = {
   title: "Palette Prodigy",
@@ -31,17 +29,9 @@ export default function RootLayout({
       </head>
       <body className="font-headline antialiased">
         <SidebarExtensionProvider>
-          <SidebarProvider defaultOpen={true}>
-            <Sidebar>
-                <SidebarNav />
-            </Sidebar>
-            <SidebarInset>
-                <Header />
-                <main className="flex-1">
-                  {children}
-                </main>
-            </SidebarInset>
-          </SidebarProvider>
+          <MainLayout>
+            {children}
+          </MainLayout>
         </SidebarExtensionProvider>
         <Toaster />
       </body>

@@ -24,10 +24,11 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CheckCircle2, Contrast } from 'lucide-react';
+import { CheckCircle2, Contrast, Circle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
+import { Input } from '@/components/ui/input';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -70,7 +71,7 @@ const ChartDisplay = ({ data, title, color }: { data: { name: number; value: num
   <div>
     <h3 className="text-sm font-medium text-muted-foreground mb-2">{title}</h3>
     <ResponsiveContainer width="100%" height={150}>
-      <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+      <LineChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} />
@@ -103,6 +104,25 @@ export default function UnifiedBuilderPage() {
   const { setExtension } = useSidebarExtension();
 
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
+  
+  const [inputValue, setInputValue] = useState(mainColor);
+
+    useEffect(() => {
+        setInputValue(mainColor.toUpperCase());
+    }, [mainColor]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+        if (colord(e.target.value).isValid()) {
+            setMainColor(e.target.value);
+        }
+    };
+    
+    const handleInputBlur = () => {
+        if (!colord(inputValue).isValid()) {
+            setInputValue(mainColor.toUpperCase());
+        }
+    };
 
   const regeneratePalette = useCallback((isRandomizing = false) => {
     setPalette(prevPalette => {
@@ -111,11 +131,15 @@ export default function UnifiedBuilderPage() {
         const numColors = prevPalette.length || 5;
 
         let currentType = generationType;
-        if (isRandomizing && lockedHexes.length > 0) {
+        if (isRandomizing) {
+          if (lockedColors.length > 0) {
             const nextType = generationCycle[0];
             setGenerationCycle(prevCycle => [...prevCycle.slice(1), prevCycle[0]]);
             setGenerationType(nextType);
             currentType = nextType;
+          } else {
+             setMainColor(getRandomColor());
+          }
         }
         
         const baseColors = lockedHexes.length > 0 
@@ -262,8 +286,9 @@ export default function UnifiedBuilderPage() {
   
   const simulatedPalette = useMemo(() => {
     if (analysisSourcePalette.length === 0) return [];
-    return analysisSourcePalette.map(color => simulate(color, simulationType));
-  }, [analysisSourcePalette, simulationType]);
+    const source = (useBezier || correctLightness) ? analysisSourcePalette : paletteHexes;
+    return source.map(color => simulate(color, simulationType));
+  }, [analysisSourcePalette, paletteHexes, simulationType, useBezier, correctLightness]);
   
   const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
   
@@ -364,12 +389,21 @@ export default function UnifiedBuilderPage() {
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col gap-8">
       {/* Top Section: Picker and Active Color Details */}
       <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-7xl mx-auto">
-        <div className="w-full flex justify-center lg:justify-start">
+        <div className="w-full flex flex-col justify-center lg:justify-start gap-4">
             <ColorPickerClient 
               color={mainColor} 
               onChange={handleColorChange}
               className="w-full max-w-sm h-full"
             />
+            <div className="relative flex items-center gap-2 max-w-sm p-2 rounded-md border bg-muted">
+                <Circle className="w-6 h-6" fill={mainColor} style={{color: mainColor}}/>
+                <Input
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    onBlur={handleInputBlur}
+                    className="w-full p-2 h-9 rounded-md bg-background text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+            </div>
         </div>
 
         <div className="w-full flex justify-center">
