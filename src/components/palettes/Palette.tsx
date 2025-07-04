@@ -7,7 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { PaletteColor } from '@/lib/palette-generator';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { SketchPicker, type ColorResult } from 'react-color';
+import ColorPickerClient from '@/components/colors/ColorPickerClient';
+import type { ColorResult } from 'react-color';
 import { Lock, Unlock, Trash2, Copy, Plus } from 'lucide-react';
 import chroma from 'chroma-js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -91,7 +92,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                                   </Button>
                               </PopoverTrigger>
                               <PopoverContent className="w-auto p-0 border-0" onClick={(e) => e.stopPropagation()}>
-                                <SketchPicker
+                                <ColorPickerClient
                                     color={color.hex}
                                     onChange={(c: ColorResult) => onColorChange(color.id, c.hex)}
                                 />

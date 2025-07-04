@@ -6,15 +6,17 @@ import { Saturation, Hue } from 'react-color/lib/components/common';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { colord } from 'colord';
+import { cn } from '@/lib/utils';
 
 // The type from @types/react-color's ColorState is missing hsv, so we extend it.
 interface CustomPickerProps extends ColorState {
     hsv: HSVColor;
     // onChange is provided by the CustomPicker HOC
     onChange: (color: any) => void;
+    className?: string;
 }
 
-const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb, hsv, onChange }) => {
+const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb, hsv, onChange, className }) => {
     // Local state for inputs to allow typing without causing rapid re-renders
     const [localHex, setLocalHex] = useState(hex);
     const [localRgb, setLocalRgb] = useState(rgb);
@@ -46,7 +48,10 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb
     }, [localRgb, onChange]);
     
     return (
-        <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground h-full flex flex-col">
+        <div className={cn(
+            "w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground h-full flex flex-col",
+            className
+        )}>
             <div className="flex gap-3 flex-grow">
                 <div className="relative flex-1 cursor-pointer">
                     <Saturation hsl={hsl} hsv={hsv} onChange={onChange} />
