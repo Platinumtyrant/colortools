@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,43 +8,28 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { colord, extend } from 'colord';
 import namesPlugin from 'colord/plugins/names';
+import cmykPlugin from 'colord/plugins/cmyk';
+import lchPlugin from 'colord/plugins/lch';
+import labPlugin from 'colord/plugins/lab';
 
-extend([namesPlugin]);
+extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
-// The PhotoshopPicker from react-color is not themeable, so we use dynamic import
-// to prevent SSR issues and ensure it only loads on the client.
 const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerClient'), {
   ssr: false,
   loading: () => (
-    // Matching PhotoshopPicker's default width. Height is an estimate.
-    <Skeleton className="w-[513px] h-[410px]" />
+    <Skeleton className="w-full max-w-[256px] h-[325px]" />
   )
 });
 
 export default function ColorPaletteBuilderPage() {
-  const [mainColor, setMainColor] = useState('#BED3F3');
-  const [stagedColor, setStagedColor] = useState(mainColor);
+  const [mainColor, setMainColor] = useState('#FF9800');
   const [paletteColors, setPaletteColors] = useState<string[]>([]);
   
   const { toast } = useToast();
 
-  // When the main color changes (e.g., by clicking a swatch), update the staged color for the picker.
-  useEffect(() => {
-    setStagedColor(mainColor);
-  }, [mainColor]);
-
-  const handleColorChange = useCallback((newColor: string) => {
-    setStagedColor(newColor);
+  const handleColorChange = useCallback((newColor: any) => {
+    setMainColor(newColor.hex);
   }, []);
-
-  const handleAcceptColor = useCallback(() => {
-    setMainColor(stagedColor);
-    toast({ title: 'Color Updated' });
-  }, [stagedColor, toast]);
-
-  const handleCancelColor = useCallback(() => {
-    setStagedColor(mainColor);
-  }, [mainColor]);
 
   const handleAddCurrentColorToPalette = useCallback(() => {
     setPaletteColors(prevColors => {
@@ -79,15 +64,16 @@ export default function ColorPaletteBuilderPage() {
   };
   
   const colorName = colord(mainColor).toName({ closest: true });
+  const colorCmyk = colord(mainColor).toCmyk();
+  const colorLch = colord(mainColor).toLch();
+  const colorLab = colord(mainColor).toLab();
 
   return (
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col md:flex-row items-start justify-center gap-8">
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 w-full max-w-[256px]">
         <ColorPickerClient 
-          color={stagedColor} 
+          color={mainColor} 
           onChange={handleColorChange}
-          onAccept={handleAcceptColor}
-          onCancel={handleCancelColor}
         />
       </div>
 
@@ -117,6 +103,18 @@ export default function ColorPaletteBuilderPage() {
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">HSL</span>
                         <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">CMYK</span>
+                        <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">LCH</span>
+                        <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">CIELAB</span>
+                        <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
                     </div>
                 </div>
             </CardContent>

@@ -1,27 +1,85 @@
 "use client";
 
-import React from 'react';
-import { PhotoshopPicker, type ColorResult } from 'react-color';
+import React, { useState, useEffect, useCallback } from 'react';
+import { CustomPicker, type HSLColor, type RGBColor, type ColorState, type HSVColor } from 'react-color';
+import { Saturation, Hue } from 'react-color/lib/components/common';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { colord } from 'colord';
 
-interface ColorPickerClientProps {
-  color: string;
-  onChange: (color: string) => void;
-  onAccept: () => void;
-  onCancel: () => void;
+// The type from @types/react-color's ColorState is missing hsv, so we extend it.
+interface CustomPickerProps extends ColorState {
+    hsv: HSVColor;
+    // onChange is provided by the CustomPicker HOC
+    onChange: (color: any) => void;
 }
 
-export default function ColorPickerClient({ color, onChange, onAccept, onCancel }: ColorPickerClientProps) {
-  const handleChangeComplete = (colorResult: ColorResult) => {
-    onChange(colorResult.hex);
-  };
+const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb, hsv, onChange }) => {
+    // Local state for inputs to allow typing without causing rapid re-renders
+    const [localHex, setLocalHex] = useState(hex);
+    const [localRgb, setLocalRgb] = useState(rgb);
 
-  return (
-    <PhotoshopPicker
-      color={color}
-      header="Color Picker"
-      onChangeComplete={handleChangeComplete}
-      onAccept={onAccept}
-      onCancel={onCancel}
-    />
-  );
-}
+    // Update local state when the color prop changes from outside
+    useEffect(() => {
+        setLocalHex(hex);
+        setLocalRgb(rgb);
+    }, [hex, rgb]);
+
+    const handleHexChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const newHex = e.target.value;
+        setLocalHex(newHex);
+        if (colord(newHex).isValid()) {
+            onChange(newHex);
+        }
+    }, [onChange]);
+
+    const handleRgbChange = useCallback((component: 'r' | 'g' | 'b', value: string) => {
+        const numValue = parseInt(value, 10);
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= 255) {
+            const newRgb = { ...localRgb, [component]: numValue };
+            setLocalRgb(newRgb);
+            onChange(newRgb);
+        } else if (value === '') {
+             const newRgb = { ...localRgb, [component]: 0 };
+             setLocalRgb(newRgb);
+        }
+    }, [localRgb, onChange]);
+    
+    return (
+        <div className="w-full max-w-xs space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
+            <div className="relative h-40 w-full cursor-pointer">
+                <Saturation hsl={hsl} hsv={hsv} onChange={onChange} />
+            </div>
+            <div className="relative h-3 w-full cursor-pointer">
+                <Hue hsl={hsl} onChange={onChange} direction="horizontal" />
+            </div>
+            
+            <div className="flex items-center gap-4 pt-2">
+                <div className="h-10 w-10 flex-shrink-0 rounded-md border" style={{ backgroundColor: hex }}></div>
+                <div className="flex-grow space-y-1">
+                    <Label htmlFor="hex-input" className="text-xs font-normal text-muted-foreground">HEX</Label>
+                    <Input id="hex-input" value={localHex.toUpperCase()} onChange={handleHexChange} className="h-8 font-mono text-sm" />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                    <Label htmlFor="r-input" className="text-xs font-normal text-muted-foreground">R</Label>
+                    <Input id="r-input" type="number" min="0" max="255" value={localRgb.r} onChange={(e) => handleRgbChange('r', e.target.value)} className="h-8"/>
+                </div>
+                 <div className="space-y-1">
+                    <Label htmlFor="g-input" className="text-xs font-normal text-muted-foreground">G</Label>
+                    <Input id="g-input" type="number" min="0" max="255" value={localRgb.g} onChange={(e) => handleRgbChange('g', e.target.value)} className="h-8"/>
+                </div>
+                 <div className="space-y-1">
+                    <Label htmlFor="b-input" className="text-xs font-normal text-muted-foreground">B</Label>
+                    <Input id="b-input" type="number" min="0" max="255" value={localRgb.b} onChange={(e) => handleRgbChange('b', e.target.value)} className="h-8"/>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Use the CustomPicker HOC from react-color
+// We cast the component to `any` because the HOC's types are not perfectly aligned with what it actually provides at runtime.
+export default CustomPicker(CustomColorPickerComponent as React.ComponentType<any>);
