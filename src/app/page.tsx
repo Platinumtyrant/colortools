@@ -25,11 +25,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Circle } from 'lucide-react';
+import { CheckCircle2, Contrast } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
-import { Input } from '@/components/ui/input';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -123,25 +122,6 @@ export default function UnifiedBuilderPage() {
 
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
   
-  const [inputValue, setInputValue] = useState(mainColor);
-
-    useEffect(() => {
-        setInputValue(mainColor.toUpperCase());
-    }, [mainColor]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.target.value);
-        if (colord(e.target.value).isValid()) {
-            setMainColor(e.target.value);
-        }
-    };
-    
-    const handleInputBlur = () => {
-        if (!colord(inputValue).isValid()) {
-            setInputValue(mainColor.toUpperCase());
-        }
-    };
-
   const regeneratePalette = useCallback((isRandomizing = false) => {
     setPalette(prevPalette => {
         const lockedColors = prevPalette.filter(c => c.locked);
@@ -422,15 +402,6 @@ export default function UnifiedBuilderPage() {
               onChange={handleColorChange}
               className="w-full max-w-sm h-full"
             />
-            <div className="relative flex items-center gap-2 max-w-sm p-2 rounded-md border bg-muted">
-                <Circle className="w-6 h-6" fill={mainColor} style={{color: mainColor}}/>
-                <Input
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onBlur={handleInputBlur}
-                    className="w-full p-2 h-9 rounded-md bg-background text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-            </div>
         </div>
 
         <div className="w-full flex justify-center">
