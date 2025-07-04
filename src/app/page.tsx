@@ -18,17 +18,17 @@ import type { PaletteColor } from '@/lib/palette-generator';
 import { simulate, type SimulationType } from '@/lib/colorblind';
 import { analyzePalette } from '@/lib/palette-analyzer';
 import { Palette } from '@/components/palettes/Palette';
-import { PaletteGenerator } from '@/components/palettes/PaletteGenerator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -40,7 +40,6 @@ const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerC
             <Skeleton className="relative flex-1 cursor-pointer" />
             <Skeleton className="relative w-5 cursor-pointer" />
         </div>
-        <Skeleton className="h-10 w-full" />
         <div className="grid grid-cols-3 gap-3">
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-8 w-full" />
@@ -391,6 +390,45 @@ export default function UnifiedBuilderPage() {
     };
   }, [analysisPanel, setExtension]);
 
+  const paletteActions = (
+    <div className="flex w-full justify-between items-center gap-4 flex-wrap">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Button onClick={() => regeneratePalette(true)} size="sm">
+              <Dices className="mr-2 h-4 w-4" />
+              Mix
+          </Button>
+          <Button onClick={handleReset} variant="outline" size="sm">
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
+          <Select 
+              value={generationType} 
+              onValueChange={(value) => setGenerationType(value as GenerationType)}
+              disabled={isGenerationLocked}
+            >
+            <SelectTrigger id="generationType" className="w-[150px] h-9">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="analogous">Analogous</SelectItem>
+              <SelectItem value="triadic">Triadic</SelectItem>
+              <SelectItem value="complementary">Complementary</SelectItem>
+              <SelectItem value="tints">Tints</SelectItem>
+              <SelectItem value="shades">Shades</SelectItem>
+            </SelectContent>
+          </Select>
+          {isGenerationLocked && <p className="text-xs text-muted-foreground mt-1">Unlock all to change.</p>}
+        </div>
+      </div>
+      
+      <Button onClick={handleSaveToLibrary}>Save to Library</Button>
+    </div>
+  );
+
 
   return (
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col gap-8">
@@ -484,38 +522,29 @@ export default function UnifiedBuilderPage() {
 
         <div className="w-full flex justify-center lg:justify-end">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={isContrastMode ? 'text-picker' : 'generator'}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="w-full max-w-sm h-full"
-              >
-                  {isContrastMode ? (
-                      <Card className="w-full h-full flex flex-col">
-                          <CardHeader>
-                              <CardTitle>Text Color</CardTitle>
-                          </CardHeader>
-                          <CardContent className="flex-grow">
-                              <ColorPickerClient 
-                                color={contrastTextColor} 
-                                onChange={(c) => setContrastTextColor(c.hex)}
-                                className="w-full border-0 shadow-none p-0"
-                              />
-                          </CardContent>
-                      </Card>
-                  ) : (
-                      <PaletteGenerator
-                          onRandomize={() => regeneratePalette(true)}
-                          onReset={handleReset}
-                          generationType={generationType}
-                          setGenerationType={setGenerationType}
-                          isGenerationLocked={isGenerationLocked}
-                          className="w-full max-w-sm h-full flex flex-col"
-                      />
-                  )}
-              </motion.div>
+              {isContrastMode && (
+                <motion.div
+                  key="text-picker"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full max-w-sm h-full"
+                >
+                    <Card className="w-full h-full flex flex-col">
+                        <CardHeader>
+                            <CardTitle>Text Color</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <ColorPickerClient 
+                              color={contrastTextColor} 
+                              onChange={(c) => setContrastTextColor(c.hex)}
+                              className="w-full border-0 shadow-none p-0"
+                            />
+                        </CardContent>
+                    </Card>
+                </motion.div>
+              )}
             </AnimatePresence>
         </div>
       </section>
@@ -529,7 +558,7 @@ export default function UnifiedBuilderPage() {
           onRemoveColor={handleRemoveColor}
           onAddColor={handleAddColorAtIndex}
           onColorClick={(c) => setMainColor(c.hex)}
-          actions={<Button onClick={handleSaveToLibrary}>Save to Library</Button>}
+          actions={paletteActions}
         />
         <div className="text-center text-sm text-muted-foreground mt-4">
             Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>

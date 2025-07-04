@@ -131,7 +131,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
           </AnimatePresence>
         </div>
       </CardContent>
-      <CardFooter className="justify-end gap-2 p-4 pt-4 border-t">
+      <CardFooter className="p-4 pt-4 border-t">
         {actions}
       </CardFooter>
     </Card>

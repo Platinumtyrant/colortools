@@ -8,7 +8,6 @@ import { generatePalette, getRandomColor, type GenerationType, adjustForColorbli
 import type { PaletteColor } from '@/lib/palette-generator';
 import { simulate, type SimulationType } from '@/lib/colorblind';
 import { Palette } from '@/components/palettes/Palette';
-import { PaletteGenerator } from '@/components/palettes/PaletteGenerator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -16,9 +15,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Dices, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 // Helper to get graph data
@@ -218,18 +218,48 @@ export default function PaletteGeneratorPage() {
     return true;
   }, [simulatedPalette]);
 
+  const paletteActions = (
+    <div className="flex w-full justify-between items-center gap-4 flex-wrap">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Button onClick={() => regeneratePalette(true)} size="sm">
+              <Dices className="mr-2 h-4 w-4" />
+              Mix
+          </Button>
+          <Button onClick={handleReset} variant="outline" size="sm">
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
+          <Select 
+              value={generationType} 
+              onValueChange={(value) => setGenerationType(value as GenerationType)}
+              disabled={isGenerationLocked}
+            >
+            <SelectTrigger id="generationType" className="w-[150px] h-9">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="analogous">Analogous</SelectItem>
+              <SelectItem value="triadic">Triadic</SelectItem>
+              <SelectItem value="complementary">Complementary</SelectItem>
+              <SelectItem value="tints">Tints</SelectItem>
+              <SelectItem value="shades">Shades</SelectItem>
+            </SelectContent>
+          </Select>
+          {isGenerationLocked && <p className="text-xs text-muted-foreground mt-1">Unlock all to change.</p>}
+        </div>
+      </div>
+      
+      <Button onClick={handleSavePalette}>Save to Library</Button>
+    </div>
+  );
+
 
   return (
     <div className="w-full h-[calc(100vh-theme(spacing.14))] flex flex-col p-4 md:p-8 gap-8">
-        <div className="flex-shrink-0">
-            <PaletteGenerator
-              onRandomize={() => regeneratePalette(true)}
-              onReset={handleReset}
-              generationType={generationType}
-              setGenerationType={setGenerationType}
-              isGenerationLocked={isGenerationLocked}
-            />
-        </div>
         <div className="flex-grow flex flex-col min-h-0">
              <Palette
               palette={palette}
@@ -237,7 +267,7 @@ export default function PaletteGeneratorPage() {
               onLockToggle={handleLockToggle}
               onRemoveColor={handleRemoveColor}
               onAddColor={handleAddColor}
-              actions={<Button onClick={handleSavePalette}>Save to Library</Button>}
+              actions={paletteActions}
             />
         </div>
          <div className="flex-shrink-0">
