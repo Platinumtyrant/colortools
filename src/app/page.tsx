@@ -25,13 +25,15 @@ import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ContrastChecker } from '@/components/colors/ContrastChecker';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
 const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerClient'), {
   ssr: false,
   loading: () => (
-    <div className="w-full max-w-xs space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
+    <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
         <div className="flex gap-3">
             <Skeleton className="relative h-40 flex-1 cursor-pointer" />
             <Skeleton className="relative h-40 w-5 cursor-pointer" />
@@ -254,6 +256,7 @@ export default function UnifiedBuilderPage() {
             <ColorPickerClient 
               color={mainColor} 
               onChange={handleColorChange}
+              className="w-full max-w-sm h-full"
             />
         </div>
 
@@ -312,6 +315,7 @@ export default function UnifiedBuilderPage() {
               generationType={generationType}
               setGenerationType={setGenerationType}
               isGenerationLocked={isGenerationLocked}
+              className="w-full max-w-sm h-full"
             />
         </div>
       </section>
@@ -333,49 +337,60 @@ export default function UnifiedBuilderPage() {
       <section className="w-full max-w-7xl mx-auto">
         <Card>
             <CardHeader>
-                <CardTitle>Palette Analysis</CardTitle>
+                <CardTitle>Analysis Tools</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                        <Label htmlFor="useBezier">Bezier interpolation</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
-                        <Label htmlFor="correctLightness">Correct lightness</Label>
-                    </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Label className="text-sm">Simulate:</Label>
-                    <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
-                        <RadioGroupItem value="normal" id="normal" className="sr-only" />
-                        <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
-                        <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
-                        <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranopia</Label>
-                        <RadioGroupItem value="deuteranomaly" id="deuteranomaly" className="sr-only" />
-                        <Label htmlFor="deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
-                        <RadioGroupItem value="protan" id="protan" className="sr-only" />
-                        <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protanopia</Label>
-                        <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
-                        <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritanopia</Label>
-                    </RadioGroup>
-                </div>
-            </div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                {isPaletteColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
-                <div className="flex h-16 w-full overflow-hidden rounded-md border">
-                    {simulatedPalette.map((color, index) => (
-                    <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                    ))}
-                </div>
-                <div className="grid md:grid-cols-3 gap-8 pt-4">
-                    <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
-                    <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
-                    <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
-                </div>
-            </motion.div>
+            <CardContent>
+                <Tabs defaultValue="analysis" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="analysis">Palette Analysis</TabsTrigger>
+                        <TabsTrigger value="contrast">Contrast Checker</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="analysis" className="mt-6 space-y-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-2">
+                                  <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                                  <Label htmlFor="useBezier">Bezier interpolation</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                  <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
+                                  <Label htmlFor="correctLightness">Correct lightness</Label>
+                              </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                              <Label className="text-sm">Simulate:</Label>
+                              <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                                  <RadioGroupItem value="normal" id="normal" className="sr-only" />
+                                  <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                                  <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
+                                  <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranopia</Label>
+                                  <RadioGroupItem value="deuteranomaly" id="deuteranomaly" className="sr-only" />
+                                  <Label htmlFor="deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
+                                  <RadioGroupItem value="protan" id="protan" className="sr-only" />
+                                  <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protanopia</Label>
+                                  <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
+                                  <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritanopia</Label>
+                              </RadioGroup>
+                          </div>
+                        </div>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                            {isPaletteColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
+                            <div className="flex h-16 w-full overflow-hidden rounded-md border">
+                                {simulatedPalette.map((color, index) => (
+                                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                                ))}
+                            </div>
+                            <div className="grid md:grid-cols-3 gap-8 pt-4">
+                                <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
+                                <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
+                                <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
+                            </div>
+                        </motion.div>
+                    </TabsContent>
+                    <TabsContent value="contrast" className="mt-6">
+                        <ContrastChecker />
+                    </TabsContent>
+                </Tabs>
             </CardContent>
         </Card>
       </section>
