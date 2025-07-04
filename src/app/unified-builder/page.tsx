@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
-import { HexColorInput } from 'react-colorful';
 import chroma from 'chroma-js';
 import { colord } from 'colord';
 import { useToast } from "@/hooks/use-toast";
@@ -18,7 +17,6 @@ import { ColorList } from '@/components/colors/ColorList';
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -27,15 +25,21 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Dices, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const Saturation = dynamic(() => import('react-colorful').then(mod => mod.Saturation), {
+const UnifiedColorEditor = dynamic(() => import('@/components/colors/UnifiedColorEditor').then(mod => mod.UnifiedColorEditor), {
   ssr: false,
-  loading: () => <div className="w-full aspect-video rounded-lg border-border border bg-muted animate-pulse" />
-});
-
-const Hue = dynamic(() => import('react-colorful').then(mod => mod.Hue), {
-  ssr: false,
-  loading: () => <div className="w-full h-4 rounded-lg border-border border bg-muted animate-pulse" />
+  loading: () => (
+    <Card>
+      <CardHeader>
+        <CardTitle>Active Color Editor</CardTitle>
+        <CardDescription>Click a color in the palette above to edit it.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="w-full aspect-video" />
+      </CardContent>
+    </Card>
+  )
 });
 
 
@@ -128,12 +132,15 @@ export default function UnifiedBuilderPage() {
       
       const safePalette = adjustForColorblindSafety(newPalette);
       if (safePalette.length > 0) {
-        setActiveColorHex(safePalette[0].hex);
-        setActivePaletteColorId(safePalette[0].id);
+        const activeColorExists = safePalette.some(c => c.id === activePaletteColorId);
+        if (!activeColorExists || activePaletteColorId === null) {
+          setActiveColorHex(safePalette[0].hex);
+          setActivePaletteColorId(safePalette[0].id);
+        }
       }
       return safePalette;
     });
-  }, [generationType, generationCycle, activeColorHex]);
+  }, [generationType, generationCycle, activeColorHex, activePaletteColorId]);
 
   useEffect(() => {
     // Initial generation
@@ -218,7 +225,19 @@ export default function UnifiedBuilderPage() {
         toast({ title: "Minimum 2 colors required.", variant: "destructive" });
         return;
     }
-    setPalette(palette.filter(c => c.id !== id));
+    
+    setPalette(prevPalette => {
+        const newPalette = prevPalette.filter(c => c.id !== id);
+        if (id === activePaletteColorId) {
+            if (newPalette.length > 0) {
+                setActiveColorHex(newPalette[0].hex);
+                setActivePaletteColorId(newPalette[0].id);
+            } else {
+                setActivePaletteColorId(null);
+            }
+        }
+        return newPalette;
+    });
   };
 
   const handleSavePalette = () => {
@@ -234,7 +253,6 @@ export default function UnifiedBuilderPage() {
   };
 
   // --- Memoized Derived State ---
-  const hsv = useMemo(() => colord(activeColorHex).toHsv(), [activeColorHex]);
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
   const simulatedPalette = useMemo(() => {
     if (paletteHexes.length === 0) return [];
@@ -251,9 +269,6 @@ export default function UnifiedBuilderPage() {
     }
     return true;
   }, [simulatedPalette]);
-
-  const hsl = colord(activeColorHex).toHsl();
-  const rgb = colord(activeColorHex).toRgb();
 
   const currentTints = getTints(activeColorHex, tintSteps);
   const currentShades = getShades(activeColorHex, shadeSteps);
@@ -294,50 +309,10 @@ export default function UnifiedBuilderPage() {
         <div className="grid lg:grid-cols-2 gap-8 items-start">
             {/* --- Left Column: Editor & Swatches --- */}
             <div className="space-y-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Active Color Editor</CardTitle>
-                        <CardDescription>Click a color in the palette above to edit it.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col md:flex-row gap-8 items-start">
-                        <div className="w-full md:w-1/2 flex flex-col gap-4">
-                           <div className="w-full space-y-3">
-                                <Saturation
-                                    hsv={hsv}
-                                    onChange={(newSV) => handleActiveColorChange(colord({ ...hsv, ...newSV }).toHex())}
-                                    className="w-full aspect-video rounded-lg border-border border cursor-pointer"
-                                />
-                                <Hue
-                                    hue={hsv.h}
-                                    onChange={(newHue) => handleActiveColorChange(colord({ ...hsv, h: newHue }).toHex())}
-                                    className="w-full h-4 rounded-lg border-border border cursor-pointer"
-                                />
-                            </div>
-                        </div>
-                        <div className="w-full md:w-1/2 flex flex-col gap-4">
-                             <div className="flex items-center gap-4">
-                                <Label htmlFor="hex-input" className="w-10 text-muted-foreground text-right">HEX</Label>
-                                <HexColorInput id="hex-input" color={activeColorHex} onChange={handleActiveColorChange} className={cn("flex-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", "uppercase")} />
-                            </div>
-                             <div className="flex items-center gap-4">
-                                <Label htmlFor="rgb-r" className="w-10 text-muted-foreground text-right">RGB</Label>
-                                <div className="flex flex-1 gap-2">
-                                    <Input id="rgb-r" type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleActiveColorChange(colord({...rgb, r: +e.target.value}).toHex())} className="w-1/3" aria-label="Red" />
-                                    <Input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleActiveColorChange(colord({...rgb, g: +e.target.value}).toHex())} className="w-1/3" aria-label="Green" />
-                                    <Input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleActiveColorChange(colord({...rgb, b: +e.target.value}).toHex())} className="w-1/3" aria-label="Blue" />
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <Label htmlFor="hsl-h" className="w-10 text-muted-foreground text-right">HSL</Label>
-                                <div className="flex flex-1 gap-2">
-                                    <Input id="hsl-h" type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleActiveColorChange(colord({...hsl, h: +e.target.value}).toHex())} className="w-1/3" aria-label="Hue" />
-                                    <Input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleActiveColorChange(colord({...hsl, s: +e.target.value}).toHex())} className="w-1/3" aria-label="Saturation" />
-                                    <Input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleActiveColorChange(colord({...hsl, l: +e.target.value}).toHex())} className="w-1/3" aria-label="Lightness" />
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <UnifiedColorEditor
+                    color={activeColorHex}
+                    onChange={handleActiveColorChange}
+                />
                 
                 <Card>
                   <CardHeader>
