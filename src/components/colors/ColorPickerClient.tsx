@@ -46,12 +46,12 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb
     }, [localRgb, onChange]);
     
     return (
-        <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
-            <div className="flex gap-3">
-                <div className="relative h-40 flex-1 cursor-pointer">
+        <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground h-full flex flex-col">
+            <div className="flex gap-3 flex-grow">
+                <div className="relative flex-1 cursor-pointer">
                     <Saturation hsl={hsl} hsv={hsv} onChange={onChange} />
                 </div>
-                <div className="relative h-40 w-5 cursor-pointer">
+                <div className="relative w-5 cursor-pointer">
                     <Hue hsl={hsl} onChange={onChange} direction="vertical" />
                 </div>
             </div>

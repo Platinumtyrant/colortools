@@ -24,15 +24,15 @@ export const PaletteGenerator = ({
   isGenerationLocked,
 }: PaletteGeneratorProps) => {
   return (
-    <Card className="bg-card border-border shadow-lg w-full max-w-sm">
+    <Card className="bg-card border-border shadow-lg w-full max-w-sm h-full flex flex-col">
       <CardHeader>
         <CardTitle>Generate a New Palette</CardTitle>
         <CardDescription>
           Use the controls to generate a palette. Lock colors to preserve them.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 items-center">
+      <CardContent className="flex-grow flex items-center">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 items-center">
           <div className="space-y-2">
             <Label>Actions</Label>
             <div className="flex gap-2">
