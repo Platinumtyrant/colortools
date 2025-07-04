@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { colord } from 'colord';
 import { cn } from '@/lib/utils';
+import { ColorSliders } from './ColorSliders';
 
 // The type from @types/react-color's ColorState is missing hsv, so we extend it.
 interface CustomPickerProps extends ColorState {
@@ -17,11 +18,9 @@ interface CustomPickerProps extends ColorState {
 }
 
 const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb, hsv, onChange, className }) => {
-    // Local state for inputs to allow typing without causing rapid re-renders
     const [localHex, setLocalHex] = useState(hex);
     const [localRgb, setLocalRgb] = useState(rgb);
 
-    // Update local state when the color prop changes from outside
     useEffect(() => {
         setLocalHex(hex);
         setLocalRgb(rgb);
@@ -46,6 +45,10 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb
              setLocalRgb(newRgb);
         }
     }, [localRgb, onChange]);
+
+    const handleHslChange = (newHsl: HSLColor) => {
+        onChange(newHsl);
+    };
     
     return (
         <div className={cn(
@@ -83,10 +86,12 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb
                     <Input id="b-input" type="number" min="0" max="255" value={localRgb.b} onChange={(e) => handleRgbChange('b', e.target.value)} className="h-8"/>
                 </div>
             </div>
+
+            <div className="pt-2">
+                <ColorSliders hsl={hsl} onChange={handleHslChange} />
+            </div>
         </div>
     );
 };
 
-// Use the CustomPicker HOC from react-color
-// We cast the component to `any` because the HOC's types are not perfectly aligned with what it actually provides at runtime.
 export default CustomPicker(CustomColorPickerComponent as React.ComponentType<any>);

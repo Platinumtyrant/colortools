@@ -21,25 +21,20 @@ export function getRandomColor(): string {
   return chroma.random().hex();
 }
 
-/**
- * Iterates through a palette and adjusts colors to meet a minimum contrast
- * ratio under various colorblindness simulations, respecting locked colors.
- * This version uses forward and backward passes to ensure stability.
- */
 export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor[] {
   if (palette.length < 2) {
     return palette;
   }
   const adjustedPalette = palette.map(p => ({ ...p }));
   const simulationTypes: SimulationType[] = ['protan', 'deutan', 'tritan', 'deuteranomaly'];
-  const minContrast = 1.5;
-  const maxPasses = 10; // Each pass includes a forward and backward run
-  const adjustmentStep = 4;
+  const minContrast = 1.1; // A very low threshold to prevent visually similar colors
+  const maxPasses = 10;
+  const adjustmentStep = 2; // A smaller step for more subtle adjustments
 
   for (let pass = 0; pass < maxPasses; pass++) {
     let adjustmentsMade = false;
 
-    // Forward pass: Adjusts color[i+1] based on color[i]
+    // Forward pass
     for (let i = 0; i < adjustedPalette.length - 1; i++) {
         const color1 = adjustedPalette[i];
         const color2 = adjustedPalette[i + 1];
@@ -58,45 +53,14 @@ export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor
 
         if (isUnsafe) {
             adjustmentsMade = true;
-            const lch1 = chroma(color1.hex).lch();
             const lch2 = chroma(color2.hex).lch();
-            const lightness1 = lch1[0];
             let lightness2 = lch2[0];
             
-            lightness2 += (lightness2 >= lightness1 ? adjustmentStep : -adjustmentStep);
+            // Adjust lightness away from the middle (50) to increase contrast
+            lightness2 += (lightness2 > 50 ? adjustmentStep : -adjustmentStep);
             adjustedPalette[i + 1].hex = chroma.lch(Math.max(0, Math.min(100, lightness2)), lch2[1], lch2[2]).hex();
         }
     }
-
-    // Backward pass: Adjusts color[i] based on color[i+1]
-    for (let i = adjustedPalette.length - 2; i >= 0; i--) {
-        const color1 = adjustedPalette[i];
-        const color2 = adjustedPalette[i + 1];
-
-        if (color1.locked) continue;
-
-        let isUnsafe = false;
-        for (const type of simulationTypes) {
-            const sim1 = simulate(color1.hex, type);
-            const sim2 = simulate(color2.hex, type);
-            if (chroma.contrast(sim1, sim2) < minContrast) {
-                isUnsafe = true;
-                break;
-            }
-        }
-
-        if (isUnsafe) {
-            adjustmentsMade = true;
-            const lch1 = chroma(color1.hex).lch();
-            const lch2 = chroma(color2.hex).lch();
-            let lightness1 = lch1[0];
-            const lightness2 = lch2[0];
-            
-            lightness1 += (lightness1 >= lightness2 ? adjustmentStep : -adjustmentStep);
-            adjustedPalette[i].hex = chroma.lch(Math.max(0, Math.min(100, lightness1)), lch1[1], lch1[2]).hex();
-        }
-    }
-
     if (!adjustmentsMade) {
       break;
     }

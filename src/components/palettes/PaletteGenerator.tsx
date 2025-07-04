@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { GenerationType } from "@/lib/palette-generator";
 import { Button } from "@/components/ui/button";
 import { Dices, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PaletteGeneratorProps {
   onRandomize: () => void;
@@ -14,6 +15,7 @@ interface PaletteGeneratorProps {
   generationType: GenerationType;
   setGenerationType: (type: GenerationType) => void;
   isGenerationLocked: boolean;
+  className?: string;
 }
 
 export const PaletteGenerator = ({
@@ -22,9 +24,10 @@ export const PaletteGenerator = ({
   generationType,
   setGenerationType,
   isGenerationLocked,
+  className,
 }: PaletteGeneratorProps) => {
   return (
-    <Card className="bg-card border-border shadow-lg w-full max-w-sm h-full flex flex-col">
+    <Card className={cn("bg-card border-border shadow-lg w-full max-w-sm h-full flex flex-col", className)}>
       <CardHeader>
         <CardTitle>Generate New Palette</CardTitle>
         <CardDescription>

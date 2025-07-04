@@ -1,88 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { colord, extend, type HslColor } from 'colord';
-import a11yPlugin from 'colord/plugins/a11y';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
+import React, { useState, useMemo, useCallback } from 'react';
+import { colord, type HslColor } from 'colord';
 import { Button } from '@/components/ui/button';
-import { ArrowRightLeft, CheckCircle2, XCircle, Dices } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-extend([a11yPlugin]);
-
-const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslColor) => void }) => {
-    const color = useMemo(() => colord(hsl).toHex(), [hsl]);
-    const [inputValue, setInputValue] = useState(color);
-
-    useEffect(() => {
-        setInputValue(color);
-    }, [color]);
-
-    const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
-        setHsl({ ...hsl, [key]: value });
-    }, [hsl, setHsl]);
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setInputValue(value);
-        if (colord(value).isValid()) {
-            const newColor = colord(value);
-            const newHsl = newColor.toHsl();
-            
-            if (newHsl.s === 0 || newHsl.l === 0 || newHsl.l === 100) {
-                setHsl({ h: hsl.h, s: newHsl.s, l: newHsl.l });
-            } else {
-                setHsl(newHsl);
-            }
-        }
-    }, [hsl, setHsl]);
-
-    const handleInputBlur = useCallback(() => {
-        if (!colord(inputValue).isValid()) {
-            setInputValue(color);
-        }
-    }, [inputValue, color]);
-
-    return (
-        <div className="space-y-3">
-            <div className="flex gap-4 items-center">
-                 <Input
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onBlur={handleInputBlur}
-                    className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-            </div>
-            <div className="space-y-1.5">
-                <Label className="text-xs">Hue</Label>
-                <Slider value={[hsl.h]} onValueChange={([v]) => handleHslChange('h', v)} max={360} step={1} />
-            </div>
-            <div className="space-y-1.5">
-                <Label className="text-xs">Saturation</Label>
-                <Slider value={[hsl.s]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
-            </div>
-            <div className="space-y-1.5">
-                <Label className="text-xs">Lightness</Label>
-                <Slider value={[hsl.l]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
-            </div>
-        </div>
-    );
-};
-
-const ResultBadge = ({ passed, text }: { passed: boolean, text: string }) => {
-  const Icon = passed ? CheckCircle2 : XCircle;
-  return (
-    <div className={cn(
-      "flex items-center justify-center gap-1.5 p-1.5 rounded-md font-medium text-xs",
-      passed ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
-    )}>
-      <Icon className="h-4 w-4" />
-      <span>{text}</span>
-    </div>
-  )
-}
+import { ArrowRightLeft, Dices } from 'lucide-react';
+import { ColorSliders } from './ColorSliders';
+import { WCAGDisplay } from './WCAGDisplay';
 
 export const ContrastChecker = () => {
     const [textHsl, setTextHsl] = useState<HslColor>(colord('#1a1a1a').toHsl());
@@ -90,21 +13,6 @@ export const ContrastChecker = () => {
 
     const textColor = useMemo(() => colord(textHsl).toHex(), [textHsl]);
     const bgColor = useMemo(() => colord(bgHsl).toHex(), [bgHsl]);
-
-    const contrastRatio = useMemo(() => {
-        return colord(textColor).contrast(bgColor);
-    }, [textColor, bgColor]);
-
-    const results = useMemo(() => ({
-        aa: {
-            normal: colord(textColor).isReadable(bgColor, { level: 'AA', size: 'normal' }),
-            large: colord(textColor).isReadable(bgColor, { level: 'AA', size: 'large' }),
-        },
-        aaa: {
-            normal: colord(textColor).isReadable(bgColor, { level: 'AAA', size: 'normal' }),
-            large: colord(textColor).isReadable(bgColor, { level: 'AAA', size: 'large' }),
-        }
-    }), [textColor, bgColor]);
     
     const handleSwap = useCallback(() => {
         const temp = textHsl;
@@ -142,33 +50,13 @@ export const ContrastChecker = () => {
                 </div>
                 
                 <div className="bg-muted/50 p-4 rounded-lg flex flex-col justify-center">
-                    <div className='flex justify-between items-center mb-4'>
-                        <div className="font-semibold text-sm">WCAG Conformance</div>
-                        <div className="bg-background text-foreground p-2 rounded-lg text-center border">
-                            <p className="text-lg font-bold">{contrastRatio.toFixed(2)}</p>
-                            <p className="text-xs text-muted-foreground">Ratio</p>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                        <div className="font-bold text-muted-foreground"></div>
-                        <div className="font-bold text-muted-foreground">Normal Text</div>
-                        <div className="font-bold text-muted-foreground">Large Text</div>
-                        
-                        <div className="font-bold flex items-center justify-center">AA</div>
-                        <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
-                        <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
-
-                        <div className="font-bold flex items-center justify-center">AAA</div>
-                        <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
-                        <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
-                   </div>
+                    <WCAGDisplay textColor={textColor} bgColor={bgColor} />
                 </div>
             </div>
 
             <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-4">
                 <div className="space-y-2">
-                    <Label>Text Color</Label>
-                    <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} />
+                    <ColorSliders title="Text Color" hsl={textHsl} onChange={setTextHsl} />
                 </div>
                 <div className="flex flex-col h-full items-center justify-center pt-6 gap-2">
                     <Button onClick={handleRandomize} size="icon" variant="outline" aria-label="Randomize Colors">
@@ -179,8 +67,7 @@ export const ContrastChecker = () => {
                     </Button>
                 </div>
                  <div className="space-y-2">
-                    <Label>Background Color</Label>
-                    <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} />
+                    <ColorSliders title="Background Color" hsl={bgHsl} onChange={setBgHsl} />
                 </div>
             </div>
         </div>
