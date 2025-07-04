@@ -53,7 +53,7 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
         <div className="space-y-3">
             {title && <Label>{title}</Label>}
             <div className="flex items-center gap-4">
-                 <div className="h-10 w-10 flex-shrink-0 rounded-md border" style={{ backgroundColor: color }} />
+                 <div className="h-10 w-10 flex-shrink-0 rounded-full border" style={{ backgroundColor: color }} />
                  <Input
                     value={inputValue.toUpperCase()}
                     onChange={handleInputChange}
