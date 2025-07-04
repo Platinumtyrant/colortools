@@ -4,7 +4,6 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { colord, extend, type HslColor } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -47,24 +46,24 @@ const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslCo
     }, [inputValue, color]);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             <div className="flex gap-4 items-center">
                  <Input
                     value={inputValue}
                     onChange={handleInputChange}
                     onBlur={handleInputBlur}
-                    className="flex-1 p-2 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
                 />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
                 <Label className="text-xs">Hue</Label>
                 <Slider value={[hsl.h]} onValueChange={([v]) => handleHslChange('h', v)} max={360} step={1} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
                 <Label className="text-xs">Saturation</Label>
                 <Slider value={[hsl.s]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
                 <Label className="text-xs">Lightness</Label>
                 <Slider value={[hsl.l]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
             </div>
@@ -132,62 +131,56 @@ export const ContrastChecker = () => {
     }, []);
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Contrast Checker</CardTitle>
-                <CardDescription>Check color contrast for WCAG compliance.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                 <div 
-                    className="relative flex flex-col h-64 w-full transition-colors duration-200 rounded-lg border p-4 items-center justify-center"
-                    style={{ backgroundColor: bgColor, color: textColor }}
-                >
-                    <h2 className="text-7xl font-bold select-none">Aa</h2>
-                    <p className="font-semibold">Some sample text</p>
-                </div>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                    <div className='flex justify-between items-center mb-4'>
-                        <div className="font-semibold">WCAG Conformance</div>
-                        <div className="bg-background text-foreground p-2 rounded-lg text-center border">
-                            <p className="text-xl font-bold">{contrastRatio.toFixed(2)}</p>
-                            <p className="text-xs text-muted-foreground">Ratio</p>
-                        </div>
+        <div className="space-y-4">
+             <div 
+                className="relative flex flex-col h-48 w-full transition-colors duration-200 rounded-lg border p-4 items-center justify-center"
+                style={{ backgroundColor: bgColor, color: textColor }}
+            >
+                <h2 className="text-5xl font-bold select-none">Aa</h2>
+                <p className="text-sm">Some sample text</p>
+            </div>
+            
+            <div className="bg-muted/50 p-4 rounded-lg">
+                <div className='flex justify-between items-center mb-4'>
+                    <div className="font-semibold text-sm">WCAG Conformance</div>
+                    <div className="bg-background text-foreground p-2 rounded-lg text-center border">
+                        <p className="text-lg font-bold">{contrastRatio.toFixed(2)}</p>
+                        <p className="text-xs text-muted-foreground">Ratio</p>
                     </div>
-                     <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                        <div className="font-bold text-muted-foreground"></div>
-                        <div className="font-bold text-muted-foreground">Normal Text</div>
-                        <div className="font-bold text-muted-foreground">Large Text</div>
-                        
-                        <div className="font-bold flex items-center justify-center">AA</div>
-                        <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
-                        <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
+                </div>
+                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="font-bold text-muted-foreground"></div>
+                    <div className="font-bold text-muted-foreground">Normal Text</div>
+                    <div className="font-bold text-muted-foreground">Large Text</div>
+                    
+                    <div className="font-bold flex items-center justify-center">AA</div>
+                    <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
+                    <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
 
-                        <div className="font-bold flex items-center justify-center">AAA</div>
-                        <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
-                        <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
-                   </div>
-                </div>
+                    <div className="font-bold flex items-center justify-center">AAA</div>
+                    <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
+                    <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
+               </div>
+            </div>
 
-                <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-4">
-                    <div className="space-y-2">
-                        <Label>Text Color</Label>
-                        <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} />
-                    </div>
-                    <div className="flex flex-col h-full items-center justify-center pt-8 gap-2">
-                        <Button onClick={handleRandomize} size="icon" variant="outline" aria-label="Randomize Colors">
-                            <Dices className="h-4 w-4" />
-                        </Button>
-                        <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors">
-                            <ArrowRightLeft className="h-4 w-4" />
-                        </Button>
-                    </div>
-                     <div className="space-y-2">
-                        <Label>Background Color</Label>
-                        <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} />
-                    </div>
+            <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-4">
+                <div className="space-y-2">
+                    <Label>Text Color</Label>
+                    <ColorControlGroup hsl={textHsl} setHsl={setTextHsl} />
                 </div>
-            </CardContent>
-        </Card>
+                <div className="flex flex-col h-full items-center justify-center pt-6 gap-2">
+                    <Button onClick={handleRandomize} size="icon" variant="outline" aria-label="Randomize Colors">
+                        <Dices className="h-4 w-4" />
+                    </Button>
+                    <Button onClick={handleSwap} size="icon" variant="outline" aria-label="Swap Colors">
+                        <ArrowRightLeft className="h-4 w-4" />
+                    </Button>
+                </div>
+                 <div className="space-y-2">
+                    <Label>Background Color</Label>
+                    <ColorControlGroup hsl={bgHsl} setHsl={setBgHsl} />
+                </div>
+            </div>
+        </div>
     );
 }
