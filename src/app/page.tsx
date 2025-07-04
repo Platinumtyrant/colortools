@@ -86,6 +86,7 @@ export default function UnifiedBuilderPage() {
   const [mainColor, setMainColor] = useState('#FF9800');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
+  const [generationCycle, setGenerationCycle] = useState<GenerationType[]>(['analogous', 'triadic', 'complementary', 'tints', 'shades']);
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
@@ -94,33 +95,46 @@ export default function UnifiedBuilderPage() {
 
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
 
-  const regeneratePalette = useCallback(() => {
-    const lockedColors = palette.filter(c => c.locked).map(c => c.hex);
-    const baseColors = lockedColors.length > 0 ? lockedColors : [mainColor];
-    const numColors = palette.length > 1 ? palette.length : 5;
-    
-    const newHexes = generatePalette({ 
-      numColors, 
-      type: generationType, 
-      lockedColors: baseColors,
+  const regeneratePalette = useCallback((isRandomizing = false) => {
+    setPalette(prevPalette => {
+        const lockedColors = prevPalette.filter(c => c.locked);
+        const lockedHexes = lockedColors.map(c => c.hex);
+        const numColors = prevPalette.length || 5;
+
+        let currentType = generationType;
+        if (isRandomizing && lockedHexes.length > 0) {
+            const nextType = generationCycle[0];
+            setGenerationCycle(prevCycle => [...prevCycle.slice(1), prevCycle[0]]);
+            setGenerationType(nextType);
+            currentType = nextType;
+        }
+        
+        const baseColors = lockedHexes.length > 0 
+            ? lockedHexes 
+            : (isRandomizing ? [getRandomColor()] : [mainColor]);
+        
+        const newHexes = generatePalette({ 
+            numColors, 
+            type: currentType, 
+            lockedColors: baseColors,
+        });
+
+        let newPalette: PaletteColor[] = [];
+        let newHexIndex = 0;
+        
+        for (let i = 0; i < numColors; i++) {
+            const originalColor = prevPalette[i];
+            if (originalColor?.locked) {
+                newPalette.push(originalColor);
+            } else {
+                const newId = originalColor?.id || Date.now() + i;
+                newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
+            }
+        }
+        
+        return adjustForColorblindSafety(newPalette);
     });
-
-    let newPalette: PaletteColor[] = [];
-    let newHexIndex = 0;
-    
-    for (let i = 0; i < numColors; i++) {
-      const originalColor = palette[i];
-      if (originalColor?.locked) {
-          newPalette.push(originalColor);
-      } else {
-          const newId = originalColor?.id || Date.now() + Math.random();
-          newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
-      }
-    }
-    
-    setPalette(adjustForColorblindSafety(newPalette));
-
-  }, [generationType, palette, mainColor]);
+  }, [generationType, generationCycle, mainColor]);
 
   useEffect(() => {
     regeneratePalette();
@@ -213,7 +227,7 @@ export default function UnifiedBuilderPage() {
 
   const handleReset = useCallback(() => {
     setPalette([]);
-    setTimeout(() => regeneratePalette(), 0);
+    setTimeout(() => regeneratePalette(true), 0);
     toast({ title: "Palette Reset" });
   }, [regeneratePalette, toast]);
 
@@ -323,12 +337,12 @@ export default function UnifiedBuilderPage() {
 
         <div className="w-full flex justify-center lg:justify-end">
             <PaletteGenerator
-              onRandomize={regeneratePalette}
+              onRandomize={() => regeneratePalette(true)}
               onReset={handleReset}
               generationType={generationType}
               setGenerationType={setGenerationType}
               isGenerationLocked={isGenerationLocked}
-              className="w-full max-w-sm h-full"
+              className="w-full max-w-sm h-full flex flex-col"
             />
         </div>
       </section>
