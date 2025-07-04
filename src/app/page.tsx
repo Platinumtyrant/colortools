@@ -16,6 +16,7 @@ import chroma from 'chroma-js';
 import { generatePalette, getRandomColor, type GenerationType, adjustForColorblindSafety } from '@/lib/palette-generator';
 import type { PaletteColor } from '@/lib/palette-generator';
 import { simulate, type SimulationType } from '@/lib/colorblind';
+import { analyzePalette } from '@/lib/palette-analyzer';
 import { Palette } from '@/components/palettes/Palette';
 import { PaletteGenerator } from '@/components/palettes/PaletteGenerator';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -34,9 +35,9 @@ const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerC
   ssr: false,
   loading: () => (
     <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
-        <div className="flex gap-3">
-            <Skeleton className="relative h-40 flex-1 cursor-pointer" />
-            <Skeleton className="relative h-40 w-5 cursor-pointer" />
+        <div className="flex gap-3 h-40">
+            <Skeleton className="relative flex-1 cursor-pointer" />
+            <Skeleton className="relative w-5 cursor-pointer" />
         </div>
         <Skeleton className="h-10 w-full" />
         <div className="grid grid-cols-3 gap-3">
@@ -193,7 +194,7 @@ export default function UnifiedBuilderPage() {
         } else if (colorBefore) {
             newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
         } else if (colorAfter) {
-            newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
+            newHex = chroma(after).set('lch.l', '*1.2').hex();
         } else {
             newHex = getRandomColor();
         }
@@ -247,6 +248,10 @@ export default function UnifiedBuilderPage() {
     }
     return true;
   }, [simulatedPalette]);
+
+  const detectedHarmony = useMemo(() => {
+      return analyzePalette(palette.map(p => p.hex));
+  }, [palette]);
 
   return (
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col gap-8">
@@ -331,6 +336,9 @@ export default function UnifiedBuilderPage() {
           onColorClick={(c) => setMainColor(c.hex)}
           actions={<Button onClick={handleSaveToLibrary}>Save to Library</Button>}
         />
+        <div className="text-center text-sm text-muted-foreground mt-4">
+            Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>
+        </div>
       </section>
       
       {/* Bottom Section: Analysis */}
