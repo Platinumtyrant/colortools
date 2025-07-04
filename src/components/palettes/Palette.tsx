@@ -4,7 +4,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import type { PaletteColor } from '@/app/palette-generator/page';
+import type { PaletteColor } from '@/lib/palette-generator';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
@@ -18,10 +18,11 @@ interface InteractivePaletteProps {
   onLockToggle: (id: number) => void;
   onRemoveColor: (id: number) => void;
   onAddColor: (index: number) => void;
+  onColorClick?: (color: PaletteColor) => void;
   actions: React.ReactNode;
 }
 
-export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, onAddColor, actions }: InteractivePaletteProps) => {
+export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, onAddColor, onColorClick, actions }: InteractivePaletteProps) => {
   const { toast } = useToast();
 
   const handleCopyColor = (color: string) => {
@@ -50,9 +51,10 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                   className="relative flex-1 min-w-0 flex"
+                  onClick={() => onColorClick?.(color)}
                 >
                   <div 
-                      className="flex-1 min-w-0 flex flex-col justify-between p-2 sm:p-4 transition-colors duration-300 group"
+                      className="flex-1 min-w-0 flex flex-col justify-between p-2 sm:p-4 transition-colors duration-300 group cursor-pointer"
                       style={{ backgroundColor: color.hex, color: textColor }}
                   >
                       <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -60,7 +62,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                               size="icon" 
                               variant="ghost" 
                               className="h-8 w-8 bg-black/20 hover:bg-black/40 text-white"
-                              onClick={() => onLockToggle(color.id)}
+                              onClick={(e) => { e.stopPropagation(); onLockToggle(color.id); }}
                               title={color.locked ? "Unlock color" : "Lock color"}
                           >
                               {color.locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
@@ -69,7 +71,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                               size="icon" 
                               variant="ghost" 
                               className="h-8 w-8 bg-black/20 hover:bg-black/40 text-white"
-                              onClick={() => onRemoveColor(color.id)}
+                              onClick={(e) => { e.stopPropagation(); onRemoveColor(color.id); }}
                               title="Remove Color"
                           >
                               <Trash2 className="h-4 w-4" />
@@ -77,17 +79,18 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                       </div>
                       
                       <div className="text-center flex items-center justify-center gap-1">
-                          <Popover>
+                          <Popover onOpenChange={(open) => { if (open) onColorClick?.(color)}}>
                               <PopoverTrigger asChild>
                                   <Button
                                     variant="ghost"
                                     className="font-mono text-sm sm:text-base font-semibold py-1 px-2 rounded-md bg-black/20 hover:bg-black/40"
                                     style={{ color: textColor }}
+                                    onClick={(e) => e.stopPropagation()}
                                   >
                                       {color.hex.toUpperCase()}
                                   </Button>
                               </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0 border-0">
+                              <PopoverContent className="w-auto p-0 border-0" onClick={(e) => e.stopPropagation()}>
                                   <HexColorPicker color={color.hex} onChange={(newHex) => onColorChange(color.id, newHex)} />
                                   <div className="p-2 border-t border-border bg-background">
                                       <HexColorInput prefixed color={color.hex} onChange={(newHex) => onColorChange(color.id, newHex)} className="w-full p-2 rounded-md bg-muted text-center font-mono uppercase" />
@@ -100,7 +103,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                               variant="ghost" 
                               className="h-8 w-8 bg-black/20 hover:bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity"
                               style={{ color: textColor }}
-                              onClick={() => handleCopyColor(color.hex)}
+                              onClick={(e) => { e.stopPropagation(); handleCopyColor(color.hex); }}
                               title="Copy Hex"
                           >
                               <Copy className="h-4 w-4" />
@@ -108,13 +111,13 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                       </div>
                   </div>
 
-                  {index < palette.length - 1 && palette.length < 10 && (
+                  {index < palette.length && palette.length < 10 && (
                       <div className="absolute top-0 bottom-0 -right-4 w-8 z-10 group/add flex items-center justify-center">
                           <Button
                               variant="outline"
                               size="icon"
                               className="z-10 h-8 w-8 rounded-full opacity-0 group-hover/add:opacity-100 transition-opacity bg-background/50 backdrop-blur-sm hover:bg-background/80"
-                              onClick={() => onAddColor(index + 1)}
+                              onClick={(e) => { e.stopPropagation(); onAddColor(index + 1); }}
                               title="Add color between"
                           >
                               <Plus className="h-4 w-4" />
@@ -133,3 +136,5 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
     </Card>
   );
 };
+
+    
