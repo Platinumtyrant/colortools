@@ -49,10 +49,10 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb
     
     return (
         <div className={cn(
-            "w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground h-full flex flex-col",
+            "w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground",
             className
         )}>
-            <div className="flex gap-3 flex-grow">
+            <div className="flex h-40 gap-3">
                 <div className="relative flex-1 cursor-pointer">
                     <Saturation hsl={hsl} hsv={hsv} onChange={onChange} />
                 </div>
