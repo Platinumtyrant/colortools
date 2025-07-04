@@ -27,6 +27,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CheckCircle2, Contrast } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
+import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -99,6 +100,7 @@ export default function UnifiedBuilderPage() {
   const [contrastTextColor, setContrastTextColor] = useState('#000000');
   
   const { toast } = useToast();
+  const { setExtension } = useSidebarExtension();
 
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
 
@@ -181,21 +183,21 @@ export default function UnifiedBuilderPage() {
     toast({ title: "Palette Saved!", description: "View it in your library." });
   }, [palette, toast]);
 
-  const handleColorUpdateInPalette = (id: number, newHex: string) => {
+  const handleColorUpdateInPalette = useCallback((id: number, newHex: string) => {
     setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
-  };
+  }, []);
 
-  const handleLockToggle = (id: number) => {
+  const handleLockToggle = useCallback((id: number) => {
     setPalette(prev => prev.map(c => c.id === id ? { ...c, locked: !c.locked } : c));
-  };
+  }, []);
 
-  const handleRemoveColor = (id: number) => {
+  const handleRemoveColor = useCallback((id: number) => {
     if (palette.length <= 2) {
         toast({ title: "Minimum 2 colors required.", variant: "destructive" });
         return;
     }
     setPalette(palette.filter(c => c.id !== id));
-  };
+  }, [palette.length, toast]);
 
   const handleAddColorAtIndex = useCallback((index: number) => {
     setPalette(prev => {
@@ -281,6 +283,82 @@ export default function UnifiedBuilderPage() {
   const detectedHarmony = useMemo(() => {
       return analyzePalette(palette.map(p => p.hex));
   }, [palette]);
+
+  // Using useCallback for setters to stabilize useEffect dependency array
+  const stableSetUseBezier = useCallback(setUseBezier, []);
+  const stableSetCorrectLightness = useCallback(setCorrectLightness, []);
+  const stableSetSimulationType = useCallback(setSimulationType, []);
+
+  const analysisPanel = useMemo(() => (
+    <div className="space-y-6">
+        <h3 className="text-lg font-semibold">Palette Analysis</h3>
+        <div className="flex flex-col gap-4">
+            <div className="flex items-center space-x-2">
+                <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
+                <Label htmlFor="useBezier">Bezier interpolation</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+                <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => stableSetCorrectLightness(!!checked)} />
+                <Label htmlFor="correctLightness">Correct lightness</Label>
+            </div>
+            <div className="flex flex-col items-start gap-2">
+                <Label className="text-sm">Simulate:</Label>
+                <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => stableSetSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                    <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
+                    <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                    <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
+                    <Label htmlFor="sb-deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
+                    <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
+                    <Label htmlFor="sb-deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
+                    <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
+                    <Label htmlFor="sb-protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
+                    <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
+                    <Label htmlFor="sb-tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
+                </RadioGroup>
+            </div>
+        </div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="h-5">
+              <AnimatePresence>
+                {isPaletteColorblindSafe && (
+                  <motion.span
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center text-sm text-green-500"
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="flex h-16 w-full overflow-hidden rounded-md border">
+                {simulatedPalette.map((color, index) => (
+                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                ))}
+            </div>
+            <div className="grid grid-cols-1 gap-8 pt-4">
+                <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
+                <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
+                <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
+            </div>
+        </motion.div>
+    </div>
+  ), [
+      useBezier, stableSetUseBezier, 
+      correctLightness, stableSetCorrectLightness,
+      simulationType, stableSetSimulationType,
+      isPaletteColorblindSafe, simulatedPalette, graphData
+  ]);
+
+  useEffect(() => {
+    setExtension(analysisPanel);
+    return () => {
+      setExtension(null);
+    };
+  }, [analysisPanel, setExtension]);
+
 
   return (
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col gap-8">
@@ -424,73 +502,6 @@ export default function UnifiedBuilderPage() {
         <div className="text-center text-sm text-muted-foreground mt-4">
             Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>
         </div>
-      </section>
-      
-      {/* Bottom Section: Analysis */}
-      <section className="w-full max-w-7xl mx-auto">
-        <Card>
-            <CardHeader>
-                <CardTitle>Palette Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                            <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                            <Label htmlFor="useBezier">Bezier interpolation</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
-                            <Label htmlFor="correctLightness">Correct lightness</Label>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <Label className="text-sm">Simulate:</Label>
-                        <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
-                            <RadioGroupItem value="normal" id="normal" className="sr-only" />
-                            <Label htmlFor="normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
-                            <RadioGroupItem value="deutan" id="deutan" className="sr-only" />
-                            <Label htmlFor="deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranopia</Label>
-                            <RadioGroupItem value="deuteranomaly" id="deuteranomaly" className="sr-only" />
-                            <Label htmlFor="deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
-                            <RadioGroupItem value="protan" id="protan" className="sr-only" />
-                            <Label htmlFor="protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protanopia</Label>
-                            <RadioGroupItem value="tritan" id="tritan" className="sr-only" />
-                            <Label htmlFor="tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritanopia</Label>
-                        </RadioGroup>
-                    </div>
-                  </div>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                      <div className="h-5">
-                        <AnimatePresence>
-                          {isPaletteColorblindSafe && (
-                            <motion.span
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 10 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex items-center text-sm text-green-500"
-                            >
-                              <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <div className="flex h-16 w-full overflow-hidden rounded-md border">
-                          {simulatedPalette.map((color, index) => (
-                          <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                          ))}
-                      </div>
-                      <div className="grid md:grid-cols-3 gap-8 pt-4">
-                          <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" />
-                          <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" />
-                          <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" />
-                      </div>
-                  </motion.div>
-              </div>
-            </CardContent>
-        </Card>
       </section>
     </main>
   );

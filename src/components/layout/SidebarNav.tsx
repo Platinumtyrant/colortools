@@ -4,7 +4,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Palette, Layers, Library, Brush, Contrast } from "lucide-react";
-import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarSeparator } from "@/components/ui/sidebar";
+import { useSidebarExtension } from "@/contexts/SidebarExtensionContext";
 
 const menuItems = [
     { href: '/', label: 'Palette Builder', icon: Palette },
@@ -15,6 +16,7 @@ const menuItems = [
 
 export function SidebarNav() {
     const pathname = usePathname();
+    const { extension } = useSidebarExtension();
     
     return (
         <>
@@ -43,8 +45,14 @@ export function SidebarNav() {
                     ))}
                 </SidebarMenu>
             </SidebarContent>
+            {pathname === '/' && extension && (
+                <>
+                    <SidebarSeparator />
+                    <SidebarContent className="p-4">
+                        {extension}
+                    </SidebarContent>
+                </>
+            )}
         </>
     );
 }
-
-    

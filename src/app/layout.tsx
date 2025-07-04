@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/layout/Header";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { Sidebar, SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarExtensionProvider } from "@/contexts/SidebarExtensionContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,17 +30,19 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body className="font-headline antialiased">
-        <SidebarProvider defaultOpen={true}>
-          <Sidebar>
-              <SidebarNav />
-          </Sidebar>
-          <SidebarInset>
-              <Header />
-              <main className="flex-1">
-                {children}
-              </main>
-          </SidebarInset>
-        </SidebarProvider>
+        <SidebarExtensionProvider>
+          <SidebarProvider defaultOpen={true}>
+            <Sidebar>
+                <SidebarNav />
+            </Sidebar>
+            <SidebarInset>
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+            </SidebarInset>
+          </SidebarProvider>
+        </SidebarExtensionProvider>
         <Toaster />
       </body>
     </html>
