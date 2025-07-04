@@ -70,7 +70,7 @@ const ChartDisplay = ({ data, title, color }: { data: { name: number; value: num
   <div>
     <h3 className="text-sm font-medium text-muted-foreground mb-2">{title}</h3>
     <ResponsiveContainer width="100%" height={150}>
-      <LineChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+      <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} />
