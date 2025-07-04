@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { HexColorPicker, HexColorInput } from 'react-colorful';
+import { Saturation, Hue, HexColorInput } from 'react-colorful';
 import chroma from 'chroma-js';
 import { colord } from 'colord';
 import { useToast } from "@/hooks/use-toast";
@@ -222,6 +222,7 @@ export default function UnifiedBuilderPage() {
   };
 
   // --- Memoized Derived State ---
+  const hsv = useMemo(() => colord(activeColorHex).toHsv(), [activeColorHex]);
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
   const simulatedPalette = useMemo(() => {
     if (paletteHexes.length === 0) return [];
@@ -287,8 +288,19 @@ export default function UnifiedBuilderPage() {
                         <CardDescription>Click a color in the palette above to edit it.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col md:flex-row gap-8 items-start">
-                        <div className="w-full md:w-1/2 flex flex-col items-center gap-4">
-                            <HexColorPicker color={activeColorHex} onChange={handleActiveColorChange} className="w-full"/>
+                        <div className="w-full md:w-1/2 flex flex-col gap-4">
+                           <div className="w-full space-y-3">
+                                <Saturation
+                                    hsv={hsv}
+                                    onChange={(newSV) => handleActiveColorChange(colord({ ...hsv, ...newSV }).toHex())}
+                                    className="w-full aspect-video rounded-lg border-border border cursor-pointer"
+                                />
+                                <Hue
+                                    hue={hsv.h}
+                                    onChange={(newHue) => handleActiveColorChange(colord({ ...hsv, h: newHue }).toHex())}
+                                    className="w-full h-4 rounded-lg border-border border cursor-pointer"
+                                />
+                            </div>
                         </div>
                         <div className="w-full md:w-1/2 flex flex-col gap-4">
                              <div className="flex items-center gap-4">
@@ -466,5 +478,7 @@ export default function UnifiedBuilderPage() {
     </div>
   );
 }
+
+    
 
     
