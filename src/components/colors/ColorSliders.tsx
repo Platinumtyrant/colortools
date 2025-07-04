@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 
 interface ColorSlidersProps {
     hsl: HslColor;
-    onChange: (hsl: HslColor) => void;
+    onChange: (color: any) => void;
     title?: string;
 }
 
@@ -21,7 +21,7 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
     }, [color]);
 
     const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
-        onChange({ ...hsl, [key]: value });
+        onChange({ ...hsl, [key]: value, source: 'hsl' });
     }, [hsl, onChange]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,9 +33,9 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
             
             // Preserve hue for black/white/gray colors
             if (newHsl.s === 0 || newHsl.l === 0 || newHsl.l === 100) {
-                onChange({ h: hsl.h, s: newHsl.s, l: newHsl.l });
+                onChange({ h: hsl.h, s: newHsl.s, l: newHsl.l, source: 'hsl' });
             } else {
-                onChange(newHsl);
+                onChange({...newHsl, source: 'hsl'});
             }
         }
     }, [hsl, onChange]);
