@@ -249,74 +249,71 @@ export default function UnifiedBuilderPage() {
   return (
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col gap-8">
       {/* Top Section: Picker and Active Color Details */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start justify-items-center gap-8 w-full max-w-7xl mx-auto">
-        <div className="w-full flex justify-center">
+      <section className="grid grid-cols-1 lg:grid-cols-3 items-start gap-8 w-full max-w-7xl mx-auto">
+        <div className="w-full flex justify-center lg:justify-start">
             <ColorPickerClient 
               color={mainColor} 
               onChange={handleColorChange}
             />
         </div>
 
-        <Card className="w-full max-w-sm">
-            <CardHeader>
-                <CardTitle>Active Color</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div 
-                  className="w-full h-24 rounded-md border"
-                  style={{ backgroundColor: mainColor }}
-                />
-                <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Name</span>
-                        <span className="font-mono font-semibold capitalize">{colorName}</span>
+        <div className="w-full flex justify-center">
+            <Card className="w-full max-w-sm">
+                <CardHeader>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div 
+                      className="w-full h-24 rounded-md border"
+                      style={{ backgroundColor: mainColor }}
+                    />
+                    <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Name</span>
+                            <span className="font-mono font-semibold capitalize">{colorName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">HEX</span>
+                            <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">RGB</span>
+                            <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">HSL</span>
+                            <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
+                        </div>
+                         <div className="flex justify-between">
+                          <span className="text-muted-foreground">CMYK</span>
+                          <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
+                      </div>
+                      <div className="flex justify-between">
+                          <span className="text-muted-foreground">LCH</span>
+                          <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
+                      </div>
+                      <div className="flex justify-between">
+                          <span className="text-muted-foreground">CIELAB</span>
+                          <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">HEX</span>
-                        <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">RGB</span>
-                        <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">HSL</span>
-                        <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
-                    </div>
-                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">CMYK</span>
-                      <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
-                  </div>
-                  <div className="flex justify-between">
-                      <span className="text-muted-foreground">LCH</span>
-                      <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
-                  </div>
-                  <div className="flex justify-between">
-                      <span className="text-muted-foreground">CIELAB</span>
-                      <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
-                  </div>
-                </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleAddColorToPalette} className="w-full">
-                  Add to Current Palette
-              </Button>
-            </CardFooter>
-        </Card>
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={handleAddColorToPalette} className="w-full">
+                      Add to Current Palette
+                  </Button>
+                </CardFooter>
+            </Card>
+        </div>
 
-        {/* This card is a placeholder to balance the grid */}
-        <div className="hidden lg:block w-full max-w-sm" />
-      </section>
-
-      {/* Mid Section: Generator Controls */}
-      <section className="w-full max-w-7xl mx-auto">
-        <PaletteGenerator
-          onRandomize={regeneratePalette}
-          onReset={handleReset}
-          generationType={generationType}
-          setGenerationType={setGenerationType}
-          isGenerationLocked={isGenerationLocked}
-        />
+        <div className="w-full flex justify-center lg:justify-end">
+            <PaletteGenerator
+              onRandomize={regeneratePalette}
+              onReset={handleReset}
+              generationType={generationType}
+              setGenerationType={setGenerationType}
+              isGenerationLocked={isGenerationLocked}
+            />
+        </div>
       </section>
       
       {/* Palette Display Section */}
@@ -385,5 +382,3 @@ export default function UnifiedBuilderPage() {
     </main>
   );
 }
-
-    
