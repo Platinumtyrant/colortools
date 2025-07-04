@@ -24,7 +24,7 @@ export const PaletteGenerator = ({
   isGenerationLocked,
 }: PaletteGeneratorProps) => {
   return (
-    <Card className="bg-card border-border shadow-lg">
+    <Card className="bg-card border-border shadow-lg w-full max-w-sm">
       <CardHeader>
         <CardTitle>Generate a New Palette</CardTitle>
         <CardDescription>
