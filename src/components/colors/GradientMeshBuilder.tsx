@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus, Trash2 } from 'lucide-react';
+import { colord } from 'colord';
 
 interface Point {
   id: number;
@@ -19,12 +20,47 @@ interface Point {
   spread: number;
 }
 
-export const GradientMeshBuilder = () => {
-    const [points, setPoints] = useState<Point[]>([
-        { id: 1, x: 10, y: 10, color: '#ff8a80', spread: 50 },
-        { id: 2, x: 90, y: 90, color: '#8c9eff', spread: 50 },
-    ]);
-    const nextId = useRef(3);
+interface GradientMeshBuilderProps {
+    initialColors?: string[];
+}
+
+export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps) => {
+    const [points, setPoints] = useState<Point[]>(() => {
+        const defaultPoints = [
+            { id: 1, x: 10, y: 10, color: '#ff8a80', spread: 50 },
+            { id: 2, x: 90, y: 90, color: '#8c9eff', spread: 50 },
+        ];
+        if (!initialColors || initialColors.length === 0) {
+            return defaultPoints;
+        }
+        const basePoints = [
+            { x: 10, y: 10, spread: 50 },
+            { x: 90, y: 90, spread: 50 },
+            { x: 10, y: 90, spread: 50 },
+            { x: 90, y: 10, spread: 50 },
+            { x: 50, y: 50, spread: 50 },
+            { x: 25, y: 75, spread: 50 },
+        ];
+        const newPoints = initialColors.slice(0, 6).map((color, index) => ({
+            id: index + 1,
+            color,
+            ...basePoints[index % basePoints.length],
+        }));
+
+        if (newPoints.length === 1) {
+            newPoints.push({
+                id: 2,
+                ...basePoints[1],
+                color: colord(newPoints[0].color).isLight()
+                    ? colord(newPoints[0].color).darken(0.3).toHex()
+                    : colord(newPoints[0].color).lighten(0.3).toHex(),
+            });
+        }
+        if (newPoints.length === 0) return defaultPoints;
+        return newPoints;
+    });
+    
+    const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     
     const previewRef = useRef<HTMLDivElement>(null);
     const draggingPointIdRef = useRef<number | null>(null);
@@ -139,6 +175,10 @@ export const GradientMeshBuilder = () => {
 
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
+            <CardHeader className="p-0 mb-4">
+                <CardTitle className="text-3xl">Gradient Mesh Builder</CardTitle>
+                <CardDescription>Create beautiful, complex gradients by adding and manipulating color points.</CardDescription>
+            </CardHeader>
             <CardContent className="grid lg:grid-cols-2 gap-8 p-0">
                 <div className="lg:col-span-1 space-y-4">
                     <div
