@@ -18,21 +18,11 @@ interface CustomPickerProps extends ColorState {
 }
 
 const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb, hsv, onChange, className }) => {
-    const [localHex, setLocalHex] = useState(hex);
     const [localRgb, setLocalRgb] = useState(rgb);
 
     useEffect(() => {
-        setLocalHex(hex);
         setLocalRgb(rgb);
-    }, [hex, rgb]);
-
-    const handleHexChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const newHex = e.target.value;
-        setLocalHex(newHex);
-        if (colord(newHex).isValid()) {
-            onChange(newHex);
-        }
-    }, [onChange]);
+    }, [rgb]);
 
     const handleRgbChange = useCallback((component: 'r' | 'g' | 'b', value: string) => {
         const numValue = parseInt(value, 10);
@@ -55,20 +45,12 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb
             "w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground",
             className
         )}>
-            <div className="flex h-40 gap-3">
-                <div className="relative flex-1 cursor-pointer">
+            <div className="relative h-40 space-y-3">
+                <div className="relative h-[calc(100%-2.5rem)] cursor-pointer">
                     <Saturation hsl={hsl} hsv={hsv} onChange={onChange} />
                 </div>
-                <div className="relative w-5 cursor-pointer">
-                    <Hue hsl={hsl} onChange={onChange} direction="vertical" />
-                </div>
-            </div>
-            
-            <div className="flex items-center gap-4 pt-2">
-                <div className="h-10 w-10 flex-shrink-0 rounded-md border" style={{ backgroundColor: hex }}></div>
-                <div className="flex-grow space-y-1">
-                    <Label htmlFor="hex-input" className="text-xs font-normal text-muted-foreground">HEX</Label>
-                    <Input id="hex-input" value={localHex.toUpperCase()} onChange={handleHexChange} className="h-8 font-mono text-sm" />
+                <div className="relative h-5 cursor-pointer">
+                    <Hue hsl={hsl} onChange={onChange} />
                 </div>
             </div>
 
@@ -87,7 +69,7 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hex, hsl, rgb
                 </div>
             </div>
 
-            <div className="pt-2">
+            <div>
                 <ColorSliders hsl={hsl} onChange={handleHslChange} />
             </div>
         </div>

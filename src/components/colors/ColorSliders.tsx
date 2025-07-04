@@ -49,15 +49,16 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
     return (
         <div className="space-y-3">
             {title && <Label>{title}</Label>}
-            <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-4">
+                 <div className="h-10 w-10 flex-shrink-0 rounded-md border" style={{ backgroundColor: color }} />
                  <Input
-                    value={inputValue}
+                    value={inputValue.toUpperCase()}
                     onChange={handleInputChange}
                     onBlur={handleInputBlur}
                     className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
                 />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 pt-2">
                 <Label className="text-xs">Hue</Label>
                 <Slider value={[hsl.h]} onValueChange={([v]) => handleHslChange('h', v)} max={360} step={1} />
             </div>
