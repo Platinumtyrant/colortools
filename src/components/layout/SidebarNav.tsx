@@ -3,16 +3,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Palette, Layers, Library, Brush, Contrast } from "lucide-react";
-import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarSeparator } from "@/components/ui/sidebar";
+import { Brush } from "lucide-react";
+import { SidebarHeader, SidebarContent, SidebarSeparator } from "@/components/ui/sidebar";
 import { useSidebarExtension } from "@/contexts/SidebarExtensionContext";
-
-const menuItems = [
-    { href: '/', label: 'Palette Builder', icon: Palette },
-    { href: '/mesh-gradient', label: 'Gradient Builder', icon: Layers },
-    { href: '/contrast-checker', label: 'Contrast Checker', icon: Contrast },
-    { href: '/library', label: 'Library', icon: Library },
-];
 
 export function SidebarNav() {
     const pathname = usePathname();
@@ -28,22 +21,6 @@ export function SidebarNav() {
                 <h1 className="font-bold text-lg group-data-[collapsible=icon]:hidden">Palette Prodigy</h1>
             </SidebarHeader>
             <SidebarContent>
-                <SidebarMenu>
-                    {menuItems.map((item) => (
-                        <SidebarMenuItem key={item.href}>
-                             <SidebarMenuButton
-                                asChild
-                                isActive={pathname === item.href}
-                                tooltip={item.label}
-                             >
-                                <Link href={item.href}>
-                                    <item.icon />
-                                    <span>{item.label}</span>
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    ))}
-                </SidebarMenu>
                 {pathname === '/' && extension && (
                     <>
                         <SidebarSeparator />
