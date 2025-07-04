@@ -174,7 +174,7 @@ export default function UnifiedBuilderPage() {
         } else if (colorBefore) {
             newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
         } else if (colorAfter) {
-            newHex = chroma(after).set('lch.l', '*1.2').hex();
+            newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
         } else {
             newHex = getRandomColor();
         }
@@ -490,7 +490,3 @@ export default function UnifiedBuilderPage() {
     </div>
   );
 }
-
-    
-
-    
