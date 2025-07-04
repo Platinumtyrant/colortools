@@ -94,7 +94,7 @@ export default function UnifiedBuilderPage() {
 
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
 
-  const regeneratePalette = useCallback((isRandomizing = false) => {
+  const regeneratePalette = useCallback(() => {
     const lockedColors = palette.filter(c => c.locked).map(c => c.hex);
     const baseColors = lockedColors.length > 0 ? lockedColors : [mainColor];
     const numColors = palette.length > 1 ? palette.length : 5;
@@ -223,22 +223,30 @@ export default function UnifiedBuilderPage() {
   const colorLab = colord(mainColor).toLab();
 
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
-  const processedPalette = useMemo(() => {
+
+  const analysisSourcePalette = useMemo(() => {
     if (paletteHexes.length < 2) return paletteHexes;
+
+    // If no processing is selected, use the raw hexes to avoid any automatic scaling adjustments.
+    if (!useBezier && !correctLightness) {
+        return paletteHexes;
+    }
+
+    // Otherwise, apply the selected processing.
     const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
     let scale = chroma.scale(interpolator).mode('lch');
     if (correctLightness) {
       scale = scale.correctLightness();
     }
     return scale.colors(paletteHexes.length);
-  }, [paletteHexes, correctLightness, useBezier]);
-
-  const simulatedPalette = useMemo(() => {
-    if (paletteHexes.length === 0) return [];
-    return (correctLightness ? processedPalette : paletteHexes).map(color => simulate(color, simulationType));
-  }, [processedPalette, paletteHexes, simulationType, correctLightness]);
+  }, [paletteHexes, useBezier, correctLightness]);
   
-  const graphData = useMemo(() => getGraphData(correctLightness ? processedPalette : paletteHexes), [processedPalette, paletteHexes, correctLightness]);
+  const simulatedPalette = useMemo(() => {
+    if (analysisSourcePalette.length === 0) return [];
+    return analysisSourcePalette.map(color => simulate(color, simulationType));
+  }, [analysisSourcePalette, simulationType]);
+  
+  const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
   
   const isPaletteColorblindSafe = useMemo(() => {
     if (simulatedPalette.length < 2) return true;
@@ -420,3 +428,5 @@ export default function UnifiedBuilderPage() {
     </main>
   );
 }
+
+    
