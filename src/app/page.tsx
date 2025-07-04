@@ -25,7 +25,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ContrastChecker } from '@/components/colors/ContrastChecker';
 
@@ -34,7 +34,7 @@ extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerClient'), {
   ssr: false,
   loading: () => (
-    <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
+    <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground h-full">
         <div className="flex gap-3 h-40">
             <Skeleton className="relative flex-1 cursor-pointer" />
             <Skeleton className="relative w-5 cursor-pointer" />
@@ -161,7 +161,7 @@ export default function UnifiedBuilderPage() {
   }, [palette, toast]);
 
   const handleColorUpdateInPalette = (id: number, newHex: string) => {
-    setPalette(prev => adjustForColorblindSafety(prev.map(c => c.id === id ? { ...c, hex: newHex } : c)));
+    setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
   };
 
   const handleLockToggle = (id: number) => {
@@ -194,7 +194,7 @@ export default function UnifiedBuilderPage() {
         } else if (colorBefore) {
             newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
         } else if (colorAfter) {
-            newHex = chroma(after).set('lch.l', '*1.2').hex();
+            newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
         } else {
             newHex = getRandomColor();
         }
@@ -382,7 +382,22 @@ export default function UnifiedBuilderPage() {
                           </div>
                         </div>
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                            {isPaletteColorblindSafe && <span className="flex items-center text-sm text-green-500"><CheckCircle2 className="mr-2 h-4 w-4" /> This palette is colorblind-safe.</span>}
+                            <div className="h-5">
+                              <AnimatePresence>
+                                {isPaletteColorblindSafe && (
+                                  <motion.span
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex items-center text-sm text-green-500"
+                                  >
+                                    <CheckCircle2 className="mr-2 h-4 w-4" /> This palette is
+                                    colorblind-safe.
+                                  </motion.span>
+                                )}
+                              </AnimatePresence>
+                            </div>
                             <div className="flex h-16 w-full overflow-hidden rounded-md border">
                                 {simulatedPalette.map((color, index) => (
                                 <div key={index} style={{ backgroundColor: color }} className="flex-1" />
