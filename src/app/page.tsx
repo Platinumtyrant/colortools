@@ -84,12 +84,20 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
       <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} />
+        <YAxis 
+          stroke="hsl(var(--muted-foreground))" 
+          fontSize={12} 
+          tickLine={false} 
+          axisLine={false} 
+          domain={['dataMin', 'dataMax']}
+          tickFormatter={(value) => typeof value === 'number' ? value.toFixed(0) : value}
+        />
         <Tooltip
           contentStyle={{
             backgroundColor: 'hsl(var(--background))',
             borderColor: 'hsl(var(--border))',
           }}
+          formatter={(value: number) => value.toFixed(2)}
         />
         <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 4, stroke: color, fill: color }}  />
       </LineChart>
@@ -329,8 +337,17 @@ export default function UnifiedBuilderPage() {
         <h3 className="text-lg font-semibold">Palette Analysis</h3>
         <div className="flex flex-col gap-4">
             <div className="flex items-center space-x-2">
-                <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
-                <Label htmlFor="useBezier">Bezier interpolation</Label>
+              <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
+                <TooltipProvider>
+                    <ShadTooltip>
+                        <TooltipTrigger asChild>
+                            <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                        </TooltipContent>
+                    </ShadTooltip>
+                </TooltipProvider>
             </div>
             <div className="flex items-center space-x-2">
                 <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => stableSetCorrectLightness(!!checked)} />

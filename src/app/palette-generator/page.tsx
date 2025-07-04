@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -35,16 +36,24 @@ const getGraphData = (colors: string[]) => {
 const ChartDisplay = ({ data, title, color }: { data: { name: number; value: number }[], title: string, color: string }) => (
   <div>
     <h3 className="text-sm font-medium text-muted-foreground mb-2">{title}</h3>
-    <ResponsiveContainer width="100%" height={150}>
+    <ResponsiveContainer width="100%" height={120}>
       <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} />
+        <YAxis 
+            stroke="hsl(var(--muted-foreground))" 
+            fontSize={12} 
+            tickLine={false} 
+            axisLine={false} 
+            domain={['dataMin', 'dataMax']} 
+            tickFormatter={(value) => typeof value === 'number' ? value.toFixed(0) : value}
+        />
         <Tooltip
           contentStyle={{
             backgroundColor: 'hsl(var(--background))',
             borderColor: 'hsl(var(--border))',
           }}
+          formatter={(value: number) => value.toFixed(2)}
         />
         <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} activeDot={{ r: 4, stroke: color, fill: color }}  />
       </LineChart>
@@ -241,7 +250,16 @@ export default function PaletteGeneratorPage() {
                     <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-2">
                             <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                            <Label htmlFor="useBezier">Bezier interpolation</Label>
+                            <TooltipProvider>
+                                <ShadTooltip>
+                                    <TooltipTrigger asChild>
+                                        <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                                    </TooltipContent>
+                                </ShadTooltip>
+                            </TooltipProvider>
                         </div>
                         <div className="flex items-center space-x-2">
                             <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
