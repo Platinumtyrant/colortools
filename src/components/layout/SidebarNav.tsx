@@ -44,15 +44,15 @@ export function SidebarNav() {
                         </SidebarMenuItem>
                     ))}
                 </SidebarMenu>
+                {pathname === '/' && extension && (
+                    <>
+                        <SidebarSeparator />
+                        <div className="p-4">
+                            {extension}
+                        </div>
+                    </>
+                )}
             </SidebarContent>
-            {pathname === '/' && extension && (
-                <>
-                    <SidebarSeparator />
-                    <SidebarContent className="p-4">
-                        {extension}
-                    </SidebarContent>
-                </>
-            )}
         </>
     );
 }
