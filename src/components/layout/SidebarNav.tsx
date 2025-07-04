@@ -3,11 +3,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Palette, Layers, Library, Brush, SlidersHorizontal, Contrast, Wand2 } from "lucide-react";
+import { Palette, Layers, Library, Brush, SlidersHorizontal, Contrast } from "lucide-react";
 import { SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 const menuItems = [
-    { href: '/unified-builder', label: 'Unified Builder', icon: Wand2 },
     { href: '/', label: 'Palette Builder', icon: Palette },
     { href: '/mesh-gradient', label: 'Gradient Builder', icon: Layers },
     { href: '/palette-generator', label: 'Palette Generator', icon: SlidersHorizontal },
