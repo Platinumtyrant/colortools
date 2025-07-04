@@ -81,7 +81,7 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
       </ShadTooltip>
     </TooltipProvider>
     <ResponsiveContainer width="100%" height={120}>
-      <LineChart data={data} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+      <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} domain={['dataMin', 'dataMax']} />
