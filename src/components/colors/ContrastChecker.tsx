@@ -132,35 +132,37 @@ export const ContrastChecker = () => {
 
     return (
         <div className="space-y-4">
-             <div 
-                className="relative flex flex-col h-48 w-full transition-colors duration-200 rounded-lg border p-4 items-center justify-center"
-                style={{ backgroundColor: bgColor, color: textColor }}
-            >
-                <h2 className="text-5xl font-bold select-none">Aa</h2>
-                <p className="text-sm">Some sample text</p>
-            </div>
-            
-            <div className="bg-muted/50 p-4 rounded-lg">
-                <div className='flex justify-between items-center mb-4'>
-                    <div className="font-semibold text-sm">WCAG Conformance</div>
-                    <div className="bg-background text-foreground p-2 rounded-lg text-center border">
-                        <p className="text-lg font-bold">{contrastRatio.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">Ratio</p>
-                    </div>
+            <div className="grid md:grid-cols-2 gap-4 items-stretch">
+                <div 
+                    className="relative flex flex-col min-h-[12rem] w-full transition-colors duration-200 rounded-lg border p-4 items-center justify-center"
+                    style={{ backgroundColor: bgColor, color: textColor }}
+                >
+                    <h2 className="text-5xl font-bold select-none">Aa</h2>
+                    <p className="text-sm">Some sample text</p>
                 </div>
-                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="font-bold text-muted-foreground"></div>
-                    <div className="font-bold text-muted-foreground">Normal Text</div>
-                    <div className="font-bold text-muted-foreground">Large Text</div>
-                    
-                    <div className="font-bold flex items-center justify-center">AA</div>
-                    <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
-                    <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
+                
+                <div className="bg-muted/50 p-4 rounded-lg flex flex-col justify-center">
+                    <div className='flex justify-between items-center mb-4'>
+                        <div className="font-semibold text-sm">WCAG Conformance</div>
+                        <div className="bg-background text-foreground p-2 rounded-lg text-center border">
+                            <p className="text-lg font-bold">{contrastRatio.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">Ratio</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div className="font-bold text-muted-foreground"></div>
+                        <div className="font-bold text-muted-foreground">Normal Text</div>
+                        <div className="font-bold text-muted-foreground">Large Text</div>
+                        
+                        <div className="font-bold flex items-center justify-center">AA</div>
+                        <ResultBadge passed={results.aa.normal} text={results.aa.normal ? "Pass" : "Fail"} />
+                        <ResultBadge passed={results.aa.large} text={results.aa.large ? "Pass" : "Fail"} />
 
-                    <div className="font-bold flex items-center justify-center">AAA</div>
-                    <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
-                    <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
-               </div>
+                        <div className="font-bold flex items-center justify-center">AAA</div>
+                        <ResultBadge passed={results.aaa.normal} text={results.aaa.normal ? "Pass" : "Fail"} />
+                        <ResultBadge passed={results.aaa.large} text={results.aaa.large ? "Pass" : "Fail"} />
+                   </div>
+                </div>
             </div>
 
             <div className="grid md:grid-cols-[1fr_auto_1fr] items-start gap-4">
