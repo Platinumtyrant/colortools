@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useCallback } from 'react';
@@ -221,21 +222,21 @@ export default function ColorPaletteBuilderPage() {
                             </div>
                         </div>
 
-                        <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
+                        <div className="w-full md:w-1/2 flex flex-col gap-4">
                             
                             <Card className="p-4 bg-muted/50">
                                 <div className="flex gap-4 items-center">
                                     <div className="w-16 h-16 rounded-md border" style={{ backgroundColor: mainColor }}/>
                                     <div className="text-sm flex-1 space-y-1">
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex justify-between items-center whitespace-nowrap gap-2">
                                             <span className="text-muted-foreground">HEX:</span>
                                             <span className="font-semibold text-left font-mono">{hex}</span>
                                         </div>
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex justify-between items-center whitespace-nowrap gap-2">
                                             <span className="text-muted-foreground">RGB:</span>
                                             <span className="font-semibold text-left font-mono">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
                                         </div>
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex justify-between items-center whitespace-nowrap gap-2">
                                             <span className="text-muted-foreground">HSL:</span>
                                             <span className="font-semibold text-left font-mono">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
                                         </div>
