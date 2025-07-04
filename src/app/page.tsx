@@ -19,6 +19,7 @@ import {
 import { ColorList } from '@/components/colors/ColorList';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -162,7 +163,7 @@ export default function ColorPaletteBuilderPage() {
   return (
     <main className="w-full flex flex-col lg:flex-row gap-8 p-4 md:p-8">
         
-        <div className="flex-shrink-0 lg:w-2/5 space-y-4">
+        <div className="flex-shrink-0 lg:w-[580px] space-y-4">
             <div className="sticky top-8 space-y-4 self-start">
                 <Card>
                   <CardHeader>
@@ -222,26 +223,28 @@ export default function ColorPaletteBuilderPage() {
 
                         <div className="w-full md:w-1/2 grid grid-cols-1 gap-4">
                             
-                            <div className="flex gap-4 items-center p-2 border rounded-md">
-                                <div className="w-16 h-16 rounded-md" style={{ backgroundColor: mainColor }}/>
-                                <div className="text-sm flex-1 space-y-1">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">HEX:</span>
-                                        <span className="font-semibold text-left font-mono">{hex}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">RGB:</span>
-                                        <span className="font-semibold text-left font-mono">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">HSL:</span>
-                                        <span className="font-semibold text-left font-mono">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+                            <Card className="p-4 bg-muted/50">
+                                <div className="flex gap-4 items-center">
+                                    <div className="w-16 h-16 rounded-md border" style={{ backgroundColor: mainColor }}/>
+                                    <div className="text-sm flex-1 space-y-1">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">HEX:</span>
+                                            <span className="font-semibold text-left font-mono">{hex}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">RGB:</span>
+                                            <span className="font-semibold text-left font-mono">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">HSL:</span>
+                                            <span className="font-semibold text-left font-mono">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Card>
 
                             <div className="flex flex-col gap-2">
-                            <label className="text-sm text-muted-foreground">HSL</label>
+                            <Label className="text-sm text-muted-foreground">HSL</Label>
                             <div className="flex gap-2">
                                 <Input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3" />
                                 <Input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3" />
@@ -249,7 +252,7 @@ export default function ColorPaletteBuilderPage() {
                             </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                            <label className="text-sm text-muted-foreground">RGB</label>
+                            <Label className="text-sm text-muted-foreground">RGB</Label>
                             <div className="flex gap-2">
                                 <Input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3" />
                                 <Input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3" />
@@ -257,7 +260,7 @@ export default function ColorPaletteBuilderPage() {
                             </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                            <label className="text-sm text-muted-foreground">HEX</label>
+                            <Label className="text-sm text-muted-foreground">HEX</Label>
                             <HexColorInput color={hex} onChange={handleHexChange} className={cn("flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", "uppercase")} />
                             </div>
                         </div>
@@ -304,7 +307,7 @@ export default function ColorPaletteBuilderPage() {
             </div>
         </div>
         
-        <div className="lg:w-3/5 space-y-8">
+        <div className="flex-1 space-y-8">
             <Card asChild>
                 <Tabs defaultValue="tints" className="w-full">
                     <CardHeader>
