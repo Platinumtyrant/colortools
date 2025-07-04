@@ -21,7 +21,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 
 export default function ColorPaletteBuilderPage() {
@@ -163,8 +164,11 @@ export default function ColorPaletteBuilderPage() {
         
         <div className="flex-shrink-0 lg:w-2/5 space-y-4">
             <div className="sticky top-8 space-y-4 self-start">
-                <Card className="p-6 shadow-xl w-full">
-                    <h2 className="text-2xl font-bold text-white mb-4">Palette Builder</h2>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Palette Builder</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div className="flex flex-col md:flex-row gap-8 items-start">
                         <div className="w-full md:w-1/2 flex flex-col gap-4">
                             <div className="w-full">
@@ -173,7 +177,7 @@ export default function ColorPaletteBuilderPage() {
                             
                             <div className="space-y-2">
                                 <div className="flex justify-between items-center">
-                                <label className="text-sm text-gray-400">Current Palette</label>
+                                <label className="text-sm text-muted-foreground">Current Palette</label>
                                 {paletteColors.length > 0 && (
                                     <Button
                                     variant="ghost"
@@ -220,73 +224,83 @@ export default function ColorPaletteBuilderPage() {
                             
                             <div className="flex gap-4 items-center p-2 border rounded-md">
                                 <div className="w-16 h-16 rounded-md" style={{ backgroundColor: mainColor }}/>
-                                <div className="text-white text-sm flex-1 space-y-1">
+                                <div className="text-sm flex-1 space-y-1">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-400">HEX:</span>
+                                        <span className="text-muted-foreground">HEX:</span>
                                         <span className="font-semibold text-left font-mono">{hex}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-400">RGB:</span>
+                                        <span className="text-muted-foreground">RGB:</span>
                                         <span className="font-semibold text-left font-mono">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-400">HSL:</span>
+                                        <span className="text-muted-foreground">HSL:</span>
                                         <span className="font-semibold text-left font-mono">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-2">
-                            <label className="text-sm text-gray-400">HSL</label>
+                            <label className="text-sm text-muted-foreground">HSL</label>
                             <div className="flex gap-2">
-                                <input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                                <input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                                <input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                                <Input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3" />
+                                <Input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3" />
+                                <Input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3" />
                             </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                            <label className="text-sm text-gray-400">RGB</label>
+                            <label className="text-sm text-muted-foreground">RGB</label>
                             <div className="flex gap-2">
-                                <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                                <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
-                                <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3 p-2  bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-primary" />
+                                <Input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3" />
+                                <Input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3" />
+                                <Input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3" />
                             </div>
                             </div>
                             <div className="flex flex-col gap-2">
-                            <label className="text-sm text-gray-400">HEX</label>
-                            <HexColorInput color={hex} onChange={handleHexChange} className="w-full p-2  bg-gray-700 border border-gray-600 text-white uppercase focus:outline-none focus:ring-2 focus:ring-primary" />
+                            <label className="text-sm text-muted-foreground">HEX</label>
+                            <HexColorInput color={hex} onChange={handleHexChange} className={cn("flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", "uppercase")} />
                             </div>
                         </div>
                     </div>
+                  </CardContent>
                 </Card>
 
-                <section className="bg-card p-6 shadow-xl">
-                    <h2 className="text-2xl font-bold text-white mb-4">Swatches</h2>
-                    <div className="flex border-b border-gray-700 mb-4 overflow-x-auto">
-                        {Object.keys(swatches).map(hue => (
-                        <button
-                            key={hue}
-                            className={`py-2 px-4 text-xs sm:text-sm font-medium capitalize flex-shrink-0 ${activeSwatchTab === hue ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                            onClick={() => setActiveSwatchTab(hue)}
-                        >
-                            {hue}
-                        </button>
-                        ))}
-                    </div>
-                    <div className="h-[450px] overflow-y-auto">
-                      <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1 p-1">
-                          {currentSwatchColors.map((color, index) => (
-                          <div
-                              key={index}
-                              className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110"
-                              style={{ backgroundColor: color }}
-                              onClick={() => setMainColor(color)}
-                              title={`Set ${color} as active`}
-                          ></div>
-                          ))}
-                      </div>
-                    </div>
-                </section>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Swatches</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="border-b border-border mb-4 overflow-x-auto">
+                            {Object.keys(swatches).map(hue => (
+                            <button
+                                key={hue}
+                                className={cn(
+                                    "py-2 px-4 text-xs sm:text-sm font-medium capitalize flex-shrink-0 border-b-2",
+                                    activeSwatchTab === hue 
+                                    ? 'text-foreground border-primary' 
+                                    : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
+                                )}
+                                onClick={() => setActiveSwatchTab(hue)}
+                            >
+                                {hue}
+                            </button>
+                            ))}
+                        </div>
+                        <div className="h-[450px] overflow-y-auto">
+                          <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-1 p-1">
+                              {currentSwatchColors.map((color, index) => (
+                              <div
+                                  key={index}
+                                  className="w-full h-12 cursor-pointer transition-transform duration-100 hover:scale-110"
+                                  style={{ backgroundColor: color }}
+                                  onClick={() => setMainColor(color)}
+                                  title={`Set ${color} as active`}
+                              ></div>
+                              ))}
+                          </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
         
@@ -336,21 +350,30 @@ export default function ColorPaletteBuilderPage() {
                 </Tabs>
             </Card>
 
-            <section className="bg-card p-6 shadow-xl">
-                <h2 className="text-2xl font-bold text-white mb-4">Color Harmonies</h2>
-                <div className="flex border-b border-gray-700 mb-4 overflow-x-auto pb-2">
-                {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
-                    <button
-                    key={harmony}
-                    className={`py-2 px-4 text-sm font-medium capitalize flex-shrink-0 ${activeHarmonyType === harmony ? 'text-white border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                    onClick={() => setActiveHarmonyType(harmony)}
-                    >
-                    {harmony.replace('-', ' ')}
-                    </button>
-                ))}
-                </div>
-                <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
-            </section>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Color Harmonies</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="border-b border-border mb-4 overflow-x-auto">
+                    {['complementary', 'analogous', 'split-complementary', 'triad', 'square', 'rectangle'].map(harmony => (
+                        <button
+                        key={harmony}
+                        className={cn(
+                            "py-2 px-4 text-sm font-medium capitalize flex-shrink-0 border-b-2",
+                            activeHarmonyType === harmony 
+                            ? 'text-foreground border-primary' 
+                            : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
+                        )}
+                        onClick={() => setActiveHarmonyType(harmony)}
+                        >
+                        {harmony.replace('-', ' ')}
+                        </button>
+                    ))}
+                    </div>
+                    <ColorList colors={currentHarmonyColors} title="" onSetActiveColor={setMainColor} onCopySuccess={handleCopySuccess} onAdd={handleAddSpecificColorToPalette} gridClassName={responsiveGridClasses} />
+                </CardContent>
+            </Card>
         </div>
     </main>
   );
