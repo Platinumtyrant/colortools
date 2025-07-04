@@ -26,13 +26,13 @@ export const PaletteGenerator = ({
   return (
     <Card className="bg-card border-border shadow-lg w-full max-w-sm h-full flex flex-col">
       <CardHeader>
-        <CardTitle>Generate a New Palette</CardTitle>
+        <CardTitle>Generate New Palette</CardTitle>
         <CardDescription>
           Use the controls to generate a palette. Lock colors to preserve them.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow flex items-center">
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 items-center">
+      <CardContent className="flex-grow flex flex-col justify-center">
+        <div className="w-full space-y-6">
           <div className="space-y-2">
             <Label>Actions</Label>
             <div className="flex gap-2">
