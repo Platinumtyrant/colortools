@@ -15,7 +15,8 @@ import {
   getTints,
   getShades,
   getTones,
-  swatches 
+  swatches,
+  getDescriptiveColorName
 } from '@/lib/colors';
 import { ColorList } from '@/components/colors/ColorList';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,7 @@ export default function ColorPaletteBuilderPage() {
   const hsl = colord(mainColor).toHsl();
   const rgb = colord(mainColor).toRgb();
   const hex = colord(mainColor).toHex();
+  const colorName = getDescriptiveColorName(hex);
 
   const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
     const newHsl = { ...hsl, [key]: value };
@@ -227,6 +229,10 @@ export default function ColorPaletteBuilderPage() {
                                 <div className="flex gap-4 items-center">
                                     <div className="w-16 h-16 rounded-md border" style={{ backgroundColor: mainColor }}/>
                                     <div className="text-sm flex-1 space-y-1">
+                                        <div className="flex justify-between items-center whitespace-nowrap gap-2">
+                                            <span className="text-muted-foreground">Name:</span>
+                                            <span className="font-semibold text-left capitalize">{colorName}</span>
+                                        </div>
                                         <div className="flex justify-between items-center whitespace-nowrap gap-2">
                                             <span className="text-muted-foreground">HEX:</span>
                                             <span className="font-semibold text-left font-mono">{hex}</span>
