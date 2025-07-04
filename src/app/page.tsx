@@ -69,111 +69,109 @@ export default function ColorPaletteBuilderPage() {
   const colorLab = colord(mainColor).toLab();
 
   return (
-    <main className="flex-1 w-full p-4 md:p-8 flex flex-col md:flex-row items-start justify-center gap-8">
-      <div className="flex-shrink-0 w-full max-w-[256px]">
+    <main className="flex-1 w-full p-4 md:p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start justify-items-center gap-8 max-w-7xl mx-auto">
+      <div className="w-full max-w-[256px]">
         <ColorPickerClient 
           color={mainColor} 
           onChange={handleColorChange}
         />
       </div>
 
-      <div className="flex flex-col gap-4 flex-1 w-full max-w-sm">
-        <Card>
-            <CardHeader>
-                <CardTitle>Active Color</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div 
-                  className="w-full h-24 rounded-md border"
-                  style={{ backgroundColor: mainColor }}
-                />
-                <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Name</span>
-                        <span className="font-mono font-semibold capitalize">{colorName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">HEX</span>
-                        <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">RGB</span>
-                        <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">HSL</span>
-                        <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">CMYK</span>
-                        <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">LCH</span>
-                        <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">CIELAB</span>
-                        <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
-                    </div>
-                </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleAddCurrentColorToPalette} className="w-full">
-                  Add to Current Palette
-              </Button>
-            </CardFooter>
-        </Card>
+      <Card className="w-full max-w-sm">
+          <CardHeader>
+              <CardTitle>Active Color</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+              <div 
+                className="w-full h-24 rounded-md border"
+                style={{ backgroundColor: mainColor }}
+              />
+              <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                      <span className="text-muted-foreground">Name</span>
+                      <span className="font-mono font-semibold capitalize">{colorName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-muted-foreground">HEX</span>
+                      <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-muted-foreground">RGB</span>
+                      <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-muted-foreground">HSL</span>
+                      <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-muted-foreground">CMYK</span>
+                      <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-muted-foreground">LCH</span>
+                      <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
+                  </div>
+                  <div className="flex justify-between">
+                      <span className="text-muted-foreground">CIELAB</span>
+                      <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
+                  </div>
+              </div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleAddCurrentColorToPalette} className="w-full">
+                Add to Current Palette
+            </Button>
+          </CardFooter>
+      </Card>
 
-        <Card>
-            <CardHeader>
-            <div className="flex justify-between items-center">
-                <CardTitle>Current Palette ({paletteColors.length} / 20)</CardTitle>
-                {paletteColors.length > 0 && (
-                <Button variant="outline" size="sm" onClick={() => setPaletteColors([])}>Clear</Button>
-                )}
-            </div>
-            </CardHeader>
-            <CardContent>
-            {paletteColors.length > 0 ? (
-                <div className="flex flex-wrap gap-3">
-                {paletteColors.map((color) => (
-                    <div 
-                    key={color}
-                    className="relative group w-20 h-20 rounded-md border cursor-pointer"
-                    style={{ backgroundColor: color }}
-                    title={color}
-                    onClick={() => setMainColor(color)}
-                    >
-                    <button 
-                        onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveColorFromPalette(color);
-                        }}
-                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remove color"
-                    >
-                        X
-                    </button>
-                    </div>
-                ))}
-                </div>
-            ) : (
-                <div className="text-center text-muted-foreground py-8">
-                    <p>Your palette is empty.</p>
-                    <p className="text-sm">Use the color picker to add colors.</p>
-                </div>
-            )}
-            </CardContent>
-            {paletteColors.length > 0 && (
-            <CardFooter>
-                <Button onClick={handleSaveToLibrary} className="w-full">
-                    Save Palette to Library
-                </Button>
-            </CardFooter>
-            )}
-        </Card>
-      </div>
+      <Card className="w-full max-w-sm md:col-span-2 lg:col-span-1">
+          <CardHeader>
+          <div className="flex justify-between items-center">
+              <CardTitle>Current Palette ({paletteColors.length} / 20)</CardTitle>
+              {paletteColors.length > 0 && (
+              <Button variant="outline" size="sm" onClick={() => setPaletteColors([])}>Clear</Button>
+              )}
+          </div>
+          </CardHeader>
+          <CardContent>
+          {paletteColors.length > 0 ? (
+              <div className="flex flex-wrap gap-3">
+              {paletteColors.map((color) => (
+                  <div 
+                  key={color}
+                  className="relative group w-20 h-20 rounded-md border cursor-pointer"
+                  style={{ backgroundColor: color }}
+                  title={color}
+                  onClick={() => setMainColor(color)}
+                  >
+                  <button 
+                      onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveColorFromPalette(color);
+                      }}
+                      className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remove color"
+                  >
+                      X
+                  </button>
+                  </div>
+              ))}
+              </div>
+          ) : (
+              <div className="text-center text-muted-foreground py-8">
+                  <p>Your palette is empty.</p>
+                  <p className="text-sm">Use the color picker to add colors.</p>
+              </div>
+          )}
+          </CardContent>
+          {paletteColors.length > 0 && (
+          <CardFooter>
+              <Button onClick={handleSaveToLibrary} className="w-full">
+                  Save Palette to Library
+              </Button>
+          </CardFooter>
+          )}
+      </Card>
     </main>
   );
 }
