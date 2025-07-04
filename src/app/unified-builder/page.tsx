@@ -2,7 +2,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Saturation, Hue, HexColorInput } from 'react-colorful';
+import dynamic from 'next/dynamic';
+import { HexColorInput } from 'react-colorful';
 import chroma from 'chroma-js';
 import { colord } from 'colord';
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +27,17 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Dices, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+
+const Saturation = dynamic(() => import('react-colorful').then(mod => mod.Saturation), {
+  ssr: false,
+  loading: () => <div className="w-full aspect-video rounded-lg border-border border bg-muted animate-pulse" />
+});
+
+const Hue = dynamic(() => import('react-colorful').then(mod => mod.Hue), {
+  ssr: false,
+  loading: () => <div className="w-full h-4 rounded-lg border-border border bg-muted animate-pulse" />
+});
+
 
 // Helper to get graph data for analysis
 const getGraphData = (colors: string[]) => {
