@@ -223,7 +223,6 @@ export default function ColorPaletteBuilderPage() {
                         </div>
 
                         <div className="w-full md:w-1/2 flex flex-col gap-4">
-                            
                             <Card className="p-4 bg-muted/50">
                                 <div className="flex gap-4 items-center">
                                     <div className="w-16 h-16 rounded-md border" style={{ backgroundColor: mainColor }}/>
@@ -244,25 +243,25 @@ export default function ColorPaletteBuilderPage() {
                                 </div>
                             </Card>
 
-                            <div className="flex flex-col gap-2">
-                            <Label className="text-sm text-muted-foreground">HSL</Label>
-                            <div className="flex gap-2">
-                                <Input type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3" />
-                                <Input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3" />
-                                <Input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3" />
+                            <div className="flex items-center gap-4">
+                                <Label htmlFor="hsl-h" className="w-12 text-muted-foreground text-right">HSL</Label>
+                                <div className="flex flex-1 gap-2">
+                                    <Input id="hsl-h" type="number" min="0" max="359" value={hsl.h} onChange={(e) => handleHslChange('h', parseInt(e.target.value))} className="w-1/3" aria-label="Hue" />
+                                    <Input type="number" min="0" max="100" value={hsl.s} onChange={(e) => handleHslChange('s', parseInt(e.target.value))} className="w-1/3" aria-label="Saturation" />
+                                    <Input type="number" min="0" max="100" value={hsl.l} onChange={(e) => handleHslChange('l', parseInt(e.target.value))} className="w-1/3" aria-label="Lightness" />
+                                </div>
                             </div>
+                            <div className="flex items-center gap-4">
+                                <Label htmlFor="rgb-r" className="w-12 text-muted-foreground text-right">RGB</Label>
+                                <div className="flex flex-1 gap-2">
+                                    <Input id="rgb-r" type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3" aria-label="Red" />
+                                    <Input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3" aria-label="Green" />
+                                    <Input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3" aria-label="Blue" />
+                                </div>
                             </div>
-                            <div className="flex flex-col gap-2">
-                            <Label className="text-sm text-muted-foreground">RGB</Label>
-                            <div className="flex gap-2">
-                                <Input type="number" min="0" max="255" value={rgb.r} onChange={(e) => handleRgbChange('r', parseInt(e.target.value))} className="w-1/3" />
-                                <Input type="number" min="0" max="255" value={rgb.g} onChange={(e) => handleRgbChange('g', parseInt(e.target.value))} className="w-1/3" />
-                                <Input type="number" min="0" max="255" value={rgb.b} onChange={(e) => handleRgbChange('b', parseInt(e.target.value))} className="w-1/3" />
-                            </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                            <Label className="text-sm text-muted-foreground">HEX</Label>
-                            <HexColorInput color={hex} onChange={handleHexChange} className={cn("flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", "uppercase")} />
+                            <div className="flex items-center gap-4">
+                                <Label htmlFor="hex-input" className="w-12 text-muted-foreground text-right">HEX</Label>
+                                <HexColorInput id="hex-input" color={hex} onChange={handleHexChange} className={cn("flex-1 h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", "uppercase")} />
                             </div>
                         </div>
                     </div>
