@@ -1,18 +1,21 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { colord, type HslColor } from 'colord';
+import type { HSLColor } from 'react-color';
+import { colord } from 'colord';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 
 interface ColorSlidersProps {
-    hsl: HslColor;
+    hsl: HSLColor;
     onChange: (color: any) => void;
     title?: string;
 }
 
 export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
+    // The `hsl` prop is from react-color, with s and l as decimals (0-1).
+    // Our sliders and colord work with percentages (0-100).
     const color = useMemo(() => colord(hsl).toHex(), [hsl]);
     const [inputValue, setInputValue] = useState(color);
 
@@ -21,24 +24,24 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
     }, [color]);
 
     const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
-        onChange({ ...hsl, [key]: value, source: 'hsl' });
+        // The value from S/L sliders is 0-100. Convert to 0-1 for react-color.
+        const newHsl = {
+            ...hsl,
+            [key]: key === 'h' ? value : value / 100,
+            source: 'hsl',
+        };
+        onChange(newHsl);
     }, [hsl, onChange]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setInputValue(value);
         if (colord(value).isValid()) {
-            const newColor = colord(value);
-            const newHsl = newColor.toHsl();
-            
-            // Preserve hue for black/white/gray colors
-            if (newHsl.s === 0 || newHsl.l === 0 || newHsl.l === 100) {
-                onChange({ h: hsl.h, s: newHsl.s, l: newHsl.l, source: 'hsl' });
-            } else {
-                onChange({...newHsl, source: 'hsl'});
-            }
+            // react-color's onChange can handle a hex string.
+            // This is the simplest way and avoids any HSL range confusion.
+            onChange(colord(value).toHex());
         }
-    }, [hsl, onChange]);
+    }, [onChange]);
 
     const handleInputBlur = useCallback(() => {
         if (!colord(inputValue).isValid()) {
@@ -64,11 +67,11 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
             </div>
             <div className="space-y-1.5">
                 <Label className="text-xs">Saturation</Label>
-                <Slider value={[hsl.s]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
+                <Slider value={[hsl.s * 100]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
             </div>
             <div className="space-y-1.5">
                 <Label className="text-xs">Lightness</Label>
-                <Slider value={[hsl.l]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
+                <Slider value={[hsl.l * 100]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
             </div>
         </div>
     );
