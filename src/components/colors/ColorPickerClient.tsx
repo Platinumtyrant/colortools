@@ -1,31 +1,27 @@
 "use client";
 
 import React from 'react';
-import { SketchPicker, type ColorResult } from 'react-color';
+import { PhotoshopPicker, type ColorResult } from 'react-color';
 
 interface ColorPickerClientProps {
   color: string;
   onChange: (color: string) => void;
+  onAccept: () => void;
+  onCancel: () => void;
 }
 
-export default function ColorPickerClient({ color, onChange }: ColorPickerClientProps) {
+export default function ColorPickerClient({ color, onChange, onAccept, onCancel }: ColorPickerClientProps) {
   const handleChangeComplete = (colorResult: ColorResult) => {
     onChange(colorResult.hex);
   };
 
   return (
-    <SketchPicker
+    <PhotoshopPicker
       color={color}
+      header="Color Picker"
       onChangeComplete={handleChangeComplete}
-      styles={{
-        default: {
-          picker: {
-            background: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            boxShadow: 'none',
-          },
-        }
-      }}
+      onAccept={onAccept}
+      onCancel={onCancel}
     />
   );
 }

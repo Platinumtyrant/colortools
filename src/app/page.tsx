@@ -1,30 +1,50 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { colord, extend } from 'colord';
+import namesPlugin from 'colord/plugins/names';
 
+extend([namesPlugin]);
+
+// The PhotoshopPicker from react-color is not themeable, so we use dynamic import
+// to prevent SSR issues and ensure it only loads on the client.
 const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerClient'), {
   ssr: false,
   loading: () => (
-    <div className="w-full max-w-[220px]">
-        <Skeleton className="w-[220px] h-[320px]" />
-    </div>
+    // Matching PhotoshopPicker's default width. Height is an estimate.
+    <Skeleton className="w-[513px] h-[410px]" />
   )
 });
 
 export default function ColorPaletteBuilderPage() {
   const [mainColor, setMainColor] = useState('#BED3F3');
+  const [stagedColor, setStagedColor] = useState(mainColor);
   const [paletteColors, setPaletteColors] = useState<string[]>([]);
   
   const { toast } = useToast();
 
+  // When the main color changes (e.g., by clicking a swatch), update the staged color for the picker.
+  useEffect(() => {
+    setStagedColor(mainColor);
+  }, [mainColor]);
+
   const handleColorChange = useCallback((newColor: string) => {
-    setMainColor(newColor);
+    setStagedColor(newColor);
   }, []);
+
+  const handleAcceptColor = useCallback(() => {
+    setMainColor(stagedColor);
+    toast({ title: 'Color Updated' });
+  }, [stagedColor, toast]);
+
+  const handleCancelColor = useCallback(() => {
+    setStagedColor(mainColor);
+  }, [mainColor]);
 
   const handleAddCurrentColorToPalette = useCallback(() => {
     setPaletteColors(prevColors => {
@@ -57,68 +77,105 @@ export default function ColorPaletteBuilderPage() {
   const handleRemoveColorFromPalette = (colorToRemove: string) => {
     setPaletteColors(prev => prev.filter(c => c !== colorToRemove));
   };
+  
+  const colorName = colord(mainColor).toName({ closest: true });
 
   return (
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col md:flex-row items-start justify-center gap-8">
-      <div className="flex flex-col gap-4 items-center">
-        <ColorPickerClient color={mainColor} onChange={handleColorChange} />
-        <div 
-          className="w-full h-16 rounded-md border"
-          style={{ backgroundColor: mainColor }}
+      <div className="flex-shrink-0">
+        <ColorPickerClient 
+          color={stagedColor} 
+          onChange={handleColorChange}
+          onAccept={handleAcceptColor}
+          onCancel={handleCancelColor}
         />
-        <Button onClick={handleAddCurrentColorToPalette} className="w-full">
-            Add to Current Palette
-        </Button>
       </div>
 
-      <Card className="flex-1 w-full max-w-2xl">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Current Palette ({paletteColors.length} / 20)</CardTitle>
-            {paletteColors.length > 0 && (
-              <Button variant="outline" size="sm" onClick={() => setPaletteColors([])}>Clear</Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {paletteColors.length > 0 ? (
-            <div className="flex flex-wrap gap-3">
-              {paletteColors.map((color) => (
+      <div className="flex flex-col gap-4 flex-1 w-full max-w-sm">
+        <Card>
+            <CardHeader>
+                <CardTitle>Active Color</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
                 <div 
-                  key={color}
-                  className="relative group w-20 h-20 rounded-md border cursor-pointer"
-                  style={{ backgroundColor: color }}
-                  title={color}
-                  onClick={() => setMainColor(color)}
-                >
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveColorFromPalette(color);
-                    }}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove color"
-                  >
-                    X
-                  </button>
+                  className="w-full h-24 rounded-md border"
+                  style={{ backgroundColor: mainColor }}
+                />
+                <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Name</span>
+                        <span className="font-mono font-semibold capitalize">{colorName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">HEX</span>
+                        <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">RGB</span>
+                        <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">HSL</span>
+                        <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
+                    </div>
                 </div>
-              ))}
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleAddCurrentColorToPalette} className="w-full">
+                  Add to Current Palette
+              </Button>
+            </CardFooter>
+        </Card>
+
+        <Card>
+            <CardHeader>
+            <div className="flex justify-between items-center">
+                <CardTitle>Current Palette ({paletteColors.length} / 20)</CardTitle>
+                {paletteColors.length > 0 && (
+                <Button variant="outline" size="sm" onClick={() => setPaletteColors([])}>Clear</Button>
+                )}
             </div>
-          ) : (
-            <div className="text-center text-muted-foreground py-8">
-                <p>Your palette is empty.</p>
-                <p className="text-sm">Use the color picker to add colors.</p>
-            </div>
-          )}
-        </CardContent>
-        {paletteColors.length > 0 && (
-          <CardFooter>
-            <Button onClick={handleSaveToLibrary} className="w-full">
-                Save Palette to Library
-            </Button>
-          </CardFooter>
-        )}
-      </Card>
+            </CardHeader>
+            <CardContent>
+            {paletteColors.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                {paletteColors.map((color) => (
+                    <div 
+                    key={color}
+                    className="relative group w-20 h-20 rounded-md border cursor-pointer"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                    onClick={() => setMainColor(color)}
+                    >
+                    <button 
+                        onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveColorFromPalette(color);
+                        }}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove color"
+                    >
+                        X
+                    </button>
+                    </div>
+                ))}
+                </div>
+            ) : (
+                <div className="text-center text-muted-foreground py-8">
+                    <p>Your palette is empty.</p>
+                    <p className="text-sm">Use the color picker to add colors.</p>
+                </div>
+            )}
+            </CardContent>
+            {paletteColors.length > 0 && (
+            <CardFooter>
+                <Button onClick={handleSaveToLibrary} className="w-full">
+                    Save Palette to Library
+                </Button>
+            </CardFooter>
+            )}
+        </Card>
+      </div>
     </main>
   );
 }

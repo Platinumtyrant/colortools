@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { colord, extend, type HslColor } from 'colord';
 import a11yPlugin from 'colord/plugins/a11y';
-import { HexColorInput } from 'react-colorful';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
@@ -15,14 +15,21 @@ extend([a11yPlugin]);
 
 const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslColor) => void }) => {
     const color = useMemo(() => colord(hsl).toHex(), [hsl]);
+    const [inputValue, setInputValue] = useState(color);
+
+    useEffect(() => {
+        setInputValue(color);
+    }, [color]);
 
     const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
         setHsl({ ...hsl, [key]: value });
     }, [hsl, setHsl]);
 
-    const handleHexChange = useCallback((newHex: string) => {
-        if (colord(newHex).isValid()) {
-            const newColor = colord(newHex);
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setInputValue(value);
+        if (colord(value).isValid()) {
+            const newColor = colord(value);
             const newHsl = newColor.toHsl();
             
             if (newHsl.s === 0 || newHsl.l === 0 || newHsl.l === 100) {
@@ -33,14 +40,20 @@ const ColorControlGroup = ({ hsl, setHsl }: { hsl: HslColor, setHsl: (hsl: HslCo
         }
     }, [hsl, setHsl]);
 
+    const handleInputBlur = useCallback(() => {
+        if (!colord(inputValue).isValid()) {
+            setInputValue(color);
+        }
+    }, [inputValue, color]);
+
     return (
         <div className="space-y-4">
             <div className="flex gap-4 items-center">
-                 <HexColorInput
-                    color={color}
-                    onChange={handleHexChange}
+                 <Input
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    onBlur={handleInputBlur}
                     className="flex-1 p-2 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
-                    prefixed
                 />
             </div>
             <div className="space-y-2">

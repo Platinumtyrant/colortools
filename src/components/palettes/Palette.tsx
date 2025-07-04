@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { PaletteColor } from '@/lib/palette-generator';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { HexColorPicker, HexColorInput } from 'react-colorful';
+import { SketchPicker, type ColorResult } from 'react-color';
 import { Lock, Unlock, Trash2, Copy, Plus } from 'lucide-react';
 import chroma from 'chroma-js';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -91,10 +91,10 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                                   </Button>
                               </PopoverTrigger>
                               <PopoverContent className="w-auto p-0 border-0" onClick={(e) => e.stopPropagation()}>
-                                  <HexColorPicker color={color.hex} onChange={(newHex) => onColorChange(color.id, newHex)} />
-                                  <div className="p-2 border-t border-border bg-background">
-                                      <HexColorInput prefixed color={color.hex} onChange={(newHex) => onColorChange(color.id, newHex)} className="w-full p-2 rounded-md bg-muted text-center font-mono uppercase" />
-                                  </div>
+                                <SketchPicker
+                                    color={color.hex}
+                                    onChange={(c: ColorResult) => onColorChange(color.id, c.hex)}
+                                />
                               </PopoverContent>
                           </Popover>
 
@@ -136,5 +136,3 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
     </Card>
   );
 };
-
-    

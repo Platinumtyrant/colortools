@@ -2,13 +2,13 @@
 "use client";
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { HexColorPicker } from 'react-colorful';
-// import { colord } from 'colord'; // Unused import
+import { SketchPicker, type ColorResult } from 'react-color';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus, Trash2 } from 'lucide-react';
 
 interface Point {
@@ -187,7 +187,17 @@ export const GradientMeshBuilder = () => {
                                     <Card key={point.id} className="p-4 space-y-3 bg-card-foreground/5">
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 border" style={{ backgroundColor: point.color }} />
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <button className="w-4 h-4 border" style={{ backgroundColor: point.color }} />
+                                                    </PopoverTrigger>
+                                                    <PopoverContent>
+                                                        <SketchPicker
+                                                            color={point.color}
+                                                            onChangeComplete={(c: ColorResult) => handlePointChange(point.id, { color: c.hex })}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
                                                 <h3 className="text-sm font-semibold">Point {index + 1}</h3>
                                             </div>
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 2}>
@@ -195,13 +205,7 @@ export const GradientMeshBuilder = () => {
                                                 <span className="sr-only">Remove Point</span>
                                             </Button>
                                         </div>
-                                        <div className="flex justify-center">
-                                            <HexColorPicker
-                                                className="!w-full" 
-                                                color={point.color} 
-                                                onChange={(c) => handlePointChange(point.id, { color: c })} 
-                                            />
-                                        </div>
+                                        
                                         <div className="p-2 rounded-md bg-muted/50 border text-center font-mono text-xs">{point.color}</div>
                                         <div className="space-y-2">
                                             <Label htmlFor={`spread-${point.id}`} className="text-xs">Spread: {point.spread}%</Label>
