@@ -39,7 +39,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
   const width = `${100 / numCols}%`;
 
   return (
-    <Card className="bg-card/50 overflow-hidden h-full flex flex-col">
+    <Card className="bg-card/50 overflow-hidden flex flex-col">
       <CardContent className="p-0 flex flex-col flex-grow min-w-0">
         <div className="flex flex-wrap flex-grow min-w-0">
           <AnimatePresence>
