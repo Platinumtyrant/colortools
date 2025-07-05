@@ -8,6 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { colord } from 'colord';
 import {
     getComplementary,
     getAnalogous,
@@ -54,6 +56,13 @@ const HarmonyDescription = ({ title, description }: { title: string, description
 
 export default function ColorWheelPage() {
     const [activeColor, setActiveColor] = useState('#ff6347');
+
+    const activeHsl = useMemo(() => colord(activeColor).toHsl(), [activeColor]);
+
+    const handleSaturationChange = (newSaturation: number[]) => {
+        const newColor = colord({ ...activeHsl, s: newSaturation[0] }).toHex();
+        setActiveColor(newColor);
+    };
 
     const harmonies = useMemo(() => ({
         complementary: getComplementary(activeColor),
@@ -158,13 +167,25 @@ export default function ColorWheelPage() {
                 </CardDescription>
             </CardHeader>
 
-            <div className="flex flex-col items-center gap-4">
-                <ColorWheel
-                    color={activeColor}
-                    onChange={(color: ColorResult) => setActiveColor(color.hex)}
-                    width={280}
-                    height={280}
-                />
+            <div className="flex flex-col items-center gap-8">
+                <div className="flex items-center gap-4">
+                    <ColorWheel
+                        color={activeColor}
+                        onChange={(color: ColorResult) => setActiveColor(color.hex)}
+                        width={280}
+                        height={280}
+                    />
+                    <div className="h-[280px]">
+                        <Slider
+                            orientation="vertical"
+                            value={[activeHsl.s]}
+                            onValueChange={handleSaturationChange}
+                            max={100}
+                            step={1}
+                        />
+                    </div>
+                </div>
+
                 <Card className="w-full max-w-xs">
                     <CardContent className="p-4">
                          <div className="w-full h-10 rounded-md border mb-2" style={{ backgroundColor: activeColor }}></div>
