@@ -1,10 +1,5 @@
 
-'use client';
-
 import React from 'react';
-import type { CategorizedPalette } from '@/lib/palette-parser';
-import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { getPrebuiltPalettes } from '@/lib/palette-parser';
 import { InspirationClientPage } from '@/components/palettes/InspirationClientPage';
