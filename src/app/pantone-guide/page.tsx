@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { pantoneProColors, yellowAndOrangeColors, orangeAndRedColors, pinkAndPurpleColors, blueAndVioletColors, cyanAndGreenColors, yellowAndGreenColors, grayColors, type PantoneColor } from '@/lib/pantone-colors';
+import { pantoneProColors, yellowAndOrangeColors, orangeAndRedColors, pinkAndPurpleColors, blueAndVioletColors, cyanAndGreenColors, yellowAndGreenColors, grayAndBrownColors, type PantoneColor } from '@/lib/pantone-colors';
 
 const ColorSwatch = ({ color }: { color: PantoneColor }) => (
   <Card className="overflow-hidden shadow-md">
@@ -32,14 +32,14 @@ export default function PantoneGuidePage() {
       </section>
 
       <Tabs defaultValue="yellow-orange" className="w-full">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-1 h-auto">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-1 h-auto">
           <TabsTrigger value="yellow-orange">Yellows &amp; Oranges</TabsTrigger>
           <TabsTrigger value="orange-red">Oranges &amp; Reds</TabsTrigger>
           <TabsTrigger value="pink-purple">Pinks &amp; Purples</TabsTrigger>
           <TabsTrigger value="blue-violet">Blues &amp; Violets</TabsTrigger>
           <TabsTrigger value="cyan-green">Cyans &amp; Greens</TabsTrigger>
           <TabsTrigger value="yellow-green">Yellows &amp; Greens</TabsTrigger>
-          <TabsTrigger value="grays">Grays</TabsTrigger>
+          <TabsTrigger value="grays-browns">Grays &amp; Browns</TabsTrigger>
         </TabsList>
         <TabsContent value="yellow-orange" className="mt-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-11 gap-4">
@@ -83,9 +83,9 @@ export default function PantoneGuidePage() {
                 ))}
             </div>
         </TabsContent>
-        <TabsContent value="grays" className="mt-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4">
-                {grayColors.map(color => (
+        <TabsContent value="grays-browns" className="mt-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-12 gap-4">
+                {grayAndBrownColors.map(color => (
                 <ColorSwatch key={color.name} color={color} />
                 ))}
             </div>
@@ -94,5 +94,3 @@ export default function PantoneGuidePage() {
     </div>
   );
 }
-
-  
