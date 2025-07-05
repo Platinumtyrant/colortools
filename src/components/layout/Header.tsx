@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { Brush, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
@@ -15,19 +14,7 @@ const navItems = [
     { href: '/', label: 'Palette Builder' },
     { href: '/inspiration', label: 'Inspiration' },
     { href: '/library', label: 'Library' },
-    { 
-        label: 'Pantone Guide',
-        children: [
-            { href: '/pantone-process', label: 'Process Colors' },
-            { href: '/pantone-yellow-orange', label: 'Yellows & Oranges' },
-            { href: '/pantone-orange-red', label: 'Oranges & Reds' },
-            { href: '/pantone-pink-purple', label: 'Pinks & Purples' },
-            { href: '/pantone-blue-violet', label: 'Blues & Violets' },
-            { href: '/pantone-cyan-green', label: 'Cyans & Greens' },
-            { href: '/pantone-yellow-green', label: 'Yellows & Greens' },
-            { href: '/pantone-gray-brown', label: 'Grays & Browns' },
-        ]
-    },
+    { href: '/pantone-guide', label: 'Pantone Guide' },
 ];
 
 export function Header() {
@@ -41,38 +28,17 @@ export function Header() {
                 
                 <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
                     {navItems.map((item) => (
-                        item.children ? (
-                            <DropdownMenu key={item.label}>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className={cn(
-                                        "transition-colors hover:text-primary gap-1",
-                                        isPantoneActive ? "text-primary" : "text-muted-foreground"
-                                    )}>
-                                        {item.label}
-                                        <ChevronDown className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    {item.children.map(child => (
-                                        <DropdownMenuItem key={child.href} asChild>
-                                            <Link href={child.href}>{child.label}</Link>
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            <Button key={item.href} asChild variant="ghost" className="text-muted-foreground hover:text-primary">
-                                <Link
-                                    href={item.href!}
-                                    className={cn(
-                                        "transition-colors",
-                                        pathname === item.href ? "text-primary" : "text-muted-foreground"
-                                    )}
-                                >
-                                    {item.label}
-                                </Link>
-                            </Button>
-                        )
+                        <Button key={item.href} asChild variant="ghost" className="text-muted-foreground hover:text-primary">
+                            <Link
+                                href={item.href!}
+                                className={cn(
+                                    "transition-colors",
+                                    pathname === item.href || (item.href === '/pantone-guide' && isPantoneActive) ? "text-primary" : "text-muted-foreground"
+                                )}
+                            >
+                                {item.label}
+                            </Link>
+                        </Button>
                     ))}
                 </nav>
 
@@ -95,46 +61,19 @@ export function Header() {
                                 </Link>
                              </div>
                             <nav className="grid gap-2 text-lg font-medium px-6">
-                                <Accordion type="single" collapsible className="w-full">
-                                    {navItems.map((item) => (
-                                        item.children ? (
-                                            <AccordionItem value={item.label} key={item.label} className="border-b-0">
-                                                <AccordionTrigger className={cn(
-                                                    "py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:no-underline",
-                                                    isPantoneActive && "text-foreground"
-                                                )}>
-                                                    {item.label}
-                                                </AccordionTrigger>
-                                                <AccordionContent>
-                                                    <div className="flex flex-col gap-3 pl-6">
-                                                    {item.children.map((child) => (
-                                                        <SheetClose asChild key={child.href}>
-                                                            <Link href={child.href} className={cn(
-                                                                "text-muted-foreground hover:text-foreground",
-                                                                pathname === child.href && "text-foreground font-semibold"
-                                                            )}>
-                                                                {child.label}
-                                                            </Link>
-                                                        </SheetClose>
-                                                    ))}
-                                                    </div>
-                                                </AccordionContent>
-                                            </AccordionItem>
-                                        ) : (
-                                            <SheetClose asChild key={item.href}>
-                                                <Link
-                                                    href={item.href!}
-                                                    className={cn(
-                                                        "block py-3 text-base text-muted-foreground hover:text-foreground",
-                                                        pathname === item.href && "text-foreground font-semibold"
-                                                    )}
-                                                >
-                                                    {item.label}
-                                                </Link>
-                                            </SheetClose>
-                                        )
-                                    ))}
-                                </Accordion>
+                                {navItems.map((item) => (
+                                    <SheetClose asChild key={item.href}>
+                                        <Link
+                                            href={item.href!}
+                                            className={cn(
+                                                "block py-3 text-base text-muted-foreground hover:text-foreground",
+                                                pathname === item.href || (item.href === '/pantone-guide' && isPantoneActive) ? "text-foreground font-semibold" : ""
+                                            )}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    </SheetClose>
+                                ))}
                             </nav>
                         </SheetContent>
                     </Sheet>

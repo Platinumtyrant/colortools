@@ -8,6 +8,11 @@ export interface PantoneColor {
   cmyk: string;
 }
 
+export interface PantoneCategory {
+    name: string;
+    colors: PantoneColor[];
+}
+
 const sortPantoneNumerically = (a: PantoneColor, b: PantoneColor): number => {
   const regex = /(\d+(\.\d+)?)/g;
   
@@ -26,82 +31,65 @@ const sortPantoneNumerically = (a: PantoneColor, b: PantoneColor): number => {
   return a.name.localeCompare(b.name, undefined, { numeric: true });
 };
 
-
-function parsePantoneFile(): Record<string, PantoneColor[]> {
+function parsePantoneFile(): PantoneCategory[] {
     const filePath = path.join(process.cwd(), 'pantone.txt');
     const fileContent = fs.readFileSync(filePath, 'utf-8');
     const lines = fileContent.split('\n');
 
-    const categories: Record<string, PantoneColor[]> = {
-        process: [],
-        yellowOrange: [],
-        orangeRed: [],
-        pinkPurple: [],
-        blueViolet: [],
-        cyanGreen: [],
-        yellowGreen: [],
-        grayBrown: [],
-    };
+    const categories: Record<string, PantoneColor[]> = {};
+    const categoryOrder: string[] = [];
 
-    let currentCategory: string | null = null;
+    let currentCategoryName = 'Process Colors';
+    categories[currentCategoryName] = [];
+    categoryOrder.push(currentCategoryName);
+
     let currentColor: Partial<PantoneColor> = {};
+
+    const isHeader = (line: string) => /^[A-Za-z\/& ]+$/.test(line) && line.toUpperCase() !== line && !line.startsWith("PANTONE");
 
     for (const line of lines) {
         const trimmedLine = line.trim();
-
-        if (!trimmedLine) {
+        if (!trimmedLine) continue;
+        
+        // This is a header if it's mixed case and doesn't start with PANTONE
+        if (isHeader(trimmedLine)) {
             if (currentColor.name && currentColor.hex && currentColor.cmyk) {
-                if (currentCategory) categories[currentCategory].push(currentColor as PantoneColor);
+                if (categories[currentCategoryName]) {
+                    categories[currentCategoryName].push(currentColor as PantoneColor);
+                }
                 currentColor = {};
             }
-            continue;
-        }
-
-        if (trimmedLine.startsWith('PANTONE')) {
-             if (currentColor.name && currentColor.hex && currentColor.cmyk) {
-                if (currentCategory) categories[currentCategory].push(currentColor as PantoneColor);
+            currentCategoryName = trimmedLine;
+            if (!categories[currentCategoryName]) {
+                categories[currentCategoryName] = [];
+                categoryOrder.push(currentCategoryName);
+            }
+        } else if (trimmedLine.startsWith('PANTONE')) {
+            if (currentColor.name && currentColor.hex && currentColor.cmyk) {
+                if (categories[currentCategoryName]) {
+                    categories[currentCategoryName].push(currentColor as PantoneColor);
+                }
             }
             currentColor = { name: trimmedLine };
         } else if (trimmedLine.startsWith('#')) {
             currentColor.hex = trimmedLine;
         } else if (trimmedLine.startsWith('C:')) {
             currentColor.cmyk = trimmedLine;
-        } else { // It's a category header
-            const lowerLine = trimmedLine.toLowerCase();
-            if (lowerLine.includes('yellows and oranges')) currentCategory = 'yellowOrange';
-            else if (lowerLine.includes('oranges and reds')) currentCategory = 'orangeRed';
-            else if (lowerLine.includes('pinks and purples')) currentCategory = 'pinkPurple';
-            else if (lowerLine.includes('blues and violets')) currentCategory = 'blueViolet';
-            else if (lowerLine.includes('cyans and greens')) currentCategory = 'cyanGreen';
-            else if (lowerLine.includes('yellow/greens')) currentCategory = 'yellowGreen';
-            else if (lowerLine.includes('grays') || lowerLine.includes('browns')) currentCategory = 'grayBrown';
-            else if (lowerLine.includes('panetone pro')) currentCategory = 'process';
         }
     }
-     if (currentColor.name && currentColor.hex && currentColor.cmyk) {
-        if (currentCategory) categories[currentCategory].push(currentColor as PantoneColor);
+    if (currentColor.name && currentColor.hex && currentColor.cmyk) {
+         if (categories[currentCategoryName]) {
+            categories[currentCategoryName].push(currentColor as PantoneColor);
+         }
     }
     
-    // The first 4 are the process colors
-    const allColors = [...categories.process, ...categories.yellowOrange, ...categories.orangeRed, ...categories.pinkPurple, ...categories.blueViolet, ...categories.cyanGreen, ...categories.yellowGreen, ...categories.grayBrown];
-    const proColors = allColors.filter(c => c.name.includes('PANTONE Pro.'));
-    if(proColors.length > 0) categories.process = proColors;
+    // The file contains duplicate headers; this ensures we merge the colors.
+    const uniqueCategoryOrder = [...new Set(categoryOrder)];
 
-
-    for (const key in categories) {
-        categories[key].sort(sortPantoneNumerically);
-    }
-    
-    return categories;
+    return uniqueCategoryOrder.map(name => ({
+        name: name,
+        colors: categories[name].sort(sortPantoneNumerically)
+    })).filter(category => category.colors.length > 0);
 }
 
-const parsedColors = parsePantoneFile();
-
-export const pantoneProColors = parsedColors.process;
-export const yellowAndOrangeColors = parsedColors.yellowOrange;
-export const orangeAndRedColors = parsedColors.orangeRed;
-export const pinkAndPurpleColors = parsedColors.pinkPurple;
-export const blueAndVioletColors = parsedColors.blueViolet;
-export const cyanAndGreenColors = parsedColors.cyanGreen;
-export const yellowAndGreenColors = parsedColors.yellowGreen;
-export const grayAndBrownColors = parsedColors.grayBrown;
+export const pantoneCategories = parsePantoneFile();
