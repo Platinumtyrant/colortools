@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
@@ -596,7 +595,7 @@ function PaletteBuilderPage() {
             </SidebarContent>
         </Sidebar>
         <div className="flex-1 flex flex-col overflow-auto">
-            <div className="p-4 md:p-8 flex flex-col gap-8 h-full">
+            <div className="p-4 md:p-8 flex flex-col gap-8">
                 {/* Save Dialog */}
                 <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                     <DialogContent className="sm:max-w-[425px]">
