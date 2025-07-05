@@ -113,9 +113,8 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                   {index < palette.length && (
                       <div className="absolute top-0 bottom-0 -right-4 w-8 z-10 group/add flex items-center justify-center">
                           <Button
-                              variant="outline"
                               size="icon"
-                              className="z-10 h-8 w-8 rounded-full opacity-0 group-hover/add:opacity-100 transition-opacity bg-background/50 backdrop-blur-sm hover:bg-background/80"
+                              className="z-10 h-8 w-8 rounded-full opacity-0 group-hover/add:opacity-100 transition-opacity bg-black/30 text-white backdrop-blur-sm hover:bg-black/50"
                               onClick={(e) => { e.stopPropagation(); onAddColor(index + 1); }}
                               title="Add color between"
                           >
