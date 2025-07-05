@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -9,8 +10,8 @@ import { cn } from "@/lib/utils";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const navItems = [
-    { href: '/', label: 'Palette Builder' },
     { href: '/mesh-gradient', label: 'Gradient Builder' },
+    { href: '/', label: 'Palette Builder' },
     { href: '/library', label: 'Library' },
 ];
 
