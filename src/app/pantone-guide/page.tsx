@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { pantoneProColors, yellowAndOrangeColors, orangeAndRedColors, PantoneColor } from '@/lib/pantone-colors';
+import { pantoneProColors, yellowAndOrangeColors, orangeAndRedColors, pinkAndPurpleColors, PantoneColor } from '@/lib/pantone-colors';
 
 const ColorSwatch = ({ color }: { color: PantoneColor }) => (
   <Card className="overflow-hidden shadow-md">
@@ -33,8 +33,9 @@ export default function PantoneGuidePage() {
 
       <Tabs defaultValue="yellow-orange" className="w-full">
         <TabsList>
-          <TabsTrigger value="yellow-orange">Yellows & Oranges</TabsTrigger>
-          <TabsTrigger value="orange-red">Oranges & Reds</TabsTrigger>
+          <TabsTrigger value="yellow-orange">Yellows &amp; Oranges</TabsTrigger>
+          <TabsTrigger value="orange-red">Oranges &amp; Reds</TabsTrigger>
+          <TabsTrigger value="pink-purple">Pinks &amp; Purples</TabsTrigger>
           {/* Add more triggers here for future sections */}
         </TabsList>
         <TabsContent value="yellow-orange" className="mt-6">
@@ -47,6 +48,13 @@ export default function PantoneGuidePage() {
         <TabsContent value="orange-red" className="mt-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-12 gap-4">
                 {orangeAndRedColors.map(color => (
+                <ColorSwatch key={color.name} color={color} />
+                ))}
+            </div>
+        </TabsContent>
+        <TabsContent value="pink-purple" className="mt-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-12 gap-4">
+                {pinkAndPurpleColors.map(color => (
                 <ColorSwatch key={color.name} color={color} />
                 ))}
             </div>
