@@ -10,6 +10,7 @@ import { Trash2, Download, Library as LibraryIcon, Pencil } from 'lucide-react';
 import { colord } from 'colord';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 
 type SavedPalette = {
   id: number;
@@ -31,6 +32,8 @@ const migratePalettes = (palettes: any): SavedPalette[] => {
 
 export default function LibraryPage() {
   const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>([]);
+  const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
+  const [newPaletteName, setNewPaletteName] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,12 +57,35 @@ export default function LibraryPage() {
     }
   }, [toast]);
 
+  const handleUpdateName = useCallback((idToUpdate: number) => {
+    if (!newPaletteName.trim()) {
+      toast({
+        title: "Name cannot be empty",
+        variant: "destructive",
+      });
+      setEditingPaletteId(null);
+      return;
+    }
+
+    const newPalettes = savedPalettes.map((p) =>
+      p.id === idToUpdate ? { ...p, name: newPaletteName.trim() } : p
+    );
+    setSavedPalettes(newPalettes);
+    localStorage.setItem('saved_palettes', JSON.stringify(newPalettes));
+    toast({ title: "Palette Renamed" });
+    setEditingPaletteId(null);
+    setNewPaletteName('');
+  }, [newPaletteName, savedPalettes, toast]);
+
   const handleDeletePalette = useCallback((idToDelete: number) => {
+    if (editingPaletteId === idToDelete) {
+        setEditingPaletteId(null);
+    }
     const newPalettes = savedPalettes.filter(({ id }) => id !== idToDelete);
     setSavedPalettes(newPalettes);
     localStorage.setItem('saved_palettes', JSON.stringify(newPalettes));
     toast({ title: "Palette Deleted" });
-  }, [savedPalettes, toast]);
+  }, [savedPalettes, toast, editingPaletteId]);
 
   const createSvgContent = (palette: { name: string; colors: string[] }) => {
     const swatchWidth = 150;
@@ -215,8 +241,53 @@ export default function LibraryPage() {
                   ))}
                 </div>
                 <div className="p-4">
-                  <p className="text-md font-semibold truncate" title={palette.name}>{palette.name}</p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    {editingPaletteId === palette.id ? (
+                      <Input
+                        value={newPaletteName}
+                        onChange={(e) => setNewPaletteName(e.target.value)}
+                        onBlur={() => handleUpdateName(palette.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleUpdateName(palette.id);
+                          } else if (e.key === 'Escape') {
+                            setEditingPaletteId(null);
+                          }
+                        }}
+                        autoFocus
+                        className="h-8"
+                      />
+                    ) : (
+                      <>
+                        <p className="text-md font-semibold truncate" title={palette.name}>
+                          {palette.name}
+                        </p>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 shrink-0"
+                                onClick={() => {
+                                  setEditingPaletteId(palette.id);
+                                  setNewPaletteName(palette.name);
+                                }}
+                              >
+                                <Pencil className="h-3 w-3" />
+                                <span className="sr-only">Edit Name</span>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit Name</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {palette.colors.map((color, index) => (
                       <span key={`${color}-${index}`} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
                     ))}
@@ -230,12 +301,12 @@ export default function LibraryPage() {
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={`/?edit=${palette.id}`}>
                             <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit Palette</span>
+                            <span className="sr-only">Edit Palette in Builder</span>
                           </Link>
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Edit Palette</p>
+                        <p>Edit Palette in Builder</p>
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
