@@ -15,26 +15,14 @@ import {
     getSquare,
     getRectangular
 } from '@/lib/colors';
+import type { ColorResult } from '@uiw/react-color';
 
-const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerClient'), {
+const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mod.default), {
   ssr: false,
   loading: () => (
-    <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground h-full">
-        <div className="flex gap-3 h-40">
-            <Skeleton className="relative flex-1 cursor-pointer" />
-            <Skeleton className="relative w-5 cursor-pointer" />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-        </div>
-        <div className="space-y-3 pt-2">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-        </div>
-    </div>
+      <div className="flex justify-center items-center w-[280px] h-[280px]">
+        <Skeleton className="w-full h-full rounded-full" />
+      </div>
   )
 });
 
@@ -51,17 +39,22 @@ const Swatch = ({ color }: { color: string }) => (
     </TooltipProvider>
 );
 
-const HarmonyDisplay = ({ title, description, colors }: { title: string, description: string | React.ReactNode, colors: string[] }) => (
+const HarmonySwatches = ({ title, colors }: { title: string, colors: string[] }) => (
+    <div>
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <div className="flex gap-2 flex-wrap">
+            {colors.map((c, i) => <Swatch key={`${title}-${c}-${i}`} color={c} />)}
+        </div>
+    </div>
+);
+
+
+const HarmonyDescription = ({ title, description }: { title: string, description: React.ReactNode }) => (
     <AccordionItem value={title}>
         <AccordionTrigger>{title}</AccordionTrigger>
         <AccordionContent>
-            <div className="space-y-4">
-                <div className="prose prose-sm text-muted-foreground">
-                    {typeof description === 'string' ? <p>{description}</p> : description}
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                    {colors.map((c, i) => <Swatch key={`${title}-${c}-${i}`} color={c} />)}
-                </div>
+            <div className="prose prose-sm text-muted-foreground max-w-none">
+                {description}
             </div>
         </AccordionContent>
     </AccordionItem>
@@ -164,45 +157,59 @@ export default function ColorWheelPage() {
     ];
 
     return (
-        <main className="flex-1 w-full p-4 md:p-8">
-            <CardHeader className="p-0 mb-8">
+        <main className="flex-1 w-full p-4 md:p-8 space-y-8">
+            <CardHeader className="p-0">
                 <CardTitle className="text-3xl">Color Theory Explorer</CardTitle>
                 <CardDescription>
-                    A color wheel is a visual representation of colors arranged according to their chromatic relationship. 
-                    It is a circular diagram where colors are typically organized according to their hue. The primary 
-                    purpose of a color wheel is to show the relationship between different hues and to give guidance on 
-                    color harmony and the creation of color schemes.
+                    Select a color to explore its harmonies. A color wheel is a visual representation of colors arranged 
+                    according to their chromatic relationship to help guide color harmony.
                 </CardDescription>
             </CardHeader>
 
-            <div className="grid md:grid-cols-[340px_1fr] gap-8">
-                <aside>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Select a Base Color</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ColorPickerClient
-                                color={activeColor}
-                                onChange={(c) => setActiveColor(c.hex)}
-                                className="w-full max-w-sm border-0 shadow-none p-0"
-                            />
+            <div className="grid md:grid-cols-[300px_1fr] gap-8">
+                <aside className="flex flex-col items-center">
+                    <ColorWheel
+                        color={activeColor}
+                        onChange={(color: ColorResult) => setActiveColor(color.hex)}
+                        width={280}
+                        height={280}
+                    />
+                    <Card className="w-full max-w-xs mt-4">
+                        <CardContent className="p-4">
+                             <div className="w-full h-10 rounded-md border mb-2" style={{ backgroundColor: activeColor }}></div>
+                             <p className="text-center font-mono">{activeColor.toUpperCase()}</p>
                         </CardContent>
                     </Card>
                 </aside>
-                <section>
-                    <Accordion type="multiple" className="w-full" defaultValue={["Complementary", "Analogous", "Triadic"]}>
-                        {harmonyInfo.map(harmony => (
-                            <HarmonyDisplay 
-                                key={harmony.name}
-                                title={harmony.name}
-                                description={harmony.description}
-                                colors={harmony.colors}
-                            />
-                        ))}
-                    </Accordion>
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    {harmonyInfo.map(harmony => (
+                        <HarmonySwatches
+                            key={harmony.name}
+                            title={harmony.name}
+                            colors={harmony.colors}
+                        />
+                    ))}
                 </section>
             </div>
+
+            <section>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Color Harmony Explanations</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Accordion type="multiple" className="w-full">
+                            {harmonyInfo.map(harmony => (
+                                <HarmonyDescription
+                                    key={harmony.name}
+                                    title={harmony.name}
+                                    description={harmony.description}
+                                />
+                            ))}
+                        </Accordion>
+                    </CardContent>
+                </Card>
+            </section>
         </main>
     );
 }
