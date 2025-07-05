@@ -104,8 +104,8 @@ const categorizePalette = (colors: string[], name: string): string => {
 
 // This function is cached by Next.js during the build process on the server.
 export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
+  const filePath = path.join(process.cwd(), 'palettes.txt');
   try {
-    const filePath = path.join(process.cwd(), 'palettes.txt');
     const htmlContent = await fs.readFile(filePath, 'utf-8');
 
     const allPalettes: CategorizedPalette[] = [];
@@ -138,8 +138,15 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
     });
 
     return allPalettes;
-  } catch (error) {
-    console.error("Failed to parse palettes.txt:", error);
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+        // This is not a critical error. It just means the user hasn't provided a palettes.txt file.
+        // We can safely return an empty array and the Inspiration page will show an empty state.
+        console.log(`Note: 'palettes.txt' not found. Inspiration page will be empty. This is expected.`);
+    } else {
+        // For other errors, it's better to log them.
+        console.error("Failed to read or parse palettes.txt:", error);
+    }
     return [];
   }
 };
