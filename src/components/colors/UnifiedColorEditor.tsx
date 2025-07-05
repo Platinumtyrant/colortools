@@ -1,8 +1,4 @@
-
-"use client";
-
-import React from 'react';
-
-export default function UnifiedColorEditor({ color, onChange }: { color: string, onChange: (newHex: string) => void }) {
+// This component has been removed.
+export default function UnifiedColorEditor() {
     return null;
 }

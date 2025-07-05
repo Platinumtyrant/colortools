@@ -11,7 +11,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 const navItems = [
     { href: '/', label: 'Palette Builder' },
     { href: '/mesh-gradient', label: 'Gradient Builder' },
-    { href: '/contrast-checker', label: 'Contrast Checker' },
     { href: '/library', label: 'Library' },
 ];
 
