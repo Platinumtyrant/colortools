@@ -11,7 +11,7 @@ export function SidebarNav() {
     
     return (
         <SidebarContent className="p-0">
-            {pathname === '/' && extension && (
+            {(pathname === '/' || pathname === '/library') && extension && (
                 <div className="p-4">
                     {extension}
                 </div>

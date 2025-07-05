@@ -24,7 +24,6 @@ export const prebuiltPalettes: PrebuiltPalette[] = [
     { name: 'Shades Apple iOS Blue #007AFF hex', colors: [ '#006ee6', '#0062cc', '#0055b3', '#004999', '#003d80', '#003166', '#00254d', '#001833', '#000c19', '#000000' ] },
     { name: 'Bootstrap 4 background colors (classes) palette', colors: [ '#007bff', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#f8f9fa', '#343a40', '#ffffff' ] },
     { name: 'Shades of Material Design Green color #4CAF50 hex', colors: [ '#4caf50', '#449e48', '#3d8c40', '#357a38', '#2e6930', '#265828', '#1e4620', '#173518', '#0f2310', '#081108' ] },
-    { name: 'Telegram color code', colors: [ '#0088cc' ] },
     { name: 'Electric blue colors palette', colors: [ '#7df9ff', '#2c75ff', '#3137fd', '#035096', '#536878' ] },
     { name: '7 Color Palette', colors: [ '#9b5fe0', '#16a4d8', '#60dbe8', '#8bd346', '#efdf48', '#f9a52c', '#d64e12' ] },
     { name: 'Shades of Dark Red #8B0000 hex color', colors: [ '#8b0000', '#7d0000', '#6f0000', '#610000', '#530000', '#460000', '#380000', '#2a0000', '#1c0000', '#0e0000' ] },
@@ -47,7 +46,6 @@ export const prebuiltPalettes: PrebuiltPalette[] = [
     { name: 'Windows 98', colors: [ '#818181', '#c3c3c3', '#fdffff', '#010081', '#008080', '#000000', '#ff0081' ] },
     { name: 'Blue Grey palette Materialize CSS', colors: [ '#263238', '#37474f', '#455a64', '#546e7a', '#607d8b', '#78909c', '#90a4ae', '#b0bec5', '#cfd8dc', '#eceff1' ] },
     { name: 'Tints of Light Grey #D3D3D3 hex color', colors: [ '#d3d3d3', '#d7d7d7', '#dcdcdc', '#e0e0e0', '#e5e5e5', '#e9e9e9', '#ededed', '#f2f2f2', '#f6f6f6', '#fbfbfb' ] },
-    { name: 'Discord Embed Color | Hex code: #2f3136', colors: [ '#2f3136' ] },
     { name: 'Glitch color palette', colors: [ '#020202', '#3e3c41', '#fdfefe', '#cc0f39', '#0ffbf9', '#c2bfcc', '#c36b93', '#cdc764' ] },
     { name: 'hatsune miku', colors: [ '#87e5cf', '#5a676b', '#47c8c0', '#ff629d', '#55d1d0', '#e2ddcc', '#ff1688' ] },
     { name: 'Dark theme minimal dark ui colors palette', colors: [ '#2069e0', '#f4d47c', '#082c6c', '#878683', '#bebebe', '#444444' ] },
@@ -67,5 +65,4 @@ export const prebuiltPalettes: PrebuiltPalette[] = [
     { name: 'BMW logo colors', colors: [ '#008ac9', '#000000', '#ffffff' ] },
     { name: 'Education website color scheme', colors: [ '#5375e2', '#7791a1', '#f65868', '#f3aa92', '#5c616e', '#fefefe' ] },
     { name: 'Shades of Red #FF0000 hex color', colors: [ '#ff0000', '#e60000', '#cc0000', '#b30000', '#990000', '#800000', '#660000', '#4d0000', '#330000', '#190000' ] },
-    { name: 'prebuiltGradients', colors: [ 'rgb(189, 195, 199)', 'rgb(44, 62, 80)' ] },
 ];
