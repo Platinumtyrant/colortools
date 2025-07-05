@@ -26,10 +26,11 @@ export const getComplementary = (color: string) => {
 export const getAnalogous = (color: string) => {
   const hsl = colord(color).toHsl();
   const colors: string[] = [];
-  for (let i = -60; i <= 60; i += 30) {
+  for (let i = -30; i <= 30; i += 30) {
+    if (i === 0) continue;
     colors.push(colord({ h: (hsl.h + i + 360) % 360, s: hsl.s, l: hsl.l } as HslColor).toHex());
   }
-  return colors.sort((a, b) => colord(a).toHsl().h - colord(b).toHsl().h);
+  return [colord(color).toHex(), ...colors].sort((a, b) => colord(a).toHsl().h - colord(b).toHsl().h);
 };
 
 export const getSplitComplementary = (color: string) => {
@@ -65,9 +66,9 @@ export const getRectangular = (color: string) => {
   const hsl = colord(color).toHsl();
   return [
     colord({ h: hsl.h, s: hsl.s, l: hsl.l } as HslColor).toHex(),
-    colord({ h: (hsl.h + 30) % 360, s: hsl.s, l: hsl.l } as HslColor).toHex(),
+    colord({ h: (hsl.h + 60) % 360, s: hsl.s, l: hsl.l } as HslColor).toHex(),
     colord({ h: (hsl.h + 180) % 360, s: hsl.s, l: hsl.l } as HslColor).toHex(),
-    colord({ h: (hsl.h + 210) % 360, s: hsl.s, l: hsl.l } as HslColor).toHex(),
+    colord({ h: (hsl.h + 240) % 360, s: hsl.s, l: hsl.l } as HslColor).toHex(),
   ].sort((a, b) => colord(a).toHsl().h - colord(b).toHsl().h);
 };
 
