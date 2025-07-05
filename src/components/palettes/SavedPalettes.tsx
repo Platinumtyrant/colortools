@@ -87,9 +87,9 @@ export function SavedPalettes({ onLoadPalette }: SavedPalettesProps) {
                         className="flex h-12 w-full cursor-pointer overflow-hidden rounded-md border transition-all hover:border-primary/80"
                         onClick={() => handleLoadPalette(palette)}
                     >
-                        {palette.colors.map((color) => (
+                        {palette.colors.map((color, index) => (
                         <div
-                            key={color}
+                            key={`${color}-${index}`}
                             className="flex-1"
                             style={{ backgroundColor: color }}
                         />
