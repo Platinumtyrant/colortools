@@ -38,55 +38,41 @@ function parsePantoneFile(): PantoneCategory[] {
 
     const categories: Record<string, PantoneColor[]> = {};
     const categoryOrder: string[] = [];
-
-    let currentCategoryName = 'Process Colors';
-    categories[currentCategoryName] = [];
-    categoryOrder.push(currentCategoryName);
-
+    let currentCategoryName: string | null = null;
     let currentColor: Partial<PantoneColor> = {};
 
-    const isHeader = (line: string) => /^[A-Za-z\/& ]+$/.test(line) && line.toUpperCase() !== line && !line.startsWith("PANTONE");
+    const saveCurrentColor = () => {
+        if (currentCategoryName && currentColor.name && currentColor.hex && currentColor.cmyk) {
+            categories[currentCategoryName].push(currentColor as PantoneColor);
+        }
+        currentColor = {};
+    };
+    
+    const isHeader = (line: string) => /^[A-Za-z\d\s\/&,]+$/.test(line) && line.toUpperCase() !== line && !line.startsWith("PANTONE");
 
     for (const line of lines) {
         const trimmedLine = line.trim();
         if (!trimmedLine) continue;
-        
-        // This is a header if it's mixed case and doesn't start with PANTONE
+
         if (isHeader(trimmedLine)) {
-            if (currentColor.name && currentColor.hex && currentColor.cmyk) {
-                if (categories[currentCategoryName]) {
-                    categories[currentCategoryName].push(currentColor as PantoneColor);
-                }
-                currentColor = {};
-            }
+            saveCurrentColor(); // Save the last color of the previous category
             currentCategoryName = trimmedLine;
             if (!categories[currentCategoryName]) {
                 categories[currentCategoryName] = [];
                 categoryOrder.push(currentCategoryName);
             }
         } else if (trimmedLine.startsWith('PANTONE')) {
-            if (currentColor.name && currentColor.hex && currentColor.cmyk) {
-                if (categories[currentCategoryName]) {
-                    categories[currentCategoryName].push(currentColor as PantoneColor);
-                }
-            }
-            currentColor = { name: trimmedLine };
+            saveCurrentColor();
+            currentColor.name = trimmedLine;
         } else if (trimmedLine.startsWith('#')) {
             currentColor.hex = trimmedLine;
         } else if (trimmedLine.startsWith('C:')) {
             currentColor.cmyk = trimmedLine;
         }
     }
-    if (currentColor.name && currentColor.hex && currentColor.cmyk) {
-         if (categories[currentCategoryName]) {
-            categories[currentCategoryName].push(currentColor as PantoneColor);
-         }
-    }
-    
-    // The file contains duplicate headers; this ensures we merge the colors.
-    const uniqueCategoryOrder = [...new Set(categoryOrder)];
+    saveCurrentColor(); // Save the very last color
 
-    return uniqueCategoryOrder.map(name => ({
+    return categoryOrder.map(name => ({
         name: name,
         colors: categories[name].sort(sortPantoneNumerically)
     })).filter(category => category.colors.length > 0);
