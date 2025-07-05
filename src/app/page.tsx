@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,7 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
@@ -592,9 +592,19 @@ export default function UnifiedBuilderPage() {
                 </CardHeader>
                 <CardContent className="space-y-4 flex-grow">
                     <div 
-                      className="w-full h-24 rounded-md border flex items-center justify-center text-center p-4"
+                      className="relative group w-full h-24 rounded-md border flex items-center justify-center text-center p-4"
                       style={{ backgroundColor: mainColor, color: isContrastMode ? contrastTextColor : 'inherit' }}
                     >
+                       {!isContrastMode && (
+                          <Button
+                              onClick={handleAddColorToPalette}
+                              size="icon"
+                              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50"
+                              title="Add color to palette"
+                          >
+                              <Plus className="h-6 w-6" />
+                          </Button>
+                      )}
                       {isContrastMode && (
                         <div className="select-none">
                             <h2 className="text-3xl font-bold">Aa</h2>
@@ -648,13 +658,6 @@ export default function UnifiedBuilderPage() {
                       </motion.div>
                     </AnimatePresence>
                 </CardContent>
-                <CardFooter>
-                  {!isContrastMode && (
-                    <Button onClick={handleAddColorToPalette} className="w-full">
-                        Add to Current Palette
-                    </Button>
-                  )}
-                </CardFooter>
             </Card>
         </div>
 
