@@ -103,7 +103,7 @@ export function generatePalette(options: GenerationOptions): string[] {
             // The scale will be generated through the two new analogous points and any locked colors.
             const scalePoints = [firstAnalogous, ...colorsToScale, secondAnalogous].sort(sortbyHue);
             
-            initialPalette = chroma.scale(scalePoints).mode('lch').colors(numColors);
+            initialPalette = chroma.scale(scalePoints).mode('oklch').colors(numColors);
             break;
         }
         case 'triadic': {
@@ -116,7 +116,7 @@ export function generatePalette(options: GenerationOptions): string[] {
             const secondColor = chroma.hsl((h + 120) % 360, s, l).hex();
             const thirdColor = chroma.hsl((h + 240) % 360, s, l).hex();
             const fullScale = [...colorsToScale, secondColor, thirdColor].sort(sortbyHue);
-            initialPalette = chroma.scale(fullScale).mode('lch').colors(numColors);
+            initialPalette = chroma.scale(fullScale).mode('oklch').colors(numColors);
             break;
         }
         case 'complementary': {
@@ -128,7 +128,7 @@ export function generatePalette(options: GenerationOptions): string[] {
 
             const complement = chroma.hsl((h + 180) % 360, s, l).hex();
             const fullScale = [...colorsToScale, complement].sort(sortbyHue);
-            initialPalette = chroma.scale(fullScale).mode('lch').colors(numColors);
+            initialPalette = chroma.scale(fullScale).mode('oklch').colors(numColors);
             break;
         }
         case 'tints': {
@@ -140,10 +140,9 @@ export function generatePalette(options: GenerationOptions): string[] {
             break;
         }
         default:
-            initialPalette = chroma.scale(colorsToScale).mode('lch').colors(numColors);
+            initialPalette = chroma.scale(colorsToScale).mode('oklch').colors(numColors);
             break;
     }
 
     return initialPalette;
 }
-

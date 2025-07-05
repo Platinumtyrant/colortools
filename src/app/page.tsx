@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
@@ -348,7 +349,7 @@ function PaletteBuilderPage() {
           let newHex: string;
 
           if (colorBefore && colorAfter) {
-              newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'lch').hex();
+              newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'oklch').hex();
           } else if (colorBefore) {
               newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
           } else if (colorAfter) {
@@ -420,7 +421,7 @@ function PaletteBuilderPage() {
         return paletteHexes;
     }
     const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
-    let scale = chroma.scale(interpolator).mode('lch');
+    let scale = chroma.scale(interpolator).mode('oklch');
     if (correctLightness) {
       scale = scale.correctLightness();
     }
