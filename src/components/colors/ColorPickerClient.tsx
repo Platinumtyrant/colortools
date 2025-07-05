@@ -16,6 +16,18 @@ interface CustomPickerProps extends ColorState {
     onEyeDropperClick?: () => void;
 }
 
+const CustomHuePointer = () => {
+    // This component's style is designed to mimic the shadcn/ui slider thumb.
+    // The Hue component from react-color wraps this in a div with `position: absolute`.
+    // The transform is used to center the thumb horizontally on the hue bar.
+    return (
+        <div
+            className="h-5 w-5 rounded-full border-2 border-primary bg-background shadow-lg"
+            style={{ transform: 'translateX(-50%)' }}
+        />
+    );
+};
+
 const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hsl, hsv, onChange, className, onEyeDropperClick }) => {
     
     const handleHslChange = (color: any) => {
@@ -31,7 +43,7 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hsl, hsv, onC
                 <Saturation hsl={hsl} hsv={hsv} onChange={onChange} />
             </div>
             <div className="relative h-5 w-full">
-                <Hue hsl={hsl} onChange={onChange} />
+                <Hue hsl={hsl} onChange={onChange} pointer={CustomHuePointer as React.ComponentType<any>} />
             </div>
             <div>
                 <ColorSliders hsl={hsl} onChange={handleHslChange} onEyeDropperClick={onEyeDropperClick} />
