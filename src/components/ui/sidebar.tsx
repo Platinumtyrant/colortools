@@ -181,7 +181,11 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className={cn("group h-full text-sidebar-foreground", className)}
+        className={cn(
+            "group hidden h-full text-sidebar-foreground transition-all duration-300 ease-in-out md:flex",
+            "w-72 data-[state=collapsed]:w-[72px]",
+            className
+        )}
         data-state={state}
         data-collapsible={!open ? collapsible : ""}
         {...props}
