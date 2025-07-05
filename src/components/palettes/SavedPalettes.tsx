@@ -69,18 +69,20 @@ export function SavedPalettes({ onLoadPalette }: SavedPalettesProps) {
     onLoadPalette(palette.colors);
     toast({ title: "Palette Loaded!", description: `Loaded "${palette.name}"` });
   }
+  
+  const recentPalettes = savedPalettes.slice(-3).reverse();
 
   return (
     <Card className="w-full h-full flex flex-col">
       <CardHeader>
-        <CardTitle>My Library</CardTitle>
-        <CardDescription>Click a palette to load it.</CardDescription>
+        <CardTitle>Recent Palettes</CardTitle>
+        <CardDescription>Your 3 most recently saved palettes. Click a palette to load it.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow p-4">
-        {savedPalettes.length > 0 ? (
+        {recentPalettes.length > 0 ? (
           <ScrollArea className="h-full max-h-[400px]">
             <div className="space-y-4">
-              {savedPalettes.map((palette) => (
+              {recentPalettes.map((palette) => (
                 <div key={palette.id} className="group relative">
                     <p className="text-sm font-medium mb-1 truncate" title={palette.name}>{palette.name}</p>
                     <div
