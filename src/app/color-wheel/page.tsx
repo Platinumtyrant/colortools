@@ -1,25 +1,36 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
 import { colord } from 'colord';
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselPrevious,
+    CarouselNext,
+    type CarouselApi
+} from "@/components/ui/carousel";
 import {
     getComplementary,
     getAnalogous,
     getSplitComplementary,
     getTriadic,
     getSquare,
-    getRectangular
+    getRectangular,
+    getTints,
+    getTones,
+    getShades,
 } from '@/lib/colors';
 import type { ColorResult } from '@uiw/react-color';
 import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
+import { Label } from '@/components/ui/label';
 
 const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mod.default), {
   ssr: false,
@@ -34,7 +45,7 @@ const Swatch = ({ color }: { color: string }) => (
     <TooltipProvider>
         <Tooltip>
             <TooltipTrigger asChild>
-                <div className="h-12 w-12 rounded-md border" style={{ backgroundColor: color }} />
+                <div className="h-10 w-10 rounded-md border" style={{ backgroundColor: color }} />
             </TooltipTrigger>
             <TooltipContent>
                 <p>{color.toUpperCase()}</p>
@@ -42,6 +53,16 @@ const Swatch = ({ color }: { color: string }) => (
         </Tooltip>
     </TooltipProvider>
 );
+
+const ColorStrip = ({ title, colors }: { title: string, colors: string[] }) => (
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium text-muted-foreground">{title}</h4>
+      <div className="flex flex-wrap gap-2">
+        {colors.map((c, i) => <Swatch key={`${title}-${c}-${i}`} color={c} />)}
+      </div>
+    </div>
+);
+
 
 const HarmonyDescription = ({ title, description }: { title: string, description: React.ReactNode }) => (
     <AccordionItem value={title}>
@@ -56,6 +77,9 @@ const HarmonyDescription = ({ title, description }: { title: string, description
 
 export default function ColorWheelPage() {
     const [activeColor, setActiveColor] = useState('#ff6347');
+    const [tintShadeCount, setTintShadeCount] = useState(5);
+    const [api, setApi] = useState<CarouselApi>();
+    const [current, setCurrent] = useState(0);
 
     const activeHsl = useMemo(() => colord(activeColor).toHsl(), [activeColor]);
 
@@ -63,6 +87,14 @@ export default function ColorWheelPage() {
         const newColor = colord({ ...activeHsl, l: newLightness[0] }).toHex();
         setActiveColor(newColor);
     };
+
+    useEffect(() => {
+        if (!api) return;
+        setCurrent(api.selectedScrollSnap());
+        api.on("select", () => {
+          setCurrent(api.selectedScrollSnap());
+        });
+    }, [api]);
 
     const harmonies = useMemo(() => ({
         complementary: getComplementary(activeColor),
@@ -157,8 +189,12 @@ export default function ColorWheelPage() {
         },
     ];
 
+    const tints = useMemo(() => getTints(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
+    const shades = useMemo(() => getShades(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
+    const tones = useMemo(() => getTones(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
+
     return (
-        <main className="flex-1 w-full p-4 md:p-8 space-y-16">
+        <main className="flex-1 w-full p-4 md:p-8 space-y-8">
             <CardHeader className="p-0 text-center max-w-3xl mx-auto">
                 <CardTitle className="text-3xl">Color Theory Explorer</CardTitle>
                 <CardDescription>
@@ -193,31 +229,71 @@ export default function ColorWheelPage() {
                     </CardContent>
                 </Card>
             </div>
-
-            <div className="w-full max-w-3xl mx-auto space-y-16">
-                {harmonyInfo.map((harmony, index) => (
-                    <React.Fragment key={harmony.name}>
-                        {index > 0 && <Separator />}
-                        <div className="flex flex-col items-center text-center">
-                            <h2 className="text-2xl font-semibold tracking-tight mb-6">{harmony.name}</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-center w-full">
-                                <div className="flex justify-center">
-                                    <HarmonyColorWheel colors={harmony.colors} size={200} />
-                                </div>
-                                <div className="flex flex-wrap gap-4 justify-center">
-                                    {harmony.colors.map((c, i) => <Swatch key={`${harmony.name}-${c}-${i}`} color={c} />)}
-                                </div>
-                            </div>
-                        </div>
-                    </React.Fragment>
-                ))}
-            </div>
-
-
-            <section className="w-full max-w-4xl mx-auto">
+            
+            <section className="w-full max-w-3xl mx-auto space-y-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Color Harmony Explanations</CardTitle>
+                        <CardTitle>Color Harmonies</CardTitle>
+                        <CardDescription>Use the arrows to cycle through different harmonic relationships based on your selected color.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center">
+                        <Carousel setApi={setApi} className="w-full max-w-xs">
+                            <CarouselContent>
+                                {harmonyInfo.map((harmony, index) => (
+                                    <CarouselItem key={index}>
+                                        <div className="p-1 flex flex-col items-center gap-6">
+                                            <HarmonyColorWheel colors={harmony.colors} size={200} />
+                                            <div className="flex flex-wrap gap-4 justify-center">
+                                                {harmony.colors.map((c, i) => <Swatch key={`${harmony.name}-${c}-${i}`} color={c} />)}
+                                            </div>
+                                        </div>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                        </Carousel>
+                        <div className="py-2 text-center text-lg font-semibold text-foreground">
+                            {harmonyInfo[current]?.name || ''}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Tints, Tones & Shades</CardTitle>
+                        <CardDescription>Explore variations of your selected color by mixing it with white (tints), gray (tones), or black (shades).</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                           <div className="flex justify-between items-center">
+                             <Label htmlFor="tint-shade-count">Count</Label>
+                             <span className="text-sm font-medium">{tintShadeCount}</span>
+                           </div>
+                           <Slider
+                                id="tint-shade-count"
+                                min={2}
+                                max={25}
+                                step={1}
+                                value={[tintShadeCount]}
+                                onValueChange={(value) => setTintShadeCount(value[0])}
+                            />
+                        </div>
+
+                        <div className="space-y-4">
+                            <ColorStrip title="Tints" colors={tints} />
+                            <ColorStrip title="Tones" colors={tones} />
+                            <ColorStrip title="Shades" colors={shades} />
+                        </div>
+                    </CardContent>
+                </Card>
+            </section>
+
+
+            <section className="w-full max-w-3xl mx-auto">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Harmony Explanations</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Accordion type="multiple" className="w-full">
