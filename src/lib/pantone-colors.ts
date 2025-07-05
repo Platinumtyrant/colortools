@@ -5,6 +5,27 @@ export interface PantoneColor {
   cmyk: string;
 }
 
+const sortPantoneNumerically = (a: PantoneColor, b: PantoneColor): number => {
+  const regex = /(\d+)/g;
+  
+  // Create a string of numbers from the name to handle cases like '1555' vs '155'
+  const numStrA = (a.name.match(regex) || []).join('');
+  const numStrB = (b.name.match(regex) || []).join('');
+
+  const numA = numStrA ? parseInt(numStrA, 10) : -1;
+  const numB = numStrB ? parseInt(numStrB, 10) : -1;
+  
+  if (numA !== -1 && numB !== -1) {
+      if (numA !== numB) {
+          return numA - numB;
+      }
+  }
+
+  // Fallback for non-numeric or special names like 'PANTONE Yellow PC'
+  return a.name.localeCompare(b.name);
+};
+
+
 export const pantoneProColors: PantoneColor[] = [
   { name: 'PANTONE Pro. Cyan PC', hex: '#00AEED', cmyk: 'C:100 M:0 Y:0 K:0' },
   { name: 'PANTONE Pro. Mag. PC', hex: '#EF008C', cmyk: 'C:0 M:100 Y:0 K:0' },
@@ -12,7 +33,7 @@ export const pantoneProColors: PantoneColor[] = [
   { name: 'PANTONE Pro. Black PC', hex: '#231F20', cmyk: 'C:0 M:0 Y:0 K:100' },
 ];
 
-export const yellowAndOrangeColors: PantoneColor[] = [
+const yellowAndOrangeUnsorted: PantoneColor[] = [
     { name: 'PANTONE 100 PC', hex: '#FFF300', cmyk: 'C:0 M:0 Y:58 K:0' },
     { name: 'PANTONE 106 PC', hex: '#FFE3CC', cmyk: 'C:0 M:1 Y:70 K:0' },
     { name: 'PANTONE 113 PC', hex: '#FFCA51', cmyk: 'C:0 M:4 Y:71 K:0' },
@@ -91,8 +112,9 @@ export const yellowAndOrangeColors: PantoneColor[] = [
     { name: 'PANTONE 154 PC', hex: '#453700', cmyk: 'C:7 M:64 Y:100 K:36' },
     { name: 'PANTONE 1545 PC', hex: '#352B00', cmyk: 'C:20 M:76 Y:100 K:78' },
 ];
+export const yellowAndOrangeColors = yellowAndOrangeUnsorted.sort(sortPantoneNumerically);
 
-export const orangeAndRedColors: PantoneColor[] = [
+const orangeAndRedColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 155 PC', hex: '#FFC597', cmyk: 'C:0 M:12 Y:32 K:0' },
     { name: 'PANTONE 1555 PC', hex: '#FFB37C', cmyk: 'C:0 M:27 Y:34 K:0' },
     { name: 'PANTONE 162 PC', hex: '#FFB183', cmyk: 'C:0 M:24 Y:31 K:0' },
@@ -178,8 +200,9 @@ export const orangeAndRedColors: PantoneColor[] = [
     { name: 'PANTONE 1955 PC', hex: '#36292E', cmyk: 'C:8 M:100 Y:47 K:39' },
     { name: 'PANTONE 202 PC', hex: '#352B32', cmyk: 'C:10 M:97 Y:61 K:48' },
 ];
+export const orangeAndRedColors = orangeAndRedColorsUnsorted.sort(sortPantoneNumerically);
 
-export const pinkAndPurpleColors: PantoneColor[] = [
+const pinkAndPurpleColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 203 PC', hex: '#F8B2D5', cmyk: 'C:0 M:36 Y:2 K:0' },
     { name: 'PANTONE 210 PC', hex: '#FAADB8', cmyk: 'C:0 M:44 Y:4 K:0' },
     { name: 'PANTONE 217 PC', hex: '#F7BEDC', cmyk: 'C:1 M:31 Y:0 K:0' },
@@ -265,8 +288,9 @@ export const pinkAndPurpleColors: PantoneColor[] = [
     { name: 'PANTONE 2622 PC', hex: '#5C175A', cmyk: 'C:65 M:91 Y:9 K:45' },
     { name: 'PANTONE 2623 PC', hex: '#5C1558', cmyk: 'C:74 M:100 Y:5 K:28' },
 ];
+export const pinkAndPurpleColors = pinkAndPurpleColorsUnsorted.sort(sortPantoneNumerically);
 
-export const blueAndVioletColors: PantoneColor[] = [
+const blueAndVioletColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 2567 PC', hex: '#8060B2', cmyk: 'C:30 M:38 Y:0 K:0' },
     { name: 'PANTONE 263 PC', hex: '#B2A2D9', cmyk: 'C:12 M:15 Y:0 K:0' },
     { name: 'PANTONE 2635 PC', hex: '#8A81C2', cmyk: 'C:25 M:26 Y:0 K:0' },
@@ -352,8 +376,9 @@ export const blueAndVioletColors: PantoneColor[] = [
     { name: 'PANTONE 296 PC', hex: '#0C0A21', cmyk: 'C:100 M:73 Y:30 K:83' },
     { name: 'PANTONE 2965 PC', hex: '#100E21', cmyk: 'C:100 M:56 Y:19 K:73' },
 ];
+export const blueAndVioletColors = blueAndVioletColorsUnsorted.sort(sortPantoneNumerically);
 
-export const cyanAndGreenColors: PantoneColor[] = [
+const cyanAndGreenColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 297 PC', hex: '#80E9EB', cmyk: 'C:51 M:0 Y:1 K:0' },
     { name: 'PANTONE 2975 PC', hex: '#A8F0F7', cmyk: 'C:35 M:0 Y:6 K:0' },
     { name: 'PANTONE 304 PC', hex: '#A6F0F7', cmyk: 'C:36 M:0 Y:6 K:0' },
@@ -439,3 +464,98 @@ export const cyanAndGreenColors: PantoneColor[] = [
     { name: 'PANTONE 336 PC', hex: '#008B8B', cmyk: 'C:100 M:9 Y:58 K:45' },
     { name: 'PANTONE 343 PC', hex: '#007C7D', cmyk: 'C:95 M:15 Y:62 K:58' },
 ];
+export const cyanAndGreenColors = cyanAndGreenColorsUnsorted.sort(sortPantoneNumerically);
+
+const yellowAndGreenColorsUnsorted: PantoneColor[] = [
+    { name: 'PANTONE 3375 PC', hex: '#A6E9B9', cmyk: 'C:40 M:0 Y:26 K:0' },
+    { name: 'PANTONE 344 PC', hex: '#B3E8C1', cmyk: 'C:33 M:0 Y:26 K:0' },
+    { name: 'PANTONE 351 PC', hex: '#B1E8BF', cmyk: 'C:34 M:0 Y:26 K:0' },
+    { name: 'PANTONE 358 PC', hex: '#A8DE9B', cmyk: 'C:38 M:0 Y:45 K:0' },
+    { name: 'PANTONE 365 PC', hex: '#C0E3A8', cmyk: 'C:22 M:0 Y:36 K:0' },
+    { name: 'PANTONE 372 PC', hex: '#D9E4B0', cmyk: 'C:16 M:0 Y:36 K:0' },
+    { name: 'PANTONE 379 PC', hex: '#E7EEB2', cmyk: 'C:0 M:0 Y:54 K:0' },
+    { name: 'PANTONE 386 PC', hex: '#F2F5BC', cmyk: 'C:6 M:0 Y:54 K:0' },
+    { name: 'PANTONE 393 PC', hex: '#F8F5C9', cmyk: 'C:3 M:0 Y:48 K:0' },
+    { name: 'PANTONE 3935 PC', hex: '#F4F1D7', cmyk: 'C:1 M:0 Y:58 K:0' },
+    { name: 'PANTONE 3385 PC', hex: '#8CE1AB', cmyk: 'C:54 M:0 Y:37 K:0' },
+    { name: 'PANTONE 345 PC', hex: '#9CE5B3', cmyk: 'C:43 M:0 Y:33 K:0' },
+    { name: 'PANTONE 352 PC', hex: '#A8E3BC', cmyk: 'C:37 M:0 Y:29 K:0' },
+    { name: 'PANTONE 359 PC', hex: '#9CB88E', cmyk: 'C:42 M:0 Y:48 K:0' },
+    { name: 'PANTONE 366 PC', hex: '#AFCE97', cmyk: 'C:29 M:0 Y:45 K:0' },
+    { name: 'PANTONE 373 PC', hex: '#C7E192', cmyk: 'C:20 M:0 Y:42 K:0' },
+    { name: 'PANTONE 380 PC', hex: '#CEE36F', cmyk: 'C:15 M:0 Y:72 K:0' },
+    { name: 'PANTONE 387 PC', hex: '#DDE884', cmyk: 'C:10 M:0 Y:72 K:0' },
+    { name: 'PANTONE 394 PC', hex: '#ECF191', cmyk: 'C:3 M:0 Y:66 K:0' },
+    { name: 'PANTONE 3945 PC', hex: '#E8F0A2', cmyk: 'C:1 M:0 Y:73 K:0' },
+    { name: 'PANTONE 3395 PC', hex: '#73D797', cmyk: 'C:74 M:0 Y:52 K:0' },
+    { name: 'PANTONE 346 PC', hex: '#85E1A1', cmyk: 'C:56 M:0 Y:42 K:0' },
+    { name: 'PANTONE 353 PC', hex: '#96DBB4', cmyk: 'C:46 M:0 Y:36 K:0' },
+    { name: 'PANTONE 360 PC', hex: '#7ED177', cmyk: 'C:62 M:0 Y:78 K:0' },
+    { name: 'PANTONE 367 PC', hex: '#9BC781', cmyk: 'C:37 M:0 Y:58 K:0' },
+    { name: 'PANTONE 374 PC', hex: '#B0D779', cmyk: 'C:27 M:0 Y:55 K:0' },
+    { name: 'PANTONE 381 PC', hex: '#B7CC5F', cmyk: 'C:23 M:0 Y:89 K:0' },
+    { name: 'PANTONE 388 PC', hex: '#C7D18A', cmyk: 'C:14 M:0 Y:76 K:0' },
+    { name: 'PANTONE 395 PC', hex: '#DFE896', cmyk: 'C:7 M:0 Y:79 K:0' },
+    { name: 'PANTONE 3955 PC', hex: '#DAE4A7', cmyk: 'C:4 M:0 Y:100 K:0' },
+    { name: 'PANTONE 3405 PC', hex: '#45BF74', cmyk: 'C:90 M:0 Y:70 K:0' },
+    { name: 'PANTONE 347 PC', hex: '#3AC369', cmyk: 'C:96 M:0 Y:88 K:1' },
+    { name: 'PANTONE 354 PC', hex: '#43C873', cmyk: 'C:89 M:0 Y:90 K:0' },
+    { name: 'PANTONE 361 PC', hex: '#5AC066', cmyk: 'C:75 M:0 Y:100 K:0' },
+    { name: 'PANTONE 368 PC', hex: '#6EC06D', cmyk: 'C:63 M:0 Y:97 K:0' },
+    { name: 'PANTONE 375 PC', hex: '#8BD97B', cmyk: 'C:47 M:0 Y:94 K:0' },
+    { name: 'PANTONE 382 PC', hex: '#AEC669', cmyk: 'C:28 M:0 Y:92 K:0' },
+    { name: 'PANTONE 389 PC', hex: '#B4C586', cmyk: 'C:23 M:0 Y:83 K:0' },
+    { name: 'PANTONE 396 PC', hex: '#CAD19F', cmyk: 'C:11 M:0 Y:90 K:0' },
+    { name: 'PANTONE 3965 PC', hex: '#C5CFAB', cmyk: 'C:6 M:0 Y:100 K:0' },
+    { name: 'PANTONE 3415 PC', hex: '#00A65B', cmyk: 'C:100 M:5 Y:72 K:24' },
+    { name: 'PANTONE 348 PC', hex: '#00AB51', cmyk: 'C:100 M:4 Y:87 K:18' },
+    { name: 'PANTONE 355 PC', hex: '#00B161', cmyk: 'C:95 M:0 Y:98 K:0' },
+    { name: 'PANTONE 362 PC', hex: '#3B9D5B', cmyk: 'C:78 M:2 Y:98 K:9' },
+    { name: 'PANTONE 369 PC', hex: '#589D5E', cmyk: 'C:67 M:0 Y:98 K:5' },
+    { name: 'PANTONE 376 PC', hex: '#77B367', cmyk: 'C:53 M:0 Y:96 K:0' },
+    { name: 'PANTONE 383 PC', hex: '#8FC757', cmyk: 'C:26 M:3 Y:93 K:17' },
+    { name: 'PANTONE 390 PC', hex: '#9BCF66', cmyk: 'C:24 M:0 Y:98 K:8' },
+    { name: 'PANTONE 397 PC', hex: '#B3D770', cmyk: 'C:10 M:1 Y:98 K:15' },
+    { name: 'PANTONE 3975 PC', hex: '#ADCC82', cmyk: 'C:6 M:9 Y:100 K:22' },
+    { name: 'PANTONE 3425 PC', hex: '#00934F', cmyk: 'C:100 M:10 Y:69 K:44' },
+    { name: 'PANTONE 349 PC', hex: '#00994D', cmyk: 'C:94 M:11 Y:84 K:43' },
+    { name: 'PANTONE 356 PC', hex: '#00A65A', cmyk: 'C:95 M:8 Y:93 K:27' },
+    { name: 'PANTONE 363 PC', hex: '#3B915C', cmyk: 'C:78 M:5 Y:98 K:24' },
+    { name: 'PANTONE 370 PC', hex: '#568F61', cmyk: 'C:64 M:5 Y:100 K:24' },
+    { name: 'PANTONE 377 PC', hex: '#70A669', cmyk: 'C:51 M:5 Y:98 K:23' },
+    { name: 'PANTONE 384 PC', hex: '#89C05A', cmyk: 'C:24 M:5 Y:98 K:35' },
+    { name: 'PANTONE 391 PC', hex: '#96CA67', cmyk: 'C:20 M:4 Y:100 K:32' },
+    { name: 'PANTONE 398 PC', hex: '#A6C075', cmyk: 'C:11 M:4 Y:100 K:25' },
+    { name: 'PANTONE 3985 PC', hex: '#A6B486', cmyk: 'C:11 M:16 Y:100 K:38' },
+    { name: 'PANTONE 3435 PC', hex: '#007C3D', cmyk: 'C:95 M:19 Y:70 K:72' },
+    { name: 'PANTONE 350 PC', hex: '#00763C', cmyk: 'C:80 M:24 Y:69 K:70' },
+    { name: 'PANTONE 357 PC', hex: '#007647', cmyk: 'C:83 M:19 Y:73 K:58' },
+    { name: 'PANTONE 364 PC', hex: '#3B6B3E', cmyk: 'C:73 M:9 Y:94 K:39' },
+    { name: 'PANTONE 371 PC', hex: '#537C51', cmyk: 'C:53 M:14 Y:89 K:56' },
+    { name: 'PANTONE 378 PC', hex: '#6B8062', cmyk: 'C:43 M:13 Y:98 K:62' },
+    { name: 'PANTONE 385 PC', hex: '#89A056', cmyk: 'C:22 M:14 Y:92 K:56' },
+    { name: 'PANTONE 392 PC', hex: '#96B166', cmyk: 'C:20 M:12 Y:100 K:48' },
+    { name: 'PANTONE 399 PC', hex: '#A6B074', cmyk: 'C:14 M:10 Y:100 K:35' },
+    { name: 'PANTONE 3995 PC', hex: '#96A382', cmyk: 'C:17 M:26 Y:100 K:66' },
+];
+export const yellowAndGreenColors = yellowAndGreenColorsUnsorted.sort(sortPantoneNumerically);
+
+const grayColorsUnsorted: PantoneColor[] = [
+    { name: 'PANTONE 400 PC', hex: '#D4CEC7', cmyk: 'C:5 M:6 Y:10 K:14' },
+    { name: 'PANTONE 406 PC', hex: '#C8C2BE', cmyk: 'C:5 M:9 Y:10 K:13' },
+    { name: 'PANTONE 401 PC', hex: '#BDB8AE', cmyk: 'C:8 M:9 Y:14 K:24' },
+    { name: 'PANTONE 407 PC', hex: '#B2AFA7', cmyk: 'C:8 M:15 Y:13 K:24' },
+    { name: 'PANTONE 402 PC', hex: '#A6A399', cmyk: 'C:10 M:13 Y:16 K:29' },
+    { name: 'PANTONE 408 PC', hex: '#9E9C92', cmyk: 'C:11 M:19 Y:18 K:35' },
+    { name: 'PANTONE 403 PC', hex: '#969389', cmyk: 'C:14 M:18 Y:22 K:42' },
+    { name: 'PANTONE 409 PC', hex: '#8C8A7F', cmyk: 'C:16 M:25 Y:21 K:45' },
+    { name: 'PANTONE 404 PC', hex: '#8A887E', cmyk: 'C:18 M:23 Y:27 K:55' },
+    { name: 'PANTONE 410 PC', hex: '#838276', cmyk: 'C:19 M:31 Y:26 K:56' },
+    { name: "PANTONE 405 PC", hex: "#7B7870", cmyk: "C:23 M:29 Y:32 K:67" },
+    { name: "PANTONE 411 PC", hex: "#747169", cmyk: "C:27 M:39 Y:30 K:70" },
+    { name: 'PANTONE Black PC', hex: '#333333', cmyk: 'C:56 M:56 Y:53 K:92' },
+    { name: 'PANTONE 412 PC', hex: '#363432', cmyk: 'C:53 M:56 Y:45 K:87' },
+];
+export const grayColors = grayColorsUnsorted.sort(sortPantoneNumerically);
+
+  
