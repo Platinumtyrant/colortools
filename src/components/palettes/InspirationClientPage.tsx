@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import type { CategorizedPalette } from '@/lib/palette-parser';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +15,9 @@ interface InspirationClientPageProps {
 
 export function InspirationClientPage({ allPalettes }: InspirationClientPageProps) {
   const { toast } = useToast();
+  // State to manage which popover is open based on hover
+  const [openPopoverKey, setOpenPopoverKey] = useState<string | null>(null);
+  const popoverTimeoutRef = useRef<number | null>(null);
 
   const handleSavePalette = (palette: { name: string; colors: string[] }) => {
     try {
@@ -77,6 +80,20 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
   const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor', 'Brands', 'Flags'];
   const orderedCategories = categoryOrder.filter(cat => palettesByCategory[cat]);
 
+  const handleMouseEnter = (key: string) => {
+    if (popoverTimeoutRef.current) {
+      clearTimeout(popoverTimeoutRef.current);
+      popoverTimeoutRef.current = null;
+    }
+    setOpenPopoverKey(key);
+  };
+
+  const handleMouseLeave = () => {
+    popoverTimeoutRef.current = window.setTimeout(() => {
+      setOpenPopoverKey(null);
+    }, 200); // Add a small delay to allow moving mouse to popover content
+  };
+
   return (
     <Tabs defaultValue={orderedCategories[0]} className="w-full">
       <TabsList className="grid w-full grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11">
@@ -88,31 +105,38 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
       {orderedCategories.map(category => (
         <TabsContent key={category} value={category} className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
-            {palettesByCategory[category].map((palette, index) => (
-                <div className="group" key={`${palette.name}-${index}`}>
+            {palettesByCategory[category].map((palette, paletteIndex) => (
+                <div className="group" key={`${palette.name}-${paletteIndex}`}>
                     <p className="text-sm font-medium mb-2 truncate cursor-pointer" title={palette.name} onClick={() => handleSavePalette(palette)}>{palette.name}</p>
                     <div 
                       className="flex flex-wrap w-full cursor-pointer overflow-hidden rounded-md border-2 border-transparent transition-all group-hover:border-primary"
                       onClick={() => handleSavePalette(palette)}
                     >
                         {palette.colors.map((color, colorIndex) => {
+                          const popoverKey = `${category}-${paletteIndex}-${colorIndex}`;
                           const hex = colord(color).toHex();
                           const rgb = colord(color).toRgb();
                           const hsl = colord(color).toHsl();
                           const name = getDescriptiveColorName(hex);
                           return (
-                            <Popover key={colorIndex}>
-                                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Popover key={popoverKey} open={openPopoverKey === popoverKey} onOpenChange={(isOpen) => setOpenPopoverKey(isOpen ? popoverKey : null)}>
+                                <PopoverTrigger asChild>
                                     <div
+                                        onMouseEnter={() => handleMouseEnter(popoverKey)}
+                                        onMouseLeave={handleMouseLeave}
                                         className="w-[10%] flex-grow"
                                         style={{
                                             backgroundColor: color,
                                             height: palette.colors.length > 10 ? '2rem' : '4rem',
                                         }}
-                                        title="Click for details"
+                                        title="Hover for details, click to save palette"
                                     />
                                 </PopoverTrigger>
-                                <PopoverContent className="w-64">
+                                <PopoverContent 
+                                    className="w-64"
+                                    onMouseEnter={() => handleMouseEnter(popoverKey)}
+                                    onMouseLeave={handleMouseLeave}
+                                >
                                     <div className="space-y-4">
                                         <div className="space-y-1">
                                             <h4 className="font-medium leading-none capitalize">{name}</h4>
