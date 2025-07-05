@@ -27,7 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
@@ -357,6 +357,16 @@ export default function UnifiedBuilderPage() {
     toast({ title: "Palette Reset" });
   }, [regeneratePalette, toast]);
 
+  const handleApplyAnalyzedPalette = useCallback((newHexes: string[]) => {
+    setPalette(newHexes.map((hex, i) => ({ 
+        id: palette[i]?.id || Date.now() + i, 
+        hex, 
+        locked: false
+    })));
+    toast({ title: "Palette Updated", description: "The analyzed palette has been applied to the editor." });
+  }, [palette, toast]);
+
+
   const colorName = colord(mainColor).toName({ closest: true });
   const colorCmyk = colord(mainColor).toCmyk();
   const colorLch = colord(mainColor).toLch();
@@ -460,10 +470,18 @@ export default function UnifiedBuilderPage() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="flex h-16 w-full overflow-hidden rounded-md border">
-                {simulatedPalette.map((color, index) => (
-                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                ))}
+            <div className="relative group">
+              <div className="flex h-16 w-full overflow-hidden rounded-md border">
+                  {simulatedPalette.map((color, index) => (
+                  <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                  ))}
+              </div>
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                  <Button onClick={() => handleApplyAnalyzedPalette(simulatedPalette)} variant="secondary">
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Use This Palette
+                  </Button>
+              </div>
             </div>
             <div className="grid grid-cols-1 gap-8 pt-4">
                 <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" description="How light or dark the color is, from black (0) to white (100)." />
@@ -476,7 +494,8 @@ export default function UnifiedBuilderPage() {
       useBezier, stableSetUseBezier, 
       correctLightness, stableSetCorrectLightness,
       simulationType, stableSetSimulationType,
-      isPaletteColorblindSafe, simulatedPalette, graphData
+      isPaletteColorblindSafe, simulatedPalette, graphData,
+      handleApplyAnalyzedPalette
   ]);
 
   useEffect(() => {
