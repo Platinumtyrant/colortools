@@ -1,7 +1,8 @@
 
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { colord, extend } from 'colord';
 import namesPlugin from 'colord/plugins/names';
 import cmykPlugin from 'colord/plugins/cmyk';
@@ -21,12 +23,11 @@ import { simulate, type SimulationType } from '@/lib/colorblind';
 import { analyzePalette } from '@/lib/palette-analyzer';
 import { Palette } from '@/components/palettes/Palette';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
@@ -122,9 +123,13 @@ export default function UnifiedBuilderPage() {
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [newPaletteName, setNewPaletteName] = useState("");
+  const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
 
   const { toast } = useToast();
   const { setExtension } = useSidebarExtension();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isInitialLoad = useRef(true);
 
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
   
@@ -174,9 +179,31 @@ export default function UnifiedBuilderPage() {
   }, [generationType, generationCycle, mainColor]);
 
   useEffect(() => {
+    if (!isInitialLoad.current) return;
+    isInitialLoad.current = false;
+
+    const editIdStr = searchParams.get('edit');
+    if (editIdStr) {
+      const id = parseInt(editIdStr, 10);
+      const savedPalettesJSON = localStorage.getItem('saved_palettes');
+      if (savedPalettesJSON) {
+        const savedPalettes = JSON.parse(savedPalettesJSON) as { id: number; name: string; colors: string[] }[];
+        const paletteToEdit = savedPalettes.find(p => p.id === id);
+        if (paletteToEdit) {
+          setEditingPaletteId(id);
+          setPalette(paletteToEdit.colors.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
+          setMainColor(paletteToEdit.colors[0] || '#FF9800');
+          setNewPaletteName(paletteToEdit.name);
+          toast({ title: "Editing Palette", description: `Loaded "${paletteToEdit.name}" for editing.` });
+          router.replace('/', { scroll: false });
+          return;
+        }
+      }
+    }
+    
     regeneratePalette();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, router]);
 
 
   const handleColorChange = useCallback((newColor: any) => {
@@ -200,41 +227,61 @@ export default function UnifiedBuilderPage() {
       toast({ title: "Cannot save empty palette", variant: "destructive" });
       return;
     }
-    const detectedHarmony = analyzePalette(palette.map(p => p.hex));
-    setNewPaletteName(detectedHarmony === 'Custom' ? 'My Custom Palette' : `${detectedHarmony} Palette`);
+    if (editingPaletteId) {
+      const savedPalettesJSON = localStorage.getItem('saved_palettes');
+      const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
+      const existingPalette = savedPalettes.find((p: any) => p.id === editingPaletteId);
+      if (existingPalette) {
+        setNewPaletteName(existingPalette.name);
+      }
+    } else {
+      const detectedHarmony = analyzePalette(palette.map(p => p.hex));
+      setNewPaletteName(detectedHarmony === 'Custom' ? 'My Custom Palette' : `${detectedHarmony} Palette`);
+    }
     setIsSaveDialogOpen(true);
-  }, [palette, toast]);
+  }, [palette, toast, editingPaletteId]);
 
   const handleSaveToLibrary = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (!newPaletteName.trim()) {
-        toast({ title: "Please enter a name for the palette.", variant: "destructive" });
-        return;
+      toast({ title: "Please enter a name for the palette.", variant: "destructive" });
+      return;
     }
 
     const savedPalettesJSON = localStorage.getItem('saved_palettes');
-    const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-    
-    const newPalette = {
-      id: Date.now(),
-      name: newPaletteName,
-      colors: palette.map(p => p.hex)
-    };
-    
-    savedPalettes.push(newPalette);
+    let savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
+
+    if (editingPaletteId) {
+      savedPalettes = savedPalettes.map((p: any) => 
+        p.id === editingPaletteId 
+          ? { ...p, name: newPaletteName, colors: palette.map(c => c.hex) } 
+          : p
+      );
+      toast({ title: "Palette Updated!", description: `"${newPaletteName}" has been updated.` });
+    } else {
+      const newPalette = {
+        id: Date.now(),
+        name: newPaletteName,
+        colors: palette.map(p => p.hex)
+      };
+      savedPalettes.push(newPalette);
+      toast({ title: "Palette Saved!", description: `"${newPaletteName}" saved to your library.` });
+    }
+
     localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
     
-    toast({ title: "Palette Saved!", description: `"${newPaletteName}" saved to your library.` });
     setLibraryUpdateKey(k => k + 1);
     setIsSaveDialogOpen(false);
     setNewPaletteName("");
-  }, [palette, newPaletteName, toast]);
+    setEditingPaletteId(null);
+  }, [palette, newPaletteName, toast, editingPaletteId]);
   
   const handleLoadPaletteFromLibrary = useCallback((colors: string[]) => {
-    if (colors.length < 2) {
+    if (colors.length < 1) {
         toast({ title: "Invalid palette to load.", variant: "destructive" });
         return;
     }
+    setEditingPaletteId(null); // Loading from library is not editing
     setPalette(colors.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
     setMainColor(colors[0]);
   }, [toast]);
@@ -286,6 +333,7 @@ export default function UnifiedBuilderPage() {
   }, []);
 
   const handleReset = useCallback(() => {
+    setEditingPaletteId(null);
     setPalette([]);
     setTimeout(() => regeneratePalette(true), 0);
     toast({ title: "Palette Reset" });
@@ -459,7 +507,10 @@ export default function UnifiedBuilderPage() {
         <div className="text-sm text-muted-foreground">
             Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>
         </div>
-        <Button onClick={handleOpenSaveDialog}>Save to Library</Button>
+        <Button onClick={handleOpenSaveDialog}>
+          {editingPaletteId ? <Pencil className="mr-2 h-4 w-4" /> : null}
+          {editingPaletteId ? 'Update Palette' : 'Save to Library'}
+        </Button>
       </div>
     </div>
   );
@@ -472,7 +523,7 @@ export default function UnifiedBuilderPage() {
         <DialogContent className="sm:max-w-[425px]">
             <form onSubmit={handleSaveToLibrary}>
                 <DialogHeader>
-                    <DialogTitle>Save Palette</DialogTitle>
+                    <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
                     <DialogDescription>
                         Give your palette a name. Click save when you're done.
                     </DialogDescription>
@@ -493,7 +544,7 @@ export default function UnifiedBuilderPage() {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button type="submit">Save palette</Button>
+                    <Button type="submit">{editingPaletteId ? 'Update' : 'Save'} palette</Button>
                 </DialogFooter>
             </form>
         </DialogContent>

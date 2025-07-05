@@ -20,7 +20,7 @@ export function PrebuiltPalettesSidebar({ onAddPalette }: PrebuiltPalettesSideba
         </CardHeader>
         <CardContent>
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="space-y-4 pr-4">
+              <div className="space-y-4">
                 {prebuiltPalettes.map((palette, index) => (
                   <div key={index} className="group relative">
                     <p className="text-sm font-medium mb-1 truncate" title={palette.name}>{palette.name}</p>

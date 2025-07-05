@@ -79,7 +79,7 @@ export function SavedPalettes({ onLoadPalette }: SavedPalettesProps) {
       <CardContent className="flex-grow p-4">
         {savedPalettes.length > 0 ? (
           <ScrollArea className="h-full max-h-[400px]">
-            <div className="space-y-4 pr-4">
+            <div className="space-y-4">
               {savedPalettes.map((palette) => (
                 <div key={palette.id} className="group relative">
                     <p className="text-sm font-medium mb-1 truncate" title={palette.name}>{palette.name}</p>

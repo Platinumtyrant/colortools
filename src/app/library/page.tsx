@@ -2,10 +2,11 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trash2, Download, Library as LibraryIcon } from 'lucide-react';
+import { Trash2, Download, Library as LibraryIcon, Pencil } from 'lucide-react';
 import { colord } from 'colord';
 import type { PrebuiltPalette } from '@/lib/prebuilt-palettes';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
@@ -181,6 +182,12 @@ export default function LibraryPage() {
                 </div>
               </CardContent>
               <CardFooter className="justify-end gap-2 p-4 pt-0">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/?edit=${palette.id}`}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
+                    </Link>
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => handleDeletePalette(palette.id)}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
