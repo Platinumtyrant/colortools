@@ -3,20 +3,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Trash2, Download, Library as LibraryIcon } from 'lucide-react';
 import { colord } from 'colord';
-import { ColorList } from '@/components/colors/ColorList';
-import { cn } from '@/lib/utils';
 
 type Palette = string[];
 
 export default function LibraryPage() {
   const [savedPalettes, setSavedPalettes] = useState<Palette[]>([]);
-  const [selectedPaletteIndex, setSelectedPaletteIndex] = useState<number | null>(null);
   const { toast } = useToast();
-
-  const selectedPalette = selectedPaletteIndex !== null ? savedPalettes[selectedPaletteIndex] : null;
 
   useEffect(() => {
     try {
@@ -24,9 +19,6 @@ export default function LibraryPage() {
       if (savedPalettesJSON) {
         const palettes = JSON.parse(savedPalettesJSON);
         setSavedPalettes(palettes);
-        if (palettes.length > 0) {
-          setSelectedPaletteIndex(0);
-        }
       }
     } catch (error) {
       console.error("Failed to parse saved palettes from localStorage", error);
@@ -38,23 +30,14 @@ export default function LibraryPage() {
     }
   }, [toast]);
 
-  const handleDeletePalette = useCallback(() => {
-    if (selectedPaletteIndex === null) return;
-
-    const newPalettes = savedPalettes.filter((_, index) => index !== selectedPaletteIndex);
+  const handleDeletePalette = useCallback((indexToDelete: number) => {
+    const newPalettes = savedPalettes.filter((_, index) => index !== indexToDelete);
     setSavedPalettes(newPalettes);
     localStorage.setItem('saved_palettes', JSON.stringify(newPalettes));
     toast({ title: "Palette Deleted" });
+  }, [savedPalettes, toast]);
 
-    if (newPalettes.length > 0) {
-      const newIndex = Math.max(0, selectedPaletteIndex - 1);
-      setSelectedPaletteIndex(newIndex);
-    } else {
-      setSelectedPaletteIndex(null);
-    }
-  }, [savedPalettes, selectedPaletteIndex, toast]);
-
-  const exportPaletteAsSvg = useCallback((palette: Palette | null) => {
+  const exportPaletteAsSvg = useCallback((palette: Palette) => {
     if (!palette) return;
     
     const swatchWidth = 150;
@@ -105,97 +88,60 @@ export default function LibraryPage() {
     toast({ title: "Palette Exported as SVG!" });
   }, [toast]);
 
-  const handleCopySuccess = useCallback((message: string) => {
-    toast({ title: message });
-  }, [toast]);
-
   return (
     <main className="flex-1 w-full p-4 md:p-8">
-      <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-grow max-w-3xl">
-          {selectedPalette ? (
-            <Card className="bg-card">
-                <CardHeader>
-                    <CardTitle>Palette Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ColorList 
-                        colors={selectedPalette} 
-                        title="" 
-                        onSetActiveColor={() => {}} 
-                        onCopySuccess={handleCopySuccess}
-                        gridClassName="grid grid-cols-1 sm:grid-cols-2 gap-4"
+       <CardHeader className="p-0 mb-8">
+        <CardTitle className="text-3xl">My Library</CardTitle>
+        <CardDescription>All your saved palettes are here. Go to the Palette Builder to create a new one.</CardDescription>
+      </CardHeader>
+      
+      {savedPalettes.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {savedPalettes.map((palette, index) => (
+            <Card key={index} className="overflow-hidden bg-card flex flex-col">
+              <CardContent className="p-0 flex-grow">
+                <div className="flex h-24">
+                  {palette.map((color) => (
+                    <div
+                      key={color}
+                      className="flex-1"
+                      style={{ backgroundColor: color }}
                     />
-                </CardContent>
-                <CardFooter className="justify-end gap-2">
-                    <Button variant="outline" onClick={handleDeletePalette}>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Palette
-                    </Button>
-                    <Button onClick={() => exportPaletteAsSvg(selectedPalette)}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Export as SVG
-                    </Button>
-                </CardFooter>
-            </Card>
-          ) : (
-             <div className="flex h-full min-h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center">
-                <LibraryIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-medium">
-                  {savedPalettes.length > 0 ? 'Select a palette' : 'Library is empty'}
-                </h3>
-                <p className="mb-4 mt-2 text-sm text-muted-foreground">
-                  {savedPalettes.length > 0 
-                    ? 'Choose a palette from the sidebar to see its details.' 
-                    : 'Go to the Palette Builder to create and save your first one.'
-                  }
-                </p>
-              </div>
-          )}
-        </div>
-        
-        <aside className="lg:w-1/3 lg:max-w-sm flex-shrink-0">
-            <div className="sticky top-20">
-                <h2 className="text-2xl font-bold mb-4">My Library</h2>
-                {savedPalettes.length > 0 ? (
-                    <div className="space-y-4 max-h-[calc(100vh-12rem)] overflow-y-auto pr-2">
-                    {savedPalettes.map((palette, index) => (
-                        <Card 
-                            key={index} 
-                            className={cn(
-                                "overflow-hidden bg-card cursor-pointer transition-all hover:border-primary/80",
-                                selectedPaletteIndex === index ? "border-primary" : "border-border"
-                            )}
-                            onClick={() => setSelectedPaletteIndex(index)}
-                        >
-                        <CardContent className="p-0">
-                            <div className="flex h-20">
-                            {palette.map((color) => (
-                                <div
-                                key={color}
-                                className="flex-1"
-                                style={{ backgroundColor: color }}
-                                />
-                            ))}
-                            </div>
-                            <div className="p-3">
-                                <p className="text-sm font-medium">Palette {index + 1}</p>
-                                <div className="flex flex-wrap gap-x-2 gap-y-1 mt-1">
-                                    {palette.map((color) => (
-                                        <span key={color} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        </CardContent>
-                        </Card>
+                  ))}
+                </div>
+                <div className="p-4">
+                  <p className="text-md font-semibold">Palette {index + 1}</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                    {palette.map((color) => (
+                      <span key={color} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
                     ))}
-                    </div>
-                ) : (
-                    <p className="text-muted-foreground text-sm mt-4">No saved palettes yet.</p>
-                )}
-            </div>
-        </aside>
-      </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="justify-end gap-2 p-4 pt-0">
+                  <Button variant="outline" size="sm" onClick={() => handleDeletePalette(index)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
+                  <Button size="sm" onClick={() => exportPaletteAsSvg(palette)}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export
+                  </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="flex h-full min-h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center">
+          <LibraryIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-medium">
+            Library is empty
+          </h3>
+          <p className="mb-4 mt-2 text-sm text-muted-foreground">
+            Go to the Palette Builder to create and save your first one.
+          </p>
+        </div>
+      )}
     </main>
   );
 }

@@ -184,10 +184,6 @@ export default function UnifiedBuilderPage() {
         toast({ title: 'Color already in palette.' });
         return prevColors;
       }
-      if (prevColors.length >= 10) {
-        toast({ title: "Maximum 10 colors reached.", variant: "destructive" });
-        return prevColors;
-      }
       const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
       return [...prevColors, newColor];
     });
@@ -234,11 +230,6 @@ export default function UnifiedBuilderPage() {
 
   const handleAddColorAtIndex = useCallback((index: number) => {
     setPalette(prev => {
-        if (prev.length >= 10) {
-            toast({ title: "Maximum 10 colors reached.", variant: "destructive" });
-            return prev;
-        }
-
         const newPalette = [...prev];
         const colorBefore = prev[index - 1]?.hex || null;
         const colorAfter = prev[index]?.hex || null;
@@ -265,7 +256,7 @@ export default function UnifiedBuilderPage() {
         
         return adjustForColorblindSafety(newPalette);
     });
-  }, [toast]);
+  }, []);
 
   const handleReset = useCallback(() => {
     setPalette([]);

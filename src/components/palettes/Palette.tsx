@@ -110,7 +110,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                     </div>
                   </div>
 
-                  {index < palette.length && palette.length < 10 && (
+                  {index < palette.length && (
                       <div className="absolute top-0 bottom-0 -right-4 w-8 z-10 group/add flex items-center justify-center">
                           <Button
                               variant="outline"
