@@ -1,7 +1,9 @@
+
 "use client";
 
 import React from 'react';
 import { colord } from 'colord';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HarmonyColorWheelProps {
     colors: string[];
@@ -28,20 +30,26 @@ const HarmonyColorWheel = ({ colors, size = 150 }: HarmonyColorWheelProps) => {
     return (
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
             <circle cx={center} cy={center} r={radius} fill="hsl(var(--card))" stroke="hsl(var(--muted))" strokeWidth="1" />
-            <circle cx={center} cy={center} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="1" />
             <circle cx={center} cy={center} r={radius / 2} fill="none" stroke="hsl(var(--muted))" strokeWidth="0.5" strokeDasharray="2 2" />
 
-            {points.map((point, i) => (
-                <circle
-                    key={`${point.hex}-${i}`}
-                    cx={point.x}
-                    cy={point.y}
-                    r="6"
-                    fill={point.hex}
-                    stroke="hsl(var(--background))"
-                    strokeWidth="2"
-                />
-            ))}
+            <AnimatePresence>
+                {points.map((point, i) => (
+                    <motion.circle
+                        key={i}
+                        layout="position"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        transition={{ duration: 0.4, type: "spring", stiffness: 300, damping: 20 }}
+                        cx={point.x}
+                        cy={point.y}
+                        r="6"
+                        fill={point.hex}
+                        stroke="hsl(var(--background))"
+                        strokeWidth="2"
+                    />
+                ))}
+            </AnimatePresence>
         </svg>
     );
 };

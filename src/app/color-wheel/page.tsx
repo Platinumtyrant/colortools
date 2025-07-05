@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +24,7 @@ import {
 import type { ColorResult } from '@uiw/react-color';
 import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
 import { Label } from '@/components/ui/label';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mod.default), {
   ssr: false,
@@ -100,7 +101,7 @@ export default function ColorWheelPage() {
         rectangular: getRectangular(activeColor),
     }), [activeColor]);
 
-    const harmonyInfo = [
+    const harmonyInfo = useMemo(() => [
         { 
             name: "Complementary", 
             colors: harmonies.complementary, 
@@ -170,19 +171,25 @@ export default function ColorWheelPage() {
             )
         },
         { 
-            name: "Rectangular (Tetradic)", 
+            name: "Tetradic", 
             colors: harmonies.rectangular, 
             description: (
                  <>
-                    <p>Similar to the square but with colors forming a rectangle on the color wheel.</p>
+                    <p>The tetradic (or rectangular) color scheme utilizes two pairs of complementary colors.</p>
                     <ul className="list-disc pl-5">
-                        <li>It utilizes two pairs of complementary colors, but with one color dominating and the others serving as accents.</li>
+                        <li>It offers a rich, vibrant palette but can be hard to balance. Best if one color is dominant.</li>
                         <li>Examples: Blue, orange, red-orange, and blue-green.</li>
                     </ul>
                 </>
             )
         },
-    ];
+    ], [harmonies]);
+
+    const [activeHarmonyName, setActiveHarmonyName] = useState(harmonyInfo[0].name);
+
+    const activeHarmony = useMemo(() => {
+        return harmonyInfo.find(h => h.name === activeHarmonyName) || harmonyInfo[0];
+    }, [activeHarmonyName, harmonyInfo]);
 
     const tints = useMemo(() => getTints(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
     const shades = useMemo(() => getShades(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
@@ -232,7 +239,7 @@ export default function ColorWheelPage() {
                         <CardDescription>Select a tab to view a different harmonic relationship based on your selected color.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Tabs defaultValue={harmonyInfo[0].name} className="w-full">
+                        <Tabs defaultValue={harmonyInfo[0].name} onValueChange={setActiveHarmonyName} className="w-full">
                             <TabsList className="flex-wrap h-auto justify-start">
                                 {harmonyInfo.map((harmony) => (
                                     <TabsTrigger key={harmony.name} value={harmony.name}>
@@ -240,20 +247,24 @@ export default function ColorWheelPage() {
                                     </TabsTrigger>
                                 ))}
                             </TabsList>
-                            {harmonyInfo.map((harmony) => (
-                                <TabsContent key={harmony.name} value={harmony.name} className="mt-6">
-                                    <div className="flex flex-col items-center gap-6">
-                                        <h3 className="text-lg font-semibold">{harmony.name}</h3>
-                                        <HarmonyColorWheel colors={harmony.colors} size={200} />
-                                        <div className="flex flex-wrap gap-4 justify-center">
-                                            {harmony.colors.map((c, i) => (
-                                                <HarmonySwatch key={`${harmony.name}-${c}-${i}`} color={c} />
-                                            ))}
-                                        </div>
-                                    </div>
-                                </TabsContent>
-                            ))}
-        
+                            <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 p-4 min-h-[250px]">
+                                <HarmonyColorWheel colors={activeHarmony.colors} size={200} />
+                                <div className="flex flex-wrap gap-4 justify-center max-w-[200px]">
+                                    <AnimatePresence mode="wait">
+                                    {activeHarmony.colors.map((c) => (
+                                        <motion.div
+                                            key={`${activeHarmony.name}-${c}`}
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.8 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            <HarmonySwatch color={c} />
+                                        </motion.div>
+                                    ))}
+                                    </AnimatePresence>
+                                </div>
+                            </div>
                         </Tabs>
                     </CardContent>
                 </Card>
