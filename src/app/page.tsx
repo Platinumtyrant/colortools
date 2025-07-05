@@ -27,7 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles, Pipette } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
@@ -35,6 +35,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SavedPalettes } from '@/components/palettes/SavedPalettes';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
+
+// Type definition for the experimental EyeDropper API
+interface EyeDropperResult {
+  sRGBHex: string;
+}
+interface EyeDropper {
+  new (): EyeDropper;
+  open(options?: { signal: AbortSignal }): Promise<EyeDropperResult>;
+}
+declare global {
+  interface Window {
+    EyeDropper?: EyeDropper;
+  }
+}
 
 const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerClient'), {
   ssr: false,
@@ -181,7 +195,7 @@ export default function UnifiedBuilderPage() {
   // Handle loading palettes from Library or Inspiration pages
   useEffect(() => {
     const editIdStr = searchParams.get('edit');
-    const paletteToLoadJSON = localStorage.getItem('palette_to_load');
+    const fromInspiration = searchParams.has('from_inspiration');
 
     if (editIdStr) {
       const id = parseInt(editIdStr, 10);
@@ -198,23 +212,23 @@ export default function UnifiedBuilderPage() {
           router.replace('/', { scroll: false });
         }
       }
-    } else if (paletteToLoadJSON) {
-      // This logic will now be triggered reliably by the query param from the inspiration page
-      localStorage.removeItem('palette_to_load'); // Remove immediately
-      try {
-          const paletteToLoad = JSON.parse(paletteToLoadJSON);
-          if (paletteToLoad && paletteToLoad.colors) {
-            setEditingPaletteId(null);
-            setPalette(paletteToLoad.colors.map((hex: string, i: number) => ({ id: Date.now() + i, hex, locked: false })));
-            setMainColor(paletteToLoad.colors[0] || '#FF9800');
-            setNewPaletteName(paletteToLoad.name || 'New Palette');
-            toast({ title: "Palette Loaded", description: `Loaded "${paletteToLoad.name}" from Inspiration.` });
-          }
-      } catch (e) {
-          console.error("Failed to parse palette from storage", e);
-      }
-      // Clean up the URL after loading
-      if(searchParams.has('from_inspiration')) {
+    } else if (fromInspiration) {
+      const paletteToLoadJSON = localStorage.getItem('palette_to_load');
+      if (paletteToLoadJSON) {
+        localStorage.removeItem('palette_to_load'); // Remove immediately
+        try {
+            const paletteToLoad = JSON.parse(paletteToLoadJSON);
+            if (paletteToLoad && paletteToLoad.colors) {
+              setEditingPaletteId(null);
+              setPalette(paletteToLoad.colors.map((hex: string, i: number) => ({ id: Date.now() + i, hex, locked: false })));
+              setMainColor(paletteToLoad.colors[0] || '#FF9800');
+              setNewPaletteName(paletteToLoad.name || 'New Palette');
+              toast({ title: "Palette Loaded", description: `Loaded "${paletteToLoad.name}" from Inspiration.` });
+            }
+        } catch (e) {
+            console.error("Failed to parse palette from storage", e);
+        }
+        // Clean up the URL after loading
         router.replace('/', { scroll: false });
       }
     } else if (isInitialLoad.current) {
@@ -365,6 +379,27 @@ export default function UnifiedBuilderPage() {
     })));
     toast({ title: "Palette Updated", description: "The analyzed palette has been applied to the editor." });
   }, [palette, toast]);
+
+
+  const handleEyeDropper = async () => {
+    if (!window.EyeDropper) {
+      toast({
+        title: "Unsupported Browser",
+        description: "The eyedropper feature is not available in your browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const eyeDropper = new window.EyeDropper();
+      const { sRGBHex } = await eyeDropper.open();
+      setMainColor(sRGBHex);
+      toast({ title: "Color Picked!", description: `Set active color to ${sRGBHex}` });
+    } catch (e) {
+      // User probably cancelled the action, so we can ignore the error.
+      console.log("EyeDropper cancelled");
+    }
+  };
 
 
   const colorName = colord(mainColor).toName({ closest: true });
@@ -589,12 +624,16 @@ export default function UnifiedBuilderPage() {
       
       {/* Top Section: Picker and Active Color Details */}
       <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-7xl mx-auto">
-        <div className="w-full flex flex-col justify-center lg:justify-start gap-4">
+        <div className="w-full flex flex-col items-center lg:items-start gap-4">
             <ColorPickerClient 
               color={mainColor} 
               onChange={handleColorChange}
               className="w-full max-w-sm h-full"
             />
+            <Button onClick={handleEyeDropper} variant="outline" className="w-full max-w-sm">
+              <Pipette className="mr-2 h-4 w-4" />
+              Pick from screen
+            </Button>
         </div>
 
         <div className="w-full flex justify-center">
