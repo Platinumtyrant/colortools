@@ -84,14 +84,17 @@ export function SavedPalettes({ onLoadPalette }: SavedPalettesProps) {
                 <div key={palette.id} className="group relative">
                     <p className="text-sm font-medium mb-1 truncate" title={palette.name}>{palette.name}</p>
                     <div
-                        className="flex h-12 w-full cursor-pointer overflow-hidden rounded-md border transition-all hover:border-primary/80"
+                        className="flex flex-wrap w-full cursor-pointer overflow-hidden rounded-md border transition-all hover:border-primary/80"
                         onClick={() => handleLoadPalette(palette)}
                     >
                         {palette.colors.map((color, index) => (
                         <div
                             key={`${color}-${index}`}
-                            className="flex-1"
-                            style={{ backgroundColor: color }}
+                            className="w-[10%]"
+                            style={{ 
+                              backgroundColor: color,
+                              height: palette.colors.length > 10 ? '1.5rem' : '3rem',
+                            }}
                         />
                         ))}
                     </div>

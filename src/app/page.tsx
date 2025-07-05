@@ -244,14 +244,18 @@ export default function UnifiedBuilderPage() {
 
   const handleAddColorToPalette = useCallback(() => {
     setPalette(prevColors => {
+      if (prevColors.length >= 20) {
+        toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
+        return prevColors;
+      }
       if (prevColors.some(p => p.hex === mainColor)) {
         toast({ title: 'Color already in palette.' });
         return prevColors;
       }
       const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
+      toast({ title: 'Color added to palette!' });
       return [...prevColors, newColor];
     });
-    toast({ title: 'Color added to palette!' });
   }, [mainColor, toast]);
   
   const handleOpenSaveDialog = useCallback(() => {
@@ -336,6 +340,10 @@ export default function UnifiedBuilderPage() {
 
   const handleAddColorAtIndex = useCallback((index: number) => {
     setPalette(prev => {
+        if (prev.length >= 20) {
+            toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
+            return prev;
+        }
         const newPalette = [...prev];
         const colorBefore = prev[index - 1]?.hex || null;
         const colorAfter = prev[index]?.hex || null;
@@ -654,7 +662,7 @@ export default function UnifiedBuilderPage() {
                           <Button
                               onClick={handleAddColorToPalette}
                               size="icon"
-                              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50"
+                              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
                               title="Add color to palette"
                           >
                               <Plus className="h-6 w-6" />

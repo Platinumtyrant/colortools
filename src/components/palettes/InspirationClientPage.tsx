@@ -79,10 +79,17 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
             {palettesByCategory[category].map((palette, index) => (
                 <div className="group" key={`${palette.name}-${index}`} onClick={() => handleSavePalette(palette)}>
                     <p className="text-sm font-medium mb-2 truncate" title={palette.name}>{palette.name}</p>
-                    <div className="flex h-16 w-full cursor-pointer overflow-hidden rounded-md border-2 border-transparent transition-all group-hover:border-primary">
-                    {palette.colors.map((color, colorIndex) => (
-                        <div key={colorIndex} className="flex-1" style={{ backgroundColor: color }} />
-                    ))}
+                    <div className="flex flex-wrap h-16 w-full cursor-pointer overflow-hidden rounded-md border-2 border-transparent transition-all group-hover:border-primary">
+                        {palette.colors.map((color, colorIndex) => (
+                            <div
+                                key={colorIndex}
+                                className="w-[10%]"
+                                style={{
+                                    backgroundColor: color,
+                                    height: palette.colors.length > 10 ? '50%' : '100%',
+                                }}
+                            />
+                        ))}
                     </div>
                 </div>
             ))}

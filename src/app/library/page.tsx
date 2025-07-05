@@ -133,12 +133,15 @@ export default function LibraryPage() {
           {savedPalettes.map((palette) => (
             <Card key={palette.id} className="overflow-hidden bg-card flex flex-col">
               <CardContent className="p-0 flex-grow">
-                <div className="flex h-24">
+                <div className="flex flex-wrap h-24">
                   {palette.colors.map((color, index) => (
                     <div
                       key={`${color}-${index}`}
-                      className="flex-1"
-                      style={{ backgroundColor: color }}
+                      style={{
+                        backgroundColor: color,
+                        width: '10%',
+                        height: palette.colors.length > 10 ? '50%' : '100%',
+                      }}
                     />
                   ))}
                 </div>
