@@ -283,7 +283,7 @@ export default function ColorWheelPage() {
                            <Slider
                                 id="tint-shade-count"
                                 min={2}
-                                max={25}
+                                max={30}
                                 step={1}
                                 value={[tintShadeCount]}
                                 onValueChange={(value) => setTintShadeCount(value[0])}
