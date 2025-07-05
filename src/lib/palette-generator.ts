@@ -95,10 +95,15 @@ export function generatePalette(options: GenerationOptions): string[] {
             const s = baseHsl[1];
             const l = baseHsl[2];
 
-            const firstAnalogous = chroma.hsl((h - 30 + 360) % 360, s, l).hex();
-            const secondAnalogous = chroma.hsl((h + 30) % 360, s, l).hex();
-            const fullScale = [...colorsToScale, firstAnalogous, secondAnalogous].sort(sortbyHue);
-            initialPalette = chroma.scale(fullScale).mode('lch').colors(numColors);
+            // Introduce slight variations in saturation and lightness for the scale's endpoints
+            // to create a more dynamic and visually distinct palette, especially for larger sets.
+            const firstAnalogous = chroma.hsl((h - 30 + 360) % 360, s * 0.9, l * 0.95).hex();
+            const secondAnalogous = chroma.hsl((h + 30) % 360, s * 0.9, l * 0.95).hex();
+            
+            // The scale will be generated through the two new analogous points and any locked colors.
+            const scalePoints = [firstAnalogous, ...colorsToScale, secondAnalogous].sort(sortbyHue);
+            
+            initialPalette = chroma.scale(scalePoints).mode('lch').colors(numColors);
             break;
         }
         case 'triadic': {
@@ -141,3 +146,4 @@ export function generatePalette(options: GenerationOptions): string[] {
 
     return initialPalette;
 }
+
