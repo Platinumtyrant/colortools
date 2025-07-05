@@ -9,14 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Slider } from '@/components/ui/slider';
 import { colord } from 'colord';
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselPrevious,
-    CarouselNext,
-    type CarouselApi
-} from "@/components/ui/carousel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     getComplementary,
     getAnalogous,
@@ -41,7 +34,7 @@ const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mo
   )
 });
 
-const Swatch = ({ color }: { color: string }) => (
+const SmallSwatch = ({ color }: { color: string }) => (
     <TooltipProvider>
         <Tooltip>
             <TooltipTrigger asChild>
@@ -54,15 +47,27 @@ const Swatch = ({ color }: { color: string }) => (
     </TooltipProvider>
 );
 
+const HarmonySwatch = ({ color }: { color: string }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div className="h-16 w-16 rounded-lg border shadow-sm" style={{ backgroundColor: color }} />
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>{color.toUpperCase()}</p>
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+);
+
 const ColorStrip = ({ title, colors }: { title: string, colors: string[] }) => (
     <div className="space-y-3">
       <h4 className="text-sm font-medium text-muted-foreground">{title}</h4>
       <div className="flex flex-wrap gap-2">
-        {colors.map((c, i) => <Swatch key={`${title}-${c}-${i}`} color={c} />)}
+        {colors.map((c, i) => <SmallSwatch key={`${title}-${c}-${i}`} color={c} />)}
       </div>
     </div>
 );
-
 
 const HarmonyDescription = ({ title, description }: { title: string, description: React.ReactNode }) => (
     <AccordionItem value={title}>
@@ -78,8 +83,6 @@ const HarmonyDescription = ({ title, description }: { title: string, description
 export default function ColorWheelPage() {
     const [activeColor, setActiveColor] = useState('#ff6347');
     const [tintShadeCount, setTintShadeCount] = useState(5);
-    const [api, setApi] = useState<CarouselApi>();
-    const [current, setCurrent] = useState(0);
 
     const activeHsl = useMemo(() => colord(activeColor).toHsl(), [activeColor]);
 
@@ -87,14 +90,6 @@ export default function ColorWheelPage() {
         const newColor = colord({ ...activeHsl, l: newLightness[0] }).toHex();
         setActiveColor(newColor);
     };
-
-    useEffect(() => {
-        if (!api) return;
-        setCurrent(api.selectedScrollSnap());
-        api.on("select", () => {
-          setCurrent(api.selectedScrollSnap());
-        });
-    }, [api]);
 
     const harmonies = useMemo(() => ({
         complementary: getComplementary(activeColor),
@@ -234,28 +229,32 @@ export default function ColorWheelPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Color Harmonies</CardTitle>
-                        <CardDescription>Use the arrows to cycle through different harmonic relationships based on your selected color.</CardDescription>
+                        <CardDescription>Select a tab to view a different harmonic relationship based on your selected color.</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex flex-col items-center">
-                        <Carousel setApi={setApi} className="w-full max-w-xs">
-                            <CarouselContent>
-                                {harmonyInfo.map((harmony, index) => (
-                                    <CarouselItem key={index}>
-                                        <div className="p-1 flex flex-col items-center gap-6">
-                                            <HarmonyColorWheel colors={harmony.colors} size={200} />
-                                            <div className="flex flex-wrap gap-4 justify-center">
-                                                {harmony.colors.map((c, i) => <Swatch key={`${harmony.name}-${c}-${i}`} color={c} />)}
-                                            </div>
-                                        </div>
-                                    </CarouselItem>
+                    <CardContent>
+                        <Tabs defaultValue={harmonyInfo[0].name} className="w-full">
+                            <TabsList className="flex-wrap h-auto justify-start">
+                                {harmonyInfo.map((harmony) => (
+                                    <TabsTrigger key={harmony.name} value={harmony.name}>
+                                        {harmony.name}
+                                    </TabsTrigger>
                                 ))}
-                            </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                        </Carousel>
-                        <div className="py-2 text-center text-lg font-semibold text-foreground">
-                            {harmonyInfo[current]?.name || ''}
-                        </div>
+                            </TabsList>
+                            {harmonyInfo.map((harmony) => (
+                                <TabsContent key={harmony.name} value={harmony.name} className="mt-6">
+                                    <div className="flex flex-col items-center gap-6">
+                                        <h3 className="text-lg font-semibold">{harmony.name}</h3>
+                                        <HarmonyColorWheel colors={harmony.colors} size={200} />
+                                        <div className="flex flex-wrap gap-4 justify-center">
+                                            {harmony.colors.map((c, i) => (
+                                                <HarmonySwatch key={`${harmony.name}-${c}-${i}`} color={c} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </TabsContent>
+                            ))}
+        
+                        </Tabs>
                     </CardContent>
                 </Card>
 
