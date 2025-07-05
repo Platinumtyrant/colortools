@@ -58,17 +58,49 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
                 onBlur={handleInputBlur}
                 className="w-full p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
             />
-            <div className="space-y-1.5 pt-2">
-                <Label className="text-xs">Hue</Label>
-                <Slider value={[hsl.h]} onValueChange={([v]) => handleHslChange('h', v)} max={360} step={1} />
-            </div>
-            <div className="space-y-1.5">
-                <Label className="text-xs">Saturation</Label>
-                <Slider value={[hsl.s * 100]} onValueChange={([v]) => handleHslChange('s', v)} max={100} step={1} />
-            </div>
-            <div className="space-y-1.5">
-                <Label className="text-xs">Lightness</Label>
-                <Slider value={[hsl.l * 100]} onValueChange={([v]) => handleHslChange('l', v)} max={100} step={1} />
+            <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="hue-slider" className="w-20 shrink-0 text-xs text-muted-foreground">
+                    Hue
+                  </Label>
+                  <Slider
+                    id="hue-slider"
+                    value={[hsl.h]}
+                    onValueChange={([v]) => handleHslChange('h', v)}
+                    max={360}
+                    step={1}
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <Label
+                    htmlFor="saturation-slider"
+                    className="w-20 shrink-0 text-xs text-muted-foreground"
+                  >
+                    Saturation
+                  </Label>
+                  <Slider
+                    id="saturation-slider"
+                    value={[hsl.s * 100]}
+                    onValueChange={([v]) => handleHslChange('s', v)}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <Label
+                    htmlFor="lightness-slider"
+                    className="w-20 shrink-0 text-xs text-muted-foreground"
+                  >
+                    Lightness
+                  </Label>
+                  <Slider
+                    id="lightness-slider"
+                    value={[hsl.l * 100]}
+                    onValueChange={([v]) => handleHslChange('l', v)}
+                    max={100}
+                    step={1}
+                  />
+                </div>
             </div>
         </div>
     );
