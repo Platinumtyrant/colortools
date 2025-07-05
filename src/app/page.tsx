@@ -27,7 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles, Pipette, PanelLeft } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles, Pipette } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -122,7 +122,6 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
 );
 
 function PaletteBuilderPage() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mainColor, setMainColor] = useState('#FF9800');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
@@ -235,18 +234,6 @@ function PaletteBuilderPage() {
       regeneratePalette();
     }
   }, [searchParams, router, toast, regeneratePalette]);
-
-  // Keyboard shortcut for sidebar
-  useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'b' && (event.metaKey || event.ctrlKey)) {
-          event.preventDefault();
-          setIsSidebarOpen((open) => !open);
-        }
-      };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   const handleColorChange = useCallback((newColor: any) => {
     setMainColor(newColor.hex);
@@ -601,16 +588,9 @@ function PaletteBuilderPage() {
     </div>
   );
 
-  const PaletteSidebarToggle = () => (
-    <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden md:inline-flex">
-        <PanelLeft className="h-5 w-5" />
-        <span className="sr-only">Toggle Sidebar</span>
-    </Button>
-  );
-
   return (
     <div className="flex h-full">
-        <Sidebar isOpen={isSidebarOpen}>
+        <Sidebar>
             <SidebarContent className="p-4">
                 {analysisPanel}
             </SidebarContent>
@@ -780,11 +760,6 @@ function PaletteBuilderPage() {
                     </div>
                 </section>
                 
-                <div className="flex items-center gap-2">
-                   <PaletteSidebarToggle />
-                   <h2 className="text-xl font-bold tracking-tight">Palette Editor</h2>
-                </div>
-
                 {/* Palette Display Section */}
                 <section className="w-full max-w-7xl mx-auto flex-grow flex flex-col min-h-[200px]">
                     <Palette
