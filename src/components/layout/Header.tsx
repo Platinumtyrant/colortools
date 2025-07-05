@@ -13,6 +13,7 @@ const navItems = [
     { href: '/', label: 'Palette Builder' },
     { href: '/inspiration', label: 'Inspiration' },
     { href: '/library', label: 'Library' },
+    { href: '/pantone-guide', label: 'Pantone Guide' },
 ];
 
 export function Header() {
