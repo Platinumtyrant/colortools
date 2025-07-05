@@ -249,7 +249,7 @@ export default function ColorWheelPage() {
                             </TabsList>
                             <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 p-4 min-h-[250px]">
                                 <HarmonyColorWheel colors={activeHarmony.colors} size={200} />
-                                <div className="flex flex-wrap gap-4 justify-center max-w-[200px]">
+                                <div className="flex flex-wrap gap-4 justify-center content-center max-w-[200px] min-h-[144px]">
                                     <AnimatePresence mode="wait">
                                     {activeHarmony.colors.map((c) => (
                                         <motion.div
