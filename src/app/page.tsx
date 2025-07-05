@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { colord, extend } from 'colord';
 import namesPlugin from 'colord/plugins/names';
 import cmykPlugin from 'colord/plugins/cmyk';
@@ -118,6 +120,9 @@ export default function UnifiedBuilderPage() {
   const [contrastTextColor, setContrastTextColor] = useState('#000000');
   const [libraryUpdateKey, setLibraryUpdateKey] = useState(0);
 
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [newPaletteName, setNewPaletteName] = useState("");
+
   const { toast } = useToast();
   const { setExtension } = useSidebarExtension();
 
@@ -190,18 +195,40 @@ export default function UnifiedBuilderPage() {
     toast({ title: 'Color added to palette!' });
   }, [mainColor, toast]);
   
-  const handleSaveToLibrary = useCallback(() => {
+  const handleOpenSaveDialog = useCallback(() => {
     if (palette.length === 0) {
       toast({ title: "Cannot save empty palette", variant: "destructive" });
       return;
     }
+    const detectedHarmony = analyzePalette(palette.map(p => p.hex));
+    setNewPaletteName(detectedHarmony === 'Custom' ? 'My Custom Palette' : `${detectedHarmony} Palette`);
+    setIsSaveDialogOpen(true);
+  }, [palette, toast]);
+
+  const handleSaveToLibrary = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPaletteName.trim()) {
+        toast({ title: "Please enter a name for the palette.", variant: "destructive" });
+        return;
+    }
+
     const savedPalettesJSON = localStorage.getItem('saved_palettes');
     const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-    savedPalettes.push(palette.map(p => p.hex));
+    
+    const newPalette = {
+      id: Date.now(),
+      name: newPaletteName,
+      colors: palette.map(p => p.hex)
+    };
+    
+    savedPalettes.push(newPalette);
     localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
-    toast({ title: "Palette Saved!", description: "View it in your library." });
+    
+    toast({ title: "Palette Saved!", description: `"${newPaletteName}" saved to your library.` });
     setLibraryUpdateKey(k => k + 1);
-  }, [palette, toast]);
+    setIsSaveDialogOpen(false);
+    setNewPaletteName("");
+  }, [palette, newPaletteName, toast]);
   
   const handleLoadPaletteFromLibrary = useCallback((colors: string[]) => {
     if (colors.length < 2) {
@@ -432,7 +459,7 @@ export default function UnifiedBuilderPage() {
         <div className="text-sm text-muted-foreground">
             Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>
         </div>
-        <Button onClick={handleSaveToLibrary}>Save to Library</Button>
+        <Button onClick={handleOpenSaveDialog}>Save to Library</Button>
       </div>
     </div>
   );
@@ -440,6 +467,38 @@ export default function UnifiedBuilderPage() {
 
   return (
     <main className="flex-1 w-full p-4 md:p-8 flex flex-col gap-8">
+      {/* Save Dialog */}
+      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+            <form onSubmit={handleSaveToLibrary}>
+                <DialogHeader>
+                    <DialogTitle>Save Palette</DialogTitle>
+                    <DialogDescription>
+                        Give your palette a name. Click save when you're done.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                            Name
+                        </Label>
+                        <Input
+                            id="name"
+                            value={newPaletteName}
+                            onChange={(e) => setNewPaletteName(e.target.value)}
+                            className="col-span-3"
+                            placeholder="e.g. Sunset Vibes"
+                            required
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="submit">Save palette</Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+      </Dialog>
+      
       {/* Top Section: Picker and Active Color Details */}
       <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-7xl mx-auto">
         <div className="w-full flex flex-col justify-center lg:justify-start gap-4">
