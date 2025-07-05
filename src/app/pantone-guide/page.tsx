@@ -19,11 +19,6 @@ export default function PantoneGuidePage() {
     return <div>No Pantone colors found.</div>;
   }
 
-  // Split categories for two-row display
-  const halfwayIndex = Math.ceil(pantoneCategories.length / 2);
-  const firstRowCategories = pantoneCategories.slice(0, halfwayIndex);
-  const secondRowCategories = pantoneCategories.slice(halfwayIndex);
-
   return (
     <div className="flex-1 w-full p-4 md:p-8 flex flex-col">
       <div className="flex-grow">
@@ -32,21 +27,12 @@ export default function PantoneGuidePage() {
           <CardDescription>A reference guide for Pantone colors, parsed from the official guide.</CardDescription>
         </CardHeader>
         <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
-          <TabsList className="h-auto flex-col items-start gap-1">
-            <div className="flex flex-wrap">
-              {firstRowCategories.map((category) => (
-                <TabsTrigger key={category.name} value={category.name}>
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </div>
-            <div className="flex flex-wrap">
-              {secondRowCategories.map((category) => (
-                <TabsTrigger key={category.name} value={category.name}>
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </div>
+          <TabsList className="h-auto flex-wrap justify-start">
+            {pantoneCategories.map((category) => (
+              <TabsTrigger key={category.name} value={category.name}>
+                {category.name}
+              </TabsTrigger>
+            ))}
           </TabsList>
           
           {/* Ensure content is generated for ALL categories */}
