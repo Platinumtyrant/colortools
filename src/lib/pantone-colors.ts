@@ -112,7 +112,7 @@ const yellowAndOrangeUnsorted: PantoneColor[] = [
 ];
 export const yellowAndOrangeColors = yellowAndOrangeUnsorted.sort(sortPantoneNumerically);
 
-const orangeAndRedColorsUnsorted: PantoneColor[] = [
+const orangeAndRedUnsorted: PantoneColor[] = [
     { name: 'PANTONE 155 PC', hex: '#FFC597', cmyk: 'C:0 M:12 Y:32 K:0' },
     { name: 'PANTONE 156 PC', hex: '#FFB183', cmyk: 'C:0 M:24 Y:49 K:0' },
     { name: 'PANTONE 157 PC', hex: '#FF8C2B', cmyk: 'C:0 M:44 Y:71 K:0' },
@@ -198,9 +198,9 @@ const orangeAndRedColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 1945 PC', hex: '#66102E', cmyk: 'C:5 M:100 Y:50 K:24' },
     { name: 'PANTONE 1955 PC', hex: '#36292E', cmyk: 'C:8 M:100 Y:47 K:39' },
 ];
-export const orangeAndRedColors = orangeAndRedColorsUnsorted.sort(sortPantoneNumerically);
+export const orangeAndRedColors = orangeAndRedUnsorted.sort(sortPantoneNumerically);
 
-const pinkAndPurpleColorsUnsorted: PantoneColor[] = [
+const pinkAndPurpleUnsorted: PantoneColor[] = [
     { name: 'PANTONE 203 PC', hex: '#F8B2D5', cmyk: 'C:0 M:36 Y:2 K:0' },
     { name: 'PANTONE 204 PC', hex: '#F79BBF', cmyk: 'C:0 M:59 Y:5 K:0' },
     { name: 'PANTONE 205 PC', hex: '#F57AA8', cmyk: 'C:0 M:83 Y:17 K:0' },
@@ -286,9 +286,27 @@ const pinkAndPurpleColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 2622 PC', hex: '#5C175A', cmyk: 'C:65 M:91 Y:9 K:45' },
     { name: 'PANTONE 2623 PC', hex: '#5C1558', cmyk: 'C:74 M:100 Y:5 K:28' },
 ];
-export const pinkAndPurpleColors = pinkAndPurpleColorsUnsorted.sort(sortPantoneNumerically);
+export const pinkAndPurpleColors = pinkAndPurpleUnsorted.sort(sortPantoneNumerically);
 
-const blueAndVioletColorsUnsorted: PantoneColor[] = [
+const blueAndVioletUnsorted: PantoneColor[] = [
+    { name: 'PANTONE 2567 PC', hex: '#8060B2', cmyk: 'C:30 M:38 Y:0 K:0' },
+    { name: 'PANTONE 2573 PC', hex: '#784EBD', cmyk: 'C:36 M:50 Y:0 K:0' },
+    { name: 'PANTONE 2577 PC', hex: '#513B9B', cmyk: 'C:44 M:50 Y:0 K:0' },
+    { name: 'PANTONE 2582 PC', hex: '#7C3CC2', cmyk: 'C:50 M:75 Y:0 K:0' },
+    { name: 'PANTONE 2583 PC', hex: '#7C33BD', cmyk: 'C:48 M:70 Y:0 K:0' },
+    { name: 'PANTONE 2587 PC', hex: '#321B7C', cmyk: 'C:66 M:76 Y:0 K:0' },
+    { name: 'PANTONE 2592 PC', hex: '#7C118A', cmyk: 'C:61 M:88 Y:0 K:0' },
+    { name: 'PANTONE 2593 PC', hex: '#721184', cmyk: 'C:67 M:91 Y:0 K:0' },
+    { name: 'PANTONE 2597 PC', hex: '#1F0D42', cmyk: 'C:78 M:94 Y:0 K:0' },
+    { name: 'PANTONE 2602 PC', hex: '#671168', cmyk: 'C:68 M:100 Y:0 K:0' },
+    { name: 'PANTONE 2603 PC', hex: '#641165', cmyk: 'C:73 M:98 Y:0 K:3' },
+    { name: 'PANTONE 2607 PC', hex: '#0D0A2C', cmyk: 'C:84 M:100 Y:0 K:4' },
+    { name: 'PANTONE 2612 PC', hex: '#601160', cmyk: 'C:70 M:100 Y:0 K:5' },
+    { name: 'PANTONE 2613 PC', hex: '#5C115E', cmyk: 'C:74 M:98 Y:2 K:12' },
+    { name: 'PANTONE 2617 PC', hex: '#080624', cmyk: 'C:84 M:100 Y:0 K:13' },
+    { name: 'PANTONE 2622 PC', hex: '#5C175A', cmyk: 'C:65 M:91 Y:9 K:45' },
+    { name: 'PANTONE 2623 PC', hex: '#5C1558', cmyk: 'C:74 M:100 Y:5 K:28' },
+    { name: 'PANTONE 2627 PC', hex: '#080622', cmyk: 'C:84 M:100 Y:7 K:33' },
     { name: 'PANTONE 263 PC', hex: '#B2A2D9', cmyk: 'C:12 M:15 Y:0 K:0' },
     { name: 'PANTONE 264 PC', hex: '#958BCA', cmyk: 'C:27 M:28 Y:0 K:0' },
     { name: 'PANTONE 265 PC', hex: '#6C62A6', cmyk: 'C:56 M:59 Y:0 K:0' },
@@ -296,49 +314,22 @@ const blueAndVioletColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 267 PC', hex: '#0B092A', cmyk: 'C:86 M:96 Y:0 K:0' },
     { name: 'PANTONE 268 PC', hex: '#0A0826', cmyk: 'C:86 M:100 Y:0 K:12' },
     { name: 'PANTONE 269 PC', hex: '#0A0820', cmyk: 'C:80 M:95 Y:0 K:35' },
-    { name: 'PANTONE 270 PC', hex: '#786CBE', cmyk: 'C:31 M:25 Y:0 K:0' },
-    { name: 'PANTONE 271 PC', hex: '#4F43B2', cmyk: 'C:48 M:40 Y:0 K:0' },
-    { name: 'PANTONE 272 PC', hex: '#3D3594', cmyk: 'C:60 M:50 Y:0 K:0' },
-    { name: 'PANTONE 273 PC', hex: '#120A4B', cmyk: 'C:100 M:100 Y:0 K:15' },
-    { name: 'PANTONE Violet PC', hex: '#090728', cmyk: 'C:92 M:98 Y:0 K:0' },
-    { name: 'PANTONE 274 PC', hex: '#080625', cmyk: 'C:100 M:100 Y:0 K:32' },
-    { name: 'PANTONE 275 PC', hex: '#060525', cmyk: 'C:100 M:100 Y:8 K:43' },
-    { name: 'PANTONE 276 PC', hex: '#060525', cmyk: 'C:100 M:100 Y:13 K:68' },
-    { name: 'PANTONE 277 PC', hex: '#728CD9', cmyk: 'C:32 M:6 Y:0 K:0' },
-    { name: 'PANTONE 278 PC', hex: '#647DD1', cmyk: 'C:44 M:13 Y:0 K:0' },
-    { name: 'PANTONE 279 PC', hex: '#425EC0', cmyk: 'C:70 M:33 Y:0 K:0' },
-    { name: 'PANTONE 280 PC', hex: '#170F28', cmyk: 'C:100 M:78 Y:5 K:18' },
-    { name: 'PANTONE 281 PC', hex: '#170E28', cmyk: 'C:100 M:85 Y:5 K:20' },
-    { name: 'PANTONE 282 PC', hex: '#0D0B24', cmyk: 'C:100 M:82 Y:10 K:64' },
-    { name: 'PANTONE 283 PC', hex: '#5B7AD2', cmyk: 'C:40 M:8 Y:0 K:0' },
-    { name: 'PANTONE 284 PC', hex: '#4267CA', cmyk: 'C:58 M:17 Y:0 K:0' },
-    { name: 'PANTONE 285 PC', hex: '#2D4DC2', cmyk: 'C:90 M:48 Y:0 K:0' },
-    { name: 'PANTONE 286 PC', hex: '#0A0833', cmyk: 'C:100 M:72 Y:0 K:0' },
-    { name: 'PANTONE 287 PC', hex: '#0D0B24', cmyk: 'C:100 M:72 Y:2 K:12' },
-    { name: 'PANTONE 288 PC', hex: '#0B0924', cmyk: 'C:100 M:75 Y:6 K:24' },
-    { name: 'PANTONE 289 PC', hex: '#0B0922', cmyk: 'C:100 M:76 Y:10 K:65' },
-    { name: 'PANTONE 290 PC', hex: '#3F60CD', cmyk: 'C:24 M:1 Y:1 K:0' },
-    { name: 'PANTONE 291 PC', hex: '#2D58C0', cmyk: 'C:36 M:3 Y:0 K:0' },
-    { name: 'PANTONE 292 PC', hex: '#1D3AB5', cmyk: 'C:58 M:11 Y:0 K:0' },
-    { name: 'PANTONE 293 PC', hex: '#0A082D', cmyk: 'C:100 M:68 Y:0 K:2' },
-    { name: 'PANTONE 294 PC', hex: '#0B0922', cmyk: 'C:100 M:68 Y:7 K:28' },
-    { name: 'PANTONE 295 PC', hex: '#0D0B22', cmyk: 'C:100 M:68 Y:8 K:52' },
-    { name: 'PANTONE 296 PC', hex: '#0C0A21', cmyk: 'C:100 M:73 Y:30 K:83' },
-    { name: 'PANTONE Ref. Blue PC', hex: '#110B47', cmyk: 'C:100 M:82 Y:0 K:2' },
-    { name: 'PANTONE Blue 072 PC', hex: '#100C46', cmyk: 'C:100 M:85 Y:0 K:4' },
-    { name: 'PANTONE 2567 PC', hex: '#8060B2', cmyk: 'C:30 M:38 Y:0 K:0' },
-    { name: 'PANTONE 2577 PC', hex: '#513B9B', cmyk: 'C:44 M:50 Y:0 K:0' },
-    { name: 'PANTONE 2587 PC', hex: '#321B7C', cmyk: 'C:66 M:76 Y:0 K:0' },
-    { name: 'PANTONE 2597 PC', hex: '#1F0D42', cmyk: 'C:78 M:94 Y:0 K:0' },
-    { name: 'PANTONE 2607 PC', hex: '#0D0A2C', cmyk: 'C:84 M:100 Y:0 K:4' },
-    { name: 'PANTONE 2617 PC', hex: '#080624', cmyk: 'C:84 M:100 Y:0 K:13' },
-    { name: 'PANTONE 2627 PC', hex: '#080622', cmyk: 'C:84 M:100 Y:7 K:33' },
     { name: 'PANTONE 2635 PC', hex: '#8A81C2', cmyk: 'C:25 M:26 Y:0 K:0' },
     { name: 'PANTONE 2645 PC', hex: '#6B62BD', cmyk: 'C:38 M:38 Y:0 K:0' },
     { name: 'PANTONE 2655 PC', hex: '#42389C', cmyk: 'C:53 M:55 Y:0 K:0' },
     { name: 'PANTONE 2665 PC', hex: '#2B2164', cmyk: 'C:67 M:68 Y:0 K:0' },
     { name: 'PANTONE 2685 PC', hex: '#090728', cmyk: 'C:92 M:100 Y:0 K:10' },
     { name: 'PANTONE 2695 PC', hex: '#090724', cmyk: 'C:90 M:100 Y:10 K:47' },
+    { name: 'PANTONE 270 PC', hex: '#786CBE', cmyk: 'C:31 M:25 Y:0 K:0' },
+    { name: 'PANTONE 271 PC', hex: '#4F43B2', cmyk: 'C:48 M:40 Y:0 K:0' },
+    { name: 'PANTONE 272 PC', hex: '#3D3594', cmyk: 'C:60 M:50 Y:0 K:0' },
+    { name: 'PANTONE 273 PC', hex: '#120A4B', cmyk: 'C:100 M:100 Y:0 K:15' },
+    { name: 'PANTONE 274 PC', hex: '#080625', cmyk: 'C:100 M:100 Y:0 K:32' },
+    { name: 'PANTONE 275 PC', hex: '#060525', cmyk: 'C:100 M:100 Y:8 K:43' },
+    { name: 'PANTONE 276 PC', hex: '#060525', cmyk: 'C:100 M:100 Y:13 K:68' },
+    { name: 'PANTONE 277 PC', hex: '#728CD9', cmyk: 'C:32 M:6 Y:0 K:0' },
+    { name: 'PANTONE 278 PC', hex: '#647DD1', cmyk: 'C:44 M:13 Y:0 K:0' },
+    { name: 'PANTONE 279 PC', hex: '#425EC0', cmyk: 'C:70 M:33 Y:0 K:0' },
     { name: 'PANTONE 2705 PC', hex: '#5B4EC9', cmyk: 'C:39 M:30 Y:0 K:0' },
     { name: 'PANTONE 2706 PC', hex: '#A6ADD4', cmyk: 'C:21 M:9 Y:0 K:0' },
     { name: 'PANTONE 2707 PC', hex: '#A6B4DD', cmyk: 'C:21 M:4 Y:0 K:0' },
@@ -366,6 +357,23 @@ const blueAndVioletColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 2766 PC', hex: '#0B0927', cmyk: 'C:100 M:92 Y:10 K:47' },
     { name: 'PANTONE 2767 PC', hex: '#140D28', cmyk: 'C:100 M:75 Y:12 K:67' },
     { name: 'PANTONE 2768 PC', hex: '#140D27', cmyk: 'C:100 M:90 Y:13 K:61' },
+    { name: 'PANTONE 280 PC', hex: '#170F28', cmyk: 'C:100 M:78 Y:5 K:18' },
+    { name: 'PANTONE 281 PC', hex: '#170E28', cmyk: 'C:100 M:85 Y:5 K:20' },
+    { name: 'PANTONE 282 PC', hex: '#0D0B24', cmyk: 'C:100 M:82 Y:10 K:64' },
+    { name: 'PANTONE 283 PC', hex: '#5B7AD2', cmyk: 'C:40 M:8 Y:0 K:0' },
+    { name: 'PANTONE 284 PC', hex: '#4267CA', cmyk: 'C:58 M:17 Y:0 K:0' },
+    { name: 'PANTONE 285 PC', hex: '#2D4DC2', cmyk: 'C:90 M:48 Y:0 K:0' },
+    { name: 'PANTONE 286 PC', hex: '#0A0833', cmyk: 'C:100 M:72 Y:0 K:0' },
+    { name: 'PANTONE 287 PC', hex: '#0D0B24', cmyk: 'C:100 M:72 Y:2 K:12' },
+    { name: 'PANTONE 288 PC', hex: '#0B0924', cmyk: 'C:100 M:75 Y:6 K:24' },
+    { name: 'PANTONE 289 PC', hex: '#0B0922', cmyk: 'C:100 M:76 Y:10 K:65' },
+    { name: 'PANTONE 290 PC', hex: '#3F60CD', cmyk: 'C:24 M:1 Y:1 K:0' },
+    { name: 'PANTONE 291 PC', hex: '#2D58C0', cmyk: 'C:36 M:3 Y:0 K:0' },
+    { name: 'PANTONE 292 PC', hex: '#1D3AB5', cmyk: 'C:58 M:11 Y:0 K:0' },
+    { name: 'PANTONE 293 PC', hex: '#0A082D', cmyk: 'C:100 M:68 Y:0 K:2' },
+    { name: 'PANTONE 294 PC', hex: '#0B0922', cmyk: 'C:100 M:68 Y:7 K:28' },
+    { name: 'PANTONE 295 PC', hex: '#0D0B22', cmyk: 'C:100 M:68 Y:8 K:52' },
+    { name: 'PANTONE 296 PC', hex: '#0C0A21', cmyk: 'C:100 M:73 Y:30 K:83' },
     { name: 'PANTONE 2905 PC', hex: '#285BC8', cmyk: 'C:44 M:1 Y:0 K:0' },
     { name: 'PANTONE 2915 PC', hex: '#134DB8', cmyk: 'C:61 M:7 Y:0 K:0' },
     { name: 'PANTONE 2925 PC', hex: '#0B24A6', cmyk: 'C:84 M:21 Y:0 K:0' },
@@ -373,10 +381,13 @@ const blueAndVioletColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 2945 PC', hex: '#0D0B21', cmyk: 'C:100 M:52 Y:2 K:12' },
     { name: 'PANTONE 2955 PC', hex: '#120D22', cmyk: 'C:100 M:55 Y:10 K:48' },
     { name: 'PANTONE 2965 PC', hex: '#100E21', cmyk: 'C:100 M:56 Y:19 K:73' },
+    { name: 'PANTONE Ref. Blue PC', hex: '#110B47', cmyk: 'C:100 M:82 Y:0 K:2' },
+    { name: 'PANTONE Blue 072 PC', hex: '#100C46', cmyk: 'C:100 M:85 Y:0 K:4' },
+    { name: 'PANTONE Violet PC', hex: '#090728', cmyk: 'C:92 M:98 Y:0 K:0' },
 ];
-export const blueAndVioletColors = blueAndVioletColorsUnsorted.sort(sortPantoneNumerically);
+export const blueAndVioletColors = blueAndVioletUnsorted.sort(sortPantoneNumerically);
 
-const cyanAndGreenColorsUnsorted: PantoneColor[] = [
+const cyanAndGreenUnsorted: PantoneColor[] = [
     { name: 'PANTONE 297 PC', hex: '#80E9EB', cmyk: 'C:51 M:0 Y:1 K:0' },
     { name: 'PANTONE 298 PC', hex: '#67D7DE', cmyk: 'C:68 M:3 Y:0 K:0' },
     { name: 'PANTONE 299 PC', hex: '#45CAD9', cmyk: 'C:86 M:8 Y:0 K:0' },
@@ -387,7 +398,6 @@ const cyanAndGreenColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 304 PC', hex: '#A6F0F7', cmyk: 'C:36 M:0 Y:6 K:0' },
     { name: 'PANTONE 305 PC', hex: '#7FDCF0', cmyk: 'C:57 M:0 Y:7 K:0' },
     { name: 'PANTONE 306 PC', hex: '#58CEEC', cmyk: 'C:79 M:0 Y:6 K:5' },
-    { name: 'PANTONE Pro. Blue PC', hex: '#00B2E0', cmyk: 'C:100 M:13 Y:1 K:3' },
     { name: 'PANTONE 307 PC', hex: '#00A3BF', cmyk: 'C:100 M:20 Y:4 K:18' },
     { name: 'PANTONE 308 PC', hex: '#009CB1', cmyk: 'C:100 M:19 Y:8 K:46' },
     { name: 'PANTONE 309 PC', hex: '#008B92', cmyk: 'C:100 M:24 Y:20 K:77' },
@@ -415,7 +425,6 @@ const cyanAndGreenColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 331 PC', hex: '#B1E9F1', cmyk: 'C:27 M:0 Y:14 K:0' },
     { name: 'PANTONE 332 PC', hex: '#A1DED4', cmyk: 'C:33 M:0 Y:17 K:0' },
     { name: 'PANTONE 333 PC', hex: '#7ED1B8', cmyk: 'C:56 M:0 Y:30 K:0' },
-    { name: 'PANTONE Green PC', hex: '#00A68A', cmyk: 'C:95 M:0 Y:58 K:0' },
     { name: 'PANTONE 334 PC', hex: '#009AA8', cmyk: 'C:100 M:0 Y:60 K:3' },
     { name: 'PANTONE 335 PC', hex: '#009995', cmyk: 'C:100 M:0 Y:58 K:22' },
     { name: 'PANTONE 336 PC', hex: '#008B8B', cmyk: 'C:100 M:9 Y:58 K:45' },
@@ -461,10 +470,12 @@ const cyanAndGreenColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 3302 PC', hex: '#007479', cmyk: 'C:94 M:16 Y:48 K:65' },
     { name: 'PANTONE 3305 PC', hex: '#007076', cmyk: 'C:92 M:17 Y:52 K:65' },
     { name: 'PANTONE 3308 PC', hex: '#006C72', cmyk: 'C:100 M:20 Y:59 K:74' },
+    { name: 'PANTONE Green PC', hex: '#00A68A', cmyk: 'C:95 M:0 Y:58 K:0' },
+    { name: 'PANTONE Pro. Blue PC', hex: '#00B2E0', cmyk: 'C:100 M:13 Y:1 K:3' },
 ];
-export const cyanAndGreenColors = cyanAndGreenColorsUnsorted.sort(sortPantoneNumerically);
+export const cyanAndGreenColors = cyanAndGreenUnsorted.sort(sortPantoneNumerically);
 
-const yellowAndGreenColorsUnsorted: PantoneColor[] = [
+const yellowAndGreenUnsorted: PantoneColor[] = [
     { name: 'PANTONE 3375 PC', hex: '#A6E9B9', cmyk: 'C:40 M:0 Y:26 K:0' },
     { name: 'PANTONE 3385 PC', hex: '#8CE1AB', cmyk: 'C:54 M:0 Y:37 K:0' },
     { name: 'PANTONE 3395 PC', hex: '#73D797', cmyk: 'C:74 M:0 Y:52 K:0' },
@@ -536,9 +547,9 @@ const yellowAndGreenColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 3985 PC', hex: '#A6B486', cmyk: 'C:11 M:16 Y:100 K:38' },
     { name: 'PANTONE 3995 PC', hex: '#96A382', cmyk: 'C:17 M:26 Y:100 K:66' },
 ];
-export const yellowAndGreenColors = yellowAndGreenColorsUnsorted.sort(sortPantoneNumerically);
+export const yellowAndGreenColors = yellowAndGreenUnsorted.sort(sortPantoneNumerically);
 
-const grayAndBrownColorsUnsorted: PantoneColor[] = [
+const grayAndBrownUnsorted: PantoneColor[] = [
     { name: 'PANTONE 400 PC', hex: '#D4CEC7', cmyk: 'C:5 M:6 Y:10 K:14' },
     { name: 'PANTONE 401 PC', hex: '#BDB8AE', cmyk: 'C:8 M:9 Y:14 K:24' },
     { name: 'PANTONE 402 PC', hex: '#A6A399', cmyk: 'C:10 M:13 Y:16 K:29' },
@@ -686,6 +697,13 @@ const grayAndBrownColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 5015 PC', hex: '#877D76', cmyk: 'C:3 M:31 Y:13 K:10' },
     { name: 'PANTONE 5025 PC', hex: '#7D7574', cmyk: 'C:2 M:24 Y:10 K:5' },
     { name: 'PANTONE 5035 PC', hex: '#7D7573', cmyk: 'C:1 M:17 Y:7 K:3' },
+    { name: 'PANTONE 7541 PC', hex: '#D9D2D0', cmyk: 'C:10 M:3 Y:2 K:2' },
+    { name: 'PANTONE 7542 PC', hex: '#A6A09E', cmyk: 'C:24 M:4 Y:8 K:13' },
+    { name: 'PANTONE 7543 PC', hex: '#96918E', cmyk: 'C:23 M:11 Y:8 K:21' },
+    { name: 'PANTONE 7544 PC', hex: '#787570', cmyk: 'C:33 M:14 Y:11 K:31' },
+    { name: 'PANTONE 7545 PC', hex: '#4C4B44', cmyk: 'C:55 M:30 Y:17 K:51' },
+    { name: 'PANTONE 7546 PC', hex: '#36352F', cmyk: 'C:70 M:43 Y:23 K:63' },
+    { name: 'PANTONE 7547 PC', hex: '#201F1C', cmyk: 'C:99 M:73 Y:30 K:80' },
     { name: 'PANTONE Wm Gy 1 PC', hex: '#D9D2D2', cmyk: 'C:2 M:3 Y:4 K:5' },
     { name: 'PANTONE Wm Gy 2 PC', hex: '#CFC9C8', cmyk: 'C:4 M:5 Y:7 K:10' },
     { name: 'PANTONE Wm Gy 3 PC', hex: '#C7C0BF', cmyk: 'C:6 M:7 Y:9 K:15' },
@@ -714,14 +732,157 @@ const grayAndBrownColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE Black 5 PC', hex: '#313337', cmyk: 'C:37 M:60 Y:35 K:80' },
     { name: 'PANTONE Black 6 PC', hex: '#1D1F23', cmyk: 'C:100 M:78 Y:44 K:91' },
     { name: 'PANTONE Black 7 PC', hex: '#1F2124', cmyk: 'C:51 M:44 Y:36 K:84' },
-    { name: 'PANTONE 7541 PC', hex: '#D9D2D0', cmyk: 'C:10 M:3 Y:2 K:2' },
-    { name: 'PANTONE 7542 PC', hex: '#A6A09E', cmyk: 'C:24 M:4 Y:8 K:13' },
-    { name: 'PANTONE 7543 PC', hex: '#96918E', cmyk: 'C:23 M:11 Y:8 K:21' },
-    { name: 'PANTONE 7544 PC', hex: '#787570', cmyk: 'C:33 M:14 Y:11 K:31' },
-    { name: 'PANTONE 7545 PC', hex: '#4C4B44', cmyk: 'C:55 M:30 Y:17 K:51' },
-    { name: 'PANTONE 7546 PC', hex: '#36352F', cmyk: 'C:70 M:43 Y:23 K:63' },
-    { name: 'PANTONE 7547 PC', hex: '#201F1C', cmyk: 'C:99 M:73 Y:30 K:80' },
 ];
-export const grayAndBrownColors = grayAndBrownColorsUnsorted.sort(sortPantoneNumerically);
+export const grayAndBrownColors = grayAndBrownUnsorted.sort(sortPantoneNumerically);
+```
+  </change>
+  <change>
+    <file>/src/components/layout/Header.tsx</file>
+    <content><![CDATA[
+"use client";
 
-    
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Brush, Menu, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+    { href: '/mesh-gradient', label: 'Gradient Builder' },
+    { href: '/', label: 'Palette Builder' },
+    { href: '/inspiration', label: 'Inspiration' },
+    { href: '/library', label: 'Library' },
+    { 
+        label: 'Pantone Guide',
+        children: [
+            { href: '/pantone-process', label: 'Process Colors' },
+            { href: '/pantone-yellow-orange', label: 'Yellows & Oranges' },
+            { href: '/pantone-orange-red', label: 'Oranges & Reds' },
+            { href: '/pantone-pink-purple', label: 'Pinks & Purples' },
+            { href: '/pantone-blue-violet', label: 'Blues & Violets' },
+            { href: '/pantone-cyan-green', label: 'Cyans & Greens' },
+            { href: '/pantone-yellow-green', label: 'Yellows & Greens' },
+            { href: '/pantone-gray-brown', label: 'Grays & Browns' },
+        ]
+    },
+];
+
+export function Header() {
+    const pathname = usePathname();
+
+    const isPantoneActive = pathname.startsWith('/pantone');
+
+    return (
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 sm:px-6">
+            <div className="flex items-center gap-4">
+                
+                <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
+                    {navItems.map((item) => (
+                        item.children ? (
+                            <DropdownMenu key={item.label}>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className={cn(
+                                        "transition-colors hover:text-primary gap-1",
+                                        isPantoneActive ? "text-primary" : "text-muted-foreground"
+                                    )}>
+                                        {item.label}
+                                        <ChevronDown className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    {item.children.map(child => (
+                                        <DropdownMenuItem key={child.href} asChild>
+                                            <Link href={child.href}>{child.label}</Link>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <Button asChild variant="ghost" className="text-muted-foreground hover:text-primary">
+                                <Link
+                                    key={item.href}
+                                    href={item.href!}
+                                    className={cn(
+                                        "transition-colors",
+                                        pathname === item.href ? "text-primary" : "text-muted-foreground"
+                                    )}
+                                >
+                                    {item.label}
+                                </Link>
+                            </Button>
+                        )
+                    ))}
+                </nav>
+
+                <div className="md:hidden">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" size="icon">
+                                <Menu className="h-5 w-5" />
+                                <span className="sr-only">Open navigation menu</span>
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="p-0">
+                             <div className="p-6">
+                                <Link
+                                    href="/"
+                                    className="flex items-center gap-2 text-lg font-semibold mb-4"
+                                >
+                                    <Brush className="h-6 w-6" />
+                                    <span>Palette Prodigy</span>
+                                </Link>
+                             </div>
+                            <nav className="grid gap-2 text-lg font-medium px-6">
+                                <Accordion type="single" collapsible className="w-full">
+                                    {navItems.map((item) => (
+                                        item.children ? (
+                                            <AccordionItem value={item.label} key={item.label} className="border-b-0">
+                                                <AccordionTrigger className={cn(
+                                                    "py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:no-underline",
+                                                    isPantoneActive && "text-foreground"
+                                                )}>
+                                                    {item.label}
+                                                </AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="flex flex-col gap-3 pl-6">
+                                                    {item.children.map((child) => (
+                                                        <SheetClose asChild key={child.href}>
+                                                            <Link href={child.href} className={cn(
+                                                                "text-muted-foreground hover:text-foreground",
+                                                                pathname === child.href && "text-foreground font-semibold"
+                                                            )}>
+                                                                {child.label}
+                                                            </Link>
+                                                        </SheetClose>
+                                                    ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        ) : (
+                                            <SheetClose asChild key={item.href}>
+                                                <Link
+                                                    href={item.href!}
+                                                    className={cn(
+                                                        "block py-3 text-base text-muted-foreground hover:text-foreground",
+                                                        pathname === item.href && "text-foreground font-semibold"
+                                                    )}
+                                                >
+                                                    {item.label}
+                                                </Link>
+                                            </SheetClose>
+                                        )
+                                    ))}
+                                </Accordion>
+                            </nav>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+            </div>
+
+            <div></div>
+        </header>
+    );
+}
