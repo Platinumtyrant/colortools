@@ -32,7 +32,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SavedPalettes } from '@/components/palettes/SavedPalettes';
-import { Sidebar, SidebarContent, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -121,18 +121,8 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
   </div>
 );
 
-const SidebarToggle = () => {
-    const { toggleSidebar } = useSidebar();
-    return (
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hidden md:inline-flex">
-            <PanelLeft className="h-5 w-5" />
-            <span className="sr-only">Toggle Sidebar</span>
-        </Button>
-    )
-}
-
-
-function PaletteBuilderContent() {
+function PaletteBuilderPage() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mainColor, setMainColor] = useState('#FF9800');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
@@ -246,26 +236,38 @@ function PaletteBuilderContent() {
     }
   }, [searchParams, router, toast, regeneratePalette]);
 
+  // Keyboard shortcut for sidebar
+  useEffect(() => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'b' && (event.metaKey || event.ctrlKey)) {
+          event.preventDefault();
+          setIsSidebarOpen((open) => !open);
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleColorChange = useCallback((newColor: any) => {
     setMainColor(newColor.hex);
   }, []);
 
   const handleAddColorToPalette = useCallback(() => {
-    if (palette.length >= 20) {
-      toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
-      return;
-    }
-    if (palette.some(p => p.hex === mainColor)) {
-      toast({ title: 'Color already in palette.' });
-      return;
-    }
-    setPalette(prevColors => {
-        const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
-        return [...prevColors, newColor];
-    });
-    toast({ title: 'Color added to palette!' });
+      if (palette.length >= 20) {
+        toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
+        return;
+      }
+      if (palette.some(p => p.hex === mainColor)) {
+        toast({ title: 'Color already in palette.' });
+        return;
+      }
+      setPalette(prevColors => {
+          const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
+          return [...prevColors, newColor];
+      });
+      toast({ title: 'Color added to palette!' });
   }, [mainColor, palette, toast]);
+
   
   const handleOpenSaveDialog = useCallback(() => {
     if (palette.length === 0) {
@@ -340,45 +342,45 @@ function PaletteBuilderContent() {
   }, []);
 
   const handleRemoveColor = useCallback((id: number) => {
-    if (palette.length <= 2) {
-        toast({ title: "Minimum 2 colors required.", variant: "destructive" });
-        return;
-    }
-    setPalette(palette.filter(c => c.id !== id));
+      if (palette.length <= 2) {
+          toast({ title: "Minimum 2 colors required.", variant: "destructive" });
+          return;
+      }
+      setPalette(palette.filter(c => c.id !== id));
   }, [palette, toast]);
 
   const handleAddColorAtIndex = useCallback((index: number) => {
-    if (palette.length >= 20) {
-        toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
-        return;
-    }
-    setPalette(prev => {
-        const newPalette = [...prev];
-        const colorBefore = prev[index - 1]?.hex || null;
-        const colorAfter = prev[index]?.hex || null;
-        
-        let newHex: string;
+      if (palette.length >= 20) {
+          toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
+          return;
+      }
+      setPalette(prev => {
+          const newPalette = [...prev];
+          const colorBefore = prev[index - 1]?.hex || null;
+          const colorAfter = prev[index]?.hex || null;
+          
+          let newHex: string;
 
-        if (colorBefore && colorAfter) {
-            newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'lch').hex();
-        } else if (colorBefore) {
-            newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
-        } else if (colorAfter) {
-            newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
-        } else {
-            newHex = getRandomColor();
-        }
+          if (colorBefore && colorAfter) {
+              newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'lch').hex();
+          } else if (colorBefore) {
+              newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
+          } else if (colorAfter) {
+              newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
+          } else {
+              newHex = getRandomColor();
+          }
 
-        const newColor: PaletteColor = {
-            id: Date.now(),
-            hex: newHex,
-            locked: false,
-        };
+          const newColor: PaletteColor = {
+              id: Date.now(),
+              hex: newHex,
+              locked: false,
+          };
 
-        newPalette.splice(index, 0, newColor);
-        
-        return adjustForColorblindSafety(newPalette);
-    });
+          newPalette.splice(index, 0, newColor);
+          
+          return adjustForColorblindSafety(newPalette);
+      });
   }, [palette.length, toast]);
 
   const handleReset = useCallback(() => {
@@ -447,7 +449,7 @@ function PaletteBuilderContent() {
   
   const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
   
-  const { isPaletteColorblindSafe, adjustedPalette } = useMemo(() => {
+  const { isPaletteColorblindSafe } = useMemo(() => {
     if (palette.length < 2) return { isPaletteColorblindSafe: true, adjustedPalette: palette };
     const adjusted = adjustForColorblindSafety(palette);
     let isSafe = true;
@@ -599,10 +601,16 @@ function PaletteBuilderContent() {
     </div>
   );
 
+  const PaletteSidebarToggle = () => (
+    <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden md:inline-flex">
+        <PanelLeft className="h-5 w-5" />
+        <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  );
 
   return (
     <div className="flex h-full">
-        <Sidebar>
+        <Sidebar isOpen={isSidebarOpen}>
             <SidebarContent className="p-4">
                 {analysisPanel}
             </SidebarContent>
@@ -772,6 +780,11 @@ function PaletteBuilderContent() {
                     </div>
                 </section>
                 
+                <div className="flex items-center gap-2">
+                   <PaletteSidebarToggle />
+                   <h2 className="text-xl font-bold tracking-tight">Palette Editor</h2>
+                </div>
+
                 {/* Palette Display Section */}
                 <section className="w-full max-w-7xl mx-auto flex-grow flex flex-col min-h-[200px]">
                     <Palette
@@ -790,10 +803,4 @@ function PaletteBuilderContent() {
   );
 }
 
-export default function UnifiedBuilderPage() {
-    return (
-        <SidebarProvider defaultOpen={true}>
-            <PaletteBuilderContent />
-        </SidebarProvider>
-    )
-}
+export default PaletteBuilderPage;

@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Noto_Sans } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
