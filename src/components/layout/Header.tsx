@@ -3,11 +3,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brush, Menu, Sparkles, PanelLeft } from "lucide-react";
+import { Brush, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
 const navItems = [
     { href: '/mesh-gradient', label: 'Gradient Builder' },
@@ -18,16 +17,11 @@ const navItems = [
 
 export function Header() {
     const pathname = usePathname();
-    const { toggleSidebar } = useSidebar();
 
     return (
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 sm:px-6">
             {/* Left side of header */}
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="hidden md:flex" onClick={toggleSidebar}>
-                    <PanelLeft className="h-5 w-5" />
-                    <span className="sr-only">Toggle Sidebar</span>
-                </Button>
                 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
@@ -82,10 +76,8 @@ export function Header() {
                 </div>
             </div>
 
-            {/* Right side of header - only for mobile analysis sidebar trigger */}
-            <div className="md:hidden">
-                <SidebarTrigger />
-            </div>
+            {/* Right side of header is empty */}
+            <div></div>
         </header>
     );
 }

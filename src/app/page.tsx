@@ -27,12 +27,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles, Pipette } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles, Pipette, PanelLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
-import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SavedPalettes } from '@/components/palettes/SavedPalettes';
+import { Sidebar, SidebarContent, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -121,8 +121,18 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
   </div>
 );
 
+const SidebarToggle = () => {
+    const { toggleSidebar } = useSidebar();
+    return (
+        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+            <PanelLeft className="h-5 w-5" />
+            <span className="sr-only">Toggle Sidebar</span>
+        </Button>
+    )
+}
 
-export default function UnifiedBuilderPage() {
+
+function PaletteBuilderContent() {
   const [mainColor, setMainColor] = useState('#FF9800');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
@@ -140,7 +150,6 @@ export default function UnifiedBuilderPage() {
   const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
 
   const { toast } = useToast();
-  const { setExtension } = useSidebarExtension();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isInitialLoad = useRef(true);
@@ -368,7 +377,7 @@ export default function UnifiedBuilderPage() {
         
         return adjustForColorblindSafety(newPalette);
     });
-  }, [palette, toast]);
+  }, [palette.length, toast]);
 
   const handleReset = useCallback(() => {
     setEditingPaletteId(null);
@@ -539,13 +548,6 @@ export default function UnifiedBuilderPage() {
       handleApplyAnalyzedPalette
   ]);
 
-  useEffect(() => {
-    setExtension(analysisPanel);
-    return () => {
-      setExtension(null);
-    };
-  }, [analysisPanel, setExtension]);
-
   const paletteActions = (
     <div className="flex w-full justify-between items-center gap-4 flex-wrap">
       <div className="flex items-center gap-4">
@@ -595,182 +597,199 @@ export default function UnifiedBuilderPage() {
 
 
   return (
-    <main className="flex-1 w-full p-4 md:p-8 flex flex-col gap-8">
-      {/* Save Dialog */}
-      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-            <form onSubmit={handleSaveToLibrary}>
-                <DialogHeader>
-                    <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
-                    <DialogDescription>
-                        Give your palette a name. Click save when you're done.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">
-                            Name
-                        </Label>
-                        <Input
-                            id="name"
-                            value={newPaletteName}
-                            onChange={(e) => setNewPaletteName(e.target.value)}
-                            className="col-span-3"
-                            placeholder="e.g. Sunset Vibes"
-                            required
+    <div className="flex h-full">
+        <Sidebar>
+            <SidebarContent className="p-4">
+                {analysisPanel}
+            </SidebarContent>
+        </Sidebar>
+        <div className="flex-1 flex flex-col overflow-auto">
+            <div className="p-4 md:p-8 flex flex-col gap-8 h-full">
+                {/* Save Dialog */}
+                <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <form onSubmit={handleSaveToLibrary}>
+                            <DialogHeader>
+                                <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
+                                <DialogDescription>
+                                    Give your palette a name. Click save when you're done.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="name" className="text-right">
+                                        Name
+                                    </Label>
+                                    <Input
+                                        id="name"
+                                        value={newPaletteName}
+                                        onChange={(e) => setNewPaletteName(e.target.value)}
+                                        className="col-span-3"
+                                        placeholder="e.g. Sunset Vibes"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit">{editingPaletteId ? 'Update' : 'Save'} palette</Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+                
+                {/* Top Section: Picker and Active Color Details */}
+                <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-7xl mx-auto">
+                    <div className="w-full flex flex-col items-center lg:items-start gap-4">
+                        <ColorPickerClient 
+                        color={mainColor} 
+                        onChange={handleColorChange}
+                        onEyeDropperClick={handleEyeDropper}
+                        className="w-full max-w-sm h-full"
                         />
                     </div>
-                </div>
-                <DialogFooter>
-                    <Button type="submit">{editingPaletteId ? 'Update' : 'Save'} palette</Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Top Section: Picker and Active Color Details */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-7xl mx-auto">
-        <div className="w-full flex flex-col items-center lg:items-start gap-4">
-            <ColorPickerClient 
-              color={mainColor} 
-              onChange={handleColorChange}
-              onEyeDropperClick={handleEyeDropper}
-              className="w-full max-w-sm h-full"
-            />
-        </div>
 
-        <div className="w-full flex justify-center">
-            <Card className="w-full max-w-sm h-full flex flex-col">
-                <CardHeader>
-                    <Button
-                        onClick={() => setIsContrastMode(prev => !prev)}
-                        variant="outline"
-                        className="w-full"
-                    >
-                        <Contrast className="mr-2 h-4 w-4" />
-                        {isContrastMode ? 'Back to Builder' : 'Check Contrast'}
-                    </Button>
-                </CardHeader>
-                <CardContent className="space-y-4 flex-grow">
-                    <div 
-                      className="relative group w-full h-24 rounded-md border flex items-center justify-center text-center p-4"
-                      style={{ backgroundColor: mainColor, color: isContrastMode ? contrastTextColor : 'inherit' }}
-                    >
-                       {!isContrastMode && (
-                          <Button
-                              onClick={handleAddColorToPalette}
-                              size="icon"
-                              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                              title="Add color to palette"
-                          >
-                              <Plus className="h-6 w-6" />
-                          </Button>
-                      )}
-                      {isContrastMode && (
-                        <div className="select-none">
-                            <h2 className="text-3xl font-bold">Aa</h2>
-                            <p className="text-sm">Sample Text</p>
-                        </div>
-                      )}
+                    <div className="w-full flex justify-center">
+                        <Card className="w-full max-w-sm h-full flex flex-col">
+                            <CardHeader>
+                                <Button
+                                    onClick={() => setIsContrastMode(prev => !prev)}
+                                    variant="outline"
+                                    className="w-full"
+                                >
+                                    <Contrast className="mr-2 h-4 w-4" />
+                                    {isContrastMode ? 'Back to Builder' : 'Check Contrast'}
+                                </Button>
+                            </CardHeader>
+                            <CardContent className="space-y-4 flex-grow">
+                                <div 
+                                className="relative group w-full h-24 rounded-md border flex items-center justify-center text-center p-4"
+                                style={{ backgroundColor: mainColor, color: isContrastMode ? contrastTextColor : 'inherit' }}
+                                >
+                                {!isContrastMode && (
+                                    <Button
+                                        onClick={handleAddColorToPalette}
+                                        size="icon"
+                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="Add color to palette"
+                                    >
+                                        <Plus className="h-6 w-6" />
+                                    </Button>
+                                )}
+                                {isContrastMode && (
+                                    <div className="select-none">
+                                        <h2 className="text-3xl font-bold">Aa</h2>
+                                        <p className="text-sm">Sample Text</p>
+                                    </div>
+                                )}
+                                </div>
+                                
+                                <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={isContrastMode ? 'contrast' : 'details'}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    {isContrastMode ? (
+                                    <WCAGDisplay bgColor={mainColor} textColor={contrastTextColor} />
+                                    ) : (
+                                    <div className="space-y-1 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Name</span>
+                                            <span className="font-mono font-semibold capitalize">{colorName}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">HEX</span>
+                                            <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">RGB</span>
+                                            <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">HSL</span>
+                                            <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">CMYK</span>
+                                            <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">LCH</span>
+                                            <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">CIELAB</span>
+                                            <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
+                                        </div>
+                                    </div>
+                                    )}
+                                </motion.div>
+                                </AnimatePresence>
+                            </CardContent>
+                        </Card>
                     </div>
-                    
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={isContrastMode ? 'contrast' : 'details'}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {isContrastMode ? (
-                          <WCAGDisplay bgColor={mainColor} textColor={contrastTextColor} />
-                        ) : (
-                          <div className="space-y-1 text-sm">
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Name</span>
-                                  <span className="font-mono font-semibold capitalize">{colorName}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground">HEX</span>
-                                  <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground">RGB</span>
-                                  <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                  <span className="text-muted-foreground">HSL</span>
-                                  <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">CMYK</span>
-                                <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">LCH</span>
-                                <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">CIELAB</span>
-                                <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    </AnimatePresence>
-                </CardContent>
-            </Card>
-        </div>
 
-        <div className="w-full flex justify-center lg:justify-end">
-            <AnimatePresence mode="wait">
-              {isContrastMode ? (
-                <motion.div
-                  key="text-picker"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="w-full max-w-sm h-full"
-                >
-                    <Card className="w-full h-full flex flex-col">
-                        <CardContent className="flex-grow p-4">
-                            <ColorPickerClient 
-                              color={contrastTextColor} 
-                              onChange={(c) => setContrastTextColor(c.hex)}
-                              className="w-full border-0 shadow-none p-0 h-full"
-                            />
-                        </CardContent>
-                    </Card>
-                </motion.div>
-              ) : (
-                <motion.div
-                    key="library-card"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-full max-w-sm h-full"
-                >
-                    <SavedPalettes key={libraryUpdateKey} onLoadPalette={handleLoadPaletteFromLibrary} />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    <div className="w-full flex justify-center lg:justify-end">
+                        <AnimatePresence mode="wait">
+                        {isContrastMode ? (
+                            <motion.div
+                            key="text-picker"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="w-full max-w-sm h-full"
+                            >
+                                <Card className="w-full h-full flex flex-col">
+                                    <CardContent className="flex-grow p-4">
+                                        <ColorPickerClient 
+                                        color={contrastTextColor} 
+                                        onChange={(c) => setContrastTextColor(c.hex)}
+                                        className="w-full border-0 shadow-none p-0 h-full"
+                                        />
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="library-card"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                                className="w-full max-w-sm h-full"
+                            >
+                                <SavedPalettes key={libraryUpdateKey} onLoadPalette={handleLoadPaletteFromLibrary} />
+                            </motion.div>
+                        )}
+                        </AnimatePresence>
+                    </div>
+                </section>
+                
+                {/* Palette Display Section */}
+                <section className="w-full max-w-7xl mx-auto flex-grow flex flex-col min-h-[200px]">
+                    <Palette
+                    palette={palette}
+                    onColorChange={handleColorUpdateInPalette}
+                    onLockToggle={handleLockToggle}
+                    onRemoveColor={handleRemoveColor}
+                    onAddColor={handleAddColorAtIndex}
+                    onColorClick={(c) => setMainColor(c.hex)}
+                    actions={paletteActions}
+                    />
+                </section>
+            </div>
         </div>
-      </section>
-      
-      {/* Palette Display Section */}
-      <section className="w-full max-w-7xl mx-auto flex-grow flex flex-col min-h-[200px]">
-        <Palette
-          palette={palette}
-          onColorChange={handleColorUpdateInPalette}
-          onLockToggle={handleLockToggle}
-          onRemoveColor={handleRemoveColor}
-          onAddColor={handleAddColorAtIndex}
-          onColorClick={(c) => setMainColor(c.hex)}
-          actions={paletteActions}
-        />
-      </section>
-    </main>
+    </div>
   );
+}
+
+export default function UnifiedBuilderPage() {
+    return (
+        <SidebarProvider defaultOpen={true}>
+            <PaletteBuilderContent />
+        </SidebarProvider>
+    )
 }

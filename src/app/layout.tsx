@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
-import { SidebarExtensionProvider } from "@/contexts/SidebarExtensionContext";
 import "./globals.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -28,11 +27,9 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body className="font-headline antialiased">
-        <SidebarExtensionProvider>
           <MainLayout>
             {children}
           </MainLayout>
-        </SidebarExtensionProvider>
         <Toaster />
       </body>
     </html>
