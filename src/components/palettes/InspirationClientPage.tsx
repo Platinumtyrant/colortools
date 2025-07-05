@@ -5,6 +5,9 @@ import React from 'react';
 import type { CategorizedPalette } from '@/lib/palette-parser';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { colord } from 'colord';
+import { getDescriptiveColorName } from '@/lib/colors';
 
 interface InspirationClientPageProps {
   allPalettes: CategorizedPalette[];
@@ -52,6 +55,15 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
       })
     }
   };
+
+  const handleCopy = (e: React.MouseEvent, text: string, type: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text).then(() => {
+        toast({ title: `${type} copied: ${text}` });
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  };
   
   const palettesByCategory = allPalettes.reduce((acc, palette) => {
     const category = palette.category;
@@ -77,19 +89,56 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
         <TabsContent key={category} value={category} className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
             {palettesByCategory[category].map((palette, index) => (
-                <div className="group" key={`${palette.name}-${index}`} onClick={() => handleSavePalette(palette)}>
-                    <p className="text-sm font-medium mb-2 truncate" title={palette.name}>{palette.name}</p>
-                    <div className="flex flex-wrap h-16 w-full cursor-pointer overflow-hidden rounded-md border-2 border-transparent transition-all group-hover:border-primary">
-                        {palette.colors.map((color, colorIndex) => (
-                            <div
-                                key={colorIndex}
-                                className="w-[10%]"
-                                style={{
-                                    backgroundColor: color,
-                                    height: palette.colors.length > 10 ? '50%' : '100%',
-                                }}
-                            />
-                        ))}
+                <div className="group" key={`${palette.name}-${index}`}>
+                    <p className="text-sm font-medium mb-2 truncate cursor-pointer" title={palette.name} onClick={() => handleSavePalette(palette)}>{palette.name}</p>
+                    <div 
+                      className="flex flex-wrap w-full cursor-pointer overflow-hidden rounded-md border-2 border-transparent transition-all group-hover:border-primary"
+                      onClick={() => handleSavePalette(palette)}
+                    >
+                        {palette.colors.map((color, colorIndex) => {
+                          const hex = colord(color).toHex();
+                          const rgb = colord(color).toRgb();
+                          const hsl = colord(color).toHsl();
+                          const name = getDescriptiveColorName(hex);
+                          return (
+                            <Popover key={colorIndex}>
+                                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                    <div
+                                        className="w-[10%] flex-grow"
+                                        style={{
+                                            backgroundColor: color,
+                                            height: palette.colors.length > 10 ? '2rem' : '4rem',
+                                        }}
+                                        title="Click for details"
+                                    />
+                                </PopoverTrigger>
+                                <PopoverContent className="w-64">
+                                    <div className="space-y-4">
+                                        <div className="space-y-1">
+                                            <h4 className="font-medium leading-none capitalize">{name}</h4>
+                                            <p className="text-sm text-muted-foreground">
+                                            Click a value to copy it.
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1 text-sm">
+                                            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, hex, 'HEX')}>
+                                                <span className="text-muted-foreground">HEX</span>
+                                                <span className="font-mono font-semibold text-right break-all">{hex}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'RGB')}>
+                                                <span className="text-muted-foreground">RGB</span>
+                                                <span className="font-mono font-semibold text-right break-all">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`, 'HSL')}>
+                                                <span className="text-muted-foreground">HSL</span>
+                                                <span className="font-mono font-semibold text-right break-all">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                          )
+                        })}
                     </div>
                 </div>
             ))}
