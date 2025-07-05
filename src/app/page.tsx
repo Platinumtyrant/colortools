@@ -124,7 +124,7 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
 const SidebarToggle = () => {
     const { toggleSidebar } = useSidebar();
     return (
-        <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hidden md:inline-flex">
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Sidebar</span>
         </Button>
@@ -260,8 +260,10 @@ function PaletteBuilderContent() {
       toast({ title: 'Color already in palette.' });
       return;
     }
-    const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
-    setPalette(prevColors => [...prevColors, newColor]);
+    setPalette(prevColors => {
+        const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
+        return [...prevColors, newColor];
+    });
     toast({ title: 'Color added to palette!' });
   }, [mainColor, palette, toast]);
   
@@ -471,22 +473,24 @@ function PaletteBuilderContent() {
     <div className="space-y-6">
         <h3 className="text-lg font-semibold">Palette Analysis</h3>
         <div className="flex flex-col gap-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
-                <TooltipProvider>
-                    <ShadTooltip>
-                        <TooltipTrigger asChild>
-                            <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
-                        </TooltipContent>
-                    </ShadTooltip>
-                </TooltipProvider>
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => stableSetCorrectLightness(!!checked)} />
-                <Label htmlFor="correctLightness">Correct lightness</Label>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
+                  <TooltipProvider>
+                      <ShadTooltip>
+                          <TooltipTrigger asChild>
+                              <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                              <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                          </TooltipContent>
+                      </ShadTooltip>
+                  </TooltipProvider>
+              </div>
+              <div className="flex items-center space-x-2">
+                  <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => stableSetCorrectLightness(!!checked)} />
+                  <Label htmlFor="correctLightness">Correct lightness</Label>
+              </div>
             </div>
             <div className="flex flex-col items-start gap-2">
                 <Label className="text-sm">Simulate:</Label>
@@ -533,7 +537,7 @@ function PaletteBuilderContent() {
                   </Button>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-4 pt-4">
+            <div className="grid grid-cols-1 gap-2 pt-4">
                 <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" description="How light or dark the color is, from black (0) to white (100)." />
                 <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" description="The intensity of the color, from gray (0) to a pure, vivid color." />
                 <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" description="The color's position on the color wheel, measured in degrees (0-360)." />
