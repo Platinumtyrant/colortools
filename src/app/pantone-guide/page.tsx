@@ -52,8 +52,8 @@ export default function PantoneGuidePage() {
         {pantoneCategories.map(category => (
             <TabsContent key={category.name} value={category.name} className="mt-6">
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-4">
-                    {category.colors.map(color => (
-                        <ColorSwatch key={color.name} color={color} />
+                    {category.colors.map((color, index) => (
+                        <ColorSwatch key={`${color.name}-${index}`} color={color} />
                     ))}
                 </div>
             </TabsContent>
