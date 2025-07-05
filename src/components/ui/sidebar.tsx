@@ -183,7 +183,7 @@ const Sidebar = React.forwardRef<
         ref={ref}
         className={cn(
             "group hidden h-full text-sidebar-foreground transition-all duration-300 ease-in-out md:flex",
-            "w-72 data-[state=collapsed]:w-[72px]",
+            "w-96 data-[state=collapsed]:w-[72px]",
             className
         )}
         data-state={state}
