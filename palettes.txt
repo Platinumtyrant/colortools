@@ -1,0 +1,45 @@
+<h3>Ocean Blues</h3>
+<div style="background-color:#03045e;"></div>
+<div style="background-color:#0077b6;"></div>
+<div style="background-color:#00b4d8;"></div>
+<div style="background-color:#90e0ef;"></div>
+<div style="background-color:#caf0f8;"></div>
+
+<h3>Sunset Hues</h3>
+<div style="background-color:#ff5733;"></div>
+<div style="background-color:#ff8d1a;"></div>
+<div style="background-color:#f9c74f;"></div>
+<div style="background-color:#f8edeb;"></div>
+<div style="background-color:#fefae0;"></div>
+
+<h3>Forest Greens</h3>
+<div style="background-color:#2d6a4f;"></div>
+<div style="background-color:#40916c;"></div>
+<div style="background-color:#52b788;"></div>
+<div style="background-color:#74c69d;"></div>
+<div style="background-color:#95d5b2;"></div>
+
+<h3>Royal Purples</h3>
+<div style="background-color:#5a189a;"></div>
+<div style="background-color:#7b2cbf;"></div>
+<div style="background-color:#9d4edd;"></div>
+<div style="background-color:#c77dff;"></div>
+<div style="background-color:#e0aaff;"></div>
+
+<h3>Monochrome Grays</h3>
+<div style="background-color:#212529;"></div>
+<div style="background-color:#495057;"></div>
+<div style="background-color:#adb5bd;"></div>
+<div style="background-color:#dee2e6;"></div>
+<div style="background-color:#f8f9fa;"></div>
+
+<h3>Google</h3>
+<div style="background-color:#4285F4;"></div>
+<div style="background-color:#DB4437;"></div>
+<div style="background-color:#F4B400;"></div>
+<div style="background-color:#0F9D58;"></div>
+
+<h3>France Flag</h3>
+<div style="background-color:#0055A4;"></div>
+<div style="background-color:#FFFFFF;"></div>
+<div style="background-color:#EF4135;"></div>
