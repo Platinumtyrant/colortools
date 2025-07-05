@@ -721,4 +721,7 @@ const grayAndBrownColorsUnsorted: PantoneColor[] = [
     { name: 'PANTONE 7545 PC', hex: '#4C4B44', cmyk: 'C:55 M:30 Y:17 K:51' },
     { name: 'PANTONE 7546 PC', hex: '#36352F', cmyk: 'C:70 M:43 Y:23 K:63' },
     { name: 'PANTONE 7547 PC', hex: '#201F1C', cmyk: 'C:99 M:73 Y:30 K:80' },
-]
+];
+export const grayAndBrownColors = grayAndBrownColorsUnsorted.sort(sortPantoneNumerically);
+
+    
