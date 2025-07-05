@@ -628,12 +628,9 @@ export default function UnifiedBuilderPage() {
             <ColorPickerClient 
               color={mainColor} 
               onChange={handleColorChange}
+              onEyeDropperClick={handleEyeDropper}
               className="w-full max-w-sm h-full"
             />
-            <Button onClick={handleEyeDropper} variant="outline" className="w-full max-w-sm">
-              <Pipette className="mr-2 h-4 w-4" />
-              Pick from screen
-            </Button>
         </div>
 
         <div className="w-full flex justify-center">

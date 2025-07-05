@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -12,9 +13,10 @@ interface CustomPickerProps extends ColorState {
     // onChange is provided by the CustomPicker HOC
     onChange: (color: any) => void;
     className?: string;
+    onEyeDropperClick?: () => void;
 }
 
-const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hsl, hsv, onChange, className }) => {
+const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hsl, hsv, onChange, className, onEyeDropperClick }) => {
     
     const handleHslChange = (color: any) => {
         onChange(color);
@@ -32,7 +34,7 @@ const CustomColorPickerComponent: React.FC<CustomPickerProps> = ({ hsl, hsv, onC
                 <Hue hsl={hsl} onChange={onChange} />
             </div>
             <div>
-                <ColorSliders hsl={hsl} onChange={handleHslChange} />
+                <ColorSliders hsl={hsl} onChange={handleHslChange} onEyeDropperClick={onEyeDropperClick} />
             </div>
         </div>
     );

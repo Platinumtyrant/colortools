@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
@@ -6,16 +7,17 @@ import { colord } from 'colord';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Pipette } from 'lucide-react';
 
 interface ColorSlidersProps {
     hsl: HSLColor;
     onChange: (color: any) => void;
     title?: string;
+    onEyeDropperClick?: () => void;
 }
 
-export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
-    // The `hsl` prop is from react-color, with s and l as decimals (0-1).
-    // Our sliders and colord work with percentages (0-100).
+export const ColorSliders = ({ hsl, onChange, title, onEyeDropperClick }: ColorSlidersProps) => {
     const color = useMemo(() => colord(hsl).toHex(), [hsl]);
     const [inputValue, setInputValue] = useState(color);
 
@@ -24,7 +26,6 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
     }, [color]);
 
     const handleHslChange = useCallback((key: 'h' | 's' | 'l', value: number) => {
-        // The value from S/L sliders is 0-100. Convert to 0-1 for react-color.
         const newHsl = {
             ...hsl,
             [key]: key === 'h' ? value : value / 100,
@@ -37,9 +38,7 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
         const value = e.target.value;
         setInputValue(value);
         if (colord(value).isValid()) {
-            // react-color's onChange can handle a hex string.
-            // This is the simplest way and avoids any HSL range confusion.
-            onChange(colord(value).toHex());
+            onChange(value);
         }
     }, [onChange]);
 
@@ -52,12 +51,20 @@ export const ColorSliders = ({ hsl, onChange, title }: ColorSlidersProps) => {
     return (
         <div className="space-y-3">
             {title && <Label>{title}</Label>}
-             <Input
-                value={inputValue.toUpperCase()}
-                onChange={handleInputChange}
-                onBlur={handleInputBlur}
-                className="w-full p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+            <div className="flex items-center gap-2">
+                <Input
+                    value={inputValue.toUpperCase()}
+                    onChange={handleInputChange}
+                    onBlur={handleInputBlur}
+                    className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                {onEyeDropperClick && (
+                    <Button onClick={onEyeDropperClick} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+                        <Pipette className="h-4 w-4" />
+                        <span className="sr-only">Pick from screen</span>
+                    </Button>
+                )}
+            </div>
             <div className="space-y-4 pt-2">
                 <div className="flex items-center gap-4">
                   <Label htmlFor="hue-slider" className="w-20 shrink-0 text-xs text-muted-foreground">
