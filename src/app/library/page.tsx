@@ -134,9 +134,9 @@ export default function LibraryPage() {
             <Card key={palette.id} className="overflow-hidden bg-card flex flex-col">
               <CardContent className="p-0 flex-grow">
                 <div className="flex h-24">
-                  {palette.colors.map((color) => (
+                  {palette.colors.map((color, index) => (
                     <div
-                      key={color}
+                      key={`${color}-${index}`}
                       className="flex-1"
                       style={{ backgroundColor: color }}
                     />
@@ -145,8 +145,8 @@ export default function LibraryPage() {
                 <div className="p-4">
                   <p className="text-md font-semibold truncate" title={palette.name}>{palette.name}</p>
                   <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-                    {palette.colors.map((color) => (
-                      <span key={color} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
+                    {palette.colors.map((color, index) => (
+                      <span key={`${color}-${index}`} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
                     ))}
                   </div>
                 </div>
