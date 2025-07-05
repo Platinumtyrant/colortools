@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -60,9 +61,8 @@ export function Header() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <Button asChild variant="ghost" className="text-muted-foreground hover:text-primary">
+                            <Button key={item.href} asChild variant="ghost" className="text-muted-foreground hover:text-primary">
                                 <Link
-                                    key={item.href}
                                     href={item.href!}
                                     className={cn(
                                         "transition-colors",
