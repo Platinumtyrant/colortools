@@ -59,8 +59,8 @@ export default function ColorWheelPage() {
 
     const activeHsl = useMemo(() => colord(activeColor).toHsl(), [activeColor]);
 
-    const handleSaturationChange = (newSaturation: number[]) => {
-        const newColor = colord({ ...activeHsl, s: newSaturation[0] }).toHex();
+    const handleLightnessChange = (newLightness: number[]) => {
+        const newColor = colord({ ...activeHsl, l: newLightness[0] }).toHex();
         setActiveColor(newColor);
     };
 
@@ -178,8 +178,8 @@ export default function ColorWheelPage() {
                     <div className="h-[280px]">
                         <Slider
                             orientation="vertical"
-                            value={[activeHsl.s]}
-                            onValueChange={handleSaturationChange}
+                            value={[activeHsl.l]}
+                            onValueChange={handleLightnessChange}
                             max={100}
                             step={1}
                         />
