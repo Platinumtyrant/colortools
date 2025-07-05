@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -47,7 +48,7 @@ function LayoutController({
             <ResizablePanel defaultSize={75}>
                 <SidebarInset>
                     <Header />
-                    <main className="flex-1 overflow-auto p-4 md:p-8">
+                    <main className="flex flex-1 flex-col overflow-auto p-4 md:p-8">
                         {children}
                     </main>
                 </SidebarInset>
