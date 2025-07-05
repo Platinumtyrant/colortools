@@ -532,14 +532,11 @@ export default function UnifiedBuilderPage() {
                   className="w-full max-w-sm h-full"
                 >
                     <Card className="w-full h-full flex flex-col">
-                        <CardHeader>
-                            <CardTitle>Text Color</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-grow">
+                        <CardContent className="flex-grow p-4">
                             <ColorPickerClient 
                               color={contrastTextColor} 
                               onChange={(c) => setContrastTextColor(c.hex)}
-                              className="w-full border-0 shadow-none p-0"
+                              className="w-full border-0 shadow-none p-0 h-full"
                             />
                         </CardContent>
                     </Card>
@@ -567,3 +564,5 @@ export default function UnifiedBuilderPage() {
     </main>
   );
 }
+
+    
