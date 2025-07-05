@@ -26,7 +26,7 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
       title: 'Palette Ready!',
       description: `"${palette.name}" sent to the Palette Builder.`,
     });
-    router.push('/');
+    router.push('/?from_inspiration=true');
   };
   
   const palettesByCategory = allPalettes.reduce((acc, palette) => {

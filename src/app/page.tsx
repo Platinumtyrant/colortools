@@ -199,6 +199,7 @@ export default function UnifiedBuilderPage() {
         }
       }
     } else if (paletteToLoadJSON) {
+      // This logic will now be triggered reliably by the query param from the inspiration page
       localStorage.removeItem('palette_to_load'); // Remove immediately
       try {
           const paletteToLoad = JSON.parse(paletteToLoadJSON);
@@ -212,12 +213,15 @@ export default function UnifiedBuilderPage() {
       } catch (e) {
           console.error("Failed to parse palette from storage", e);
       }
+      // Clean up the URL after loading
+      if(searchParams.has('from_inspiration')) {
+        router.replace('/', { scroll: false });
+      }
     } else if (isInitialLoad.current) {
       isInitialLoad.current = false;
       regeneratePalette();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, router, toast]);
+  }, [searchParams, router, toast, regeneratePalette]);
 
 
   const handleColorChange = useCallback((newColor: any) => {
