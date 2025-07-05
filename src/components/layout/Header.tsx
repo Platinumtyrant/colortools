@@ -3,11 +3,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brush, Menu, ChevronDown } from "lucide-react";
+import { Brush, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
     { href: '/', label: 'Palette Builder' },
@@ -80,7 +80,9 @@ export function Header() {
                 </div>
             </div>
 
-            <div></div>
+            <div className="flex items-center gap-2">
+                <ThemeToggle />
+            </div>
         </header>
     );
 }

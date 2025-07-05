@@ -4,6 +4,7 @@ import { Noto_Sans } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Palette Prodigy",
@@ -22,15 +23,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${notoSans.variable}`}>
+    <html lang="en" className={`${notoSans.variable}`} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body className="font-headline antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
           <MainLayout>
             {children}
           </MainLayout>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>
