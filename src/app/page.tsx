@@ -105,7 +105,7 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
 
 
 export default function UnifiedBuilderPage() {
-  const [mainColor, setMainColor] = useState('#FAFAFA');
+  const [mainColor, setMainColor] = useState('#FF9800');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
   const [generationCycle, setGenerationCycle] = useState<GenerationType[]>(['analogous', 'triadic', 'complementary', 'tints', 'shades']);
