@@ -1,13 +1,11 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import type { CategorizedPalette } from '@/lib/palette-parser';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-
-const PALETTES_PER_PAGE = 24; // 8 rows * 3 columns on large screens
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface InspirationClientPageProps {
   allPalettes: CategorizedPalette[];
@@ -16,7 +14,6 @@ interface InspirationClientPageProps {
 export function InspirationClientPage({ allPalettes }: InspirationClientPageProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [visibleCount, setVisibleCount] = useState(PALETTES_PER_PAGE);
 
   const handleLoadPalette = (palette: { name: string; colors: string[] }) => {
     const newPaletteData = {
@@ -31,24 +28,32 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
     });
     router.push('/');
   };
+  
+  const palettesByCategory = allPalettes.reduce((acc, palette) => {
+    const category = palette.category;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(palette);
+    return acc;
+  }, {} as Record<string, CategorizedPalette[]>);
 
-  const visiblePalettes = allPalettes.slice(0, visibleCount);
-  let lastCategory = '';
+  const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor'];
+  const orderedCategories = categoryOrder.filter(cat => palettesByCategory[cat]);
 
   return (
-    <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
-        {visiblePalettes.map((palette, index) => {
-            const showCategoryHeader = palette.category !== lastCategory;
-            lastCategory = palette.category;
-            return (
-              <React.Fragment key={`${palette.name}-${index}`}>
-                {showCategoryHeader && (
-                  <h2 className="text-2xl font-semibold tracking-tight mt-8 pb-2 border-b col-span-full">
-                    {palette.category}
-                  </h2>
-                )}
-                <div className="group" onClick={() => handleLoadPalette(palette)}>
+    <Tabs defaultValue={orderedCategories[0]} className="w-full">
+      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 md:grid-cols-9">
+        {orderedCategories.map(category => (
+          <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
+        ))}
+      </TabsList>
+      
+      {orderedCategories.map(category => (
+        <TabsContent key={category} value={category} className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
+            {palettesByCategory[category].map((palette, index) => (
+                <div className="group" key={`${palette.name}-${index}`} onClick={() => handleLoadPalette(palette)}>
                     <p className="text-sm font-medium mb-2 truncate" title={palette.name}>{palette.name}</p>
                     <div className="flex h-16 w-full cursor-pointer overflow-hidden rounded-md border-2 border-transparent transition-all group-hover:border-primary">
                     {palette.colors.map((color, colorIndex) => (
@@ -56,16 +61,10 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                     ))}
                     </div>
                 </div>
-              </React.Fragment>
-            );
-        })}
-        </div>
-
-      {visibleCount < allPalettes.length && (
-        <div className="text-center mt-12">
-          <Button onClick={() => setVisibleCount(prev => prev + PALETTES_PER_PAGE)}>Load More</Button>
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 }
