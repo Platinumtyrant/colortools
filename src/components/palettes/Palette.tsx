@@ -34,11 +34,14 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
           });
       });
   };
+  
+  const numCols = Math.max(1, Math.min(palette.length, 10));
+  const width = `${100 / numCols}%`;
 
   return (
     <Card className="bg-card/50 overflow-hidden h-full flex flex-col">
       <CardContent className="p-0 flex flex-col flex-grow min-w-0">
-        <div className="flex flex-grow min-w-0">
+        <div className="flex flex-wrap flex-grow min-w-0">
           <AnimatePresence>
             {palette.map((color, index) => {
               const textColor = chroma(color.hex).luminance() > 0.4 ? 'black' : 'white';
@@ -51,7 +54,8 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="relative flex-1 min-w-0 flex"
+                  className="relative min-w-0 flex"
+                  style={{ width }}
                   onClick={() => onColorClick?.(color)}
                 >
                   <div 
