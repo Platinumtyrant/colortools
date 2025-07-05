@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SavedPalettes } from '@/components/palettes/SavedPalettes';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -115,7 +116,8 @@ export default function UnifiedBuilderPage() {
   
   const [isContrastMode, setIsContrastMode] = useState(false);
   const [contrastTextColor, setContrastTextColor] = useState('#000000');
-  
+  const [libraryUpdateKey, setLibraryUpdateKey] = useState(0);
+
   const { toast } = useToast();
   const { setExtension } = useSidebarExtension();
 
@@ -202,7 +204,17 @@ export default function UnifiedBuilderPage() {
     savedPalettes.push(palette.map(p => p.hex));
     localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
     toast({ title: "Palette Saved!", description: "View it in your library." });
+    setLibraryUpdateKey(k => k + 1);
   }, [palette, toast]);
+  
+  const handleLoadPaletteFromLibrary = useCallback((colors: string[]) => {
+    if (colors.length < 2) {
+        toast({ title: "Invalid palette to load.", variant: "destructive" });
+        return;
+    }
+    setPalette(colors.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
+    setMainColor(colors[0]);
+  }, [toast]);
 
   const handleColorUpdateInPalette = useCallback((id: number, newHex: string) => {
     setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
@@ -529,7 +541,7 @@ export default function UnifiedBuilderPage() {
 
         <div className="w-full flex justify-center lg:justify-end">
             <AnimatePresence mode="wait">
-              {isContrastMode && (
+              {isContrastMode ? (
                 <motion.div
                   key="text-picker"
                   initial={{ opacity: 0, y: 10 }}
@@ -539,9 +551,6 @@ export default function UnifiedBuilderPage() {
                   className="w-full max-w-sm h-full"
                 >
                     <Card className="w-full h-full flex flex-col">
-                        <CardHeader>
-                            <CardTitle>Text Color</CardTitle>
-                        </CardHeader>
                         <CardContent className="flex-grow p-4">
                             <ColorPickerClient 
                               color={contrastTextColor} 
@@ -550,6 +559,17 @@ export default function UnifiedBuilderPage() {
                             />
                         </CardContent>
                     </Card>
+                </motion.div>
+              ) : (
+                <motion.div
+                    key="library-card"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full max-w-sm h-full"
+                >
+                    <SavedPalettes key={libraryUpdateKey} onLoadPalette={handleLoadPaletteFromLibrary} />
                 </motion.div>
               )}
             </AnimatePresence>
