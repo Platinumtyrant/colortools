@@ -7,10 +7,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Trash2, Download, Library as LibraryIcon, Pencil } from 'lucide-react';
-import { colord } from 'colord';
+import { colord, extend } from 'colord';
+import namesPlugin from 'colord/plugins/names';
+import cmykPlugin from 'colord/plugins/cmyk';
+import lchPlugin from 'colord/plugins/lch';
+import labPlugin from 'colord/plugins/lab';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
+
+extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
 type SavedPalette = {
   id: number;
@@ -89,7 +95,7 @@ export default function LibraryPage() {
 
   const createSvgContent = (palette: { name: string; colors: string[] }) => {
     const swatchWidth = 150;
-    const swatchHeight = 250;
+    const swatchHeight = 320;
     const padding = 20;
     const spacing = 20;
 
@@ -105,19 +111,34 @@ export default function LibraryPage() {
       
       const rgb = colorInstance.toRgb();
       const hsl = colorInstance.toHsl();
+      const cmyk = colorInstance.toCmyk();
+      const lch = colorInstance.toLch();
+      const lab = colorInstance.toLab();
 
       svgContent += `<rect x="${xPos}" y="${padding}" width="${swatchWidth}" height="${swatchHeight}" fill="${color}" />`;
       
       const textX = xPos + 15;
       let textY = padding + swatchHeight - 15;
 
-      svgContent += `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="14">HSL: ${hsl.h}, ${hsl.s}%, ${hsl.l}%</text>`;
-      textY -= 20;
-      
-      svgContent += `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="14">RGB: ${rgb.r}, ${rgb.g}, ${rgb.b}</text>`;
-      textY -= 20;
+      const renderText = (label: string, value: string) => {
+        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12">${label}: ${value}</text>`;
+        textY -= 18;
+        return content;
+      };
 
-      svgContent += `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="14" font-weight="bold">HEX: ${color.toUpperCase()}</text>`;
+      const renderBoldText = (label: string, value: string) => {
+        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" font-weight="bold">${label}: ${value}</text>`;
+        textY -= 18;
+        return content;
+      };
+      
+      svgContent += renderText('CIELAB', `lab(${lab.l.toFixed(0)}, ${lab.a.toFixed(0)}, ${lab.b.toFixed(0)})`);
+      svgContent += renderText('LCH', `lch(${lch.l.toFixed(0)}, ${lch.c.toFixed(0)}, ${lch.h.toFixed(0)})`);
+      svgContent += renderText('CMYK', `cmyk(${cmyk.c}, ${cmyk.m}, ${cmyk.y}, ${cmyk.k})`);
+      svgContent += renderText('HSL', `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`);
+      svgContent += renderText('RGB', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+      svgContent += renderBoldText('HEX', color.toUpperCase());
+
     });
 
     svgContent += `</svg>`;

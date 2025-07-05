@@ -6,8 +6,14 @@ import type { CategorizedPalette } from '@/lib/palette-parser';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { colord } from 'colord';
+import { colord, extend } from 'colord';
+import namesPlugin from 'colord/plugins/names';
+import cmykPlugin from 'colord/plugins/cmyk';
+import lchPlugin from 'colord/plugins/lch';
+import labPlugin from 'colord/plugins/lab';
 import { getDescriptiveColorName } from '@/lib/colors';
+
+extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
 interface InspirationClientPageProps {
   allPalettes: CategorizedPalette[];
@@ -114,10 +120,15 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                     >
                         {palette.colors.map((color, colorIndex) => {
                           const popoverKey = `${category}-${paletteIndex}-${colorIndex}`;
-                          const hex = colord(color).toHex();
-                          const rgb = colord(color).toRgb();
-                          const hsl = colord(color).toHsl();
+                          const colorInstance = colord(color);
+                          const hex = colorInstance.toHex();
                           const name = getDescriptiveColorName(hex);
+                          const rgb = colorInstance.toRgb();
+                          const hsl = colorInstance.toHsl();
+                          const cmyk = colorInstance.toCmyk();
+                          const lch = colorInstance.toLch();
+                          const lab = colorInstance.toLab();
+
                           return (
                             <Popover key={popoverKey} open={openPopoverKey === popoverKey} onOpenChange={(isOpen) => setOpenPopoverKey(isOpen ? popoverKey : null)}>
                                 <PopoverTrigger asChild>
@@ -147,15 +158,27 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                                         <div className="space-y-1 text-sm">
                                             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, hex, 'HEX')}>
                                                 <span className="text-muted-foreground">HEX</span>
-                                                <span className="font-mono font-semibold text-right break-all">{hex}</span>
+                                                <span className="font-mono font-semibold text-right break-all">{hex.toUpperCase()}</span>
                                             </div>
                                             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'RGB')}>
                                                 <span className="text-muted-foreground">RGB</span>
-                                                <span className="font-mono font-semibold text-right break-all">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
+                                                <span className="font-mono font-semibold text-right break-all">{`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`}</span>
                                             </div>
                                             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`, 'HSL')}>
                                                 <span className="text-muted-foreground">HSL</span>
-                                                <span className="font-mono font-semibold text-right break-all">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
+                                                <span className="font-mono font-semibold text-right break-all">{`hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `cmyk(${cmyk.c}, ${cmyk.m}, ${cmyk.y}, ${cmyk.k})`, 'CMYK')}>
+                                                <span className="text-muted-foreground">CMYK</span>
+                                                <span className="font-mono font-semibold text-right break-all">{`cmyk(${cmyk.c}, ${cmyk.m}, ${cmyk.y}, ${cmyk.k})`}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `lch(${lch.l}, ${lch.c}, ${lch.h})`, 'LCH')}>
+                                                <span className="text-muted-foreground">LCH</span>
+                                                <span className="font-mono font-semibold text-right break-all">{`lch(${lch.l.toFixed(0)}, ${lch.c.toFixed(0)}, ${lch.h.toFixed(0)})`}</span>
+                                            </div>
+                                             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `lab(${lab.l}, ${lab.a}, ${lab.b})`, 'CIELAB')}>
+                                                <span className="text-muted-foreground">CIELAB</span>
+                                                <span className="font-mono font-semibold text-right break-all">{`lab(${lab.l.toFixed(0)}, ${lab.a.toFixed(0)}, ${lab.b.toFixed(0)})`}</span>
                                             </div>
                                         </div>
                                     </div>
