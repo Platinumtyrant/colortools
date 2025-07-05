@@ -533,7 +533,7 @@ function PaletteBuilderContent() {
                   </Button>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-8 pt-4">
+            <div className="grid grid-cols-1 gap-4 pt-4">
                 <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" description="How light or dark the color is, from black (0) to white (100)." />
                 <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" description="The intensity of the color, from gray (0) to a pure, vivid color." />
                 <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" description="The color's position on the color wheel, measured in degrees (0-360)." />
