@@ -513,9 +513,11 @@ export default function UnifiedBuilderPage() {
                     </AnimatePresence>
                 </CardContent>
                 <CardFooter>
-                  <Button onClick={handleAddColorToPalette} className="w-full" disabled={isContrastMode}>
-                      Add to Current Palette
-                  </Button>
+                  {!isContrastMode && (
+                    <Button onClick={handleAddColorToPalette} className="w-full">
+                        Add to Current Palette
+                    </Button>
+                  )}
                 </CardFooter>
             </Card>
         </div>
@@ -532,6 +534,9 @@ export default function UnifiedBuilderPage() {
                   className="w-full max-w-sm h-full"
                 >
                     <Card className="w-full h-full flex flex-col">
+                        <CardHeader className="p-4">
+                            {/* This header is intentionally blank */}
+                        </CardHeader>
                         <CardContent className="flex-grow p-4">
                             <ColorPickerClient 
                               color={contrastTextColor} 
@@ -564,5 +569,3 @@ export default function UnifiedBuilderPage() {
     </main>
   );
 }
-
-    
