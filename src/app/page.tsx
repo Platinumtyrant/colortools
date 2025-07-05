@@ -178,11 +178,11 @@ export default function UnifiedBuilderPage() {
     });
   }, [generationType, generationCycle, mainColor]);
 
+  // Handle loading palettes from Library or Inspiration pages
   useEffect(() => {
-    if (!isInitialLoad.current) return;
-    isInitialLoad.current = false;
-
     const editIdStr = searchParams.get('edit');
+    const paletteToLoadJSON = localStorage.getItem('palette_to_load');
+
     if (editIdStr) {
       const id = parseInt(editIdStr, 10);
       const savedPalettesJSON = localStorage.getItem('saved_palettes');
@@ -196,14 +196,28 @@ export default function UnifiedBuilderPage() {
           setNewPaletteName(paletteToEdit.name);
           toast({ title: "Editing Palette", description: `Loaded "${paletteToEdit.name}" for editing.` });
           router.replace('/', { scroll: false });
-          return;
         }
       }
+    } else if (paletteToLoadJSON) {
+      localStorage.removeItem('palette_to_load'); // Remove immediately
+      try {
+          const paletteToLoad = JSON.parse(paletteToLoadJSON);
+          if (paletteToLoad && paletteToLoad.colors) {
+            setEditingPaletteId(null);
+            setPalette(paletteToLoad.colors.map((hex: string, i: number) => ({ id: Date.now() + i, hex, locked: false })));
+            setMainColor(paletteToLoad.colors[0] || '#FF9800');
+            setNewPaletteName(paletteToLoad.name || 'New Palette');
+            toast({ title: "Palette Loaded", description: `Loaded "${paletteToLoad.name}" from Inspiration.` });
+          }
+      } catch (e) {
+          console.error("Failed to parse palette from storage", e);
+      }
+    } else if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      regeneratePalette();
     }
-    
-    regeneratePalette();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, router]);
+  }, [searchParams, router, toast]);
 
 
   const handleColorChange = useCallback((newColor: any) => {

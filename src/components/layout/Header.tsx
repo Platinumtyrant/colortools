@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brush, Menu } from "lucide-react";
+import { Brush, Menu, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 const navItems = [
     { href: '/mesh-gradient', label: 'Gradient Builder' },
     { href: '/', label: 'Palette Builder' },
+    { href: '/inspiration', label: 'Inspiration' },
     { href: '/library', label: 'Library' },
 ];
 

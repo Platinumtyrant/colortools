@@ -8,9 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Trash2, Download, Library as LibraryIcon, Pencil } from 'lucide-react';
 import { colord } from 'colord';
-import type { PrebuiltPalette } from '@/lib/prebuilt-palettes';
-import { useSidebarExtension } from '@/contexts/SidebarExtensionContext';
-import { PrebuiltPalettesSidebar } from '@/components/palettes/PrebuiltPalettesSidebar';
 
 type SavedPalette = {
   id: number;
@@ -33,7 +30,6 @@ const migratePalettes = (palettes: any): SavedPalette[] => {
 export default function LibraryPage() {
   const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>([]);
   const { toast } = useToast();
-  const { setExtension } = useSidebarExtension();
 
   useEffect(() => {
     try {
@@ -62,32 +58,6 @@ export default function LibraryPage() {
     localStorage.setItem('saved_palettes', JSON.stringify(newPalettes));
     toast({ title: "Palette Deleted" });
   }, [savedPalettes, toast]);
-
-  const handleAddPrebuiltPalette = useCallback((palette: PrebuiltPalette) => {
-    setSavedPalettes(prev => {
-      const newPalette: SavedPalette = {
-        id: Date.now(),
-        name: palette.name,
-        colors: palette.colors,
-      };
-      if (prev.some(p => p.name === newPalette.name)) {
-        toast({ title: "Palette already in library.", variant: "destructive" });
-        return prev;
-      }
-      const newPalettes = [...prev, newPalette];
-      localStorage.setItem('saved_palettes', JSON.stringify(newPalettes));
-      return newPalettes;
-    });
-    toast({ title: "Palette Added!", description: `"${palette.name}" has been added to your library.`});
-  }, [toast]);
-
-  useEffect(() => {
-      setExtension(<PrebuiltPalettesSidebar onAddPalette={handleAddPrebuiltPalette} />);
-      return () => {
-          setExtension(null);
-      };
-  }, [setExtension, handleAddPrebuiltPalette]);
-
 
   const exportPaletteAsSvg = useCallback((palette: {name: string, colors: string[]}) => {
     if (!palette || !palette.colors) return;
@@ -146,7 +116,7 @@ export default function LibraryPage() {
         Library is empty
       </h3>
       <p className="mb-4 mt-2 text-sm text-muted-foreground">
-        Go to the Palette Builder to create and save your first one, or add one from the pre-built collections in the sidebar.
+        Go to the Palette Builder to create and save your first one, or add one from the Inspiration page.
       </p>
     </div>
   );
@@ -155,7 +125,7 @@ export default function LibraryPage() {
     <main className="flex-1 w-full p-4 md:p-8">
        <CardHeader className="p-0 mb-8">
         <CardTitle className="text-3xl">My Library</CardTitle>
-        <CardDescription>Browse and manage your saved palettes. Find pre-built collections in the sidebar.</CardDescription>
+        <CardDescription>Browse and manage your saved palettes. Find pre-built collections on the Inspiration page.</CardDescription>
       </CardHeader>
       
       {savedPalettes.length > 0 ? (
