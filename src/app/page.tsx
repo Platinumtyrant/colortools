@@ -243,20 +243,18 @@ export default function UnifiedBuilderPage() {
   }, []);
 
   const handleAddColorToPalette = useCallback(() => {
-    setPalette(prevColors => {
-      if (prevColors.length >= 20) {
-        toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
-        return prevColors;
-      }
-      if (prevColors.some(p => p.hex === mainColor)) {
-        toast({ title: 'Color already in palette.' });
-        return prevColors;
-      }
-      const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
-      toast({ title: 'Color added to palette!' });
-      return [...prevColors, newColor];
-    });
-  }, [mainColor, toast]);
+    if (palette.length >= 20) {
+      toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
+      return;
+    }
+    if (palette.some(p => p.hex === mainColor)) {
+      toast({ title: 'Color already in palette.' });
+      return;
+    }
+    const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
+    setPalette(prevColors => [...prevColors, newColor]);
+    toast({ title: 'Color added to palette!' });
+  }, [mainColor, palette, toast]);
   
   const handleOpenSaveDialog = useCallback(() => {
     if (palette.length === 0) {
@@ -336,14 +334,14 @@ export default function UnifiedBuilderPage() {
         return;
     }
     setPalette(palette.filter(c => c.id !== id));
-  }, [palette.length, toast]);
+  }, [palette, toast]);
 
   const handleAddColorAtIndex = useCallback((index: number) => {
+    if (palette.length >= 20) {
+        toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
+        return;
+    }
     setPalette(prev => {
-        if (prev.length >= 20) {
-            toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
-            return prev;
-        }
         const newPalette = [...prev];
         const colorBefore = prev[index - 1]?.hex || null;
         const colorAfter = prev[index]?.hex || null;
@@ -370,7 +368,7 @@ export default function UnifiedBuilderPage() {
         
         return adjustForColorblindSafety(newPalette);
     });
-  }, []);
+  }, [palette, toast]);
 
   const handleReset = useCallback(() => {
     setEditingPaletteId(null);
