@@ -38,12 +38,12 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
     return acc;
   }, {} as Record<string, CategorizedPalette[]>);
 
-  const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor'];
+  const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor', 'Brands', 'Flags'];
   const orderedCategories = categoryOrder.filter(cat => palettesByCategory[cat]);
 
   return (
     <Tabs defaultValue={orderedCategories[0]} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 md:grid-cols-9">
+      <TabsList className="grid w-full grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11">
         {orderedCategories.map(category => (
           <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
         ))}

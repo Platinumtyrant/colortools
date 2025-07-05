@@ -12,8 +12,37 @@ export interface CategorizedPalette extends PrebuiltPalette {
   category: string;
 }
 
+const brandKeywords = [
+    'gucci', 'discord', 'windows', 'materialize', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
+    'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'ios', 'bmw', 'amazon', 'fedex', 
+    'google', 'telegram', 'steam', 'valorant', 'minecraft', 'rolex', 'samsung', 'logitech', 'figma', 
+    'linktree', 'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
+    'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
+    'snapchat', 'youtube', 'illustrator', 'us dollar'
+];
+
+const flagKeywords = [
+    'flag', 'india', 'ukraine', 'germany', 'japan', 'russia', 'france', 'uk ', 'united kingdom', 
+    'brazil', 'mexico', 'bangladesh'
+];
+
+
 // Function to determine the primary color category of a palette
-const categorizePalette = (colors: string[]): string => {
+const categorizePalette = (colors: string[], name: string): string => {
+  const lowerCaseName = name.toLowerCase();
+
+  for (const keyword of flagKeywords) {
+    if (lowerCaseName.includes(keyword)) {
+      return 'Flags';
+    }
+  }
+  
+  for (const keyword of brandKeywords) {
+    if (lowerCaseName.includes(keyword)) {
+      return 'Brands';
+    }
+  }
+
   if (colors.length === 0) return 'Monochrome';
 
   const hues: number[] = [];
@@ -94,18 +123,18 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
            allPalettes.push({
              name: paletteName,
              colors,
-             category: categorizePalette(colors),
+             category: categorizePalette(colors, paletteName),
            });
       }
     }
 
     // Sort the entire list by color category
-    const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor'];
+    const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor', 'Brands', 'Flags'];
     allPalettes.sort((a, b) => {
         const indexA = categoryOrder.indexOf(a.category);
         const indexB = categoryOrder.indexOf(b.category);
         if (indexA === indexB) return 0;
-        return indexA - indexB;
+        return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB);
     });
 
     return allPalettes;
