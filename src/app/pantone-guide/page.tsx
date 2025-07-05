@@ -25,40 +25,49 @@ export default function PantoneGuidePage() {
   const secondRowCategories = pantoneCategories.slice(halfwayIndex);
 
   return (
-    <div className="flex-1 w-full p-4 md:p-8">
-      <CardHeader className="p-0 mb-8">
-        <CardTitle className="text-3xl">Pantone Color Guide</CardTitle>
-        <CardDescription>A reference guide for Pantone colors, parsed from the official guide.</CardDescription>
-      </CardHeader>
-      <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
-        <TabsList className="h-auto flex-col items-start gap-1">
-          <div className="flex flex-wrap">
-            {firstRowCategories.map((category) => (
-              <TabsTrigger key={category.name} value={category.name}>
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </div>
-          <div className="flex flex-wrap">
-            {secondRowCategories.map((category) => (
-              <TabsTrigger key={category.name} value={category.name}>
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </div>
-        </TabsList>
-        
-        {/* Ensure content is generated for ALL categories */}
-        {pantoneCategories.map(category => (
-            <TabsContent key={category.name} value={category.name} className="mt-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-4">
-                    {category.colors.map((color, index) => (
-                        <ColorSwatch key={`${color.name}-${index}`} color={color} />
-                    ))}
-                </div>
-            </TabsContent>
-        ))}
-      </Tabs>
+    <div className="flex-1 w-full p-4 md:p-8 flex flex-col">
+      <div className="flex-grow">
+        <CardHeader className="p-0 mb-8">
+          <CardTitle className="text-3xl">Pantone Color Guide</CardTitle>
+          <CardDescription>A reference guide for Pantone colors, parsed from the official guide.</CardDescription>
+        </CardHeader>
+        <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
+          <TabsList className="h-auto flex-col items-start gap-1">
+            <div className="flex flex-wrap">
+              {firstRowCategories.map((category) => (
+                <TabsTrigger key={category.name} value={category.name}>
+                  {category.name}
+                </TabsTrigger>
+              ))}
+            </div>
+            <div className="flex flex-wrap">
+              {secondRowCategories.map((category) => (
+                <TabsTrigger key={category.name} value={category.name}>
+                  {category.name}
+                </TabsTrigger>
+              ))}
+            </div>
+          </TabsList>
+          
+          {/* Ensure content is generated for ALL categories */}
+          {pantoneCategories.map(category => (
+              <TabsContent key={category.name} value={category.name} className="mt-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-4">
+                      {category.colors.map((color, index) => (
+                          <ColorSwatch key={`${color.name}-${index}`} color={color} />
+                      ))}
+                  </div>
+              </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+
+      <footer className="mt-8 pt-4 border-t text-center text-xs text-muted-foreground space-y-2">
+        <p>PANTONE® Colors displayed here may not match PANTONE-identified standards. Consult current PANTONE Color Publications for accurate color.</p>
+        <p>PANTONE® and other Pantone, Inc. trademarks are the property of Pantone, Inc. © Pantone, Inc., 2005. All rights reserved.</p>
+        <p>Hardcopies of PANTONE Color Charts and reproductions thereof MAY NOT BE SOLD in any form.</p>
+        <p>Pantone, Inc. is not responsible for any modifications made to such Charts which have not been approved by Pantone, Inc. PC = four-color Process (process) simulations of solid colors Coated (stock).</p>
+      </footer>
     </div>
   );
 }
