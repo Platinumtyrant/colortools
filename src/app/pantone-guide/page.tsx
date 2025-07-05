@@ -20,6 +20,8 @@ export default function PantoneGuidePage() {
   }
 
   const halfwayIndex = Math.ceil(pantoneCategories.length / 2);
+  const firstRowCategories = pantoneCategories.slice(0, halfwayIndex);
+  const secondRowCategories = pantoneCategories.slice(halfwayIndex);
 
   return (
     <div className="flex-1 w-full p-4 md:p-8">
@@ -28,18 +30,30 @@ export default function PantoneGuidePage() {
         <CardDescription>A reference guide for Pantone colors, parsed from the official guide.</CardDescription>
       </CardHeader>
       <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
-        <TabsList className="grid grid-cols-2 h-auto gap-1">
-            {pantoneCategories.map((category, index) => (
-            <TabsTrigger 
-                key={category.name} 
-                value={category.name}
-                disabled={index >= halfwayIndex}
-            >
-                {category.name}
-            </TabsTrigger>
-            ))}
-        </TabsList>
-        {pantoneCategories.map(category => (
+        <div className="flex flex-col gap-1 mb-2">
+            <TabsList className="h-auto justify-start flex-wrap">
+                {firstRowCategories.map((category) => (
+                    <TabsTrigger 
+                        key={category.name} 
+                        value={category.name}
+                    >
+                        {category.name}
+                    </TabsTrigger>
+                ))}
+            </TabsList>
+            <div className="h-auto flex flex-wrap items-center gap-1 p-1">
+                 {secondRowCategories.map((category) => (
+                    <div
+                        key={category.name}
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium text-muted-foreground/60 select-none"
+                    >
+                        {category.name}
+                    </div>
+                ))}
+            </div>
+        </div>
+        
+        {firstRowCategories.map(category => (
             <TabsContent key={category.name} value={category.name} className="mt-6">
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-4">
                     {category.colors.map(color => (
