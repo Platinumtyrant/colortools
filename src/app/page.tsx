@@ -425,7 +425,12 @@ export default function UnifiedBuilderPage() {
         </div>
       </div>
       
-      <Button onClick={handleSaveToLibrary}>Save to Library</Button>
+      <div className="flex items-center gap-4">
+        <div className="text-sm text-muted-foreground">
+            Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>
+        </div>
+        <Button onClick={handleSaveToLibrary}>Save to Library</Button>
+      </div>
     </div>
   );
 
@@ -562,9 +567,6 @@ export default function UnifiedBuilderPage() {
           onColorClick={(c) => setMainColor(c.hex)}
           actions={paletteActions}
         />
-        <div className="text-center text-sm text-muted-foreground mt-4">
-            Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>
-        </div>
       </section>
     </main>
   );
