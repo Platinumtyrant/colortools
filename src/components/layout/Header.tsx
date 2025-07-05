@@ -10,8 +10,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { cn } from "@/lib/utils";
 
 const navItems = [
-    { href: '/mesh-gradient', label: 'Gradient Builder' },
     { href: '/', label: 'Palette Builder' },
+    { href: '/mesh-gradient', label: 'Gradient Builder' },
     { href: '/inspiration', label: 'Inspiration' },
     { href: '/library', label: 'Library' },
     { href: '/pantone-guide', label: 'Pantone Guide' },
