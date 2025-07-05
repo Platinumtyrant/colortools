@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Trash2, Download, Library as LibraryIcon, Pencil } from 'lucide-react';
 import { colord } from 'colord';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type SavedPalette = {
   id: number;
@@ -59,9 +61,7 @@ export default function LibraryPage() {
     toast({ title: "Palette Deleted" });
   }, [savedPalettes, toast]);
 
-  const exportPaletteAsSvg = useCallback((palette: {name: string, colors: string[]}) => {
-    if (!palette || !palette.colors) return;
-    
+  const createSvgContent = (palette: { name: string; colors: string[] }) => {
     const swatchWidth = 150;
     const swatchHeight = 250;
     const padding = 20;
@@ -95,7 +95,13 @@ export default function LibraryPage() {
     });
 
     svgContent += `</svg>`;
+    return { svgContent, svgWidth, svgHeight };
+  }
 
+  const exportPaletteAsSvg = useCallback((palette: {name: string, colors: string[]}) => {
+    if (!palette || !palette.colors) return;
+    
+    const { svgContent } = createSvgContent(palette);
     const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -108,6 +114,69 @@ export default function LibraryPage() {
 
     toast({ title: "Palette Exported as SVG!" });
   }, [toast]);
+
+  const exportPaletteAsPng = useCallback((palette: { name: string, colors: string[] }) => {
+    if (!palette || !palette.colors) return;
+    
+    const { svgContent, svgWidth, svgHeight } = createSvgContent(palette);
+    const svgBlob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = svgWidth;
+      canvas.height = svgHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        const pngUrl = canvas.toDataURL('image/png');
+        
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `${palette.name.replace(/ /g, '_')}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(svgUrl);
+        toast({ title: "Palette Exported as PNG!" });
+      }
+    };
+    img.onerror = (err) => {
+        console.error("Failed to load SVG for PNG conversion", err);
+        toast({ title: "Failed to export as PNG", variant: 'destructive' });
+        URL.revokeObjectURL(svgUrl);
+    }
+    img.src = svgUrl;
+  }, [toast]);
+
+  const exportPaletteAsJson = useCallback((palette: { name: string, colors: string[] }) => {
+    if (!palette || !palette.colors) return;
+
+    const tokens = {
+      [palette.name.toLowerCase().replace(/ /g, '-')]: {
+        colors: palette.colors.reduce((acc, color, index) => {
+          acc[`color-${index + 1}`] = { value: color.toUpperCase() };
+          return acc;
+        }, {} as Record<string, { value: string }>)
+      }
+    };
+
+    const jsonString = JSON.stringify(tokens, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${palette.name.replace(/ /g, '_')}_tokens.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({ title: "Palette Exported as JSON Tokens!" });
+  }, [toast]);
+
 
   const NoPalettesState = () => (
     <div className="flex h-full min-h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center">
@@ -139,8 +208,8 @@ export default function LibraryPage() {
                       key={`${color}-${index}`}
                       style={{
                         backgroundColor: color,
-                        width: '10%',
-                        height: palette.colors.length > 10 ? '50%' : '100%',
+                        flexGrow: 1,
+                        minWidth: '10px'
                       }}
                     />
                   ))}
@@ -154,21 +223,47 @@ export default function LibraryPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="justify-end gap-2 p-4 pt-0">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/?edit=${palette.id}`}>
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDeletePalette(palette.id)}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </Button>
-                  <Button size="sm" onClick={() => exportPaletteAsSvg(palette)}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
-                  </Button>
+              <CardFooter className="justify-end gap-1 p-4 pt-0">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/?edit=${palette.id}`}>
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit Palette</span>
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit Palette</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeletePalette(palette.id)}>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete Palette</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete Palette</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button>
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => exportPaletteAsSvg(palette)}>SVG</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => exportPaletteAsPng(palette)}>PNG</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => exportPaletteAsJson(palette)}>Tokens (JSON)</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
               </CardFooter>
             </Card>
           ))}
