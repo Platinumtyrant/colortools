@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { pantoneCategories, type PantoneColor } from '@/lib/pantone-colors';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ColorSwatch = ({ color }: { color: PantoneColor }) => (
   <Card className="overflow-hidden shadow-md">
@@ -19,6 +18,9 @@ export default function PantoneGuidePage() {
   if (!pantoneCategories || pantoneCategories.length === 0) {
     return <div>No Pantone colors found.</div>;
   }
+
+  const halfwayIndex = Math.ceil(pantoneCategories.length / 2);
+
   return (
     <div className="flex-1 w-full p-4 md:p-8">
       <CardHeader className="p-0 mb-8">
@@ -26,16 +28,20 @@ export default function PantoneGuidePage() {
         <CardDescription>A reference guide for Pantone colors, parsed from the official guide.</CardDescription>
       </CardHeader>
       <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
-        <ScrollArea className="w-full whitespace-nowrap pb-2">
-            <TabsList>
-                {pantoneCategories.map(category => (
-                <TabsTrigger key={category.name} value={category.name}>{category.name}</TabsTrigger>
-                ))}
-            </TabsList>
-        </ScrollArea>
+        <TabsList className="grid grid-cols-2 h-auto gap-1">
+            {pantoneCategories.map((category, index) => (
+            <TabsTrigger 
+                key={category.name} 
+                value={category.name}
+                disabled={index >= halfwayIndex}
+            >
+                {category.name}
+            </TabsTrigger>
+            ))}
+        </TabsList>
         {pantoneCategories.map(category => (
             <TabsContent key={category.name} value={category.name} className="mt-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-12 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-4">
                     {category.colors.map(color => (
                         <ColorSwatch key={color.name} color={color} />
                     ))}
