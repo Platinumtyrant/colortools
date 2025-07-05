@@ -105,7 +105,7 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
 
 
 export default function UnifiedBuilderPage() {
-  const [mainColor, setMainColor] = useState('#FF9800');
+  const [mainColor, setMainColor] = useState('#FAFAFA');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
   const [generationCycle, setGenerationCycle] = useState<GenerationType[]>(['analogous', 'triadic', 'complementary', 'tints', 'shades']);
@@ -534,6 +534,9 @@ export default function UnifiedBuilderPage() {
                   className="w-full max-w-sm h-full"
                 >
                     <Card className="w-full h-full flex flex-col">
+                        <CardHeader>
+                            <CardTitle>Text Color</CardTitle>
+                        </CardHeader>
                         <CardContent className="flex-grow p-4">
                             <ColorPickerClient 
                               color={contrastTextColor} 
