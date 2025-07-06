@@ -95,15 +95,26 @@ export function generatePalette(options: GenerationOptions): string[] {
             const s = baseHsl[1];
             const l = baseHsl[2];
 
-            // Introduce slight variations in saturation and lightness for the scale's endpoints
-            // to create a more dynamic and visually distinct palette, especially for larger sets.
-            const firstAnalogous = chroma.hsl((h - 30 + 360) % 360, s * 0.9, l * 0.95).hex();
-            const secondAnalogous = chroma.hsl((h + 30) % 360, s * 0.9, l * 0.95).hex();
-            
-            // The scale will be generated through the two new analogous points and any locked colors.
-            const scalePoints = [firstAnalogous, ...colorsToScale, secondAnalogous].sort(sortbyHue);
-            
-            initialPalette = chroma.scale(scalePoints).mode('oklch').colors(numColors);
+            const analogousPalette: string[] = [];
+            const angleStep = 60 / (numColors > 1 ? numColors - 1 : 1); // Total 60 degree arc
+
+            for (let i = 0; i < numColors; i++) {
+                const hueOffset = (i * angleStep) - 30; // Center the arc around the base hue
+                const newHue = (h + hueOffset + 360) % 360;
+                
+                // Add subtle variations to saturation and lightness to avoid a flat look
+                // This creates a gentle "arc" in lightness and saturation as well
+                const position = i / (numColors - 1 || 1); // 0 to 1
+                const lightnessFactor = 1.0 - 0.15 * Math.sin(position * Math.PI); // Peak lightness in middle
+                const saturationFactor = 0.85 + 0.15 * Math.sin(position * Math.PI); // Peak saturation at ends
+
+                const newLightness = Math.max(0.05, Math.min(0.95, l * lightnessFactor));
+                const newSaturation = Math.max(0.1, Math.min(1.0, s * saturationFactor));
+
+                analogousPalette.push(chroma.hsl(newHue, newSaturation, newLightness).hex());
+            }
+
+            initialPalette = analogousPalette;
             break;
         }
         case 'triadic': {
