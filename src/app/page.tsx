@@ -38,6 +38,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
+import { ContrastGrid } from '@/components/colors/ContrastGrid';
 
 // Type definition for the experimental EyeDropper API
 interface EyeDropperResult {
@@ -488,6 +489,7 @@ function PaletteBuilderPage() {
                 <Label>Detected Harmony</Label>
                 <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
             </div>
+            <ContrastGrid colors={paletteHexes} />
             <Separator />
             <div className="flex flex-col gap-4">
                  <div className="space-y-1.5">
@@ -554,23 +556,21 @@ function PaletteBuilderPage() {
                         )}
                     </AnimatePresence>
                 </div>
-                <div className="h-16 w-full overflow-hidden rounded-md border">
-                    <div className="relative h-full w-full">
-                        <div className="group/palette flex h-full w-full">
-                            {simulatedPalette.map((color, index) => (
-                                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                            ))}
-                            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover/palette:opacity-100">
-                                <Button
-                                    onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
-                                    variant="secondary"
-                                    className="pointer-events-auto"
-                                >
-                                    <Sparkles className="mr-2 h-4 w-4" />
-                                    Use This Palette
-                                </Button>
-                            </div>
-                        </div>
+                <div className="relative h-16 w-full overflow-hidden rounded-md border">
+                    <div className="group/palette flex h-full w-full">
+                        {simulatedPalette.map((color, index) => (
+                            <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                        ))}
+                    </div>
+                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover/palette:opacity-100">
+                        <Button
+                            onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
+                            variant="secondary"
+                            className="pointer-events-auto"
+                        >
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Use This Palette
+                        </Button>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 gap-2 pt-4">
@@ -597,6 +597,7 @@ function PaletteBuilderPage() {
         detectedHarmony,
         colorSpace,
         setColorSpace,
+        paletteHexes,
     ]);
 
     const paletteActions = (
@@ -778,8 +779,3 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
-
-
-
-
-
