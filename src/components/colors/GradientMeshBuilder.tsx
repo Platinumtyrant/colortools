@@ -145,10 +145,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                     newProps.x = Math.max(0, Math.min(100, newX));
                     newProps.y = Math.max(0, Math.min(100, newY));
                 } else {
-                    const centerX = (pointToUpdate.x / 100) * rect.width;
-                    const centerY = (pointToUpdate.y / 100) * rect.height;
-                    const mouseX = moveEvent.clientX - rect.left;
-                    const mouseY = moveEvent.clientY - rect.top;
+                    const centerX = rect.left + (pointToUpdate.x / 100) * rect.width;
+                    const centerY = rect.top + (pointToUpdate.y / 100) * rect.height;
+                    const mouseX = moveEvent.clientX;
+                    const mouseY = moveEvent.clientY;
 
                     const dx = mouseX - centerX;
                     const dy = mouseY - centerY;
@@ -161,11 +161,11 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                     const unrotatedDy = dx * sinA + dy * cosA;
                     
                     if (handleType === 'spreadX') {
-                        const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 200;
-                        newProps.spreadX = Math.max(5, Math.min(100, newSpreadX));
+                        const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 100;
+                        newProps.spreadX = Math.max(5, Math.min(200, newSpreadX));
                     } else if (handleType === 'spreadY') {
-                        const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 200;
-                        newProps.spreadY = Math.max(5, Math.min(100, newSpreadY));
+                        const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 100;
+                        newProps.spreadY = Math.max(5, Math.min(200, newSpreadY));
                     }
                 }
                 
@@ -193,32 +193,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             const dy = Math.abs(moveEvent.clientY - dragStartPos.current.y);
             if (dx > 3 || dy > 3) { // Drag threshold
                 if (!isDragging.current) {
-                    isDragging.current = true;
-                    // Close popover if it's open when drag starts
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
                     setPopoverOpen({});
-                    
-                    // Manually start the position drag handler
-                    if (!previewRef.current) return;
-                    const rect = previewRef.current.getBoundingClientRect();
-                    const dragHandler = (mmEvent: MouseEvent) => {
-                        setPoints(currentPoints => {
-                            const newX = ((mmEvent.clientX - rect.left) / rect.width) * 100;
-                            const newY = ((mmEvent.clientY - rect.top) / rect.height) * 100;
-                            return currentPoints.map(p => p.id === pointId ? { 
-                                ...p, 
-                                x: Math.max(0, Math.min(100, newX)),
-                                y: Math.max(0, Math.min(100, newY))
-                            } : p);
-                        });
-                    };
-                    
-                    const stopDragHandler = () => {
-                        document.removeEventListener('mousemove', dragHandler);
-                        document.removeEventListener('mouseup', stopDragHandler);
-                    };
-
-                    document.addEventListener('mousemove', dragHandler);
-                    document.addEventListener('mouseup', stopDragHandler);
+                    handleDragStart(e, pointId, 'position');
                 }
             }
         };
@@ -230,7 +208,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                 // This is a click, toggle the popover
                 setPopoverOpen(prev => {
                     const isOpen = !!prev[pointId];
-                    const newPopoverState: Record<number, boolean> = {};
+                    const newPopoverState: Record<number, boolean> = {}; // Close all others
                     newPopoverState[pointId] = !isOpen;
                     return newPopoverState;
                 });
@@ -268,7 +246,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
 .mesh-point {
   position: absolute;
-  mix-blend-mode: screen; /* Or try other modes like 'lighten' */
+  mix-blend-mode: lighten;
   border-radius: 50%;
 }
 `;
@@ -321,7 +299,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                              {points.map(point => (
                                 <div
                                     key={`grad-${point.id}`}
-                                    className="absolute mix-blend-screen rounded-full"
+                                    className="absolute mix-blend-lighten rounded-full"
                                     style={{
                                         left: `${point.x}%`,
                                         top: `${point.y}%`,
@@ -363,7 +341,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                             <Label htmlFor={`spreadX-${point.id}`} className="text-xs">Spread X: {point.spreadX.toFixed(0)}%</Label>
                                             <Slider
                                                 id={`spreadX-${point.id}`}
-                                                min={0} max={100} step={1} value={[point.spreadX]}
+                                                min={0} max={200} step={1} value={[point.spreadX]}
                                                 onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, spreadX: value[0] } : p))}
                                             />
                                         </div>
@@ -371,7 +349,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                             <Label htmlFor={`spreadY-${point.id}`} className="text-xs">Spread Y: {point.spreadY.toFixed(0)}%</Label>
                                             <Slider
                                                 id={`spreadY-${point.id}`}
-                                                min={0} max={100} step={1} value={[point.spreadY]}
+                                                min={0} max={200} step={1} value={[point.spreadY]}
                                                 onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, spreadY: value[0] } : p))}
                                             />
                                         </div>
