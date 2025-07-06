@@ -397,7 +397,7 @@ export default function LibraryPage() {
                                             const normalizedColor = colord(color).toHex();
                                             const isInPalette = paletteHexes.has(normalizedColor);
                                             return (
-                                                <div key={`${color}-${index}`} className="flex-1 min-w-[3.5rem]">
+                                                <div key={`${color}-${index}`} className="w-40">
                                                     <ColorBox
                                                         color={color}
                                                         variant="compact"

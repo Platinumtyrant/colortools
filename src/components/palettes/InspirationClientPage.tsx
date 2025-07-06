@@ -139,13 +139,13 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                             <Plus className="h-4 w-4" />
                         </Button>
                     </div>
-                     <div className="flex flex-wrap gap-2 rounded-md border p-2">
+                     <div className="flex flex-wrap gap-2">
                         {palette.colors.map((color, index) => {
                            const normalizedColor = colord(color).toHex();
                            const isInLibrary = libraryHexes.has(normalizedColor);
                            const isInPalette = paletteHexes.has(normalizedColor);
                            return (
-                                <div key={`${color}-${index}`} className="w-16">
+                                <div key={`${color}-${index}`} className="w-40">
                                     <ColorBox
                                         color={color}
                                         variant="compact"
