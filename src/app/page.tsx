@@ -42,6 +42,7 @@ import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ContrastGrid } from '@/components/colors/ContrastGrid';
 
 
 // Type definition for the experimental EyeDropper API
@@ -600,6 +601,8 @@ function PaletteBuilderPage() {
                         </motion.div>
                     </TabsContent>
                     <TabsContent value="contrast" className="p-4 space-y-6">
+                        <ContrastGrid colors={paletteHexes} />
+                        <Separator />
                         <div className="space-y-4">
                             <div className="space-y-1.5">
                                 <Label>Text Color</Label>
@@ -748,7 +751,7 @@ function PaletteBuilderPage() {
                 </DialogContent>
             </Dialog>
 
-            <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1.2fr,2fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
+            <main className="flex-1 grid grid-cols-1 lg:grid-cols-[2fr,1.2fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
                 <div className="flex flex-col gap-8 min-h-0">
                     <section className="flex flex-col lg:flex-row items-center justify-center gap-8 w-full">
                         <div className="w-full lg:w-auto flex justify-center">
@@ -834,5 +837,6 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
 
 
