@@ -606,10 +606,9 @@ function PaletteBuilderPage() {
                     </TabsContent>
                     <TabsContent value="contrast" className="p-4">
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <ContrastGrid colors={paletteHexes} />
-                            </div>
                             <div className="space-y-4">
+                                <ContrastGrid colors={paletteHexes} />
+                                <div className="text-xs text-muted-foreground pt-1">Text color (vertical) on background color (horizontal).</div>
                                 <div className="space-y-1.5">
                                     <Label>Text Color</Label>
                                     <div className="flex items-center gap-2 p-2 rounded-md border border-input h-10">
@@ -618,7 +617,6 @@ function PaletteBuilderPage() {
                                     </div>
                                     <p className="text-xs text-muted-foreground">Controlled by the main color picker.</p>
                                 </div>
-                                
                                 <div className="space-y-1.5">
                                     <Label>Background Color</Label>
                                     <Popover>
@@ -636,7 +634,8 @@ function PaletteBuilderPage() {
                                         </PopoverContent>
                                     </Popover>
                                 </div>
-        
+                            </div>
+                            <div className="space-y-4">
                                 <div
                                     className="p-4 rounded-lg text-center border-2 border-dashed"
                                     style={{ backgroundColor: contrastBgColor, color: mainColor }}
@@ -848,5 +847,7 @@ export default PaletteBuilderPage;
 
 
 
+
+    
 
     
