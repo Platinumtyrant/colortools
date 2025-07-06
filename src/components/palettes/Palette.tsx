@@ -35,7 +35,7 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
       });
   };
   
-  const numCols = Math.max(1, Math.min(palette.length, 10));
+  const numCols = Math.max(1, Math.min(palette.length, 5));
   const width = `${100 / numCols}%`;
 
   return (

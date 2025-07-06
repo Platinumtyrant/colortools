@@ -8,6 +8,7 @@ import mixPlugin from 'colord/plugins/mix';
 import namesPlugin from 'colord/plugins/names';
 import chroma from 'chroma-js';
 import namer from 'color-namer';
+import { pantoneLookup } from './pantone-colors';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
@@ -19,25 +20,39 @@ const capitalize = (str: string) => {
         .join(' ');
 };
 
-export const getDescriptiveColorName = (hexColor: string): string => {
-    if (!colord(hexColor).isValid()) return "Invalid Color";
+export interface DescriptiveNameResult {
+    name: string;
+    source: 'pantone' | 'ntc' | 'basic' | 'colord' | 'hex';
+}
+
+export const getDescriptiveColorName = (hexColor: string): DescriptiveNameResult => {
+    if (!colord(hexColor).isValid()) return { name: "Invalid Color", source: 'hex' };
+    const lowerHex = colord(hexColor).toHex().toLowerCase();
+
+    if (pantoneLookup.has(lowerHex)) {
+        return { name: pantoneLookup.get(lowerHex)!, source: 'pantone' };
+    }
+    
     try {
-        const names = namer(hexColor);
-        // Prioritize 'ntc' for more descriptive names, fallback to 'basic'.
+        const names = namer(lowerHex);
         const ntcName = names.ntc[0]?.name;
         if (ntcName) {
-            return capitalize(ntcName);
+            return { name: capitalize(ntcName), source: 'ntc' };
         }
         const basicName = names.basic[0]?.name;
         if (basicName) {
-            return capitalize(basicName);
+            return { name: capitalize(basicName), source: 'basic' };
         }
     } catch (e) {
         console.error("Error getting color name from color-namer:", e);
     }
-    // Fallback to colord's name generator if color-namer fails or has no result
-    const colordName = colord(hexColor).toName({ closest: true });
-    return colordName ? capitalize(colordName) : hexColor.toUpperCase();
+
+    const colordName = colord(lowerHex).toName({ closest: true });
+    if (colordName) {
+        return { name: capitalize(colordName), source: 'colord' };
+    }
+
+    return { name: lowerHex.toUpperCase(), source: 'hex' };
 };
 
 

@@ -87,4 +87,18 @@ function parsePantoneFile(): PantoneCategory[] {
     }
 }
 
+function createPantoneLookup(categories: PantoneCategory[]): Map<string, string> {
+    const lookup = new Map<string, string>();
+    for (const category of categories) {
+        for (const color of category.colors) {
+            const hexKey = color.hex.toLowerCase();
+            if (!lookup.has(hexKey)) {
+                lookup.set(hexKey, color.name);
+            }
+        }
+    }
+    return lookup;
+}
+
 export const pantoneCategories = parsePantoneFile();
+export const pantoneLookup = createPantoneLookup(pantoneCategories);

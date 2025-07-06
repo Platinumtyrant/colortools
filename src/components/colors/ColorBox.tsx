@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -77,7 +78,7 @@ export const ColorBox = React.memo(({
     variant = 'compact'
 }: ColorBoxProps) => {
     const { toast } = useToast();
-    const descriptiveName = name || getDescriptiveColorName(color);
+    const { name: descriptiveName, source } = name ? { name, source: 'pantone' } : getDescriptiveColorName(color);
     
     const handleSaveDefault = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -109,7 +110,12 @@ export const ColorBox = React.memo(({
                     </div>
                 </div>
                 <CardContent className="p-4 flex-grow flex flex-col justify-center">
-                    <p className="font-semibold text-lg text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                        <p className="font-semibold text-lg text-center" title={descriptiveName}>{descriptiveName}</p>
+                        {source === 'pantone' && (
+                            <Badge variant="outline" className="text-xs px-2 py-0.5 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
+                        )}
+                    </div>
                     <ColorDetails color={color} />
                 </CardContent>
             </Card>
@@ -145,7 +151,12 @@ export const ColorBox = React.memo(({
                     </div>
                 </div>
                 <CardContent className="p-2 cursor-pointer" onClick={handleCopyHex}>
-                    <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
+                    <div className="flex items-center justify-between">
+                        <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
+                        {source === 'pantone' && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
+                        )}
+                    </div>
                     <p className="text-xs text-muted-foreground font-mono">{info || color.toUpperCase()}</p>
                 </CardContent>
             </Card>
