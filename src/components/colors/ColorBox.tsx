@@ -121,7 +121,7 @@ const ColorBoxInner = ({
                         <ColorDetails color={color} />
                         {allNames.length > 1 && (
                             <>
-                                <Separator />
+                                <Separator className="my-4" />
                                 <div className="space-y-1 text-sm">
                                     <h4 className="font-medium text-xs text-muted-foreground mb-2">OTHER NAMES</h4>
                                     {allNames.slice(1).map((nameObj) => (
@@ -189,6 +189,20 @@ const ColorBoxInner = ({
                 <div className="p-3">
                     <p className="font-semibold text-base text-center mb-2" title={primary.name}>{primary.name}</p>
                     <ColorDetails color={color} />
+                     {allNames.length > 1 && (
+                        <>
+                            <Separator className="my-3"/>
+                            <div className="space-y-1 text-sm">
+                                <h4 className="font-medium text-xs text-muted-foreground mb-2">OTHER NAMES</h4>
+                                {allNames.slice(1).map((nameObj) => (
+                                    <div key={nameObj.source} className="grid grid-cols-2 items-center gap-x-2 text-xs">
+                                        <span className="text-muted-foreground whitespace-nowrap">{nameObj.source}</span>
+                                        <span className="font-medium text-right truncate">{nameObj.name}</span> 
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                     {popoverActions && (
                         <>
                             <Separator className="my-3"/>
