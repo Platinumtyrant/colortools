@@ -28,6 +28,9 @@ interface ColorBoxProps {
   onRemoveFromLibrary?: () => void;
   onAddToPalette?: () => void;
   onRemoveFromPalette?: () => void;
+  onLockToggle?: () => void;
+  onSetActiveColor?: () => void;
+  isLocked?: boolean;
 }
 
 
@@ -82,6 +85,9 @@ const ColorBoxInner = ({
     onRemoveFromLibrary,
     onAddToPalette,
     onRemoveFromPalette,
+    onLockToggle,
+    onSetActiveColor,
+    isLocked,
 }: ColorBoxProps) => {
     const { primary, all: allNames } = name ? { primary: { name, source: 'Pantone' }, all: [{ name, source: 'Pantone' }] } : useAllDescriptiveColorNames(color);
     const { toast } = useToast();
@@ -148,6 +154,16 @@ const ColorBoxInner = ({
                         style={{ backgroundColor: color }}
                     >
                          <div className="absolute bottom-1 right-1 flex flex-row gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {onSetActiveColor && (
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onSetActiveColor(); }} title="Set as Active">
+                                    <MousePointerClick className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {onLockToggle && (
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onLockToggle(); }} title={isLocked ? "Unlock" : "Lock"}>
+                                    {isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                                </Button>
+                            )}
                             <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={handleCopy} title="Copy HEX">
                                 <Copy className="h-4 w-4" />
                             </Button>
