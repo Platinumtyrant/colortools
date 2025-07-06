@@ -28,11 +28,11 @@ interface ColorBoxProps {
 
 const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onCopy: () => void }) => (
     <div 
-        className="grid grid-cols-[min-content_1fr] items-center gap-x-4 cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm"
+        className="grid grid-cols-[minmax(50px,max-content)_1fr] items-center gap-x-4 cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm"
         onClick={onCopy}
     >
         <span className="text-muted-foreground whitespace-nowrap">{label}</span>
-        <span className="font-mono font-semibold text-right break-words">{value}</span> 
+        <span className="font-mono font-semibold text-right break-all">{value}</span> 
     </div>
 );
 
@@ -101,7 +101,7 @@ export const ColorBox = React.memo(({
     if (variant === 'default') {
         return (
              <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col">
-                <div className="relative h-40 w-full" style={{ backgroundColor: color }}>
+                <div className="relative h-80 w-full" style={{ backgroundColor: color }}>
                      <div className="absolute top-2 right-2 flex gap-1">
                         <Button size="icon" className="h-8 w-8" onClick={finalActionClick} title={actionTitle}>
                             {finalActionIcon}
