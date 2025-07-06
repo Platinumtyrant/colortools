@@ -12,6 +12,9 @@ import type { ColorResult } from 'react-color';
 import { Lock, Unlock, Trash2, Copy, Plus, MousePointerClick } from 'lucide-react';
 import chroma from 'chroma-js';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDescriptiveColorName } from '@/lib/colors';
+import { ColorDetails } from '@/components/colors/ColorBox';
+import { Separator } from '@/components/ui/separator';
 
 interface InteractivePaletteProps {
   palette: PaletteColor[];
@@ -22,6 +25,18 @@ interface InteractivePaletteProps {
   onSetActiveColor: (hex: string) => void;
   actions: React.ReactNode;
 }
+
+const SwatchContent = ({ color }: { color: PaletteColor }) => {
+    const { name: descriptiveName } = useDescriptiveColorName(color.hex);
+    const textColor = chroma(color.hex).luminance() > 0.4 ? 'black' : 'white';
+
+    return (
+        <div className="flex flex-col p-2 text-left w-full h-full justify-end" style={{ color: textColor }}>
+            <span className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</span>
+            <span className="font-mono text-xs">{color.hex.toUpperCase()}</span>
+        </div>
+    );
+};
 
 export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, onAddColor, onSetActiveColor, actions }: InteractivePaletteProps) => {
   const { toast } = useToast();
@@ -47,8 +62,6 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
         <div className="flex flex-wrap flex-grow min-w-0">
           <AnimatePresence>
             {palette.map((color, index) => {
-              const textColor = chroma(color.hex).luminance() > 0.4 ? 'black' : 'white';
-              
               return (
                 <motion.div
                   key={color.id}
@@ -60,71 +73,67 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                   className="relative min-w-0 flex"
                   style={{ width }}
                 >
-                  <div 
-                      className="flex-1 min-w-0 flex flex-col justify-center items-center p-2 sm:p-4 transition-colors duration-300 group cursor-pointer"
-                      style={{ backgroundColor: color.hex, color: textColor }}
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                variant="ghost"
-                                className="font-mono text-sm sm:text-base font-semibold py-1 px-2 rounded-md bg-black/20 hover:bg-black/40"
-                                style={{ color: textColor }}
-                                onClick={(e) => e.stopPropagation()}
+                  <Popover>
+                      <PopoverTrigger asChild>
+                          <div 
+                              className="flex-1 min-w-0 flex flex-col justify-center items-center p-2 sm:p-4 transition-colors duration-300 group cursor-pointer aspect-square"
+                              style={{ backgroundColor: color.hex }}
+                          >
+                              <div className="relative w-full h-full flex flex-col justify-between">
+                                  <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <Button 
+                                          size="icon" 
+                                          variant="ghost" 
+                                          className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white"
+                                          onClick={(e) => { e.stopPropagation(); onLockToggle(color.id); }}
+                                          title={color.locked ? "Unlock color" : "Lock color"}
+                                      >
+                                          {color.locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                                      </Button>
+                                  </div>
+                                  
+                                  <SwatchContent color={color} />
+                              </div>
+                          </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-4" onClick={(e) => e.stopPropagation()}>
+                          <div className="grid gap-4">
+                              <div className="h-24 w-full rounded-md" style={{backgroundColor: color.hex}} />
+                              <ColorDetails color={color.hex} />
+                              <Separator />
+                              <ColorPickerClient
+                                  color={color.hex}
+                                  onChange={(c: ColorResult) => onColorChange(color.id, c.hex)}
+                              />
+                              <div className="flex gap-2 mt-2">
+                                <Button 
+                                    variant="outline" 
+                                    className="w-full" 
+                                    onClick={(e) => { e.stopPropagation(); onSetActiveColor(color.hex); }}
                                 >
-                                    {color.hex.toUpperCase()}
+                                    <MousePointerClick className="mr-2 h-4 w-4" />
+                                    Set as Active
                                 </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 border-0" onClick={(e) => e.stopPropagation()}>
-                                <ColorPickerClient
-                                    color={color.hex}
-                                    onChange={(c: ColorResult) => onColorChange(color.id, c.hex)}
-                                />
-                                <div className="p-2">
-                                  <Button 
-                                      variant="outline" 
-                                      className="w-full mt-2" 
-                                      onClick={(e) => { e.stopPropagation(); onSetActiveColor(color.hex); }}
-                                  >
-                                      <MousePointerClick className="mr-2 h-4 w-4" />
-                                      Set as Active Color
-                                  </Button>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-
-                        <div className="flex flex-col items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button 
-                                size="icon" 
-                                variant="ghost" 
-                                className="h-8 w-8 bg-black/20 hover:bg-black/40 text-white"
-                                onClick={(e) => { e.stopPropagation(); onLockToggle(color.id); }}
-                                title={color.locked ? "Unlock color" : "Lock color"}
-                            >
-                                {color.locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                            </Button>
-                            <Button 
-                                size="icon" 
-                                variant="ghost" 
-                                className="h-8 w-8 bg-black/20 hover:bg-black/40 text-white"
-                                onClick={(e) => { e.stopPropagation(); handleCopyColor(color.hex); }}
-                                title="Copy Hex"
-                            >
-                                <Copy className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                                size="icon" 
-                                variant="ghost" 
-                                className="h-8 w-8 bg-black/20 hover:bg-black/40 text-white"
-                                onClick={(e) => { e.stopPropagation(); onRemoveColor(color.id); }}
-                                title="Remove Color"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                  </div>
+                                <Button 
+                                    size="icon" 
+                                    variant="outline" 
+                                    onClick={(e) => { e.stopPropagation(); handleCopyColor(color.hex); }}
+                                    title="Copy Hex"
+                                >
+                                    <Copy className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                    size="icon" 
+                                    variant="destructive" 
+                                    onClick={(e) => { e.stopPropagation(); onRemoveColor(color.id); }}
+                                    title="Remove Color"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                          </div>
+                      </PopoverContent>
+                  </Popover>
 
                   {index < palette.length && (
                       <div className="absolute top-0 bottom-0 -right-4 w-8 z-10 group/add flex items-center justify-center">
