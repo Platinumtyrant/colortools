@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { colord } from 'colord';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
+import { Badge } from '@/components/ui/badge';
 
 interface PantoneGuideClientPageProps {
   pantoneCategories: PantoneCategory[];
@@ -70,9 +71,12 @@ export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClient
   return (
     <div className="flex-1 w-full p-4 md:p-8 flex flex-col">
       <div className="flex-grow">
-        <CardHeader className="p-0 mb-8">
-          <CardTitle className="text-3xl">Pantone Color Guide</CardTitle>
-          <CardDescription>A reference guide for Pantone colors, parsed from the official guide.</CardDescription>
+        <CardHeader className="p-0 mb-8 space-y-2">
+            <div className="flex items-center gap-4">
+                <CardTitle className="text-3xl">Pantone Color Bridge</CardTitle>
+                <Badge variant="outline">Solid Coated</Badge>
+            </div>
+          <CardDescription>An unofficial reference guide for Pantone colors, based on the Color Bridge (Solid Coated) library.</CardDescription>
         </CardHeader>
         <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
           <TabsList className="h-auto flex-wrap justify-start">

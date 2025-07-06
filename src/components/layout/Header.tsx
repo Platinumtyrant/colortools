@@ -14,8 +14,8 @@ const navItems = [
     { href: '/mesh-gradient', label: 'Gradient Builder' },
     { href: '/color-wheel', label: 'Color Wheel' },
     { href: '/inspiration', label: 'Inspiration' },
-    { href: '/library', label: 'Library' },
     { href: '/pantone-guide', label: 'Pantone Guide' },
+    { href: '/library', label: 'Library' },
 ];
 
 export function Header() {
