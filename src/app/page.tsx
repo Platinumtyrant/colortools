@@ -554,13 +554,11 @@ function PaletteBuilderPage() {
                         )}
                     </AnimatePresence>
                 </div>
-                <div className="relative group">
-                    <div className="flex h-16 w-full overflow-hidden rounded-md border">
-                        {simulatedPalette.map((color, index) => (
-                            <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                        ))}
-                    </div>
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                <div className="group relative flex h-16 w-full overflow-hidden rounded-md border">
+                    {simulatedPalette.map((color, index) => (
+                        <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                    ))}
+                    <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                         <Button onClick={() => handleApplyAnalyzedPalette(simulatedPalette)} variant="secondary">
                             <Sparkles className="mr-2 h-4 w-4" />
                             Use This Palette
@@ -772,4 +770,5 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
 
