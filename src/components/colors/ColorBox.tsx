@@ -7,12 +7,12 @@ import namesPlugin from "colord/plugins/names";
 import cmykPlugin from "colord/plugins/cmyk";
 import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
-import { useDescriptiveColorName, saveColorToLibrary } from "@/lib/colors";
+import { useDescriptiveColorName } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Info, Library } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "../ui/separator";
 
@@ -76,41 +76,23 @@ const ColorBoxInner = ({
     info,
     onActionClick,
     actionIcon,
-    actionTitle = "Save color to library",
+    actionTitle = "Default Action",
     variant = 'compact',
     popoverActions
 }: ColorBoxProps) => {
-    const { toast } = useToast();
     const { name: descriptiveName, source } = name ? { name, source: 'pantone' } : useDescriptiveColorName(color);
-    
-    const handleSaveDefault = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const result = saveColorToLibrary(color);
-        toast({
-            title: result.message,
-            variant: result.success ? 'default' : 'destructive',
-        });
-    };
-
-    const finalActionClick = onActionClick || handleSaveDefault;
-    const finalActionIcon = actionIcon || <Library className="h-4 w-4" />;
-
-    const handleCopyHex = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(color.toUpperCase()).then(() => {
-            toast({ title: 'HEX copied!', description: color.toUpperCase() });
-        });
-    };
     
     if (variant === 'default') {
         return (
              <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col cursor-pointer">
                 <div className="relative h-80 w-full" style={{ backgroundColor: color }}>
-                     <div className="absolute top-2 right-2 flex gap-1">
-                        <Button size="icon" className="h-8 w-8" onClick={finalActionClick} title={actionTitle}>
-                            {finalActionIcon}
-                        </Button>
-                    </div>
+                    {onActionClick && (
+                        <div className="absolute top-2 right-2 flex gap-1">
+                            <Button size="icon" className="h-8 w-8" onClick={onActionClick} title={actionTitle}>
+                                {actionIcon}
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <CardContent className="p-4 flex-grow flex flex-col justify-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
@@ -135,7 +117,7 @@ const ColorBoxInner = ({
                     >
                          {onActionClick && (
                              <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={finalActionClick} title={actionTitle}>
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={onActionClick} title={actionTitle}>
                                     {actionIcon || <Plus className="h-4 w-4" />}
                                 </Button>
                             </div>

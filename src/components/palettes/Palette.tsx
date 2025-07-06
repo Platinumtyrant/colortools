@@ -65,36 +65,37 @@ export const Palette = ({
                         <ColorBox
                             color={color.hex}
                             variant="compact"
-                            onActionClick={(e) => { e.stopPropagation(); onLockToggle(color.id); }}
-                            actionIcon={color.locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                            actionTitle={color.locked ? "Unlock" : "Lock"}
+                            onActionClick={(e) => { e.stopPropagation(); onRemoveColor(color.id); }}
+                            actionIcon={<Trash2 className="h-4 w-4" />}
+                            actionTitle="Remove Color"
                             popoverActions={(
-                                <div className="flex gap-2 mt-4">
-                                    <Button 
-                                        variant="outline" 
-                                        className="w-full" 
-                                        onClick={(e) => { e.stopPropagation(); onSetActiveColor(color.id, color.hex); }}
+                                <div className="flex flex-col gap-2 mt-4">
+                                    <Button
+                                        variant="outline"
+                                        onClick={(e) => { e.stopPropagation(); onLockToggle(color.id) }}
                                     >
-                                        <MousePointerClick className="mr-2 h-4 w-4" />
-                                        Set as Active
+                                        {color.locked ? <Unlock className="mr-2 h-4 w-4" /> : <Lock className="mr-2 h-4 w-4" />}
+                                        {color.locked ? 'Unlock' : 'Lock'}
                                     </Button>
-                                    <Button 
-                                        size="icon" 
-                                        variant="outline" 
-                                        onClick={(e) => { e.stopPropagation(); handleCopyColor(color.hex); }}
-                                        title="Copy Hex"
-                                    >
-                                        <Copy className="h-4 w-4" />
-                                    </Button>
-                                    <Button 
-                                        size="icon" 
-                                        variant="destructive" 
-                                        onClick={(e) => { e.stopPropagation(); onRemoveColor(color.id); }}
-                                        title="Remove Color"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button 
+                                            variant="outline" 
+                                            className="w-full" 
+                                            onClick={(e) => { e.stopPropagation(); onSetActiveColor(color.id, color.hex); }}
+                                        >
+                                            <MousePointerClick className="mr-2 h-4 w-4" />
+                                            Set as Active
+                                        </Button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="outline" 
+                                            onClick={(e) => { e.stopPropagation(); handleCopyColor(color.hex); }}
+                                            title="Copy Hex"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </Button>
                                     </div>
+                                </div>
                             )}
                         />
                     </motion.div>

@@ -175,10 +175,10 @@ function PaletteBuilderPage() {
         }
     }, [inputValue, mainColor]);
 
-    const regeneratePalette = useCallback((base: string) => {
+    const regeneratePalette = useCallback((base: string, type: GenerationType) => {
         const newHexes = generatePalette({
             numColors: palette.length || 5,
-            type: generationType,
+            type: type,
             baseColors: [base],
         });
 
@@ -202,7 +202,7 @@ function PaletteBuilderPage() {
                  }));
             }
         });
-    }, [generationType, palette.length, setPalette]);
+    }, [palette.length, setPalette]);
 
     useEffect(() => {
         if (paletteToLoad) {
@@ -213,11 +213,7 @@ function PaletteBuilderPage() {
             toast({ title: `Loaded "${paletteToLoad.name}" for editing.` });
             clearPaletteToLoad();
         } else if (isInitialLoad.current && palette.length === 0) {
-             const initialHexes = generatePalette({
-                numColors: 5,
-                type: 'analogous',
-                baseColors: [mainColor],
-            });
+            const initialHexes = generatePalette({ numColors: 5, type: 'analogous', baseColors: [mainColor] });
             initialHexes[0] = mainColor;
             setPalette(initialHexes.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
         }
@@ -225,8 +221,11 @@ function PaletteBuilderPage() {
     }, [paletteToLoad, clearPaletteToLoad, setPalette, setMainColor, mainColor, palette.length, toast]);
 
     const handleMix = useCallback(() => {
-        regeneratePalette(mainColor);
-    }, [regeneratePalette, mainColor]);
+        const newType = allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)];
+        setGenerationType(newType);
+        regeneratePalette(mainColor, newType);
+        toast({ title: `Generated ${newType} palette`});
+    }, [regeneratePalette, mainColor, setGenerationType, toast]);
 
     const handleRandomize = useCallback(() => {
         setEditingPaletteId(null);
@@ -240,10 +239,10 @@ function PaletteBuilderPage() {
              const newHexes = generatePalette({ numColors: 5, type: newType, baseColors: [newMainColor] });
              setPalette(newHexes.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })))
         } else {
-            regeneratePalette(newMainColor);
+            regeneratePalette(newMainColor, generationType);
         }
         toast({ title: "Palette Randomized!" });
-    }, [toast, isHarmonyLocked, setPalette, setMainColor, setGenerationType, regeneratePalette]);
+    }, [toast, isHarmonyLocked, setPalette, setMainColor, setGenerationType, regeneratePalette, generationType]);
     
     const handleSetActiveColor = useCallback((id: number, hex: string) => {
         setMainColor(hex);
@@ -526,7 +525,7 @@ function PaletteBuilderPage() {
         <div className="flex w-full justify-between items-center gap-4 flex-wrap">
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                    <Button onClick={handleMix} size="sm">
+                    <Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}>
                         <Dices className="mr-2 h-4 w-4" />
                         Mix
                     </Button>
@@ -619,7 +618,7 @@ function PaletteBuilderPage() {
                 </DialogContent>
             </Dialog>
 
-            <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr,1.5fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
+            <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1.2fr,2fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
                 <div className="flex flex-col gap-8 min-h-0">
                     <section className="grid grid-cols-1 md:items-center gap-8 w-full">
                         <div className="w-full flex justify-center">
@@ -670,11 +669,11 @@ function PaletteBuilderPage() {
                         </div>
 
                         <div className="w-full flex justify-center">
-                             <div className="w-full max-w-md h-full" onClick={() => setEditingColorId(null)} >
+                             <div className="w-full max-w-sm" onClick={() => setEditingColorId(null)} >
                                 <ColorBox 
                                     variant="default"
                                     color={mainColor} 
-                                    onActionClick={handleSaveActiveColor} 
+                                    onActionClick={(e) => { e.stopPropagation(); handleSaveActiveColor(); }} 
                                     actionIcon={<Library className="h-4 w-4" />}
                                     actionTitle="Save color to library"
                                 />
