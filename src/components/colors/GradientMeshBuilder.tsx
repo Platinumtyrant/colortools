@@ -129,10 +129,18 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         e.stopPropagation();
 
         if (!previewRef.current) return;
-        const rect = previewRef.current.getBoundingClientRect();
+        
+        let initialPoint: Point | undefined;
+        setPoints(currentPoints => {
+            initialPoint = currentPoints.find(p => p.id === pointId);
+            return currentPoints;
+        });
 
+        if (!initialPoint) return;
+
+        const rect = previewRef.current.getBoundingClientRect();
+        
         const handleMouseMove = (moveEvent: MouseEvent) => {
-            isDragging.current = true;
             setPoints(currentPoints => {
                 const pointToUpdate = currentPoints.find(p => p.id === pointId);
                 if (!pointToUpdate) return currentPoints;
@@ -161,10 +169,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                     const unrotatedDy = dx * sinA + dy * cosA;
                     
                     if (handleType === 'spreadX') {
-                        const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 100;
+                        const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 200;
                         newProps.spreadX = Math.max(5, Math.min(200, newSpreadX));
                     } else if (handleType === 'spreadY') {
-                        const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 100;
+                        const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 200;
                         newProps.spreadY = Math.max(5, Math.min(200, newSpreadY));
                     }
                 }
@@ -192,12 +200,11 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             const dx = Math.abs(moveEvent.clientX - dragStartPos.current.x);
             const dy = Math.abs(moveEvent.clientY - dragStartPos.current.y);
             if (dx > 3 || dy > 3) { // Drag threshold
-                if (!isDragging.current) {
-                    document.removeEventListener('mousemove', handleMouseMove);
-                    document.removeEventListener('mouseup', handleMouseUp);
-                    setPopoverOpen({});
-                    handleDragStart(e, pointId, 'position');
-                }
+                isDragging.current = true;
+                setPopoverOpen({});
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                handleDragStart(e, pointId, 'position');
             }
         };
 
@@ -213,7 +220,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                     return newPopoverState;
                 });
             }
-            isDragging.current = false;
         };
 
         document.addEventListener('mousemove', handleMouseMove);
@@ -248,6 +254,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
   position: absolute;
   mix-blend-mode: lighten;
   border-radius: 50%;
+  filter: blur(50px);
 }
 `;
         const pointsCss = points.map((p, i) => `
@@ -307,6 +314,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                         height: `${point.spreadY * 2}%`,
                                         transform: `translate(-50%, -50%) rotate(${point.rotation}deg)`,
                                         backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
+                                        filter: 'blur(50px)',
                                     }}
                                 />
                              ))}
@@ -386,8 +394,8 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                 style={{
                                                     left: `${activePoint.x}%`,
                                                     top: `${activePoint.y}%`,
-                                                    width: `${spreadXInPixels * 2}px`,
-                                                    height: `${spreadYInPixels * 2}px`,
+                                                    width: `${spreadXInPixels}px`,
+                                                    height: `${spreadYInPixels}px`,
                                                     transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg)`
                                                 }}
                                             />
@@ -396,7 +404,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                 style={{
                                                     left: `${activePoint.x}%`,
                                                     top: `${activePoint.y}%`,
-                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels}px) rotate(${-activePoint.rotation}deg)`,
+                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
                                                 onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadX')}
@@ -406,7 +414,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                 style={{
                                                     left: `${activePoint.x}%`,
                                                     top: `${activePoint.y}%`,
-                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels}px) rotate(${-activePoint.rotation}deg)`,
+                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
                                                 onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadY')}
