@@ -100,9 +100,9 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                         </Button>
                     </div>
                     <div className="flex flex-wrap w-full cursor-pointer overflow-hidden rounded-md border">
-                        {palette.colors.map((color) => (
+                        {palette.colors.map((color, index) => (
                             <div
-                                key={color}
+                                key={`${color}-${index}`}
                                 className="relative w-[10%] flex-grow group/color"
                                 style={{
                                     backgroundColor: color,
