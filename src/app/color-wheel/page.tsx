@@ -18,6 +18,7 @@ import {
     getTones,
     getTints,
     getShades,
+    getRectangular,
 } from '@/lib/colors';
 import type { ColorResult } from '@uiw/react-color';
 import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
