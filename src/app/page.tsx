@@ -39,6 +39,9 @@ import { Separator } from '@/components/ui/separator';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { ContrastGrid } from '@/components/colors/ContrastGrid';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ManualContrastChecker } from '@/components/colors/ManualContrastChecker';
+
 
 // Type definition for the experimental EyeDropper API
 interface EyeDropperResult {
@@ -438,8 +441,6 @@ function PaletteBuilderPage() {
     const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
 
     const interpolationMode = useMemo(() => {
-        // HWB and sRGB don't have direct interpolation modes in chroma-js,
-        // so we fall back to a perceptually uniform space.
         if (colorSpace === 'hwb' || colorSpace === 'srgb') return 'lch';
         return colorSpace;
     }, [colorSpace]);
@@ -483,108 +484,120 @@ function PaletteBuilderPage() {
     }, [palette]);
 
     const analysisPanel = useMemo(() => (
-        <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Palette Analysis</h3>
-            <div className="flex justify-between items-center text-sm">
-                <Label>Detected Harmony</Label>
-                <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
-            </div>
-            <ContrastGrid colors={paletteHexes} />
-            <Separator />
-            <div className="flex flex-col gap-4">
-                 <div className="space-y-1.5">
-                    <Label className="text-sm">Color Space</Label>
-                    <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select colorspace..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Object.entries(colorSpaceInfo).map(([key, value]) => (
-                                <SelectItem key={key} value={key}>{value.name}</SelectItem>
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold px-4">Palette Analysis</h3>
+             <Tabs defaultValue="analysis" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mx-auto max-w-[calc(100%-2rem)]">
+                    <TabsTrigger value="analysis">Spectrum</TabsTrigger>
+                    <TabsTrigger value="contrast">Contrast</TabsTrigger>
+                </TabsList>
+                <TabsContent value="analysis" className="p-4 space-y-6">
+                    <div className="flex justify-between items-center text-sm">
+                        <Label>Detected Harmony</Label>
+                        <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
+                    </div>
+                    <Separator />
+                    <div className="flex flex-col gap-4">
+                         <div className="space-y-1.5">
+                            <Label className="text-sm">Color Space</Label>
+                            <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select colorspace..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(colorSpaceInfo).map(([key, value]) => (
+                                        <SelectItem key={key} value={key}>{value.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                                <TooltipProvider>
+                                    <ShadTooltip>
+                                        <TooltipTrigger asChild>
+                                            <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                                        </TooltipContent>
+                                    </ShadTooltip>
+                                </TooltipProvider>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
+                                <Label htmlFor="correctLightness">Correct lightness</Label>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-start gap-2">
+                            <Label className="text-sm">Simulate Deficiency:</Label>
+                            <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                                <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
+                                <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                                <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
+                                <Label htmlFor="sb-deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
+                                <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
+                                <Label htmlFor="sb-deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
+                                <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
+                                <Label htmlFor="sb-protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
+                                <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
+                                <Label htmlFor="sb-tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
+                            </RadioGroup>
+                        </div>
+                    </div>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                        <div className="h-5">
+                            <AnimatePresence>
+                                {isPaletteColorblindSafe && (
+                                    <motion.span
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex items-center text-sm text-green-500"
+                                    >
+                                        <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                        <div className="relative group/palette w-full h-16 overflow-hidden rounded-md border">
+                            <div className="h-full w-full flex">
+                                {simulatedPalette.map((color, index) => (
+                                    <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                                ))}
+                            </div>
+                             <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover/palette:opacity-100">
+                                <Button
+                                    onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
+                                    variant="secondary"
+                                    className="pointer-events-auto"
+                                >
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Use This Palette
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 pt-4">
+                            {graphData.map((graph, i) => (
+                                <ChartDisplay 
+                                    key={`${graph.title}-${i}`} 
+                                    data={graph.data} 
+                                    title={graph.title} 
+                                    description={graph.description}
+                                    color={`hsl(var(--chart-${(i % 5) + 1}))`}
+                                />
                             ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                        <TooltipProvider>
-                            <ShadTooltip>
-                                <TooltipTrigger asChild>
-                                    <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
-                                </TooltipContent>
-                            </ShadTooltip>
-                        </TooltipProvider>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
-                        <Label htmlFor="correctLightness">Correct lightness</Label>
-                    </div>
-                </div>
-                <div className="flex flex-col items-start gap-2">
-                    <Label className="text-sm">Simulate Deficiency:</Label>
-                    <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
-                        <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
-                        <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
-                        <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
-                        <Label htmlFor="sb-deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
-                        <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
-                        <Label htmlFor="sb-deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
-                        <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
-                        <Label htmlFor="sb-protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
-                        <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
-                        <Label htmlFor="sb-tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
-                    </RadioGroup>
-                </div>
-            </div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                <div className="h-5">
-                    <AnimatePresence>
-                        {isPaletteColorblindSafe && (
-                            <motion.span
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                transition={{ duration: 0.2 }}
-                                className="flex items-center text-sm text-green-500"
-                            >
-                                <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
-                            </motion.span>
-                        )}
-                    </AnimatePresence>
-                </div>
-                <div className="relative h-16 w-full overflow-hidden rounded-md border">
-                    <div className="group/palette flex h-full w-full">
-                        {simulatedPalette.map((color, index) => (
-                            <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                        ))}
-                    </div>
-                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover/palette:opacity-100">
-                        <Button
-                            onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
-                            variant="secondary"
-                            className="pointer-events-auto"
-                        >
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Use This Palette
-                        </Button>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 gap-2 pt-4">
-                    {graphData.map((graph, i) => (
-                        <ChartDisplay 
-                            key={`${graph.title}-${i}`} 
-                            data={graph.data} 
-                            title={graph.title} 
-                            description={graph.description}
-                            color={`hsl(var(--chart-${(i % 5) + 1}))`}
-                        />
-                    ))}
-                </div>
-            </motion.div>
+                        </div>
+                    </motion.div>
+                </TabsContent>
+                <TabsContent value="contrast" className="p-4 space-y-6">
+                    <ContrastGrid colors={paletteHexes} />
+                    <Separator />
+                    <ManualContrastChecker colors={paletteHexes} />
+                </TabsContent>
+            </Tabs>
         </div>
     ), [
         useBezier,
@@ -596,7 +609,6 @@ function PaletteBuilderPage() {
         handleApplyAnalyzedPalette,
         detectedHarmony,
         colorSpace,
-        setColorSpace,
         paletteHexes,
     ]);
 
@@ -661,7 +673,7 @@ function PaletteBuilderPage() {
     return (
         <div className="flex h-full overflow-hidden">
             <Sidebar>
-                <SidebarContent className="p-4">
+                <SidebarContent className="p-0">
                     {analysisPanel}
                 </SidebarContent>
             </Sidebar>
