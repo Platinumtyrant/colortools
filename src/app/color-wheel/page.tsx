@@ -18,7 +18,6 @@ import {
     getSquare,
     getTones,
     getTints,
-    getShades,
     getRectangular,
 } from '@/lib/colors';
 import type { ColorResult } from '@uiw/react-color';
@@ -314,7 +313,9 @@ export default function ColorWheelPage({}) {
                                         </div>
                                         <div className="flex flex-wrap justify-center gap-4">
                                             {harmony.colors.map((c, i) => (
-                                                <ColorBox key={`${c}-${i}`} color={c} variant="compact" />
+                                                <div key={`${c}-${i}`} className="w-40">
+                                                    <ColorBox color={c} variant="compact" />
+                                                </div>
                                             ))}
                                         </div>
                                     </motion.div>
@@ -346,7 +347,9 @@ export default function ColorWheelPage({}) {
                                 />
                                 <div className="flex flex-wrap gap-4 mt-4">
                                     {tints.map((c, i) => (
-                                        <ColorBox key={`tint-${c}-${i}`} color={c} variant="compact" />
+                                        <div key={`tint-${c}-${i}`} className="w-40">
+                                            <ColorBox color={c} variant="compact" />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
@@ -368,7 +371,9 @@ export default function ColorWheelPage({}) {
                                 />
                                 <div className="flex flex-wrap gap-4 mt-4">
                                     {tones.map((c, i) => (
-                                        <ColorBox key={`tone-${c}-${i}`} color={c} variant="compact" />
+                                        <div key={`tone-${c}-${i}`} className="w-40">
+                                            <ColorBox color={c} variant="compact" />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
@@ -390,7 +395,9 @@ export default function ColorWheelPage({}) {
                                 />
                                 <div className="flex flex-wrap gap-4 mt-4">
                                     {shades.map((c, i) => (
-                                        <ColorBox key={`shade-${c}-${i}`} color={c} variant="compact" />
+                                        <div key={`shade-${c}-${i}`} className="w-40">
+                                            <ColorBox color={c} variant="compact" />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
