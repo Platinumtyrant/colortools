@@ -221,7 +221,7 @@ export default function ColorWheelPage() {
 
     return (
         <main className="flex-1 w-full p-4 md:p-8 space-y-8">
-            <CardHeader className="p-0 text-center max-w-5xl mx-auto">
+            <CardHeader className="p-0 text-center max-w-4xl mx-auto">
                 <CardTitle className="text-3xl">Color Theory Explorer</CardTitle>
                 <CardDescription>
                     Select a color to explore its harmonies. A color wheel is a visual representation of colors arranged 
@@ -229,7 +229,7 @@ export default function ColorWheelPage() {
                 </CardDescription>
             </CardHeader>
 
-            <div className="flex flex-col md:flex-row items-center justify-center gap-12 max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-12 max-w-4xl mx-auto">
                 <div className="flex items-center justify-center gap-4">
                     <div className="flex flex-col items-center gap-4">
                         <ColorWheel
@@ -285,7 +285,7 @@ export default function ColorWheelPage() {
                 </div>
             </div>
             
-            <section className="w-full max-w-5xl mx-auto space-y-8">
+            <section className="w-full max-w-4xl mx-auto space-y-8">
                 <Card>
                     <CardHeader>
                         <CardTitle>Color Harmonies</CardTitle>
@@ -399,7 +399,7 @@ export default function ColorWheelPage() {
                 </Card>
             </section>
 
-            <section className="w-full max-w-5xl mx-auto">
+            <section className="w-full max-w-4xl mx-auto">
                 <Card>
                     <CardHeader>
                         <CardTitle>Harmony Explanations</CardTitle>
