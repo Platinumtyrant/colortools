@@ -162,7 +162,7 @@ export const saveColorToLibrary = (color: string): { success: boolean; message: 
 
     const normalizedColor = colord(color).toHex();
 
-    if (saved.includes(normalizedColor)) {
+    if (saved.some(c => colord(c).toHex() === normalizedColor)) {
       return { success: false, message: 'Color is already in your library.' };
     }
     saved.push(normalizedColor);
@@ -171,6 +171,30 @@ export const saveColorToLibrary = (color: string): { success: boolean; message: 
   } catch (e) {
     console.error('Could not save color:', e);
     return { success: false, message: 'There was an error saving the color.' };
+  }
+};
+
+export const removeColorFromLibrary = (color: string): { success: boolean; message: string } => {
+  if (typeof window === 'undefined') {
+    return { success: false, message: 'Cannot remove on server.' };
+  }
+  try {
+    const key = 'saved_individual_colors';
+    const savedJSON = localStorage.getItem(key);
+    let saved: string[] = savedJSON ? JSON.parse(savedJSON) : [];
+    
+    const normalizedColor = colord(color).toHex();
+    const newSaved = saved.filter(c => colord(c).toHex() !== normalizedColor);
+
+    if (saved.length === newSaved.length) {
+      return { success: false, message: 'Color not found in library.' };
+    }
+
+    localStorage.setItem(key, JSON.stringify(newSaved));
+    return { success: true, message: 'Color removed from library!' };
+  } catch (e) {
+    console.error('Could not remove color:', e);
+    return { success: false, message: 'There was an error removing the color.' };
   }
 };
 

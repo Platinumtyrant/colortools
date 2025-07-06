@@ -36,7 +36,7 @@ import type { ColorResult } from 'react-color';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
-import { saveColorToLibrary } from '@/lib/colors';
+import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 
 // Type definition for the experimental EyeDropper API
 interface EyeDropperResult {
@@ -131,16 +131,42 @@ function PaletteBuilderPage() {
     const [newPaletteName, setNewPaletteName] = useState("");
     const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
     const [editingColorId, setEditingColorId] = useState<number | null>(null);
+    const [libraryColors, setLibraryColors] = useState<string[]>([]);
+    const libraryHexes = useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
 
     const { toast } = useToast();
     const router = useRouter();
     const isInitialLoad = useRef(true);
+
+    useEffect(() => {
+        try {
+            const savedColorsJSON = localStorage.getItem('saved_individual_colors');
+            if (savedColorsJSON) {
+                setLibraryColors(JSON.parse(savedColorsJSON));
+            }
+        } catch (e) { console.error(e); }
+    }, []);
+
+    const handleToggleLibrary = useCallback((color: string) => {
+        const normalizedColor = colord(color).toHex();
+        const isInLibrary = libraryHexes.has(normalizedColor);
+        
+        const result = isInLibrary ? removeColorFromLibrary(color) : saveColorToLibrary(color);
+        toast({ title: result.message, variant: result.success ? 'default' : 'destructive' });
+
+        if (result.success) {
+            const newLibrary = isInLibrary
+                ? libraryColors.filter(c => colord(c).toHex() !== normalizedColor)
+                : [...libraryColors, normalizedColor];
+            setLibraryColors(newLibrary);
+        }
+    }, [libraryColors, libraryHexes, toast]);
   
     const hasLockedColors = useMemo(() => palette.some(c => c.locked), [palette]);
 
     // When the main color changes, update the currently editing swatch in the palette
     useEffect(() => {
-        if (editingColorId) {
+        if (editingColorId !== null) {
             setPalette(prev => prev.map(p => p.id === editingColorId ? { ...p, hex: mainColor } : p));
         }
     }, [mainColor, editingColorId, setPalette]);
@@ -249,14 +275,6 @@ function PaletteBuilderPage() {
         setEditingColorId(id);
     }, [setMainColor]);
 
-    const handleSaveActiveColor = useCallback(() => {
-        const result = saveColorToLibrary(mainColor);
-        toast({
-            title: result.message,
-            variant: result.success ? 'default' : 'destructive',
-        });
-    }, [mainColor, toast]);
-  
     const handleOpenSaveDialog = useCallback(() => {
         if (palette.length === 0) {
             toast({ title: "Cannot save empty palette", variant: "destructive" });
@@ -670,12 +688,11 @@ function PaletteBuilderPage() {
 
                         <div className="w-full flex justify-center">
                              <div className="w-full max-w-sm" onClick={() => setEditingColorId(null)} >
-                                <ColorBox 
+                                 <ColorBox
                                     variant="default"
-                                    color={mainColor} 
-                                    onActionClick={(e) => { e.stopPropagation(); handleSaveActiveColor(); }} 
-                                    actionIcon={<Library className="h-4 w-4" />}
-                                    actionTitle="Save color to library"
+                                    color={mainColor}
+                                    onAddToLibrary={!libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
+                                    onRemoveFromLibrary={libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
                                 />
                             </div>
                         </div>
@@ -691,6 +708,8 @@ function PaletteBuilderPage() {
                         onAddColor={handleAddColorAtIndex}
                         onSetActiveColor={handleSetActiveColor}
                         actions={paletteActions}
+                        libraryHexes={libraryHexes}
+                        onToggleLibrary={handleToggleLibrary}
                     />
                 </section>
             </main>

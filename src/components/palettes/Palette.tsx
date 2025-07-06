@@ -19,6 +19,8 @@ interface InteractivePaletteProps {
   onAddColor: (index: number) => void;
   onSetActiveColor: (id: number, hex: string) => void;
   actions: React.ReactNode;
+  onToggleLibrary: (hex: string) => void;
+  libraryHexes: Set<string>;
 }
 
 export const Palette = ({ 
@@ -28,7 +30,9 @@ export const Palette = ({
     onRemoveColor, 
     onAddColor, 
     onSetActiveColor, 
-    actions 
+    actions,
+    onToggleLibrary,
+    libraryHexes,
 }: InteractivePaletteProps) => {
   const { toast } = useToast();
 
@@ -51,6 +55,7 @@ export const Palette = ({
           <AnimatePresence>
             {palette.map((color, index) => {
               const isActive = editingColorId === color.id;
+              const isInLibrary = libraryHexes.has(color.hex);
               return (
                 <div key={color.id} className="relative group/container">
                     <motion.div
@@ -65,9 +70,9 @@ export const Palette = ({
                         <ColorBox
                             color={color.hex}
                             variant="compact"
-                            onActionClick={(e) => { e.stopPropagation(); onRemoveColor(color.id); }}
-                            actionIcon={<Trash2 className="h-4 w-4" />}
-                            actionTitle="Remove Color"
+                            onRemoveFromPalette={() => onRemoveColor(color.id)}
+                            onAddToLibrary={!isInLibrary ? () => onToggleLibrary(color.hex) : undefined}
+                            onRemoveFromLibrary={isInLibrary ? () => onToggleLibrary(color.hex) : undefined}
                             popoverActions={(
                                 <div className="flex flex-col gap-2 mt-4">
                                     <Button

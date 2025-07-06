@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trash2, Download, Library as LibraryIcon, Pencil } from 'lucide-react';
+import { Trash2, Download, Library as LibraryIcon, Pencil, Palette } from 'lucide-react';
 import { colord, extend } from 'colord';
 import namesPlugin from 'colord/plugins/names';
 import cmykPlugin from 'colord/plugins/cmyk';
@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Input } from '@/components/ui/input';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
+import { removeColorFromLibrary } from '@/lib/colors';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -44,8 +45,10 @@ export default function LibraryPage() {
   const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
   const [newPaletteName, setNewPaletteName] = useState('');
   const { toast } = useToast();
-  const { loadPalette } = usePaletteBuilder();
+  const { palette, setPalette, loadPalette } = usePaletteBuilder();
   const router = useRouter();
+
+  const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
 
   useEffect(() => {
     try {
@@ -80,11 +83,28 @@ export default function LibraryPage() {
   }, [loadPalette, router]);
 
   const handleDeleteIndividualColor = useCallback((colorToDelete: string) => {
-    const newColors = savedIndividualColors.filter(c => c !== colorToDelete);
-    setSavedIndividualColors(newColors);
-    localStorage.setItem('saved_individual_colors', JSON.stringify(newColors));
-    toast({ title: 'Color removed' });
-  }, [savedIndividualColors, toast]);
+    const result = removeColorFromLibrary(colorToDelete);
+    if(result.success) {
+      setSavedIndividualColors(current => current.filter(c => colord(c).toHex() !== colord(colorToDelete).toHex()));
+    }
+    toast({ title: result.message, variant: result.success ? 'default' : 'destructive' });
+  }, [toast]);
+
+  const handleAddToPalette = useCallback((color: string) => {
+    if (palette.length >= 20) {
+        toast({ title: "Palette is full (20 colors max).", variant: "destructive" });
+        return;
+    }
+    const newPaletteColor = { id: Date.now(), hex: color, locked: false };
+    setPalette(p => [...p, newPaletteColor]);
+    toast({ title: "Color added to palette!" });
+  }, [palette.length, setPalette, toast]);
+
+  const handleRemoveFromPalette = useCallback((color: string) => {
+    const normalizedColor = colord(color).toHex();
+    setPalette(currentPalette => currentPalette.filter(p => colord(p.hex).toHex() !== normalizedColor));
+    toast({ title: 'Color removed from palette.' });
+  }, [setPalette, toast]);
 
   const handleUpdateName = useCallback((idToUpdate: number) => {
     if (!newPaletteName.trim()) {
@@ -277,16 +297,21 @@ export default function LibraryPage() {
                  <section>
                     <h2 className="text-2xl font-semibold mb-4">My Individual Colors</h2>
                     <div className="flex flex-wrap gap-4">
-                        {savedIndividualColors.map(color => (
-                            <div key={color} className="w-40">
-                                <ColorBox 
-                                    color={color} 
-                                    onActionClick={(e) => { e.stopPropagation(); handleDeleteIndividualColor(color); }}
-                                    actionIcon={<Trash2 className="h-4 w-4" />}
-                                    actionTitle="Delete color"
-                                />
-                            </div>
-                        ))}
+                        {savedIndividualColors.map(color => {
+                            const normalizedColor = colord(color).toHex();
+                            const isInPalette = paletteHexes.has(normalizedColor);
+                            return (
+                                <div key={color} className="w-40">
+                                    <ColorBox 
+                                        color={color}
+                                        variant="compact"
+                                        onRemoveFromLibrary={() => handleDeleteIndividualColor(color)}
+                                        onAddToPalette={!isInPalette ? () => handleAddToPalette(color) : undefined}
+                                        onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color) : undefined}
+                                    />
+                                </div>
+                            )
+                        })}
                     </div>
                 </section>
             )}

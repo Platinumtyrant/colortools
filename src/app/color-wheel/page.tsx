@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,8 +28,10 @@ import { motion } from 'framer-motion';
 import { ColorBox, ColorDetails } from '@/components/colors/ColorBox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Pipette } from 'lucide-react';
+import { Pipette, Library, Palette as PaletteIcon, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
+import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 
 // Type definition for the experimental EyeDropper API
 interface EyeDropperResult {
@@ -71,7 +73,54 @@ export default function ColorWheelPage({}) {
     const [toneCount, setToneCount] = useState(5);
     const [shadeCount, setShadeCount] = useState(5);
     const [inputValue, setInputValue] = useState(activeColor);
+
     const { toast } = useToast();
+    const { palette, setPalette } = usePaletteBuilder();
+    const [libraryColors, setLibraryColors] = useState<string[]>([]);
+
+    const paletteHexes = useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
+    const libraryHexes = useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
+
+    useEffect(() => {
+        try {
+            const savedColorsJSON = localStorage.getItem('saved_individual_colors');
+            if (savedColorsJSON) {
+                setLibraryColors(JSON.parse(savedColorsJSON));
+            }
+        } catch (e) { console.error(e); }
+    }, []);
+    
+    const handleToggleLibrary = useCallback((color: string) => {
+        const normalizedColor = colord(color).toHex();
+        const isInLibrary = libraryHexes.has(normalizedColor);
+        
+        const result = isInLibrary ? removeColorFromLibrary(color) : saveColorToLibrary(color);
+        toast({ title: result.message, variant: result.success ? 'default' : 'destructive' });
+
+        if (result.success) {
+            const newLibrary = isInLibrary
+                ? libraryColors.filter(c => colord(c).toHex() !== normalizedColor)
+                : [...libraryColors, normalizedColor];
+            setLibraryColors(newLibrary);
+        }
+    }, [libraryColors, libraryHexes, toast]);
+
+    const handleAddToPalette = useCallback((color: string) => {
+        if (palette.length >= 20) {
+            toast({ title: "Palette is full (20 colors max).", variant: "destructive" });
+            return;
+        }
+        const newPaletteColor = { id: Date.now(), hex: color, locked: false };
+        setPalette(p => [...p, newPaletteColor]);
+        toast({ title: "Color added to palette!" });
+    }, [palette.length, setPalette, toast]);
+
+    const handleRemoveFromPalette = useCallback((color: string) => {
+        const normalizedColor = colord(color).toHex();
+        setPalette(currentPalette => currentPalette.filter(p => colord(p.hex).toHex() !== normalizedColor));
+        toast({ title: 'Color removed from palette.' });
+    }, [setPalette, toast]);
+
 
     React.useEffect(() => {
         setInputValue(activeColor);
@@ -219,6 +268,29 @@ export default function ColorWheelPage({}) {
     const shades = useMemo(() => getShades(activeColor, shadeCount), [activeColor, shadeCount]);
     const tones = useMemo(() => getTones(activeColor, toneCount), [activeColor, toneCount]);
 
+    const renderColorGrid = (colors: string[]) => (
+        <div className="flex flex-wrap gap-4 mt-4">
+            {colors.map((c, i) => {
+                const normalizedColor = colord(c).toHex();
+                const isInLibrary = libraryHexes.has(normalizedColor);
+                const isInPalette = paletteHexes.has(normalizedColor);
+
+                return (
+                    <div key={`${c}-${i}`} className="w-40">
+                         <ColorBox
+                            color={c}
+                            variant="compact"
+                            onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(c) : undefined}
+                            onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(c) : undefined}
+                            onAddToPalette={!isInPalette ? () => handleAddToPalette(c) : undefined}
+                            onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(c) : undefined}
+                         />
+                    </div>
+                );
+            })}
+        </div>
+    );
+
     return (
         <main className="flex-1 w-full p-4 md:p-8 space-y-8">
             <CardHeader className="p-0 text-center max-w-4xl mx-auto">
@@ -275,13 +347,12 @@ export default function ColorWheelPage({}) {
                     </div>
                 </div>
                 <div className="w-full max-w-sm h-full">
-                    <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col">
-                        <div className="relative h-80 w-full" style={{ backgroundColor: activeColor }} />
-                        <CardContent className="p-4 flex-grow flex flex-col justify-center">
-                            <p className="font-semibold text-lg text-center mb-2">{colord(activeColor).toName({closest: true})}</p>
-                            <ColorDetails color={activeColor} />
-                        </CardContent>
-                    </Card>
+                     <ColorBox
+                        variant="default"
+                        color={activeColor}
+                        onAddToLibrary={!libraryHexes.has(colord(activeColor).toHex()) ? () => handleToggleLibrary(activeColor) : undefined}
+                        onRemoveFromLibrary={libraryHexes.has(colord(activeColor).toHex()) ? () => handleToggleLibrary(activeColor) : undefined}
+                    />
                 </div>
             </div>
             
@@ -313,11 +384,23 @@ export default function ColorWheelPage({}) {
                                             <HarmonyColorWheel colors={harmony.colors} size={200} />
                                         </div>
                                         <div className="flex flex-wrap justify-center gap-4">
-                                            {harmony.colors.map((c, i) => (
-                                                <div key={`${c}-${i}`} className="w-40">
-                                                    <ColorBox color={c} variant="compact" />
-                                                </div>
-                                            ))}
+                                            {harmony.colors.map((c, i) => {
+                                                const normalizedColor = colord(c).toHex();
+                                                const isInLibrary = libraryHexes.has(normalizedColor);
+                                                const isInPalette = paletteHexes.has(normalizedColor);
+                                                return (
+                                                    <div key={`${c}-${i}`} className="w-40">
+                                                        <ColorBox
+                                                            color={c}
+                                                            variant="compact"
+                                                            onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(c) : undefined}
+                                                            onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(c) : undefined}
+                                                            onAddToPalette={!isInPalette ? () => handleAddToPalette(c) : undefined}
+                                                            onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(c) : undefined}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </motion.div>
                                 </TabsContent>
@@ -346,13 +429,7 @@ export default function ColorWheelPage({}) {
                                     value={[tintCount]}
                                     onValueChange={(value) => setTintCount(value[0])}
                                 />
-                                <div className="flex flex-wrap gap-4 mt-4">
-                                    {tints.map((c, i) => (
-                                        <div key={`tint-${c}-${i}`} className="w-40">
-                                            <ColorBox color={c} variant="compact" />
-                                        </div>
-                                    ))}
-                                </div>
+                                {renderColorGrid(tints)}
                             </div>
                             
                             <Separator />
@@ -370,13 +447,7 @@ export default function ColorWheelPage({}) {
                                     value={[toneCount]}
                                     onValueChange={(value) => setToneCount(value[0])}
                                 />
-                                <div className="flex flex-wrap gap-4 mt-4">
-                                    {tones.map((c, i) => (
-                                        <div key={`tone-${c}-${i}`} className="w-40">
-                                            <ColorBox color={c} variant="compact" />
-                                        </div>
-                                    ))}
-                                </div>
+                                {renderColorGrid(tones)}
                             </div>
 
                             <Separator />
@@ -394,13 +465,7 @@ export default function ColorWheelPage({}) {
                                     value={[shadeCount]}
                                     onValueChange={(value) => setShadeCount(value[0])}
                                 />
-                                <div className="flex flex-wrap gap-4 mt-4">
-                                    {shades.map((c, i) => (
-                                        <div key={`shade-${c}-${i}`} className="w-40">
-                                            <ColorBox color={c} variant="compact" />
-                                        </div>
-                                    ))}
-                                </div>
+                                {renderColorGrid(shades)}
                             </div>
                         </div>
                     </CardContent>

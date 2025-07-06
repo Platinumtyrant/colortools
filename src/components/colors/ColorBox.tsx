@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus } from "lucide-react";
+import { Plus, Trash2, Library, Palette as PaletteIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "../ui/separator";
 
@@ -22,12 +22,14 @@ interface ColorBoxProps {
   color: string;
   name?: string;
   info?: string;
-  onActionClick?: (e: React.MouseEvent) => void;
-  actionIcon?: React.ReactNode;
-  actionTitle?: string;
   variant?: 'default' | 'compact';
   popoverActions?: React.ReactNode;
+  onAddToLibrary?: (color: string) => void;
+  onRemoveFromLibrary?: (color: string) => void;
+  onAddToPalette?: (color: string) => void;
+  onRemoveFromPalette?: (color: string) => void;
 }
+
 
 const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onCopy: () => void }) => (
     <div 
@@ -74,11 +76,12 @@ const ColorBoxInner = ({
     color,
     name,
     info,
-    onActionClick,
-    actionIcon,
-    actionTitle = "Default Action",
     variant = 'compact',
-    popoverActions
+    popoverActions,
+    onAddToLibrary,
+    onRemoveFromLibrary,
+    onAddToPalette,
+    onRemoveFromPalette,
 }: ColorBoxProps) => {
     const { name: descriptiveName, source } = name ? { name, source: 'pantone' } : useDescriptiveColorName(color);
     
@@ -86,13 +89,18 @@ const ColorBoxInner = ({
         return (
              <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col cursor-pointer">
                 <div className="relative h-80 w-full" style={{ backgroundColor: color }}>
-                    {onActionClick && (
-                        <div className="absolute top-2 right-2 flex gap-1">
-                            <Button size="icon" className="h-8 w-8" onClick={onActionClick} title={actionTitle}>
-                                {actionIcon}
+                    <div className="absolute top-2 right-2 flex flex-col gap-1">
+                        {onAddToLibrary && (
+                            <Button size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onAddToLibrary(color); }} title="Save to Library">
+                                <Library className="h-4 w-4" />
                             </Button>
-                        </div>
-                    )}
+                        )}
+                         {onRemoveFromLibrary && (
+                            <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(color); }} title="Remove from Library">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
                 </div>
                 <CardContent className="p-4 flex-grow flex flex-col justify-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
@@ -115,13 +123,28 @@ const ColorBoxInner = ({
                         className="relative h-20 w-full"
                         style={{ backgroundColor: color }}
                     >
-                         {onActionClick && (
-                             <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={onActionClick} title={actionTitle}>
-                                    {actionIcon || <Plus className="h-4 w-4" />}
+                         <div className="absolute top-1 right-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {onAddToLibrary && (
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToLibrary(color); }} title="Save to Library">
+                                    <Library className="h-4 w-4" />
                                 </Button>
-                            </div>
-                         )}
+                            )}
+                            {onRemoveFromLibrary && (
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(color); }} title="Remove from Library">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {onAddToPalette && (
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToPalette(color); }} title="Add to Palette">
+                                    <PaletteIcon className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {onRemoveFromPalette && (
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromPalette(color); }} title="Remove from Palette">
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
                     </div>
                     <CardContent className="p-2">
                         <div className="flex items-center justify-between">

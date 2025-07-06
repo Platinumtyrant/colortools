@@ -1,13 +1,16 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { CategorizedPalette } from '@/lib/palette-parser';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from 'lucide-react';
 import { Button } from '../ui/button';
-import { saveColorToLibrary } from '@/lib/colors';
+import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
+import { colord } from 'colord';
+import { ColorBox } from '../colors/ColorBox';
+import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 
 interface InspirationClientPageProps {
   allPalettes: CategorizedPalette[];
@@ -15,6 +18,52 @@ interface InspirationClientPageProps {
 
 export function InspirationClientPage({ allPalettes }: InspirationClientPageProps) {
   const { toast } = useToast();
+  const { palette, setPalette } = usePaletteBuilder();
+  const [libraryColors, setLibraryColors] = useState<string[]>([]);
+
+  const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
+  const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
+
+  useEffect(() => {
+    try {
+        const savedColorsJSON = localStorage.getItem('saved_individual_colors');
+        if (savedColorsJSON) {
+            setLibraryColors(JSON.parse(savedColorsJSON));
+        }
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const handleToggleLibrary = useCallback((color: string) => {
+      const normalizedColor = colord(color).toHex();
+      const isInLibrary = libraryHexes.has(normalizedColor);
+      
+      const result = isInLibrary ? removeColorFromLibrary(color) : saveColorToLibrary(color);
+      toast({ title: result.message, variant: result.success ? 'default' : 'destructive' });
+
+      if (result.success) {
+          const newLibrary = isInLibrary
+              ? libraryColors.filter(c => colord(c).toHex() !== normalizedColor)
+              : [...libraryColors, normalizedColor];
+          setLibraryColors(newLibrary);
+      }
+  }, [libraryColors, libraryHexes, toast]);
+
+  const handleAddToPalette = useCallback((color: string) => {
+    if (palette.length >= 20) {
+        toast({ title: "Palette is full (20 colors max).", variant: "destructive" });
+        return;
+    }
+    const newPaletteColor = { id: Date.now(), hex: color, locked: false };
+    setPalette(p => [...p, newPaletteColor]);
+    toast({ title: "Color added to palette!" });
+  }, [palette.length, setPalette, toast]);
+  
+  const handleRemoveFromPalette = useCallback((color: string) => {
+    const normalizedColor = colord(color).toHex();
+    setPalette(currentPalette => currentPalette.filter(p => colord(p.hex).toHex() !== normalizedColor));
+    toast({ title: 'Color removed from palette.' });
+  }, [setPalette, toast]);
+
 
   const handleSavePalette = (palette: { name: string; colors: string[] }) => {
     try {
@@ -53,15 +102,6 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
     }
   };
   
-  const handleSaveColor = (e: React.MouseEvent, color: string) => {
-    e.stopPropagation();
-    const result = saveColorToLibrary(color);
-    toast({
-        title: result.message,
-        variant: result.success ? 'default' : 'destructive',
-    });
-  };
-
   const palettesByCategory = allPalettes.reduce((acc, palette) => {
     const category = palette.category;
     if (!acc[category]) {
@@ -100,28 +140,33 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                         </Button>
                     </div>
                     <div className="flex flex-wrap w-full cursor-pointer overflow-hidden rounded-md border">
-                        {palette.colors.map((color, index) => (
-                            <div
-                                key={`${color}-${index}`}
-                                className="relative w-[10%] flex-grow group/color"
-                                style={{
-                                    backgroundColor: color,
-                                    height: palette.colors.length > 10 ? '2rem' : '4rem',
-                                }}
-                            >
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/color:opacity-100 transition-opacity bg-black/20">
-                                     <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6 text-white"
-                                        onClick={(e) => handleSaveColor(e, color)}
-                                        title={`Save ${color}`}
-                                     >
-                                        <Plus className="h-4 w-4" />
-                                     </Button>
+                        {palette.colors.map((color, index) => {
+                           const normalizedColor = colord(color).toHex();
+                           const isInLibrary = libraryHexes.has(normalizedColor);
+                           const isInPalette = paletteHexes.has(normalizedColor);
+                           return (
+                                <div
+                                    key={`${color}-${index}`}
+                                    className="relative flex-grow group/color"
+                                    style={{
+                                        backgroundColor: color,
+                                        height: palette.colors.length > 10 ? '2rem' : '4rem',
+                                        minWidth: '20px'
+                                    }}
+                                >
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover/color:opacity-100 transition-opacity">
+                                         <ColorBox
+                                            color={color}
+                                            variant="compact"
+                                            onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color) : undefined}
+                                            onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color) : undefined}
+                                            onAddToPalette={!isInPalette ? () => handleAddToPalette(color) : undefined}
+                                            onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color) : undefined}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             ))}
