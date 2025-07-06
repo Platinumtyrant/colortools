@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { PaletteColor } from '@/lib/palette-generator';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,9 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
 
   return (
     <Card className="bg-card/50 overflow-hidden flex flex-col">
+      <CardHeader className="p-4 border-b">
+        {actions}
+      </CardHeader>
       <CardContent className="p-0 flex flex-col flex-grow min-w-0">
         <div className="flex flex-wrap flex-grow min-w-0">
           <AnimatePresence>
@@ -132,9 +135,6 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
           </AnimatePresence>
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-4 border-t">
-        {actions}
-      </CardFooter>
     </Card>
   );
 };
