@@ -610,30 +610,8 @@ function PaletteBuilderPage() {
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <ContrastGrid colors={paletteHexes} />
-                                <div className="space-y-1.5">
-                                    <Label>Text Color</Label>
-                                    <div className="flex items-center gap-2 p-2 rounded-md border border-input h-10">
-                                        <div className="w-6 h-6 rounded border" style={{ backgroundColor: mainColor }} />
-                                        <span className="font-mono text-sm">{mainColor.toUpperCase()}</span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">Controlled by the main color picker.</p>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label>Background Color</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" className="w-full h-10 justify-start px-3">
-                                                <div className="w-6 h-6 rounded border mr-2" style={{ backgroundColor: contrastBgColor }} />
-                                                <span className="font-mono text-sm">{contrastBgColor.toUpperCase()}</span>
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0 border-none">
-                                            <ColorPickerClient
-                                                color={contrastBgColor}
-                                                onChange={(color: ColorResult) => setContrastBgColor(color.hex)}
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                                <div className="text-xs text-muted-foreground">
+                                    <p>Text color (vertical) on background color (horizontal).</p>
                                 </div>
                             </div>
                             <div className="space-y-4">
@@ -808,7 +786,7 @@ function PaletteBuilderPage() {
                         </div>
 
                         <div className="w-full lg:w-auto flex justify-center">
-                             <div className="w-full max-w-sm relative group/container h-60" onClick={() => setEditingColorId(null)} >
+                             <div className="w-full max-w-sm relative group/container" onClick={() => setEditingColorId(null)} >
                                  <ColorBox
                                     variant="default"
                                     color={mainColor}
@@ -851,5 +829,6 @@ export default PaletteBuilderPage;
     
 
     
+
 
 
