@@ -12,10 +12,6 @@ import { colord } from 'colord';
 import { ColorBox } from '../colors/ColorBox';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 
-interface InspirationClientPageProps {
-  allPalettes: CategorizedPalette[];
-}
-
 const brandKeywords = [
     'gucci', 'discord', 'windows', 'materialize', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
     'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'ios', 'bmw', 'amazon', 'fedex', 
@@ -29,12 +25,22 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function getBrandFromPaletteName(name: string): string | null {
   const lowerName = name.toLowerCase();
+
+  // Specific mappings first to consolidate brands
+  if (lowerName.includes('ios') || lowerName.includes('apple')) return 'Apple';
+  if (lowerName.includes('windows') || lowerName.includes('visual studio') || lowerName.includes('vs code') || lowerName.includes('microsoft')) return 'Microsoft';
+
+  // Keywords that have been explicitly mapped above
+  const handledKeywords = ['ios', 'apple', 'windows', 'visual studio', 'vs code', 'microsoft'];
+
   for (const keyword of brandKeywords) {
+    if (handledKeywords.includes(keyword)) continue;
+    
     if (lowerName.includes(keyword)) {
-        if (keyword === 'vs code') return 'Visual Studio'; // Group vs code with visual studio
         return keyword.split(' ').map(capitalize).join(' ');
     }
   }
+
   return null;
 }
 
