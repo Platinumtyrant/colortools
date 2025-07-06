@@ -131,8 +131,6 @@ function PaletteBuilderPage() {
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
   
-  const [isContrastMode, setIsContrastMode] = useState(false);
-  const [contrastTextColor, setContrastTextColor] = useState('#000000');
   const [libraryUpdateKey, setLibraryUpdateKey] = useState(0);
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -637,86 +635,21 @@ function PaletteBuilderPage() {
                     </div>
 
                     <div className="w-full flex justify-center">
-                        <div className="w-full max-w-sm h-full flex flex-col gap-4">
-                            <Button
-                                onClick={() => setIsContrastMode(prev => !prev)}
-                                variant="outline"
-                                className="w-full"
-                            >
-                                <Contrast className="mr-2 h-4 w-4" />
-                                {isContrastMode ? 'Back to Builder' : 'Check Contrast'}
-                            </Button>
-                            <AnimatePresence mode="wait">
-                            <motion.div
-                                key={isContrastMode ? 'contrast' : 'details'}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                {isContrastMode ? (
-                                    <Card>
-                                        <CardContent className="p-4 space-y-4">
-                                            <div 
-                                                className="relative group w-full h-24 rounded-md border flex items-center justify-center text-center p-4"
-                                                style={{ backgroundColor: mainColor, color: contrastTextColor }}
-                                            >
-                                                <div className="select-none">
-                                                    <h2 className="text-3xl font-bold">Aa</h2>
-                                                    <p className="text-sm">Sample Text</p>
-                                                </div>
-                                            </div>
-                                            <WCAGDisplay bgColor={mainColor} textColor={contrastTextColor} />
-                                        </CardContent>
-                                    </Card>
-                                ) : (
-                                    <ColorBox 
-                                        variant="default"
-                                        color={mainColor} 
-                                        onActionClick={handleAddColorToPalette} 
-                                        actionIcon={<Plus className="h-4 w-4" />}
-                                        actionTitle="Add color to palette"
-                                    />
-                                )}
-                            </motion.div>
-                            </AnimatePresence>
+                        <div className="w-full max-w-sm h-full">
+                            <ColorBox 
+                                variant="default"
+                                color={mainColor} 
+                                onActionClick={handleAddColorToPalette} 
+                                actionIcon={<Plus className="h-4 w-4" />}
+                                actionTitle="Add color to palette"
+                            />
                         </div>
                     </div>
 
                     <div className="w-full flex justify-center lg:justify-end">
-                        <AnimatePresence mode="wait">
-                        {isContrastMode ? (
-                            <motion.div
-                            key="text-picker"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="w-full max-w-sm h-full"
-                            >
-                                <Card className="w-full h-full flex flex-col">
-                                    <CardContent className="flex-grow p-4">
-                                        <ColorPickerClient 
-                                        color={contrastTextColor} 
-                                        onChange={(c) => setContrastTextColor(c.hex)}
-                                        className="w-full border-0 shadow-none p-0 h-full"
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="library-card"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                                className="w-full max-w-sm h-full"
-                            >
-                                <SavedPalettes key={libraryUpdateKey} onLoadPalette={handleLoadPaletteFromLibrary} />
-                            </motion.div>
-                        )}
-                        </AnimatePresence>
+                        <div className="w-full max-w-sm h-full">
+                            <SavedPalettes key={libraryUpdateKey} onLoadPalette={handleLoadPaletteFromLibrary} />
+                        </div>
                     </div>
                 </section>
                 

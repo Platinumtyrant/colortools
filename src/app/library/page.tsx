@@ -268,15 +268,16 @@ export default function LibraryPage() {
             {savedIndividualColors.length > 0 && (
                  <section>
                     <h2 className="text-2xl font-semibold mb-4">My Individual Colors</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-4">
+                    <div className="flex flex-wrap gap-4">
                         {savedIndividualColors.map(color => (
-                            <ColorBox 
-                                key={color} 
-                                color={color} 
-                                onActionClick={(e) => { e.stopPropagation(); handleDeleteIndividualColor(color); }}
-                                actionIcon={<Trash2 className="h-4 w-4" />}
-                                actionTitle="Delete color"
-                            />
+                            <div key={color} className="w-40">
+                                <ColorBox 
+                                    color={color} 
+                                    onActionClick={(e) => { e.stopPropagation(); handleDeleteIndividualColor(color); }}
+                                    actionIcon={<Trash2 className="h-4 w-4" />}
+                                    actionTitle="Delete color"
+                                />
+                            </div>
                         ))}
                     </div>
                 </section>

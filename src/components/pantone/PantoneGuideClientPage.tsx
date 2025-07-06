@@ -8,11 +8,14 @@ import type { PantoneCategory, PantoneColor } from '@/lib/pantone-colors';
 import { ColorBox } from '@/components/colors/ColorBox';
 
 const ColorSwatch = ({ color }: { color: PantoneColor }) => (
-    <ColorBox
-        color={color.hex}
-        name={color.name}
-        info={color.cmyk}
-    />
+    <div className="w-40">
+        <ColorBox
+            color={color.hex}
+            name={color.name}
+            info={color.cmyk}
+            variant="compact"
+        />
+    </div>
 );
 
 interface PantoneGuideClientPageProps {
@@ -42,7 +45,7 @@ export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClient
           
           {pantoneCategories.map(category => (
               <TabsContent key={category.name} value={category.name} className="mt-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-4">
+                  <div className="flex flex-wrap gap-4">
                       {category.colors.map((color, index) => (
                           <ColorSwatch key={`${color.name}-${index}`} color={color} />
                       ))}

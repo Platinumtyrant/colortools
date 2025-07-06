@@ -185,7 +185,9 @@ export default function ColorWheelPage() {
                         />
                     </div>
                 </div>
-                <ColorBox color={activeColor} variant="default" />
+                <div className="w-full max-w-xs h-[280px]">
+                    <ColorBox color={activeColor} variant="default" />
+                </div>
             </div>
             
             <section className="w-full max-w-4xl mx-auto space-y-8">
@@ -247,8 +249,12 @@ export default function ColorWheelPage() {
                                     value={[tintCount]}
                                     onValueChange={(value) => setTintCount(value[0])}
                                 />
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                                    {tints.map((c, i) => <ColorBox key={`tint-${c}-${i}`} color={c} variant="compact" />)}
+                                <div className="flex flex-wrap gap-4 mt-4">
+                                    {tints.map((c, i) => (
+                                        <div key={`tint-${c}-${i}`} className="w-40">
+                                            <ColorBox color={c} variant="compact" />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                             
@@ -267,8 +273,12 @@ export default function ColorWheelPage() {
                                     value={[toneCount]}
                                     onValueChange={(value) => setToneCount(value[0])}
                                 />
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                                    {tones.map((c, i) => <ColorBox key={`tone-${c}-${i}`} color={c} variant="compact" />)}
+                                <div className="flex flex-wrap gap-4 mt-4">
+                                    {tones.map((c, i) => (
+                                        <div key={`tone-${c}-${i}`} className="w-40">
+                                            <ColorBox color={c} variant="compact" />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
@@ -287,8 +297,12 @@ export default function ColorWheelPage() {
                                     value={[shadeCount]}
                                     onValueChange={(value) => setShadeCount(value[0])}
                                 />
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                                    {shades.map((c, i) => <ColorBox key={`shade-${c}-${i}`} color={c} variant="compact" />)}
+                                <div className="flex flex-wrap gap-4 mt-4">
+                                    {shades.map((c, i) => (
+                                        <div key={`shade-${c}-${i}`} className="w-40">
+                                            <ColorBox color={c} variant="compact" />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
