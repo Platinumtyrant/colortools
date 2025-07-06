@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus, Trash2, Code } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
-import { colord } from 'colord';
 
 interface Point {
   id: number;
@@ -158,7 +157,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
         document.addEventListener('mousemove', handleDocumentMouseMove);
         document.addEventListener('mouseup', handleDocumentMouseUp);
-    }, [setActivePointId]);
+    }, [setActivePointId, setPoints, setPopoverOpen]);
 
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
@@ -209,7 +208,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #111827;
   overflow: hidden;
 }
 
@@ -259,7 +257,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
             </CardHeader>
             <CardContent className="flex flex-col gap-8 p-0">
                 <div className="space-y-4">
-                    <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-gray-900">
+                    <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden">
                         <div
                             ref={previewRef}
                             className="absolute inset-0 cursor-pointer"
