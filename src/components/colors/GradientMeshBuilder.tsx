@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import type { ColorResult } from 'react-color';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -58,8 +58,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         });
     });
     
-    const [activePointId, setActivePointId] = useState<number | null>(null);
-    const [popoverOpen, setPopoverOpen] = useState<Record<number, boolean>>({});
+    const [activePointId, setActivePointId] = useState<number | null>(points[0]?.id ?? null);
+    const [openPopoverId, setOpenPopoverId] = useState<number | null>(null);
     const [isCodeVisible, setIsCodeVisible] = useState(false);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
@@ -69,18 +69,25 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         e.preventDefault();
         e.stopPropagation();
 
-        const dragStartPos = { x: e.clientX, y: e.clientY };
+        const startPos = { x: e.clientX, y: e.clientY };
         let hasDragged = false;
-        
+
+        // On mouse down, always set the active point, but don't open the popover yet.
+        // This makes the first click always a "selection".
+        if (handleType === 'position' && activePointId !== pointId) {
+            setActivePointId(pointId);
+            setOpenPopoverId(null); // Close any other popover
+        }
+
         const handleDocumentMouseMove = (moveEvent: MouseEvent) => {
-            const dx = moveEvent.clientX - dragStartPos.x;
-            const dy = moveEvent.clientY - dragStartPos.y;
+            const dx = moveEvent.clientX - startPos.x;
+            const dy = moveEvent.clientY - startPos.y;
 
             if (!hasDragged && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
                 hasDragged = true;
-                if (handleType === 'position' || handleType === 'spreadX' || handleType === 'spreadY') {
-                    // Close any open popovers on drag start
-                    setPopoverOpen({});
+                // If we start dragging, ensure the popover is closed.
+                if (openPopoverId === pointId) {
+                    setOpenPopoverId(null);
                 }
             }
 
@@ -133,15 +140,16 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             document.removeEventListener('mousemove', handleDocumentMouseMove);
             document.removeEventListener('mouseup', handleDocumentMouseUp);
 
+            // If it wasn't a drag, it was a click.
             if (!hasDragged && handleType === 'position') {
-                setActivePointId(pointId);
-                setPopoverOpen(prev => ({ [pointId]: !prev[pointId] }));
+                // Now, because selection happened on mousedown, we just toggle the popover.
+                 setOpenPopoverId(prevId => (prevId === pointId ? null : pointId));
             }
         };
 
         document.addEventListener('mousemove', handleDocumentMouseMove);
         document.addEventListener('mouseup', handleDocumentMouseUp);
-    }, []);
+    }, [activePointId, openPopoverId]);
 
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
@@ -172,17 +180,19 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             }
             if (activePointId === idToRemove) {
                 setActivePointId(null);
-                 setPopoverOpen(prev => ({ ...prev, [idToRemove]: false }));
+            }
+            if (openPopoverId === idToRemove) {
+                setOpenPopoverId(null);
             }
             return prev.filter(p => p.id !== idToRemove);
         });
-    }, [toast, activePointId]);
+    }, [toast, activePointId, openPopoverId]);
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement;
         if (target.contains(previewRef.current) || target === previewRef.current) {
             setActivePointId(null);
-            setPopoverOpen({});
+            setOpenPopoverId(null);
         }
     }, []);
     
@@ -265,7 +275,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                 />
                              ))}
                             {points.map((point) => (
-                                <Popover key={point.id} open={!!popoverOpen[point.id]} onOpenChange={(isOpen) => setPopoverOpen(prev => ({...prev, [point.id]: isOpen}))}>
+                                <Popover key={point.id} open={openPopoverId === point.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? point.id : null)}>
                                     <PopoverTrigger asChild>
                                         <div
                                             className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
