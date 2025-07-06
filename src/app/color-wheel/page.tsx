@@ -218,7 +218,7 @@ export default function ColorWheelPage() {
                                         <div className="mx-auto">
                                             <HarmonyColorWheel colors={harmony.colors} size={200} />
                                         </div>
-                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 items-start content-center min-h-[144px]">
+                                        <div className="grid grid-cols-2 gap-4 items-start content-center min-h-[144px]">
                                             {harmony.colors.map((c) => (
                                                 <ColorBox key={c} color={c} showDetails />
                                             ))}
