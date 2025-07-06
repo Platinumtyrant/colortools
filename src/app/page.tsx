@@ -569,12 +569,12 @@ function PaletteBuilderPage() {
                 </div>
                 <div className="grid grid-cols-1 gap-2 pt-4">
                     {graphData.map((graph, i) => (
-                        <ChartDisplay 
-                            key={graph.title} 
-                            data={graph.data} 
+                        <ChartDisplay
+                            key={`${graph.title}-${i}`}
+                            data={graph.data}
                             title={graph.title}
                             description={graph.description}
-                            color={`hsl(var(--chart-${(i % 5) + 1}))`} 
+                            color={`hsl(var(--chart-${(i % 5) + 1}))`}
                         />
                     ))}
                 </div>
@@ -762,8 +762,8 @@ function PaletteBuilderPage() {
                         onAddColor={handleAddColorAtIndex}
                         onSetActiveColor={handleSetActiveColor}
                         actions={paletteActions}
-                        libraryHexes={libraryHexes}
                         onToggleLibrary={handleToggleLibrary}
+                        libraryHexes={libraryHexes}
                     />
                 </section>
             </main>
@@ -772,3 +772,4 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
