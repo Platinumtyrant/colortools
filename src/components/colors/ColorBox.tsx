@@ -24,10 +24,10 @@ interface ColorBoxProps {
   info?: string;
   variant?: 'default' | 'compact';
   popoverActions?: React.ReactNode;
-  onAddToLibrary?: (color: string) => void;
-  onRemoveFromLibrary?: (color: string) => void;
-  onAddToPalette?: (color: string) => void;
-  onRemoveFromPalette?: (color: string) => void;
+  onAddToLibrary?: () => void;
+  onRemoveFromLibrary?: () => void;
+  onAddToPalette?: () => void;
+  onRemoveFromPalette?: () => void;
 }
 
 
@@ -100,12 +100,12 @@ const ColorBoxInner = ({
                 <div className="relative h-80 w-full" style={{ backgroundColor: color }}>
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
                         {onAddToLibrary && (
-                            <Button size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onAddToLibrary(color); }} title="Save to Library">
+                            <Button size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }} title="Save to Library">
                                 <Library className="h-4 w-4" />
                             </Button>
                         )}
                          {onRemoveFromLibrary && (
-                            <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(color); }} title="Remove from Library">
+                            <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }} title="Remove from Library">
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         )}
@@ -137,22 +137,22 @@ const ColorBoxInner = ({
                                 <Copy className="h-4 w-4" />
                             </Button>
                             {onAddToLibrary && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToLibrary(color); }} title="Save to Library">
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }} title="Save to Library">
                                     <Library className="h-4 w-4" />
                                 </Button>
                             )}
                             {onRemoveFromLibrary && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(color); }} title="Remove from Library">
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }} title="Remove from Library">
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             )}
                             {onAddToPalette && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToPalette(color); }} title="Add to Palette">
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToPalette(); }} title="Add to Palette">
                                     <PaletteIcon className="h-4 w-4" />
                                 </Button>
                             )}
                              {onRemoveFromPalette && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromPalette(color); }} title="Remove from Palette">
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromPalette(); }} title="Remove from Palette">
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             )}
@@ -169,7 +169,7 @@ const ColorBoxInner = ({
                     </CardContent>
                 </Card>
             </PopoverTrigger>
-            <PopoverContent className="w-72 p-0">
+            <PopoverContent className="w-[300px] p-0">
                 <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
                 <div className="p-3">
                     <p className="font-semibold text-base text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
