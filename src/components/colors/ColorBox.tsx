@@ -134,7 +134,7 @@ export const ColorBox = React.memo(({
                                     <Info className="h-4 w-4" />
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-72 p-0">
+                            <PopoverContent className="w-75 p-0">
                                 <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
                                 <div className="p-3">
                                     <p className="font-semibold text-base text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
