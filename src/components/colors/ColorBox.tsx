@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, Library, Palette as PaletteIcon, Copy } from "lucide-react";
+import { Plus, Trash2, Library, Palette as PaletteIcon, Copy, MousePointerClick, Lock, Unlock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "../ui/separator";
 
@@ -55,7 +55,7 @@ export const ColorDetails = ({ color }: { color: string }) => {
     const hex = colorInstance.toHex().toUpperCase();
     const rgb = colorInstance.toRgbString();
     const hsl = colorInstance.toHslString();
-    const cmyk = colorInstance.toCmykString();
+    const cmyk = colorInstance.isLight() ? `device-cmyk(${colorInstance.toCmyk().c}% ${colorInstance.toCmyk().m}% ${colorInstance.toCmyk().y}% ${colorInstance.toCmyk().k}% / ${colorInstance.toCmyk().a})` : colorInstance.toCmykString();
     const lchObj = colorInstance.toLch();
     const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
 
@@ -132,7 +132,7 @@ const ColorBoxInner = ({
                         className="relative h-20 w-full"
                         style={{ backgroundColor: color }}
                     >
-                         <div className="absolute top-1 right-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <div className="absolute bottom-1 right-1 flex flex-row gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={handleCopy} title="Copy HEX">
                                 <Copy className="h-4 w-4" />
                             </Button>
@@ -151,7 +151,7 @@ const ColorBoxInner = ({
                                     <PaletteIcon className="h-4 w-4" />
                                 </Button>
                             )}
-                            {onRemoveFromPalette && (
+                             {onRemoveFromPalette && (
                                 <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromPalette(color); }} title="Remove from Palette">
                                     <Trash2 className="h-4 w-4" />
                                 </Button>

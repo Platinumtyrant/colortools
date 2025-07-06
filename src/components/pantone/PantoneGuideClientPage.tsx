@@ -1,28 +1,68 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { PantoneCategory, PantoneColor } from '@/lib/pantone-colors';
+import type { PantoneCategory } from '@/lib/pantone-colors';
 import { ColorBox } from '@/components/colors/ColorBox';
-
-const ColorSwatch = ({ color }: { color: PantoneColor }) => (
-    <div className="w-40">
-        <ColorBox
-            color={color.hex}
-            name={color.name}
-            info={color.cmyk}
-            variant="compact"
-        />
-    </div>
-);
+import { useToast } from '@/hooks/use-toast';
+import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
+import { colord } from 'colord';
+import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 
 interface PantoneGuideClientPageProps {
   pantoneCategories: PantoneCategory[];
 }
 
 export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClientPageProps) {
+  const { toast } = useToast();
+  const { palette, setPalette } = usePaletteBuilder();
+  const [libraryColors, setLibraryColors] = useState<string[]>([]);
+
+  const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
+  const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
+
+  useEffect(() => {
+    try {
+      const savedColorsJSON = localStorage.getItem('saved_individual_colors');
+      if (savedColorsJSON) {
+        setLibraryColors(JSON.parse(savedColorsJSON));
+      }
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const handleToggleLibrary = useCallback((color: string) => {
+    const normalizedColor = colord(color).toHex();
+    const isInLibrary = libraryHexes.has(normalizedColor);
+    
+    const result = isInLibrary ? removeColorFromLibrary(color) : saveColorToLibrary(color);
+    toast({ title: result.message, variant: result.success ? 'default' : 'destructive' });
+
+    if (result.success) {
+        const newLibrary = isInLibrary
+            ? libraryColors.filter(c => colord(c).toHex() !== normalizedColor)
+            : [...libraryColors, normalizedColor];
+        setLibraryColors(newLibrary);
+    }
+  }, [libraryColors, libraryHexes, toast]);
+
+  const handleAddToPalette = useCallback((color: string) => {
+    if (palette.length >= 20) {
+        toast({ title: "Palette is full (20 colors max).", variant: "destructive" });
+        return;
+    }
+    const newPaletteColor = { id: Date.now(), hex: color, locked: false };
+    setPalette(p => [...p, newPaletteColor]);
+    toast({ title: "Color added to palette!" });
+  }, [palette.length, setPalette, toast]);
+
+  const handleRemoveFromPalette = useCallback((color: string) => {
+    const normalizedColor = colord(color).toHex();
+    setPalette(currentPalette => currentPalette.filter(p => colord(p.hex).toHex() !== normalizedColor));
+    toast({ title: 'Color removed from palette.' });
+  }, [setPalette, toast]);
+
   if (!pantoneCategories || pantoneCategories.length === 0) {
     return <div>No Pantone colors found.</div>;
   }
@@ -46,9 +86,25 @@ export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClient
           {pantoneCategories.map(category => (
               <TabsContent key={category.name} value={category.name} className="mt-6">
                   <div className="flex flex-wrap gap-4">
-                      {category.colors.map((color, index) => (
-                          <ColorSwatch key={`${color.name}-${index}`} color={color} />
-                      ))}
+                      {category.colors.map((color, index) => {
+                          const normalizedColor = colord(color.hex).toHex();
+                          const isInLibrary = libraryHexes.has(normalizedColor);
+                          const isInPalette = paletteHexes.has(normalizedColor);
+                          return (
+                            <div className="w-40" key={`${color.name}-${index}`}>
+                              <ColorBox
+                                  color={color.hex}
+                                  name={color.name}
+                                  info={color.cmyk}
+                                  variant="compact"
+                                  onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
+                                  onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
+                                  onAddToPalette={!isInPalette ? () => handleAddToPalette(color.hex) : undefined}
+                                  onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color.hex) : undefined}
+                              />
+                            </div>
+                          )
+                      })}
                   </div>
               </TabsContent>
           ))}
