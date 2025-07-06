@@ -14,7 +14,7 @@ import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { getDescriptiveColorName } from '@/lib/colors';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
