@@ -18,6 +18,7 @@ import {
     getSquare,
     getTones,
     getTints,
+    getShades,
     getRectangular,
 } from '@/lib/colors';
 import type { ColorResult } from '@uiw/react-color';
