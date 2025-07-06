@@ -554,23 +554,25 @@ function PaletteBuilderPage() {
                         )}
                     </AnimatePresence>
                 </div>
-                <div className="group relative flex h-16 w-full overflow-hidden rounded-md border">
-                    {simulatedPalette.map((color, index) => (
-                        <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                    ))}
-                    <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                        <Button onClick={() => handleApplyAnalyzedPalette(simulatedPalette)} variant="secondary">
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Use This Palette
-                        </Button>
+                <div className="h-16 w-full overflow-hidden rounded-md border">
+                    <div className="group relative flex h-full w-full">
+                        {simulatedPalette.map((color, index) => (
+                            <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                        ))}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                            <Button onClick={() => handleApplyAnalyzedPalette(simulatedPalette)} variant="secondary">
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                Use This Palette
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 gap-2 pt-4">
                     {graphData.map((graph, i) => (
-                        <ChartDisplay
-                            key={`${graph.title}-${i}`}
-                            data={graph.data}
-                            title={graph.title}
+                        <ChartDisplay 
+                            key={`${graph.title}-${i}`} 
+                            data={graph.data} 
+                            title={graph.title} 
                             description={graph.description}
                             color={`hsl(var(--chart-${(i % 5) + 1}))`}
                         />
@@ -770,5 +772,6 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
 
 
