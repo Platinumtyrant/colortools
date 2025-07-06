@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import type { ColorResult } from 'react-color';
-import { Lock, Unlock, Trash2, Copy, Plus } from 'lucide-react';
+import { Lock, Unlock, Trash2, Copy, Plus, MousePointerClick } from 'lucide-react';
 import chroma from 'chroma-js';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -19,11 +19,11 @@ interface InteractivePaletteProps {
   onLockToggle: (id: number) => void;
   onRemoveColor: (id: number) => void;
   onAddColor: (index: number) => void;
-  onColorClick?: (color: PaletteColor) => void;
+  onSetActiveColor: (hex: string) => void;
   actions: React.ReactNode;
 }
 
-export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, onAddColor, onColorClick, actions }: InteractivePaletteProps) => {
+export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, onAddColor, onSetActiveColor, actions }: InteractivePaletteProps) => {
   const { toast } = useToast();
 
   const handleCopyColor = (color: string) => {
@@ -59,14 +59,13 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                   className="relative min-w-0 flex"
                   style={{ width }}
-                  onClick={() => onColorClick?.(color)}
                 >
                   <div 
                       className="flex-1 min-w-0 flex flex-col justify-center items-center p-2 sm:p-4 transition-colors duration-300 group cursor-pointer"
                       style={{ backgroundColor: color.hex, color: textColor }}
                   >
                     <div className="flex flex-col items-center gap-2">
-                        <Popover onOpenChange={(open) => { if (open) onColorClick?.(color)}}>
+                        <Popover>
                             <PopoverTrigger asChild>
                                 <Button
                                 variant="ghost"
@@ -78,10 +77,20 @@ export const Palette = ({ palette, onColorChange, onLockToggle, onRemoveColor, o
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0 border-0" onClick={(e) => e.stopPropagation()}>
-                            <ColorPickerClient
-                                color={color.hex}
-                                onChange={(c: ColorResult) => onColorChange(color.id, c.hex)}
-                            />
+                                <ColorPickerClient
+                                    color={color.hex}
+                                    onChange={(c: ColorResult) => onColorChange(color.id, c.hex)}
+                                />
+                                <div className="p-2">
+                                  <Button 
+                                      variant="outline" 
+                                      className="w-full mt-2" 
+                                      onClick={(e) => { e.stopPropagation(); onSetActiveColor(color.hex); }}
+                                  >
+                                      <MousePointerClick className="mr-2 h-4 w-4" />
+                                      Set as Active Color
+                                  </Button>
+                                </div>
                             </PopoverContent>
                         </Popover>
 

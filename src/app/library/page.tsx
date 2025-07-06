@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from '@/components/ui/input';
 import { ColorBox } from '@/components/colors/ColorBox';
+import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -43,6 +44,8 @@ export default function LibraryPage() {
   const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
   const [newPaletteName, setNewPaletteName] = useState('');
   const { toast } = useToast();
+  const { loadPalette } = usePaletteBuilder();
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -70,6 +73,11 @@ export default function LibraryPage() {
       });
     }
   }, [toast]);
+
+  const handleLoadForEditing = useCallback((palette: SavedPalette) => {
+    loadPalette({ colors: palette.colors, name: palette.name, id: palette.id });
+    router.push('/');
+  }, [loadPalette, router]);
 
   const handleDeleteIndividualColor = useCallback((colorToDelete: string) => {
     const newColors = savedIndividualColors.filter(c => c !== colorToDelete);
@@ -360,11 +368,9 @@ export default function LibraryPage() {
                                 <TooltipProvider>
                                     <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" asChild>
-                                        <Link href={`/?edit=${palette.id}`}>
+                                        <Button variant="ghost" size="icon" onClick={() => handleLoadForEditing(palette)}>
                                             <Pencil className="h-4 w-4" />
                                             <span className="sr-only">Edit Palette in Builder</span>
-                                        </Link>
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>

@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Info } from "lucide-react";
+import { Plus, Info, Library } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
@@ -90,7 +90,7 @@ const ColorBoxInner = ({
     };
 
     const finalActionClick = onActionClick || handleSaveDefault;
-    const finalActionIcon = actionIcon || <Plus className="h-4 w-4" />;
+    const finalActionIcon = actionIcon || <Library className="h-4 w-4" />;
 
     const handleCopyHex = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -132,7 +132,7 @@ const ColorBoxInner = ({
                 >
                     <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                          <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={finalActionClick} title={actionTitle}>
-                            {finalActionIcon}
+                            {actionIcon || <Plus className="h-4 w-4" />}
                         </Button>
                         <Popover>
                             <PopoverTrigger asChild>

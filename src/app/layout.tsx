@@ -7,6 +7,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { getPantoneLookup } from "@/lib/palette-parser";
 import { PantoneProvider } from "@/contexts/SidebarExtensionContext";
+import { PaletteBuilderProvider } from "@/contexts/PaletteBuilderContext";
 
 export const metadata: Metadata = {
   title: "Palette Prodigy",
@@ -34,16 +35,18 @@ export default async function RootLayout({
       </head>
       <body className="font-headline antialiased">
         <PantoneProvider lookup={pantoneLookup}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <MainLayout>
-              {children}
-            </MainLayout>
-          </ThemeProvider>
+          <PaletteBuilderProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <MainLayout>
+                {children}
+              </MainLayout>
+            </ThemeProvider>
+          </PaletteBuilderProvider>
         </PantoneProvider>
         <Toaster />
       </body>

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,7 +26,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Dices, Pencil, Plus, Sparkles, Pipette, Unlock, Lock } from 'lucide-react';
+import { CheckCircle2, Dices, Pencil, Sparkles, Pipette, Unlock, Lock, Library } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
@@ -35,8 +35,8 @@ import { Slider } from '@/components/ui/slider';
 import type { ColorResult } from 'react-color';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-
-extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
+import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
+import { saveColorToLibrary } from '@/lib/colors';
 
 // Type definition for the experimental EyeDropper API
 interface EyeDropperResult {
@@ -114,672 +114,636 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
 const allGenerationTypes: GenerationType[] = ['analogous', 'triadic', 'complementary', 'tints', 'shades'];
 
 function PaletteBuilderPage() {
-  const [mainColor, setMainColor] = useState('#FF9800');
-  const [palette, setPalette] = useState<PaletteColor[]>([]);
-  const [generationType, setGenerationType] = useState<GenerationType>('analogous');
-  const [isHarmonyLocked, setIsHarmonyLocked] = useState(false);
-  const [simulationType, setSimulationType] = useState<SimulationType>('normal');
-  const [correctLightness, setCorrectLightness] = useState(true);
-  const [useBezier, setUseBezier] = useState(true);
-  const [inputValue, setInputValue] = useState(mainColor);
+    const { 
+        mainColor, setMainColor, 
+        palette, setPalette, 
+        generationType, setGenerationType,
+        isHarmonyLocked, setIsHarmonyLocked,
+        paletteToLoad, loadPalette, clearPaletteToLoad
+    } = usePaletteBuilder();
+
+    const [simulationType, setSimulationType] = useState<SimulationType>('normal');
+    const [correctLightness, setCorrectLightness] = useState(true);
+    const [useBezier, setUseBezier] = useState(true);
+    const [inputValue, setInputValue] = useState(mainColor);
+    
+    const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+    const [newPaletteName, setNewPaletteName] = useState("");
+    const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
+
+    const { toast } = useToast();
+    const router = useRouter();
+    const isInitialLoad = useRef(true);
   
-  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-  const [newPaletteName, setNewPaletteName] = useState("");
-  const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
-
-  const { toast } = useToast();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const isInitialLoad = useRef(true);
+    const hasLockedColors = useMemo(() => palette.some(c => c.locked), [palette]);
   
-  const hasLockedColors = useMemo(() => palette.some(c => c.locked), [palette]);
-  
-  useEffect(() => {
-    setInputValue(mainColor);
-  }, [mainColor]);
+    useEffect(() => {
+        setInputValue(mainColor);
+    }, [mainColor]);
 
-  const mainHsl = useMemo(() => colord(mainColor).toHsl(), [mainColor]);
+    const mainHsl = useMemo(() => colord(mainColor).toHsl(), [mainColor]);
 
-  const handleLightnessChange = (newLightness: number[]) => {
-      const newColor = colord({ ...mainHsl, l: newLightness[0] }).toHex();
-      setMainColor(newColor);
-  };
+    const handleLightnessChange = (newLightness: number[]) => {
+        const newColor = colord({ ...mainHsl, l: newLightness[0] }).toHex();
+        setMainColor(newColor);
+    };
 
-  const handleSaturationChange = (newSaturation: number[]) => {
-      const newColor = colord({ ...mainHsl, s: newSaturation[0] }).toHex();
-      setMainColor(newColor);
-  };
+    const handleSaturationChange = (newSaturation: number[]) => {
+        const newColor = colord({ ...mainHsl, s: newSaturation[0] }).toHex();
+        setMainColor(newColor);
+    };
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setInputValue(value);
-      if (colord(value).isValid()) {
-          setMainColor(value);
-      }
-  }, []);
-
-  const handleInputBlur = useCallback(() => {
-      if (!colord(inputValue).isValid()) {
-          setInputValue(mainColor);
-      }
-  }, [inputValue, mainColor]);
-
-  const regeneratePalette = useCallback(() => {
-    setPalette(prevPalette => {
-        const isInitial = prevPalette.length === 0;
-        const currentLockedColors = prevPalette.filter(c => c.locked);
-        const currentLockedHexes = currentLockedColors.map(c => c.hex);
-        const numColors = isInitial ? 5 : (prevPalette.length || 5);
-
-        let baseForGeneration = [mainColor];
-        
-        // If there are locked colors, they become the base for generation
-        if (currentLockedHexes.length > 0) {
-            baseForGeneration = currentLockedHexes;
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setInputValue(value);
+        if (colord(value).isValid()) {
+            setMainColor(value);
         }
+    }, [setMainColor]);
 
-        const newHexes = generatePalette({
-            numColors: numColors,
-            type: generationType,
-            baseColors: baseForGeneration,
-        });
+    const handleInputBlur = useCallback(() => {
+        if (!colord(inputValue).isValid()) {
+            setInputValue(mainColor);
+        }
+    }, [inputValue, mainColor]);
 
-        // Smartly merge new colors with locked ones
-        if (currentLockedHexes.length > 0) {
-            const finalPalette: PaletteColor[] = [];
-            const newHexesPool = newHexes.filter(h => !currentLockedHexes.includes(h));
+    const regeneratePalette = useCallback(() => {
+        setPalette(prevPalette => {
+            const isInitial = prevPalette.length === 0;
+            const currentLockedColors = prevPalette.filter(c => c.locked);
+            const currentLockedHexes = currentLockedColors.map(c => c.hex);
+            const numColors = isInitial ? 5 : (prevPalette.length || 5);
+
+            let baseForGeneration = [mainColor];
             
-            for(let i = 0; i < numColors; i++) {
-                if (prevPalette[i]?.locked) {
-                    finalPalette.push(prevPalette[i]);
-                } else {
-                    const newHex = newHexesPool.shift() || getRandomColor();
-                    finalPalette.push({ id: prevPalette[i]?.id || Date.now() + i, hex: newHex, locked: false });
+            if (currentLockedHexes.length > 0) {
+                baseForGeneration = currentLockedHexes;
+            }
+
+            const newHexes = generatePalette({
+                numColors: numColors,
+                type: generationType,
+                baseColors: baseForGeneration,
+            });
+
+            if (currentLockedHexes.length > 0) {
+                const finalPalette: PaletteColor[] = [];
+                const newHexesPool = newHexes.filter(h => !currentLockedHexes.includes(h));
+                
+                for(let i = 0; i < numColors; i++) {
+                    if (prevPalette[i]?.locked) {
+                        finalPalette.push(prevPalette[i]);
+                    } else {
+                        const newHex = newHexesPool.shift() || getRandomColor();
+                        finalPalette.push({ id: prevPalette[i]?.id || Date.now() + i, hex: newHex, locked: false });
+                    }
                 }
+                return finalPalette;
             }
-            return finalPalette;
-        }
 
-        // If no colors are locked, but it's not the initial generation, keep the main color
-        if (!isInitial) {
-             newHexes[0] = mainColor;
-        }
-        
-        return newHexes.map((hex, i) => ({
-            id: prevPalette[i]?.id || Date.now() + i,
-            hex,
-            locked: false,
-        }));
-    });
-  }, [generationType, mainColor]);
-
-  const regenerateWithActiveColor = useCallback(() => {
-    const newHexes = generatePalette({
-        numColors: palette.length || 5,
-        type: generationType,
-        baseColors: [mainColor],
-    });
-    
-    newHexes[0] = mainColor;
-
-    setPalette(prevPalette => {
-        return newHexes.map((hex, i) => ({
-            id: prevPalette[i]?.id || Date.now() + i,
-            hex: hex,
-            locked: prevPalette[i]?.locked || false
-        }));
-    });
-
-  }, [generationType, mainColor, palette.length]);
-
-  // Handle loading palettes from Library or Inspiration pages & initial load
-  useEffect(() => {
-    if (!isInitialLoad.current) return;
-
-    const editIdStr = searchParams.get('edit');
-    const fromInspiration = searchParams.has('from_inspiration');
-
-    let loadedFromStorage = false;
-
-    if (editIdStr) {
-      const id = parseInt(editIdStr, 10);
-      const savedPalettesJSON = localStorage.getItem('saved_palettes');
-      if (savedPalettesJSON) {
-        const savedPalettes = JSON.parse(savedPalettesJSON) as { id: number; name: string; colors: string[] }[];
-        const paletteToEdit = savedPalettes.find(p => p.id === id);
-        if (paletteToEdit) {
-          loadedFromStorage = true;
-          setEditingPaletteId(id);
-          setPalette(paletteToEdit.colors.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
-          setMainColor(paletteToEdit.colors[0] || '#FF9800');
-          setNewPaletteName(paletteToEdit.name);
-          toast({ title: "Editing Palette", description: `Loaded "${paletteToEdit.name}" for editing.` });
-          router.replace('/', { scroll: false });
-        }
-      }
-    } else if (fromInspiration) {
-      const paletteToLoadJSON = localStorage.getItem('palette_to_load');
-      if (paletteToLoadJSON) {
-        localStorage.removeItem('palette_to_load');
-        try {
-            const paletteToLoad = JSON.parse(paletteToLoadJSON);
-            if (paletteToLoad && paletteToLoad.colors) {
-              loadedFromStorage = true;
-              setEditingPaletteId(null);
-              setPalette(paletteToLoad.colors.map((hex: string, i: number) => ({ id: Date.now() + i, hex, locked: false })));
-              setMainColor(paletteToLoad.colors[0] || '#FF9800');
-              setNewPaletteName(paletteToLoad.name || 'New Palette');
-              toast({ title: "Palette Loaded", description: `Loaded "${paletteToLoad.name}" from Inspiration.` });
+            if (!isInitial) {
+                 newHexes[0] = mainColor;
             }
-        } catch (e) { console.error("Failed to parse palette from storage", e); }
-        router.replace('/', { scroll: false });
-      }
-    }
-    
-    if (!loadedFromStorage) {
-        // Initial palette generation
-        const initialHexes = generatePalette({
-            numColors: 5,
-            type: 'analogous',
+            
+            return newHexes.map((hex, i) => ({
+                id: prevPalette[i]?.id || Date.now() + i,
+                hex,
+                locked: false,
+            }));
+        });
+    }, [generationType, mainColor, setPalette]);
+
+    const regenerateWithActiveColor = useCallback(() => {
+        const newHexes = generatePalette({
+            numColors: palette.length || 5,
+            type: generationType,
             baseColors: [mainColor],
         });
-        initialHexes[0] = mainColor;
-        setPalette(initialHexes.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
-    }
-    isInitialLoad.current = false;
+        
+        const finalHexes = [...newHexes];
+        finalHexes[0] = mainColor;
 
-  }, [searchParams, router, toast]);
+        setPalette(prevPalette => {
+            const lockedColors = new Map(
+                prevPalette.filter(p => p.locked).map(p => [p.id, p.hex])
+            );
+            
+            if (lockedColors.size > 0) {
+                const unlockedIndices: number[] = [];
+                prevPalette.forEach((p, i) => { if (!p.locked) unlockedIndices.push(i); });
+                
+                const newPalette = [...prevPalette];
+                unlockedIndices.forEach((paletteIndex, i) => {
+                    newPalette[paletteIndex].hex = finalHexes[i % finalHexes.length];
+                });
+                return newPalette;
+            }
 
-  useEffect(() => {
-    if (!hasLockedColors && !isInitialLoad.current) {
-        regeneratePalette();
-    }
-  }, [mainColor, generationType, hasLockedColors, regeneratePalette]);
+            return finalHexes.map((hex, i) => ({
+                id: prevPalette[i]?.id || Date.now() + i,
+                hex: hex,
+                locked: false
+            }));
+        });
 
+    }, [generationType, mainColor, palette.length, setPalette]);
 
-  const handleAddColorToPalette = useCallback(() => {
-      if (palette.length >= 20) {
-        toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
-        return;
-      }
-      if (palette.some(p => p.hex === mainColor)) {
-        toast({ title: 'Color already in palette.' });
-        return;
-      }
-      setPalette(prevColors => {
-          const newColor: PaletteColor = { id: Date.now(), hex: mainColor, locked: false };
-          return [...prevColors, newColor];
-      });
-      toast({ title: 'Color added to palette!' });
-  }, [mainColor, palette, toast]);
-
-  
-  const handleOpenSaveDialog = useCallback(() => {
-    if (palette.length === 0) {
-      toast({ title: "Cannot save empty palette", variant: "destructive" });
-      return;
-    }
-    if (editingPaletteId) {
-      const savedPalettesJSON = localStorage.getItem('saved_palettes');
-      const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-      const existingPalette = savedPalettes.find((p: any) => p.id === editingPaletteId);
-      if (existingPalette) {
-        setNewPaletteName(existingPalette.name);
-      }
-    } else {
-      const detectedHarmony = analyzePalette(palette.map(p => p.hex));
-      setNewPaletteName(detectedHarmony === 'Custom' ? 'My Custom Palette' : `${detectedHarmony} Palette`);
-    }
-    setIsSaveDialogOpen(true);
-  }, [palette, toast, editingPaletteId]);
-
-  const handleSaveToLibrary = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPaletteName.trim()) {
-      toast({ title: "Please enter a name for the palette.", variant: "destructive" });
-      return;
-    }
-
-    const savedPalettesJSON = localStorage.getItem('saved_palettes');
-    let savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-
-    if (editingPaletteId) {
-      savedPalettes = savedPalettes.map((p: any) => 
-        p.id === editingPaletteId 
-          ? { ...p, name: newPaletteName, colors: palette.map(c => c.hex) } 
-          : p
-      );
-      toast({ title: "Palette Updated!", description: `"${newPaletteName}" has been updated.` });
-    } else {
-      const newPalette = {
-        id: Date.now(),
-        name: newPaletteName,
-        colors: palette.map(p => p.hex)
-      };
-      savedPalettes.push(newPalette);
-      toast({ title: "Palette Saved!", description: `"${newPaletteName}" saved to your library.` });
-    }
-
-    localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
-    
-    setIsSaveDialogOpen(false);
-    setNewPaletteName("");
-    setEditingPaletteId(null);
-  }, [palette, newPaletteName, toast, editingPaletteId]);
-
-  const handleColorUpdateInPalette = useCallback((id: number, newHex: string) => {
-    setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
-  }, []);
-
-  const handleLockToggle = useCallback((id: number) => {
-    setPalette(prev => prev.map(c => c.id === id ? { ...c, locked: !c.locked } : c));
-  }, []);
-
-  const handleRemoveColor = useCallback((id: number) => {
-      if (palette.length <= 2) {
-          toast({ title: "Minimum 2 colors required.", variant: "destructive" });
-          return;
-      }
-      setPalette(palette.filter(c => c.id !== id));
-  }, [palette, toast]);
-
-  const handleAddColorAtIndex = useCallback((index: number) => {
-      if (palette.length >= 20) {
-          toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
-          return;
-      }
-      setPalette(prev => {
-          const newPalette = [...prev];
-          const colorBefore = prev[index - 1]?.hex || null;
-          const colorAfter = prev[index]?.hex || null;
-          
-          let newHex: string;
-
-          if (colorBefore && colorAfter) {
-              newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'oklch').hex();
-          } else if (colorBefore) {
-              newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
-          } else if (colorAfter) {
-              newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
-          } else {
-              newHex = getRandomColor();
-          }
-
-          const newColor: PaletteColor = {
-              id: Date.now(),
-              hex: newHex,
-              locked: false,
-          };
-
-          newPalette.splice(index, 0, newColor);
-          
-          return adjustForColorblindSafety(newPalette);
-      });
-  }, [palette.length, toast]);
-
-  const handleMix = useCallback(() => {
-    setGenerationType(prevType => {
-        const currentIndex = allGenerationTypes.indexOf(prevType);
-        const nextIndex = (currentIndex + 1) % allGenerationTypes.length;
-        return allGenerationTypes[nextIndex];
-    });
-    regenerateWithActiveColor();
-  }, [regenerateWithActiveColor]);
-
-  const handleRandomize = useCallback(() => {
-    setEditingPaletteId(null);
-    setPalette(prev => prev.map(c => ({...c, locked: false})));
-    setMainColor(getRandomColor());
-    if (!isHarmonyLocked) {
-      setGenerationType(allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)]);
-    }
-    toast({ title: "Palette Randomized!" });
-  }, [toast, isHarmonyLocked]);
-
-  const handleUnlockAll = useCallback(() => {
-    setPalette(prev => prev.map(c => ({...c, locked: false})));
-    toast({ title: "All colors unlocked" });
-  }, [toast]);
-
-  const handleApplyAnalyzedPalette = useCallback((newHexes: string[]) => {
-    setPalette(newHexes.map((hex, i) => ({ 
-        id: palette[i]?.id || Date.now() + i, 
-        hex, 
-        locked: false
-    })));
-    toast({ title: "Palette Updated", description: "The analyzed palette has been applied to the editor." });
-  }, [palette, toast]);
-
-
-  const handleEyeDropper = async () => {
-    if (!window.EyeDropper) {
-      toast({
-        title: "Unsupported Browser",
-        description: "The eyedropper feature is not available in your browser.",
-        variant: "destructive",
-      });
-      return;
-    }
-    try {
-      const eyeDropper = new window.EyeDropper();
-      const { sRGBHex } = await eyeDropper.open();
-      setMainColor(sRGBHex);
-      toast({ title: "Color Picked!", description: `Set active color to ${sRGBHex}` });
-    } catch (e) {
-      // User probably cancelled the action, so we can ignore the error.
-      console.log("EyeDropper cancelled");
-    }
-  };
-
-
-  const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
-
-  const analysisSourcePalette = useMemo(() => {
-    if (paletteHexes.length < 2) return paletteHexes;
-    if (!useBezier && !correctLightness) {
-        return paletteHexes;
-    }
-    const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
-    let scale = chroma.scale(interpolator).mode('oklch');
-    if (correctLightness) {
-      scale = scale.correctLightness();
-    }
-    return scale.colors(paletteHexes.length);
-  }, [paletteHexes, useBezier, correctLightness]);
-  
-  const simulatedPalette = useMemo(() => {
-    if (analysisSourcePalette.length === 0) return [];
-    const source = (useBezier || correctLightness) ? analysisSourcePalette : paletteHexes;
-    return source.map(color => simulate(color, simulationType));
-  }, [analysisSourcePalette, paletteHexes, simulationType, useBezier, correctLightness]);
-  
-  const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
-  
-  const { isPaletteColorblindSafe } = useMemo(() => {
-    if (palette.length < 2) return { isPaletteColorblindSafe: true, adjustedPalette: palette };
-    const adjusted = adjustForColorblindSafety(palette);
-    let isSafe = true;
-    for(let i=0; i < adjusted.length -1; i++){
-        if(chroma.contrast(adjusted[i].hex, adjusted[i+1].hex) < 1.1){
-            isSafe = false;
-            break;
+    useEffect(() => {
+        if (paletteToLoad) {
+            setPalette(paletteToLoad.colors.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
+            setMainColor(paletteToLoad.colors[0] || '#FF9800');
+            setNewPaletteName(paletteToLoad.name || '');
+            setEditingPaletteId(paletteToLoad.id);
+            toast({ title: `Loaded "${paletteToLoad.name}" for editing.` });
+            clearPaletteToLoad();
+        } else if (isInitialLoad.current && palette.length === 0) {
+            const initialHexes = generatePalette({
+                numColors: 5,
+                type: 'analogous',
+                baseColors: [mainColor],
+            });
+            initialHexes[0] = mainColor;
+            setPalette(initialHexes.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
         }
-    }
-    return { isPaletteColorblindSafe: isSafe, adjustedPalette: adjusted };
-  }, [palette]);
+        isInitialLoad.current = false;
+    }, [paletteToLoad, clearPaletteToLoad, setPalette, setMainColor, mainColor, palette.length, toast]);
 
-  const detectedHarmony = useMemo(() => {
-      return analyzePalette(palette.map(p => p.hex));
-  }, [palette]);
+    useEffect(() => {
+        if (!hasLockedColors && !isInitialLoad.current && !paletteToLoad) {
+            regeneratePalette();
+        }
+    }, [mainColor, generationType, hasLockedColors, regeneratePalette, paletteToLoad]);
 
-  // Using useCallback for setters to stabilize useEffect dependency array
-  const stableSetUseBezier = useCallback(setUseBezier, []);
-  const stableSetCorrectLightness = useCallback(setCorrectLightness, []);
-  const stableSetSimulationType = useCallback(setSimulationType, []);
+    const handleSaveActiveColor = useCallback(() => {
+        const result = saveColorToLibrary(mainColor);
+        toast({
+            title: result.message,
+            variant: result.success ? 'default' : 'destructive',
+        });
+    }, [mainColor, toast]);
+  
+    const handleOpenSaveDialog = useCallback(() => {
+        if (palette.length === 0) {
+            toast({ title: "Cannot save empty palette", variant: "destructive" });
+            return;
+        }
+        if (editingPaletteId) {
+            const savedPalettesJSON = localStorage.getItem('saved_palettes');
+            const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
+            const existingPalette = savedPalettes.find((p: any) => p.id === editingPaletteId);
+            if (existingPalette) {
+                setNewPaletteName(existingPalette.name);
+            }
+        } else {
+            const detectedHarmony = analyzePalette(palette.map(p => p.hex));
+            setNewPaletteName(detectedHarmony === 'Custom' ? 'My Custom Palette' : `${detectedHarmony} Palette`);
+        }
+        setIsSaveDialogOpen(true);
+    }, [palette, toast, editingPaletteId]);
 
-  const analysisPanel = useMemo(() => (
-    <div className="space-y-6">
-        <h3 className="text-lg font-semibold">Palette Analysis</h3>
-        <div className="flex justify-between items-center text-sm">
-            <Label>Detected Harmony</Label>
-            <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
-        </div>
-        <Separator />
-        <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
-                  <TooltipProvider>
-                      <ShadTooltip>
-                          <TooltipTrigger asChild>
-                              <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                              <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
-                          </TooltipContent>
-                      </ShadTooltip>
-                  </TooltipProvider>
-              </div>
-              <div className="flex items-center space-x-2">
-                  <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => stableSetCorrectLightness(!!checked)} />
-                  <Label htmlFor="correctLightness">Correct lightness</Label>
-              </div>
+    const handleSaveToLibrary = useCallback((e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newPaletteName.trim()) {
+            toast({ title: "Please enter a name for the palette.", variant: "destructive" });
+            return;
+        }
+
+        const savedPalettesJSON = localStorage.getItem('saved_palettes');
+        let savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
+
+        if (editingPaletteId) {
+            savedPalettes = savedPalettes.map((p: any) => 
+                p.id === editingPaletteId 
+                ? { ...p, name: newPaletteName, colors: palette.map(c => c.hex) } 
+                : p
+            );
+            toast({ title: "Palette Updated!", description: `"${newPaletteName}" has been updated.` });
+        } else {
+            const newPalette = {
+                id: Date.now(),
+                name: newPaletteName,
+                colors: palette.map(p => p.hex)
+            };
+            savedPalettes.push(newPalette);
+            toast({ title: "Palette Saved!", description: `"${newPaletteName}" saved to your library.` });
+        }
+
+        localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
+        
+        setIsSaveDialogOpen(false);
+        setNewPaletteName("");
+        setEditingPaletteId(null);
+    }, [palette, newPaletteName, toast, editingPaletteId]);
+
+    const handleColorUpdateInPalette = useCallback((id: number, newHex: string) => {
+        setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
+    }, [setPalette]);
+
+    const handleLockToggle = useCallback((id: number) => {
+        setPalette(prev => prev.map(c => c.id === id ? { ...c, locked: !c.locked } : c));
+    }, [setPalette]);
+
+    const handleRemoveColor = useCallback((id: number) => {
+        if (palette.length <= 2) {
+            toast({ title: "Minimum 2 colors required.", variant: "destructive" });
+            return;
+        }
+        setPalette(palette.filter(c => c.id !== id));
+    }, [palette, toast, setPalette]);
+
+    const handleAddColorAtIndex = useCallback((index: number) => {
+        if (palette.length >= 20) {
+            toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
+            return;
+        }
+        setPalette(prev => {
+            const newPalette = [...prev];
+            const colorBefore = prev[index - 1]?.hex || null;
+            const colorAfter = prev[index]?.hex || null;
+            
+            let newHex: string;
+
+            if (colorBefore && colorAfter) {
+                newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'oklch').hex();
+            } else if (colorBefore) {
+                newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
+            } else if (colorAfter) {
+                newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
+            } else {
+                newHex = getRandomColor();
+            }
+
+            const newColor: PaletteColor = {
+                id: Date.now(),
+                hex: newHex,
+                locked: false,
+            };
+
+            newPalette.splice(index, 0, newColor);
+            
+            return adjustForColorblindSafety(newPalette);
+        });
+    }, [palette.length, toast, setPalette]);
+
+    const handleMix = useCallback(() => {
+        setGenerationType(prevType => {
+            const currentIndex = allGenerationTypes.indexOf(prevType);
+            const nextIndex = (currentIndex + 1) % allGenerationTypes.length;
+            return allGenerationTypes[nextIndex];
+        });
+        regenerateWithActiveColor();
+    }, [regenerateWithActiveColor, setGenerationType]);
+
+    const handleRandomize = useCallback(() => {
+        setEditingPaletteId(null);
+        setPalette(prev => prev.map(c => ({...c, locked: false})));
+        setMainColor(getRandomColor());
+        if (!isHarmonyLocked) {
+            setGenerationType(allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)]);
+        }
+        toast({ title: "Palette Randomized!" });
+    }, [toast, isHarmonyLocked, setPalette, setMainColor, setGenerationType]);
+
+    const handleUnlockAll = useCallback(() => {
+        setPalette(prev => prev.map(c => ({...c, locked: false})));
+        toast({ title: "All colors unlocked" });
+    }, [toast, setPalette]);
+
+    const handleApplyAnalyzedPalette = useCallback((newHexes: string[]) => {
+        setPalette(newHexes.map((hex, i) => ({ 
+            id: palette[i]?.id || Date.now() + i, 
+            hex, 
+            locked: false
+        })));
+        toast({ title: "Palette Updated", description: "The analyzed palette has been applied to the editor." });
+    }, [palette, toast, setPalette]);
+
+    const handleEyeDropper = async () => {
+        if (!window.EyeDropper) {
+            toast({
+                title: "Unsupported Browser",
+                description: "The eyedropper feature is not available in your browser.",
+                variant: "destructive",
+            });
+            return;
+        }
+        try {
+            const eyeDropper = new window.EyeDropper();
+            const { sRGBHex } = await eyeDropper.open();
+            setMainColor(sRGBHex);
+            toast({ title: "Color Picked!", description: `Set active color to ${sRGBHex}` });
+        } catch (e) {
+            console.log("EyeDropper cancelled");
+        }
+    };
+
+    const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
+
+    const analysisSourcePalette = useMemo(() => {
+        if (paletteHexes.length < 2) return paletteHexes;
+        if (!useBezier && !correctLightness) {
+            return paletteHexes;
+        }
+        const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
+        let scale = chroma.scale(interpolator).mode('oklch');
+        if (correctLightness) {
+            scale = scale.correctLightness();
+        }
+        return scale.colors(paletteHexes.length);
+    }, [paletteHexes, useBezier, correctLightness]);
+  
+    const simulatedPalette = useMemo(() => {
+        if (analysisSourcePalette.length === 0) return [];
+        const source = (useBezier || correctLightness) ? analysisSourcePalette : paletteHexes;
+        return source.map(color => simulate(color, simulationType));
+    }, [analysisSourcePalette, paletteHexes, simulationType, useBezier, correctLightness]);
+  
+    const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
+  
+    const { isPaletteColorblindSafe } = useMemo(() => {
+        if (palette.length < 2) return { isPaletteColorblindSafe: true, adjustedPalette: palette };
+        const adjusted = adjustForColorblindSafety(palette);
+        let isSafe = true;
+        for(let i=0; i < adjusted.length -1; i++){
+            if(chroma.contrast(adjusted[i].hex, adjusted[i+1].hex) < 1.1){
+                isSafe = false;
+                break;
+            }
+        }
+        return { isPaletteColorblindSafe: isSafe, adjustedPalette: adjusted };
+    }, [palette]);
+
+    const detectedHarmony = useMemo(() => {
+        return analyzePalette(palette.map(p => p.hex));
+    }, [palette]);
+
+    const stableSetUseBezier = useCallback(setUseBezier, []);
+    const stableSetCorrectLightness = useCallback(setCorrectLightness, []);
+    const stableSetSimulationType = useCallback(setSimulationType, []);
+
+    const analysisPanel = useMemo(() => (
+        <div className="space-y-6">
+            <h3 className="text-lg font-semibold">Palette Analysis</h3>
+            <div className="flex justify-between items-center text-sm">
+                <Label>Detected Harmony</Label>
+                <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
             </div>
-            <div className="flex flex-col items-start gap-2">
-                <Label className="text-sm">Simulate:</Label>
-                <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => stableSetSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
-                    <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
-                    <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
-                    <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
-                    <Label htmlFor="sb-deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
-                    <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
-                    <Label htmlFor="sb-deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
-                    <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
-                    <Label htmlFor="sb-protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
-                    <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
-                    <Label htmlFor="sb-tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
-                </RadioGroup>
-            </div>
-        </div>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            <div className="h-5">
-              <AnimatePresence>
-                {isPaletteColorblindSafe && (
-                  <motion.span
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center text-sm text-green-500"
-                  >
-                    <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
-            <div className="relative group">
-              <div className="flex h-16 w-full overflow-hidden rounded-md border">
-                  {simulatedPalette.map((color, index) => (
-                  <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                  ))}
-              </div>
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
-                  <Button onClick={() => handleApplyAnalyzedPalette(simulatedPalette)} variant="secondary">
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Use This Palette
-                  </Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-2 pt-4">
-                <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" description="How light or dark the color is, from black (0) to white (100)." />
-                <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" description="The intensity of the color, from gray (0) to a pure, vivid color." />
-                <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" description="The color's position on the color wheel, measured in degrees (0-360)." />
-            </div>
-        </motion.div>
-    </div>
-  ), [
-      useBezier, stableSetUseBezier, 
-      correctLightness, stableSetCorrectLightness,
-      simulationType, stableSetSimulationType,
-      isPaletteColorblindSafe, simulatedPalette, graphData,
-      handleApplyAnalyzedPalette, detectedHarmony
-  ]);
-
-  const paletteActions = (
-    <div className="flex w-full justify-between items-center gap-4 flex-wrap">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Button onClick={handleMix} size="sm">
-              <Dices className="mr-2 h-4 w-4" />
-              Mix
-          </Button>
-          <Button onClick={handleRandomize} size="sm" variant="outline">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Randomize
-          </Button>
-          <Button onClick={handleUnlockAll} variant="outline" size="sm" disabled={!hasLockedColors}>
-              <Unlock className="mr-2 h-4 w-4" />
-              Unlock All
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
-          <Select 
-              value={generationType} 
-              onValueChange={(value) => setGenerationType(value as GenerationType)}
-              disabled={hasLockedColors || isHarmonyLocked}
-            >
-            <SelectTrigger id="generationType" className="w-[150px] h-9">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              {allGenerationTypes.map(type => (
-                <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <TooltipProvider>
-            <ShadTooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setIsHarmonyLocked(v => !v)}>
-                  {isHarmonyLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isHarmonyLocked ? 'Unlock' : 'Lock'} Harmony Type</p>
-              </TooltipContent>
-            </ShadTooltip>
-          </TooltipProvider>
-          {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change type.</p>}
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-4">
-        <Button onClick={handleOpenSaveDialog}>
-          {editingPaletteId ? <Pencil className="mr-2 h-4 w-4" /> : null}
-          {editingPaletteId ? 'Update Palette' : 'Save'}
-        </Button>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="flex h-full overflow-hidden">
-        <Sidebar>
-            <SidebarContent className="p-4">
-                {analysisPanel}
-            </SidebarContent>
-        </Sidebar>
-
-        <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-                <form onSubmit={handleSaveToLibrary}>
-                    <DialogHeader>
-                        <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
-                        <DialogDescription>
-                            Give your palette a name. Click save when you're done.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">
-                                Name
-                            </Label>
-                            <Input
-                                id="name"
-                                value={newPaletteName}
-                                onChange={(e) => setNewPaletteName(e.target.value)}
-                                className="col-span-3"
-                                placeholder="e.g. Sunset Vibes"
-                                required
-                            />
-                        </div>
+            <Separator />
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
+                        <TooltipProvider>
+                            <ShadTooltip>
+                                <TooltipTrigger asChild>
+                                    <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                                </TooltipContent>
+                            </ShadTooltip>
+                        </TooltipProvider>
                     </div>
-                    <DialogFooter>
-                        <Button type="submit">{editingPaletteId ? 'Update' : 'Save'}</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-
-        <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr,1.5fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
-            <div className="flex flex-col gap-8 min-h-0">
-                <section className="grid grid-cols-1 md:items-center gap-8 w-full">
-                    <div className="w-full flex justify-center">
-                         <div className="flex items-center justify-center gap-4">
-                            <div className="flex flex-col items-center gap-4">
-                                <ColorWheel
-                                    color={mainColor}
-                                    onChange={(color: ColorResult) => setMainColor(color.hex)}
-                                    width={280}
-                                    height={280}
-                                />
-                                <div className="flex items-center gap-2 w-[280px]">
-                                    <Input
-                                        value={inputValue.toUpperCase()}
-                                        onChange={handleInputChange}
-                                        onBlur={handleInputBlur}
-                                        className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
-                                    />
-                                    <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
-                                        <Pipette className="h-4 w-4" />
-                                        <span className="sr-only">Pick from screen</span>
-                                    </Button>
-                                </div>
-                            </div>
-                             <div className="flex gap-4 h-[280px]">
-                                <div className="flex flex-col items-center gap-2">
-                                    <Slider
-                                        orientation="vertical"
-                                        value={[mainHsl.s]}
-                                        onValueChange={handleSaturationChange}
-                                        max={100}
-                                        step={1}
-                                    />
-                                    <Label className="text-xs text-muted-foreground">S</Label>
-                                </div>
-                                <div className="flex flex-col items-center gap-2">
-                                    <Slider
-                                        orientation="vertical"
-                                        value={[mainHsl.l]}
-                                        onValueChange={handleLightnessChange}
-                                        max={100}
-                                        step={1}
-                                    />
-                                    <Label className="text-xs text-muted-foreground">L</Label>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => stableSetCorrectLightness(!!checked)} />
+                        <Label htmlFor="correctLightness">Correct lightness</Label>
                     </div>
-
-                    <div className="w-full flex justify-center">
-                        <div className="w-full max-w-md h-full">
-                            <ColorBox 
-                                variant="default"
-                                color={mainColor} 
-                                onActionClick={handleAddColorToPalette} 
-                                actionIcon={<Plus className="h-4 w-4" />}
-                                actionTitle="Add color to palette"
-                            />
-                        </div>
+                </div>
+                <div className="flex flex-col items-start gap-2">
+                    <Label className="text-sm">Simulate:</Label>
+                    <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => stableSetSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                        <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
+                        <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                        <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
+                        <Label htmlFor="sb-deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
+                        <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
+                        <Label htmlFor="sb-deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
+                        <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
+                        <Label htmlFor="sb-protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
+                        <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
+                        <Label htmlFor="sb-tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
+                    </RadioGroup>
+                </div>
+            </div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div className="h-5">
+                    <AnimatePresence>
+                        {isPaletteColorblindSafe && (
+                            <motion.span
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex items-center text-sm text-green-500"
+                            >
+                                <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
+                            </motion.span>
+                        )}
+                    </AnimatePresence>
+                </div>
+                <div className="relative group">
+                    <div className="flex h-16 w-full overflow-hidden rounded-md border">
+                        {simulatedPalette.map((color, index) => (
+                            <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                        ))}
                     </div>
-                </section>
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                        <Button onClick={() => handleApplyAnalyzedPalette(simulatedPalette)} variant="secondary">
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Use This Palette
+                        </Button>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 gap-2 pt-4">
+                    <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" description="How light or dark the color is, from black (0) to white (100)." />
+                    <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" description="The intensity of the color, from gray (0) to a pure, vivid color." />
+                    <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" description="The color's position on the color wheel, measured in degrees (0-360)." />
+                </div>
+            </motion.div>
+        </div>
+    ), [
+        useBezier, stableSetUseBezier, 
+        correctLightness, stableSetCorrectLightness,
+        simulationType, stableSetSimulationType,
+        isPaletteColorblindSafe, simulatedPalette, graphData,
+        handleApplyAnalyzedPalette, detectedHarmony
+    ]);
+
+    const paletteActions = (
+        <div className="flex w-full justify-between items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <Button onClick={handleMix} size="sm">
+                        <Dices className="mr-2 h-4 w-4" />
+                        Mix
+                    </Button>
+                    <Button onClick={handleRandomize} size="sm" variant="outline">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Randomize
+                    </Button>
+                    <Button onClick={handleUnlockAll} variant="outline" size="sm" disabled={!hasLockedColors}>
+                        <Unlock className="mr-2 h-4 w-4" />
+                        Unlock All
+                    </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
+                    <Select 
+                        value={generationType} 
+                        onValueChange={(value) => setGenerationType(value as GenerationType)}
+                        disabled={hasLockedColors || isHarmonyLocked}
+                    >
+                        <SelectTrigger id="generationType" className="w-[150px] h-9">
+                            <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {allGenerationTypes.map(type => (
+                                <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <TooltipProvider>
+                        <ShadTooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setIsHarmonyLocked(v => !v)}>
+                                    {isHarmonyLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{isHarmonyLocked ? 'Unlock' : 'Lock'} Harmony Type</p>
+                            </TooltipContent>
+                        </ShadTooltip>
+                    </TooltipProvider>
+                    {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change type.</p>}
+                </div>
             </div>
             
-            <section className="flex flex-col min-h-0 lg:min-h-full">
-                <Palette
-                    palette={palette}
-                    onColorChange={handleColorUpdateInPalette}
-                    onLockToggle={handleLockToggle}
-                    onRemoveColor={handleRemoveColor}
-                    onAddColor={handleAddColorAtIndex}
-                    onColorClick={(c) => setMainColor(c.hex)}
-                    actions={paletteActions}
-                />
-            </section>
-        </main>
-    </div>
-  );
+            <div className="flex items-center gap-4">
+                <Button onClick={handleOpenSaveDialog}>
+                    {editingPaletteId ? <Pencil className="mr-2 h-4 w-4" /> : null}
+                    {editingPaletteId ? 'Update Palette' : 'Save'}
+                </Button>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="flex h-full overflow-hidden">
+            <Sidebar>
+                <SidebarContent className="p-4">
+                    {analysisPanel}
+                </SidebarContent>
+            </Sidebar>
+
+            <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <form onSubmit={handleSaveToLibrary}>
+                        <DialogHeader>
+                            <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
+                            <DialogDescription>
+                                Give your palette a name. Click save when you're done.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="name" className="text-right">
+                                    Name
+                                </Label>
+                                <Input
+                                    id="name"
+                                    value={newPaletteName}
+                                    onChange={(e) => setNewPaletteName(e.target.value)}
+                                    className="col-span-3"
+                                    placeholder="e.g. Sunset Vibes"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit">{editingPaletteId ? 'Update' : 'Save'}</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr,1.5fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
+                <div className="flex flex-col gap-8 min-h-0">
+                    <section className="grid grid-cols-1 md:items-center gap-8 w-full">
+                        <div className="w-full flex justify-center">
+                            <div className="flex items-center justify-center gap-4">
+                                <div className="flex flex-col items-center gap-4">
+                                    <ColorWheel
+                                        color={mainColor}
+                                        onChange={(color: ColorResult) => setMainColor(color.hex)}
+                                        width={280}
+                                        height={280}
+                                    />
+                                    <div className="flex items-center gap-2 w-[280px]">
+                                        <Input
+                                            value={inputValue.toUpperCase()}
+                                            onChange={handleInputChange}
+                                            onBlur={handleInputBlur}
+                                            className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                                        />
+                                        <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+                                            <Pipette className="h-4 w-4" />
+                                            <span className="sr-only">Pick from screen</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 h-[280px]">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Slider
+                                            orientation="vertical"
+                                            value={[mainHsl.s]}
+                                            onValueChange={handleSaturationChange}
+                                            max={100}
+                                            step={1}
+                                        />
+                                        <Label className="text-xs text-muted-foreground">S</Label>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Slider
+                                            orientation="vertical"
+                                            value={[mainHsl.l]}
+                                            onValueChange={handleLightnessChange}
+                                            max={100}
+                                            step={1}
+                                        />
+                                        <Label className="text-xs text-muted-foreground">L</Label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="w-full flex justify-center">
+                            <div className="w-full max-w-md h-full">
+                                <ColorBox 
+                                    variant="default"
+                                    color={mainColor} 
+                                    onActionClick={handleSaveActiveColor} 
+                                    actionIcon={<Library className="h-4 w-4" />}
+                                    actionTitle="Save color to library"
+                                />
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                
+                <section className="flex flex-col min-h-0 lg:min-h-full">
+                    <Palette
+                        palette={palette}
+                        onColorChange={handleColorUpdateInPalette}
+                        onLockToggle={handleLockToggle}
+                        onRemoveColor={handleRemoveColor}
+                        onAddColor={handleAddColorAtIndex}
+                        onSetActiveColor={setMainColor}
+                        actions={paletteActions}
+                    />
+                </section>
+            </main>
+        </div>
+    );
 }
 
 export default PaletteBuilderPage;
