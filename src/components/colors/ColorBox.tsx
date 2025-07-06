@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Info, Library } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "../ui/separator";
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -25,6 +26,7 @@ interface ColorBoxProps {
   actionIcon?: React.ReactNode;
   actionTitle?: string;
   variant?: 'default' | 'compact';
+  popoverActions?: React.ReactNode;
 }
 
 const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onCopy: () => void }) => (
@@ -75,7 +77,8 @@ const ColorBoxInner = ({
     onActionClick,
     actionIcon,
     actionTitle = "Save color to library",
-    variant = 'compact'
+    variant = 'compact',
+    popoverActions
 }: ColorBoxProps) => {
     const { toast } = useToast();
     const { name: descriptiveName, source } = name ? { name, source: 'pantone' } : useDescriptiveColorName(color);
@@ -101,7 +104,7 @@ const ColorBoxInner = ({
     
     if (variant === 'default') {
         return (
-             <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col">
+             <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col cursor-pointer">
                 <div className="relative h-80 w-full" style={{ backgroundColor: color }}>
                      <div className="absolute top-2 right-2 flex gap-1">
                         <Button size="icon" className="h-8 w-8" onClick={finalActionClick} title={actionTitle}>
@@ -123,44 +126,46 @@ const ColorBoxInner = ({
     }
     
     return (
-        <div className="w-40">
-            <Card className="overflow-hidden shadow-sm group w-full">
-                <div
-                    className="relative h-20 w-full cursor-pointer"
-                    style={{ backgroundColor: color }}
-                    onClick={handleCopyHex}
-                >
-                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={finalActionClick} title={actionTitle}>
-                            {actionIcon || <Plus className="h-4 w-4" />}
-                        </Button>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                 <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => e.stopPropagation()} title="Show Details">
-                                    <Info className="h-4 w-4" />
+        <Popover>
+            <PopoverTrigger asChild>
+                <Card className="overflow-hidden shadow-sm group w-full cursor-pointer h-full">
+                    <div
+                        className="relative h-20 w-full"
+                        style={{ backgroundColor: color }}
+                    >
+                         {onActionClick && (
+                             <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={finalActionClick} title={actionTitle}>
+                                    {actionIcon || <Plus className="h-4 w-4" />}
                                 </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-72 p-0">
-                                <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
-                                <div className="p-3">
-                                    <p className="font-semibold text-base text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
-                                    <ColorDetails color={color} />
-                                </div>
-                            </PopoverContent>
-                        </Popover>
+                            </div>
+                         )}
                     </div>
+                    <CardContent className="p-2">
+                        <div className="flex items-center justify-between">
+                            <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
+                            {source === 'pantone' && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground font-mono">{info || color.toUpperCase()}</p>
+                    </CardContent>
+                </Card>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-0">
+                <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
+                <div className="p-3">
+                    <p className="font-semibold text-base text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
+                    <ColorDetails color={color} />
+                    {popoverActions && (
+                        <>
+                            <Separator className="my-3"/>
+                            {popoverActions}
+                        </>
+                    )}
                 </div>
-                <CardContent className="p-2 cursor-pointer" onClick={handleCopyHex}>
-                    <div className="flex items-center justify-between">
-                        <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
-                        {source === 'pantone' && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
-                        )}
-                    </div>
-                    <p className="text-xs text-muted-foreground font-mono">{info || color.toUpperCase()}</p>
-                </CardContent>
-            </Card>
-        </div>
+            </PopoverContent>
+        </Popover>
     );
 };
 

@@ -130,12 +130,20 @@ function PaletteBuilderPage() {
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [newPaletteName, setNewPaletteName] = useState("");
     const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
+    const [editingColorId, setEditingColorId] = useState<number | null>(null);
 
     const { toast } = useToast();
     const router = useRouter();
     const isInitialLoad = useRef(true);
   
     const hasLockedColors = useMemo(() => palette.some(c => c.locked), [palette]);
+
+    // When the main color changes, update the currently editing swatch in the palette
+    useEffect(() => {
+        if (editingColorId) {
+            setPalette(prev => prev.map(p => p.id === editingColorId ? { ...p, hex: mainColor } : p));
+        }
+    }, [mainColor, editingColorId, setPalette]);
   
     useEffect(() => {
         setInputValue(mainColor);
@@ -167,86 +175,34 @@ function PaletteBuilderPage() {
         }
     }, [inputValue, mainColor]);
 
-    const regeneratePalette = useCallback(() => {
-        setPalette(prevPalette => {
-            const isInitial = prevPalette.length === 0;
-            const currentLockedColors = prevPalette.filter(c => c.locked);
-            const currentLockedHexes = currentLockedColors.map(c => c.hex);
-            const numColors = isInitial ? 5 : (prevPalette.length || 5);
-
-            let baseForGeneration = [mainColor];
-            
-            if (currentLockedHexes.length > 0) {
-                baseForGeneration = currentLockedHexes;
-            }
-
-            const newHexes = generatePalette({
-                numColors: numColors,
-                type: generationType,
-                baseColors: baseForGeneration,
-            });
-
-            if (currentLockedHexes.length > 0) {
-                const finalPalette: PaletteColor[] = [];
-                const newHexesPool = newHexes.filter(h => !currentLockedHexes.includes(h));
-                
-                for(let i = 0; i < numColors; i++) {
-                    if (prevPalette[i]?.locked) {
-                        finalPalette.push(prevPalette[i]);
-                    } else {
-                        const newHex = newHexesPool.shift() || getRandomColor();
-                        finalPalette.push({ id: prevPalette[i]?.id || Date.now() + i, hex: newHex, locked: false });
-                    }
-                }
-                return finalPalette;
-            }
-
-            if (!isInitial) {
-                 newHexes[0] = mainColor;
-            }
-            
-            return newHexes.map((hex, i) => ({
-                id: prevPalette[i]?.id || Date.now() + i,
-                hex,
-                locked: false,
-            }));
-        });
-    }, [generationType, mainColor, setPalette]);
-
-    const regenerateWithActiveColor = useCallback(() => {
+    const regeneratePalette = useCallback((base: string) => {
         const newHexes = generatePalette({
             numColors: palette.length || 5,
             type: generationType,
-            baseColors: [mainColor],
+            baseColors: [base],
         });
-        
-        const finalHexes = [...newHexes];
-        finalHexes[0] = mainColor;
 
-        setPalette(prevPalette => {
-            const lockedColors = new Map(
-                prevPalette.filter(p => p.locked).map(p => [p.id, p.hex])
-            );
-            
+        setPalette(currentPalette => {
+            const lockedColors = new Map(currentPalette.filter(p => p.locked).map(p => [p.id, p.hex]));
             if (lockedColors.size > 0) {
-                const unlockedIndices: number[] = [];
-                prevPalette.forEach((p, i) => { if (!p.locked) unlockedIndices.push(i); });
-                
-                const newPalette = [...prevPalette];
-                unlockedIndices.forEach((paletteIndex, i) => {
-                    newPalette[paletteIndex].hex = finalHexes[i % finalHexes.length];
+                 const newPalette = [...currentPalette];
+                 const unlockedIndices: number[] = [];
+                 currentPalette.forEach((p, i) => { if (!p.locked) unlockedIndices.push(i); });
+                 
+                 unlockedIndices.forEach((paletteIndex, i) => {
+                    newPalette[paletteIndex].hex = newHexes[i % newHexes.length];
                 });
                 return newPalette;
+            } else {
+                 newHexes[0] = base;
+                 return newHexes.map((hex, i) => ({
+                    id: currentPalette[i]?.id || Date.now() + i,
+                    hex,
+                    locked: currentPalette[i]?.locked || false
+                 }));
             }
-
-            return finalHexes.map((hex, i) => ({
-                id: prevPalette[i]?.id || Date.now() + i,
-                hex: hex,
-                locked: false
-            }));
         });
-
-    }, [generationType, mainColor, palette.length, setPalette]);
+    }, [generationType, palette.length, setPalette]);
 
     useEffect(() => {
         if (paletteToLoad) {
@@ -257,7 +213,7 @@ function PaletteBuilderPage() {
             toast({ title: `Loaded "${paletteToLoad.name}" for editing.` });
             clearPaletteToLoad();
         } else if (isInitialLoad.current && palette.length === 0) {
-            const initialHexes = generatePalette({
+             const initialHexes = generatePalette({
                 numColors: 5,
                 type: 'analogous',
                 baseColors: [mainColor],
@@ -268,11 +224,31 @@ function PaletteBuilderPage() {
         isInitialLoad.current = false;
     }, [paletteToLoad, clearPaletteToLoad, setPalette, setMainColor, mainColor, palette.length, toast]);
 
-    useEffect(() => {
-        if (!hasLockedColors && !isInitialLoad.current && !paletteToLoad) {
-            regeneratePalette();
+    const handleMix = useCallback(() => {
+        regeneratePalette(mainColor);
+    }, [regeneratePalette, mainColor]);
+
+    const handleRandomize = useCallback(() => {
+        setEditingPaletteId(null);
+        setEditingColorId(null);
+        setPalette(prev => prev.map(c => ({...c, locked: false})));
+        const newMainColor = getRandomColor();
+        setMainColor(newMainColor);
+        if (!isHarmonyLocked) {
+            const newType = allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)];
+            setGenerationType(newType);
+             const newHexes = generatePalette({ numColors: 5, type: newType, baseColors: [newMainColor] });
+             setPalette(newHexes.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })))
+        } else {
+            regeneratePalette(newMainColor);
         }
-    }, [mainColor, generationType, hasLockedColors, regeneratePalette, paletteToLoad]);
+        toast({ title: "Palette Randomized!" });
+    }, [toast, isHarmonyLocked, setPalette, setMainColor, setGenerationType, regeneratePalette]);
+    
+    const handleSetActiveColor = useCallback((id: number, hex: string) => {
+        setMainColor(hex);
+        setEditingColorId(id);
+    }, [setMainColor]);
 
     const handleSaveActiveColor = useCallback(() => {
         const result = saveColorToLibrary(mainColor);
@@ -335,10 +311,6 @@ function PaletteBuilderPage() {
         setEditingPaletteId(null);
     }, [palette, newPaletteName, toast, editingPaletteId]);
 
-    const handleColorUpdateInPalette = useCallback((id: number, newHex: string) => {
-        setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
-    }, [setPalette]);
-
     const handleLockToggle = useCallback((id: number) => {
         setPalette(prev => prev.map(c => c.id === id ? { ...c, locked: !c.locked } : c));
     }, [setPalette]);
@@ -384,25 +356,6 @@ function PaletteBuilderPage() {
             return adjustForColorblindSafety(newPalette);
         });
     }, [palette.length, toast, setPalette]);
-
-    const handleMix = useCallback(() => {
-        setGenerationType(prevType => {
-            const currentIndex = allGenerationTypes.indexOf(prevType);
-            const nextIndex = (currentIndex + 1) % allGenerationTypes.length;
-            return allGenerationTypes[nextIndex];
-        });
-        regenerateWithActiveColor();
-    }, [regenerateWithActiveColor, setGenerationType]);
-
-    const handleRandomize = useCallback(() => {
-        setEditingPaletteId(null);
-        setPalette(prev => prev.map(c => ({...c, locked: false})));
-        setMainColor(getRandomColor());
-        if (!isHarmonyLocked) {
-            setGenerationType(allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)]);
-        }
-        toast({ title: "Palette Randomized!" });
-    }, [toast, isHarmonyLocked, setPalette, setMainColor, setGenerationType]);
 
     const handleUnlockAll = useCallback(() => {
         setPalette(prev => prev.map(c => ({...c, locked: false})));
@@ -717,7 +670,7 @@ function PaletteBuilderPage() {
                         </div>
 
                         <div className="w-full flex justify-center">
-                            <div className="w-full max-w-md h-full">
+                             <div className="w-full max-w-md h-full" onClick={() => setEditingColorId(null)} >
                                 <ColorBox 
                                     variant="default"
                                     color={mainColor} 
@@ -733,11 +686,11 @@ function PaletteBuilderPage() {
                 <section className="flex flex-col min-h-0 lg:min-h-full">
                     <Palette
                         palette={palette}
-                        onColorChange={handleColorUpdateInPalette}
+                        editingColorId={editingColorId}
                         onLockToggle={handleLockToggle}
                         onRemoveColor={handleRemoveColor}
                         onAddColor={handleAddColorAtIndex}
-                        onSetActiveColor={setMainColor}
+                        onSetActiveColor={handleSetActiveColor}
                         actions={paletteActions}
                     />
                 </section>
