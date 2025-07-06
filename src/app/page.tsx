@@ -554,8 +554,6 @@ function PaletteBuilderPage() {
                                         </RadioGroup>
                                     </div>
                                 </div>
-                            </div>
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                                 <div className="h-5">
                                     <AnimatePresence>
                                         {isPaletteColorblindSafe && (
@@ -590,6 +588,8 @@ function PaletteBuilderPage() {
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                                 <div className="space-y-2 pt-4">
                                     {graphData.map((graph, i) => (
                                         <ChartDisplay 

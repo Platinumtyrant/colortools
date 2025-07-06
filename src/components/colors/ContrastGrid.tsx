@@ -75,8 +75,7 @@ export const ContrastGrid = ({ colors }: ContrastGridProps) => {
 
   return (
     <div className="space-y-2">
-       <div className="text-sm font-medium">Contrast Grid</div>
-       <div className="text-xs text-muted-foreground">Text color (vertical) on background color (horizontal).</div>
+      <div className="text-sm font-medium">Contrast Grid</div>
       <div className="flex gap-1">
         <div className="w-7 shrink-0" />
         <div className="flex gap-1">
@@ -95,6 +94,7 @@ export const ContrastGrid = ({ colors }: ContrastGridProps) => {
           </div>
         </div>
       ))}
+      <div className="text-xs text-muted-foreground pt-1">Text color (vertical) on background color (horizontal).</div>
     </div>
   );
 };
