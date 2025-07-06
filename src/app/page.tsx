@@ -624,7 +624,7 @@ function PaletteBuilderPage() {
                 </Dialog>
                 
                 {/* Top Section: Picker and Active Color Details */}
-                <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-4xl mx-auto">
+                <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-5xl mx-auto">
                     <div className="w-full flex flex-col items-center lg:items-start gap-4">
                         <ColorPickerClient 
                         color={mainColor} 
@@ -654,7 +654,7 @@ function PaletteBuilderPage() {
                 </section>
                 
                 {/* Palette Display Section */}
-                <section className="w-full max-w-4xl mx-auto flex-grow flex flex-col min-h-[200px]">
+                <section className="w-full max-w-5xl mx-auto flex-grow flex flex-col min-h-[200px]">
                     <Palette
                     palette={palette}
                     onColorChange={handleColorUpdateInPalette}
