@@ -185,7 +185,7 @@ export default function ColorWheelPage() {
                         />
                     </div>
                 </div>
-                <div className="w-full max-w-sm h-[280px]">
+                <div className="w-full max-w-sm h-full">
                     <ColorBox color={activeColor} variant="default" />
                 </div>
             </div>
@@ -198,7 +198,7 @@ export default function ColorWheelPage() {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue={harmonyInfo[0].name} className="w-full">
-                            <TabsList className="flex-wrap h-auto justify-start">
+                            <TabsList className="flex-wrap h-auto justify-center">
                                 {harmonyInfo.map((harmony) => (
                                     <TabsTrigger key={harmony.name} value={harmony.name}>
                                         {harmony.name}
@@ -217,7 +217,7 @@ export default function ColorWheelPage() {
                                         <div className="mx-auto">
                                             <HarmonyColorWheel colors={harmony.colors} size={200} />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 items-start content-center">
+                                        <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                             {harmony.colors.map((c) => (
                                                 <ColorBox key={c} color={c} variant="compact" />
                                             ))}
