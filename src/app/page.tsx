@@ -628,7 +628,7 @@ function PaletteBuilderPage() {
                 
                 {/* Top Section: Picker and Active Color Details */}
                 <section className="grid grid-cols-1 lg:grid-cols-2 lg:items-center gap-8 w-full max-w-5xl mx-auto">
-                    <div className="w-full flex justify-center lg:justify-start">
+                    <div className="w-full flex justify-center">
                          <div className="flex items-center justify-center gap-4">
                             <div className="flex flex-col items-center gap-4">
                                 <ColorWheel
