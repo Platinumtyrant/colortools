@@ -64,34 +64,39 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
+    const dragInfo = useRef<{isDragging: boolean, pointId: number | null}>({ isDragging: false, pointId: null });
     
-    const handlePointInteractionStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
+    const handlePointClick = useCallback((pointId: number) => {
+        if (!dragInfo.current.isDragging) {
+            setActivePointId(pointId);
+            setOpenPopoverId(prevId => prevId === pointId ? null : pointId);
+        }
+        dragInfo.current = { isDragging: false, pointId: null };
+    }, []);
+
+    const handlePointMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
         e.preventDefault();
         e.stopPropagation();
 
+        dragInfo.current = { isDragging: false, pointId: pointId };
+        
         const startPos = { x: e.clientX, y: e.clientY };
-        let hasDragged = false;
-
-        // On mouse down, always set the active point, but don't open the popover yet.
-        // This makes the first click always a "selection".
-        if (handleType === 'position' && activePointId !== pointId) {
-            setActivePointId(pointId);
-            setOpenPopoverId(null); // Close any other popover
-        }
-
+        let moved = false;
+        
         const handleDocumentMouseMove = (moveEvent: MouseEvent) => {
-            const dx = moveEvent.clientX - startPos.x;
-            const dy = moveEvent.clientY - startPos.y;
+            const dx = Math.abs(moveEvent.clientX - startPos.x);
+            const dy = Math.abs(moveEvent.clientY - startPos.y);
 
-            if (!hasDragged && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-                hasDragged = true;
-                // If we start dragging, ensure the popover is closed.
-                if (openPopoverId === pointId) {
-                    setOpenPopoverId(null);
+            if (!moved && (dx > 3 || dy > 3)) {
+                moved = true;
+                dragInfo.current.isDragging = true;
+                setOpenPopoverId(null);
+                 if (activePointId !== pointId) {
+                    setActivePointId(pointId);
                 }
             }
 
-            if (hasDragged) {
+            if (moved) {
                 if (!previewRef.current) return;
                 const rect = previewRef.current.getBoundingClientRect();
                 
@@ -139,18 +144,17 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         const handleDocumentMouseUp = () => {
             document.removeEventListener('mousemove', handleDocumentMouseMove);
             document.removeEventListener('mouseup', handleDocumentMouseUp);
-
-            // If it wasn't a drag, it was a click.
-            if (!hasDragged && handleType === 'position') {
-                // Now, because selection happened on mousedown, we just toggle the popover.
-                 setOpenPopoverId(prevId => (prevId === pointId ? null : pointId));
+            if (!moved) {
+                handlePointClick(pointId);
+            } else {
+                dragInfo.current = { isDragging: false, pointId: null };
             }
         };
 
         document.addEventListener('mousemove', handleDocumentMouseMove);
         document.addEventListener('mouseup', handleDocumentMouseUp);
-    }, [activePointId, openPopoverId]);
-
+    }, [handlePointClick, activePointId]);
+    
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
             if (prev.length >= 6) {
@@ -174,8 +178,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
     const handleRemovePoint = useCallback((idToRemove: number) => {
         setPoints(prev => {
-            if (prev.length <= 2) {
-                toast({ title: "A minimum of 2 points is required." });
+            if (prev.length <= 1) {
+                toast({ title: "A minimum of 1 point is required." });
                 return prev;
             }
             if (activePointId === idToRemove) {
@@ -202,15 +206,15 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: ${points[0]?.color || '#000000'};
   overflow: hidden;
+  background-color: ${points[0]?.color || '#000000'};
 }
 
 .mesh-point {
   position: absolute;
   mix-blend-mode: lighten;
-  border-radius: 50%;
   filter: blur(50px);
+  border-radius: 50%;
 }
 `;
         const pointsCss = points.map((p, i) => `
@@ -259,7 +263,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                             onClick={handleBackgroundClick}
                             style={{ backgroundColor: points[0]?.color || '#000000' }}
                         >
-                             {points.map(point => (
+                            {points.map(point => (
                                 <div
                                     key={`grad-${point.id}`}
                                     className="absolute mix-blend-lighten rounded-full"
@@ -273,10 +277,10 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                         filter: 'blur(50px)',
                                     }}
                                 />
-                             ))}
+                            ))}
                             {points.map((point) => (
-                                <Popover key={point.id} open={openPopoverId === point.id} onOpenChange={(isOpen) => setOpenPopoverId(isOpen ? point.id : null)}>
-                                    <PopoverTrigger asChild>
+                                <Popover key={point.id} open={openPopoverId === point.id} onOpenChange={(isOpen) => !isOpen && openPopoverId === point.id && setOpenPopoverId(null)}>
+                                     <PopoverTrigger asChild>
                                         <div
                                             className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
                                             style={{
@@ -286,13 +290,13 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                 boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                                 zIndex: activePointId === point.id ? 10 : 1,
                                             }}
-                                            onMouseDown={(e) => handlePointInteractionStart(e, point.id, 'position')}
+                                            onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
                                         />
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-72 p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
+                                    <PopoverContent className="w-72 p-4 space-y-4" onClick={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
                                         <div className="flex justify-between items-center">
                                             <h3 className="text-sm font-semibold">Point {points.findIndex(p => p.id === point.id) + 1}</h3>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 2}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 1}>
                                                 <Trash2 className="h-3 w-3" />
                                                 <span className="sr-only">Remove Point</span>
                                             </Button>
@@ -363,7 +367,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                     transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
-                                                onMouseDown={(e) => handlePointInteractionStart(e, activePoint.id, 'spreadX')}
+                                                onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadX')}
                                             />
                                             <div
                                                 className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
@@ -373,7 +377,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                     transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
-                                                onMouseDown={(e) => handlePointInteractionStart(e, activePoint.id, 'spreadY')}
+                                                onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadY')}
                                             />
                                         </>
                                     );
@@ -394,9 +398,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                     {isCodeVisible && (
                         <div className="relative mt-4">
                             <pre className="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto text-xs">
-                                <code>
-                                    {gradientCss}
-                                </code>
+                                <code>{gradientCss}</code>
                             </pre>
                         </div>
                     )}
