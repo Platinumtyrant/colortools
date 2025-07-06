@@ -37,7 +37,7 @@ const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onC
 );
 
 
-const ColorDetails = ({ color }: { color: string }) => {
+export const ColorDetails = ({ color }: { color: string }) => {
     const { toast } = useToast();
     const colorInstance = colord(color);
     

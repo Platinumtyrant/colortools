@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,7 +25,25 @@ import type { ColorResult } from '@uiw/react-color';
 import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { ColorBox } from '@/components/colors/ColorBox';
+import { ColorBox, ColorDetails } from '@/components/colors/ColorBox';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Pipette } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+// Type definition for the experimental EyeDropper API
+interface EyeDropperResult {
+  sRGBHex: string;
+}
+interface EyeDropper {
+  new (): EyeDropper;
+  open(options?: { signal: AbortSignal }): Promise<EyeDropperResult>;
+}
+declare global {
+  interface Window {
+    EyeDropper?: EyeDropper;
+  }
+}
 
 const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mod.default), {
   ssr: false,
@@ -52,6 +70,12 @@ export default function ColorWheelPage() {
     const [tintCount, setTintCount] = useState(5);
     const [toneCount, setToneCount] = useState(5);
     const [shadeCount, setShadeCount] = useState(5);
+    const [inputValue, setInputValue] = useState(activeColor);
+    const { toast } = useToast();
+
+    React.useEffect(() => {
+        setInputValue(activeColor);
+    }, [activeColor]);
 
     const activeHsl = useMemo(() => colord(activeColor).toHsl(), [activeColor]);
 
@@ -64,6 +88,39 @@ export default function ColorWheelPage() {
         const newColor = colord({ ...activeHsl, s: newSaturation[0] }).toHex();
         setActiveColor(newColor);
     };
+
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setInputValue(value);
+        if (colord(value).isValid()) {
+            setActiveColor(value);
+        }
+    }, []);
+
+    const handleInputBlur = useCallback(() => {
+        if (!colord(inputValue).isValid()) {
+            setInputValue(activeColor);
+        }
+    }, [inputValue, activeColor]);
+
+    const handleEyeDropper = async () => {
+        if (!window.EyeDropper) {
+          toast({
+            title: "Unsupported Browser",
+            description: "The eyedropper feature is not available in your browser.",
+            variant: "destructive",
+          });
+          return;
+        }
+        try {
+          const eyeDropper = new window.EyeDropper();
+          const { sRGBHex } = await eyeDropper.open();
+          setActiveColor(sRGBHex);
+          toast({ title: "Color Picked!", description: `Set active color to ${sRGBHex}` });
+        } catch (e) {
+          console.log("EyeDropper cancelled");
+        }
+      };
 
     const harmonies = useMemo(() => ({
         complementary: getComplementary(activeColor),
@@ -174,12 +231,26 @@ export default function ColorWheelPage() {
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-12 max-w-5xl mx-auto">
                 <div className="flex items-center justify-center gap-4">
-                    <ColorWheel
-                        color={activeColor}
-                        onChange={(color: ColorResult) => setActiveColor(color.hex)}
-                        width={280}
-                        height={280}
-                    />
+                    <div className="flex flex-col items-center gap-4">
+                        <ColorWheel
+                            color={activeColor}
+                            onChange={(color: ColorResult) => setActiveColor(color.hex)}
+                            width={280}
+                            height={280}
+                        />
+                        <div className="flex items-center gap-2 w-[280px]">
+                            <Input
+                                value={inputValue.toUpperCase()}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                            <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+                                <Pipette className="h-4 w-4" />
+                                <span className="sr-only">Pick from screen</span>
+                            </Button>
+                        </div>
+                    </div>
                      <div className="flex gap-4 h-[280px]">
                         <div className="flex flex-col items-center gap-2">
                             <Slider
@@ -204,7 +275,13 @@ export default function ColorWheelPage() {
                     </div>
                 </div>
                 <div className="w-full max-w-sm h-full">
-                    <ColorBox color={activeColor} variant="default" />
+                    <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col">
+                        <div className="relative h-80 w-full" style={{ backgroundColor: activeColor }} />
+                        <CardContent className="p-4 flex-grow flex flex-col justify-center">
+                            <p className="font-semibold text-lg text-center mb-2">{colord(activeColor).toName({closest: true})}</p>
+                            <ColorDetails color={activeColor} />
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
             
@@ -216,7 +293,7 @@ export default function ColorWheelPage() {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue={harmonyInfo[0].name} className="w-full">
-                             <TabsList className="flex-wrap h-auto justify-center">
+                             <TabsList className="flex flex-wrap h-auto justify-center">
                                 {harmonyInfo.map((harmony) => (
                                     <TabsTrigger key={harmony.name} value={harmony.name}>
                                         {harmony.name}
