@@ -5,7 +5,7 @@ import React from "react";
 import { colord, extend } from "colord";
 import namesPlugin from "colord/plugins/names";
 import cmykPlugin from "colord/plugins/cmyk";
-import lchPlugin from "colord/plugins/lch";
+import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
 import { getDescriptiveColorName, saveColorToLibrary } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
@@ -134,8 +134,8 @@ export const ColorBox = React.memo(({
                                     <Info className="h-4 w-4" />
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 p-0">
-                                <div className="h-12 w-full rounded-t-md" style={{backgroundColor: color}} />
+                            <PopoverContent className="w-72 p-0">
+                                <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
                                 <div className="p-3">
                                     <p className="font-semibold text-base text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
                                     <ColorDetails color={color} />
