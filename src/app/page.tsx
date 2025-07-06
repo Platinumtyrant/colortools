@@ -31,9 +31,10 @@ import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles, Pipet
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SavedPalettes } from '@/components/palettes/SavedPalettes';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
 import { ColorBox } from '@/components/colors/ColorBox';
+import { Slider } from '@/components/ui/slider';
+import type { ColorResult } from 'react-color';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -51,27 +52,15 @@ declare global {
   }
 }
 
-const ColorPickerClient = dynamic(() => import('@/components/colors/ColorPickerClient'), {
+const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mod.default), {
   ssr: false,
   loading: () => (
-    <div className="w-full max-w-sm space-y-3 rounded-lg border bg-card p-4 text-card-foreground h-full">
-        <div className="flex gap-3 h-40">
-            <Skeleton className="relative flex-1 cursor-pointer" />
-            <Skeleton className="relative w-5 cursor-pointer" />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-        </div>
-        <div className="space-y-3 pt-2">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-        </div>
-    </div>
+      <div className="flex justify-center items-center w-[280px] h-[280px]">
+        <Skeleton className="w-full h-full rounded-full" />
+      </div>
   )
 });
+
 
 // Helper to get graph data
 const getGraphData = (colors: string[]) => {
@@ -130,9 +119,8 @@ function PaletteBuilderPage() {
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
+  const [inputValue, setInputValue] = useState(mainColor);
   
-  const [libraryUpdateKey, setLibraryUpdateKey] = useState(0);
-
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [newPaletteName, setNewPaletteName] = useState("");
   const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
@@ -144,6 +132,36 @@ function PaletteBuilderPage() {
 
   const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
   
+  useEffect(() => {
+    setInputValue(mainColor);
+  }, [mainColor]);
+
+  const mainHsl = useMemo(() => colord(mainColor).toHsl(), [mainColor]);
+
+  const handleLightnessChange = (newLightness: number[]) => {
+      const newColor = colord({ ...mainHsl, l: newLightness[0] }).toHex();
+      setMainColor(newColor);
+  };
+
+  const handleSaturationChange = (newSaturation: number[]) => {
+      const newColor = colord({ ...mainHsl, s: newSaturation[0] }).toHex();
+      setMainColor(newColor);
+  };
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setInputValue(value);
+      if (colord(value).isValid()) {
+          setMainColor(value);
+      }
+  }, []);
+
+  const handleInputBlur = useCallback(() => {
+      if (!colord(inputValue).isValid()) {
+          setInputValue(mainColor);
+      }
+  }, [inputValue, mainColor]);
+
   const regeneratePalette = useCallback((isRandomizing = false) => {
     setPalette(prevPalette => {
         const lockedColors = prevPalette.filter(c => c.locked);
@@ -234,10 +252,6 @@ function PaletteBuilderPage() {
     }
   }, [searchParams, router, toast, regeneratePalette]);
 
-  const handleColorChange = useCallback((newColor: any) => {
-    setMainColor(newColor.hex);
-  }, []);
-
   const handleAddColorToPalette = useCallback(() => {
       if (palette.length >= 20) {
         toast({ title: 'Maximum of 20 colors reached.', variant: 'destructive' });
@@ -303,21 +317,10 @@ function PaletteBuilderPage() {
 
     localStorage.setItem('saved_palettes', JSON.stringify(savedPalettes));
     
-    setLibraryUpdateKey(k => k + 1);
     setIsSaveDialogOpen(false);
     setNewPaletteName("");
     setEditingPaletteId(null);
   }, [palette, newPaletteName, toast, editingPaletteId]);
-  
-  const handleLoadPaletteFromLibrary = useCallback((colors: string[]) => {
-    if (colors.length < 1) {
-        toast({ title: "Invalid palette to load.", variant: "destructive" });
-        return;
-    }
-    setEditingPaletteId(null); // Loading from library is not editing
-    setPalette(colors.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
-    setMainColor(colors[0]);
-  }, [toast]);
 
   const handleColorUpdateInPalette = useCallback((id: number, newHex: string) => {
     setPalette(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
@@ -624,14 +627,52 @@ function PaletteBuilderPage() {
                 </Dialog>
                 
                 {/* Top Section: Picker and Active Color Details */}
-                <section className="grid grid-cols-1 lg:grid-cols-3 lg:items-stretch gap-8 w-full max-w-5xl mx-auto">
-                    <div className="w-full flex flex-col items-center lg:items-start gap-4">
-                        <ColorPickerClient 
-                        color={mainColor} 
-                        onChange={handleColorChange}
-                        onEyeDropperClick={handleEyeDropper}
-                        className="w-full max-w-sm h-full"
-                        />
+                <section className="grid grid-cols-1 lg:grid-cols-2 lg:items-center gap-8 w-full max-w-5xl mx-auto">
+                    <div className="w-full flex justify-center lg:justify-start">
+                         <div className="flex items-center justify-center gap-4">
+                            <div className="flex flex-col items-center gap-4">
+                                <ColorWheel
+                                    color={mainColor}
+                                    onChange={(color: ColorResult) => setMainColor(color.hex)}
+                                    width={280}
+                                    height={280}
+                                />
+                                <div className="flex items-center gap-2 w-[280px]">
+                                    <Input
+                                        value={inputValue.toUpperCase()}
+                                        onChange={handleInputChange}
+                                        onBlur={handleInputBlur}
+                                        className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                                    />
+                                    <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+                                        <Pipette className="h-4 w-4" />
+                                        <span className="sr-only">Pick from screen</span>
+                                    </Button>
+                                </div>
+                            </div>
+                             <div className="flex gap-4 h-[280px]">
+                                <div className="flex flex-col items-center gap-2">
+                                    <Slider
+                                        orientation="vertical"
+                                        value={[mainHsl.s]}
+                                        onValueChange={handleSaturationChange}
+                                        max={100}
+                                        step={1}
+                                    />
+                                    <Label className="text-xs text-muted-foreground">S</Label>
+                                </div>
+                                <div className="flex flex-col items-center gap-2">
+                                    <Slider
+                                        orientation="vertical"
+                                        value={[mainHsl.l]}
+                                        onValueChange={handleLightnessChange}
+                                        max={100}
+                                        step={1}
+                                    />
+                                    <Label className="text-xs text-muted-foreground">L</Label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="w-full flex justify-center">
@@ -643,12 +684,6 @@ function PaletteBuilderPage() {
                                 actionIcon={<Plus className="h-4 w-4" />}
                                 actionTitle="Add color to palette"
                             />
-                        </div>
-                    </div>
-
-                    <div className="w-full flex justify-center lg:justify-end">
-                        <div className="w-full max-w-sm h-full">
-                            <SavedPalettes key={libraryUpdateKey} onLoadPalette={handleLoadPaletteFromLibrary} />
                         </div>
                     </div>
                 </section>
