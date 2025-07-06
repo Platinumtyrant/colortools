@@ -31,58 +31,32 @@ interface GradientMeshBuilderProps {
 export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps) => {
     const [points, setPoints] = useState<Point[]>(() => {
         const defaultPoints = [
-            { id: 1, x: 0, y: 0, color: '#111827', spreadX: 0, spreadY: 0, rotation: 0, strength: 0 }, // Background point
-            { id: 2, x: 20, y: 20, color: '#ff8a80', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
-            { id: 3, x: 80, y: 80, color: '#8c9eff', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
+            { id: 1, x: 20, y: 20, color: '#ff8a80', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
+            { id: 2, x: 80, y: 80, color: '#8c9eff', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
         ];
 
-        if (!initialColors || initialColors.length === 0) {
+        if (!initialColors || initialColors.length < 2) {
             return defaultPoints;
         }
 
-        const basePoints = [
-            { x: 20, y: 20, spread: 50 },
-            { x: 80, y: 80, spread: 50 },
-            { x: 20, y: 80, spread: 50 },
-            { x: 80, y: 20, spread: 50 },
-            { x: 50, y: 50, spread: 50 },
-            { x: 25, y: 75, spread: 50 },
+        const basePositions = [
+            { x: 20, y: 20 }, { x: 80, y: 80 }, { x: 20, y: 80 },
+            { x: 80, y: 20 }, { x: 50, y: 50 }, { x: 25, y: 75 },
         ];
-
-        // First color is background, rest are points
-        const backgroundPoint: Point = { id: 1, x: 0, y: 0, color: initialColors[0], spreadX: 0, spreadY: 0, rotation: 0, strength: 0 };
-        const overlayPoints = initialColors.slice(1, 7).map((color, index) => {
-            const base = basePoints[index % basePoints.length];
+        
+        return initialColors.slice(0, 6).map((color, index) => {
+            const pos = basePositions[index % basePositions.length];
             return {
-                id: index + 2,
+                id: index + 1,
                 color,
-                x: base.x,
-                y: base.y,
-                spreadX: base.spread,
-                spreadY: base.spread,
+                x: pos.x,
+                y: pos.y,
+                spreadX: 50,
+                spreadY: 50,
                 rotation: 0,
                 strength: 75
             };
         });
-        
-        const newPoints = [backgroundPoint, ...overlayPoints];
-
-        if (newPoints.length === 1) { // Only a background color was provided
-            newPoints.push({
-                id: 2,
-                x: basePoints[1].x,
-                y: basePoints[1].y,
-                color: colord(newPoints[0].color).isLight()
-                    ? colord(newPoints[0].color).darken(0.3).toHex()
-                    : colord(newPoints[0].color).lighten(0.3).toHex(),
-                spreadX: basePoints[1].spread,
-                spreadY: basePoints[1].spread,
-                rotation: 0,
-                strength: 75,
-            });
-        }
-        
-        return newPoints;
     });
     
     const [activePointId, setActivePointId] = useState<number | null>(null);
@@ -90,38 +64,37 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const [isCodeVisible, setIsCodeVisible] = useState(false);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
-    const isDragging = useRef(false);
-    const dragStartPos = useRef({ x: 0, y: 0 });
     const { toast } = useToast();
     
     const activeDragPointId = useRef<number | null>(null);
     const activeDragHandleType = useRef<'position' | 'spreadX' | 'spreadY' | null>(null);
+    const isDraggingRef = useRef(false);
 
     const handlePointInteractionStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
         e.preventDefault();
         e.stopPropagation();
 
+        isDraggingRef.current = false;
+        activeDragPointId.current = pointId;
+        activeDragHandleType.current = handleType;
+        const dragStartPos = { x: e.clientX, y: e.clientY };
+        
         if (handleType === 'position') {
             setActivePointId(pointId);
         }
 
-        isDragging.current = false;
-        activeDragPointId.current = pointId;
-        activeDragHandleType.current = handleType;
-        dragStartPos.current = { x: e.clientX, y: e.clientY };
-
         const handleDocumentMouseMove = (moveEvent: MouseEvent) => {
-            const dx = Math.abs(moveEvent.clientX - dragStartPos.current.x);
-            const dy = Math.abs(moveEvent.clientY - dragStartPos.current.y);
+            const dx = moveEvent.clientX - dragStartPos.x;
+            const dy = moveEvent.clientY - dragStartPos.y;
 
-            if (!isDragging.current && (dx > 3 || dy > 3)) {
-                isDragging.current = true;
+            if (!isDraggingRef.current && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+                isDraggingRef.current = true;
                 if (handleType === 'position' || handleType === 'spreadX' || handleType === 'spreadY') {
-                    setPopoverOpen({});
+                    setPopoverOpen({}); // Close popovers on drag start
                 }
             }
 
-            if (isDragging.current) {
+            if (isDraggingRef.current) {
                 if (!previewRef.current) return;
                 const rect = previewRef.current.getBoundingClientRect();
                 
@@ -143,15 +116,15 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                         const mouseX = moveEvent.clientX;
                         const mouseY = moveEvent.clientY;
                         
-                        const dx = mouseX - centerX;
-                        const dy = mouseY - centerY;
+                        const mouseDx = mouseX - centerX;
+                        const mouseDy = mouseY - centerY;
                         
                         const rotationRad = -pointToUpdate.rotation * (Math.PI / 180);
                         const cosA = Math.cos(rotationRad);
                         const sinA = Math.sin(rotationRad);
                         
-                        const unrotatedDx = dx * cosA - dy * sinA;
-                        const unrotatedDy = dx * sinA + dy * cosA;
+                        const unrotatedDx = mouseDx * cosA - mouseDy * sinA;
+                        const unrotatedDy = mouseDx * sinA + mouseDy * cosA;
 
                         if (currentHandleType === 'spreadX') {
                             const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 200;
@@ -171,17 +144,14 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             document.removeEventListener('mousemove', handleDocumentMouseMove);
             document.removeEventListener('mouseup', handleDocumentMouseUp);
 
-            if (!isDragging.current && activeDragHandleType.current === 'position') {
+            if (!isDraggingRef.current && activeDragHandleType.current === 'position') {
                 setPopoverOpen(prev => {
                     const pointIdToToggle = activeDragPointId.current!;
-                    const isOpen = !!prev[pointIdToToggle];
-                    const newPopoverState: Record<number, boolean> = {}; 
-                    newPopoverState[pointIdToToggle] = !isOpen;
-                    return newPopoverState;
+                    return { ...prev, [pointIdToToggle]: !prev[pointIdToToggle] };
                 });
             }
             
-            isDragging.current = false;
+            isDraggingRef.current = false;
             activeDragPointId.current = null;
             activeDragHandleType.current = null;
         };
@@ -192,7 +162,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
-            if (prev.length >= 7) {
+            if (prev.length >= 6) {
                 toast({ title: "Maximum of 6 overlay points reached." });
                 return prev;
             }
@@ -214,7 +184,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const handleRemovePoint = useCallback((idToRemove: number) => {
         setPoints(prev => {
             if (prev.length <= 2) {
-                toast({ title: "A minimum of 1 overlay point is required." });
+                toast({ title: "A minimum of 2 overlay points is required." });
                 return prev;
             }
             if (activePointId === idToRemove) {
@@ -234,13 +204,12 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     }, []);
     
     const gradientCss = useMemo(() => {
-        const overlayPoints = points.slice(1);
         const containerCss = `
 .mesh-container {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: ${points[0]?.color || '#111827'};
+  background-color: #111827;
   overflow: hidden;
 }
 
@@ -251,7 +220,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
   filter: blur(50px);
 }
 `;
-        const pointsCss = overlayPoints.map((p, i) => `
+        const pointsCss = points.map((p, i) => `
 .mesh-point-${i + 1} {
   left: ${p.x.toFixed(1)}%;
   top: ${p.y.toFixed(1)}%;
@@ -265,7 +234,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         const htmlStructure = `
 <!-- HTML Structure -->
 <div class="mesh-container">
-${overlayPoints.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).join('\n')}
+${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).join('\n')}
 </div>
 `;
 
@@ -282,8 +251,6 @@ ${overlayPoints.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></d
     
     const activePoint = useMemo(() => points.find(p => p.id === activePointId), [points, activePointId]);
 
-    const overlayPoints = points.slice(1);
-
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
             <CardHeader className="p-0 mb-4">
@@ -295,11 +262,10 @@ ${overlayPoints.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></d
                     <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden">
                         <div
                             ref={previewRef}
-                            className="absolute inset-0 cursor-pointer"
-                            style={{ backgroundColor: points[0]?.color || '#111827' }}
+                            className="absolute inset-0 cursor-pointer bg-gray-900"
                             onClick={handleBackgroundClick}
                         >
-                             {overlayPoints.map(point => (
+                             {points.map(point => (
                                 <div
                                     key={`grad-${point.id}`}
                                     className="absolute mix-blend-lighten rounded-full"
@@ -314,7 +280,7 @@ ${overlayPoints.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></d
                                     }}
                                 />
                              ))}
-                            {overlayPoints.map((point) => (
+                            {points.map((point) => (
                                 <Popover key={point.id} open={!!popoverOpen[point.id]} onOpenChange={(isOpen) => setPopoverOpen(prev => ({...prev, [point.id]: isOpen}))}>
                                     <PopoverTrigger asChild>
                                         <div
@@ -331,7 +297,7 @@ ${overlayPoints.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></d
                                     </PopoverTrigger>
                                     <PopoverContent className="w-72 p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-sm font-semibold">Point {points.findIndex(p => p.id === point.id)}</h3>
+                                            <h3 className="text-sm font-semibold">Point {points.findIndex(p => p.id === point.id) + 1}</h3>
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 2}>
                                                 <Trash2 className="h-3 w-3" />
                                                 <span className="sr-only">Remove Point</span>
@@ -421,27 +387,11 @@ ${overlayPoints.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></d
                             )}
                         </div>
                         <div className="absolute top-2 right-2 flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/50 shadow-lg">
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button size="sm" variant="outline" className="h-8">
-                                        BG
-                                        <span className="ml-2 h-4 w-4 rounded-sm border" style={{backgroundColor: points[0]?.color || '#000'}} />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 border-0">
-                                    <ColorPickerClient
-                                        color={points[0]?.color || '#000'}
-                                        onChange={(c: ColorResult) => {
-                                            setPoints(prev => prev.map((p, i) => i === 0 ? { ...p, color: c.hex } : p));
-                                        }}
-                                    />
-                                </PopoverContent>
-                            </Popover>
                              <Button onClick={() => setIsCodeVisible(v => !v)} size="sm" variant="ghost">
                                 <Code className="mr-2 h-4 w-4" />
                                 {isCodeVisible ? 'Hide Code' : 'Show Code'}
                             </Button>
-                            <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 7}>
+                            <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
                                 <Plus className="mr-2 h-4 w-4" /> Point
                             </Button>
                             <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
@@ -461,3 +411,5 @@ ${overlayPoints.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></d
         </Card>
     );
 };
+
+    
