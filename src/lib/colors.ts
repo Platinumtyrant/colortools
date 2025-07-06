@@ -1,3 +1,4 @@
+
 import { colord, extend, type HslColor } from 'colord';
 import hwbPlugin from 'colord/plugins/hwb';
 import labPlugin from 'colord/plugins/lab';
@@ -103,6 +104,29 @@ export const getTones = (color: string, steps = 5) => {
     tones.push(chroma.mix(color, 'gray', i / (steps - 1)).hex());
   }
   return tones;
+};
+
+export const saveColorToLibrary = (color: string): { success: boolean; message: string } => {
+  if (typeof window === 'undefined') {
+    return { success: false, message: 'Cannot save on server.' };
+  }
+  try {
+    const key = 'saved_individual_colors';
+    const savedJSON = localStorage.getItem(key);
+    let saved: string[] = savedJSON ? JSON.parse(savedJSON) : [];
+
+    const normalizedColor = colord(color).toHex();
+
+    if (saved.includes(normalizedColor)) {
+      return { success: false, message: 'Color is already in your library.' };
+    }
+    saved.push(normalizedColor);
+    localStorage.setItem(key, JSON.stringify(saved));
+    return { success: true, message: 'Color saved!' };
+  } catch (e) {
+    console.error('Could not save color:', e);
+    return { success: false, message: 'There was an error saving the color.' };
+  }
 };
 
 const greenAnchors = ['#dcfce7', '#4ade80', '#16a34a', '#14532d'];

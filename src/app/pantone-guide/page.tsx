@@ -1,17 +1,18 @@
 
+"use client";
+
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { pantoneCategories, type PantoneColor } from '@/lib/pantone-colors';
+import { ColorBox } from '@/components/colors/ColorBox';
 
 const ColorSwatch = ({ color }: { color: PantoneColor }) => (
-  <Card className="overflow-hidden shadow-md">
-    <div style={{ backgroundColor: color.hex }} className="h-24 w-full" />
-    <CardContent className="p-3">
-      <p className="font-bold text-sm truncate" title={color.name}>{color.name}</p>
-      <p className="text-xs text-muted-foreground">{color.cmyk}</p>
-    </CardContent>
-  </Card>
+    <ColorBox
+        color={color.hex}
+        name={color.name}
+        info={color.cmyk}
+    />
 );
 
 export default function PantoneGuidePage() {
@@ -35,7 +36,6 @@ export default function PantoneGuidePage() {
             ))}
           </TabsList>
           
-          {/* Ensure content is generated for ALL categories */}
           {pantoneCategories.map(category => (
               <TabsContent key={category.name} value={category.name} className="mt-6">
                   <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-4">

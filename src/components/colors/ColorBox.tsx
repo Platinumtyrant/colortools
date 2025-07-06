@@ -1,100 +1,86 @@
+
 "use client";
 
-import { colord } from "colord";
-import { getDescriptiveColorName } from "@/lib/colors";
-import { cn } from "@/lib/utils";
+import React from "react";
+import { colord, extend } from "colord";
+import namesPlugin from "colord/plugins/names";
+import cmykPlugin from "colord/plugins/cmyk";
+import lchPlugin from "colord/plugins/lch";
+import labPlugin from "colord/plugins/lab";
+import { getDescriptiveColorName, saveColorToLibrary } from "@/lib/colors";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
 interface ColorBoxProps {
   color: string;
-  onSetActiveColor?: (color: string) => void;
-  isMainPalette?: boolean;
-  onRemove?: (color: string) => void;
-  onCopySuccess: (message: string) => void;
-  onAdd?: (color: string) => void;
+  name?: string;
+  info?: string;
+  isPrimaryDisplay?: boolean;
 }
 
-export const ColorBox = ({ color, onSetActiveColor, isMainPalette, onRemove, onCopySuccess, onAdd }: ColorBoxProps) => {
-  const hex = colord(color).toHex();
-  const rgb = colord(color).toRgb();
-  const hsl = colord(color).toHsl();
-  const name = getDescriptiveColorName(hex);
-
-  const handleCopy = (e: React.MouseEvent, text: string, type: string) => {
-    e.stopPropagation(); // Prevent popover from closing if we click inside
-    navigator.clipboard.writeText(text).then(() => {
-      if (onCopySuccess) {
-        onCopySuccess(`${type} copied: ${text}`);
-      }
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
+export const ColorBox = React.memo(({ color, name, info, isPrimaryDisplay = false }: ColorBoxProps) => {
+  const { toast } = useToast();
+  
+  const descriptiveName = name || getDescriptiveColorName(color);
+  const colorInstance = colord(color);
+  
+  const handleSave = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const result = saveColorToLibrary(color);
+    toast({
+      title: result.message,
+      variant: result.success ? 'default' : 'destructive',
     });
   };
 
+  const handleCopy = (textToCopy: string, type: string) => {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        toast({ title: `${type} copied!`, description: textToCopy });
+    });
+  };
+
+  if (isPrimaryDisplay) {
+     return (
+        <div className="space-y-1 text-sm">
+            <div className="flex justify-between">
+                <span className="text-muted-foreground">Name</span>
+                <span className="font-mono font-semibold capitalize">{descriptiveName}</span>
+            </div>
+            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(colorInstance.toHex().toUpperCase(), 'HEX')}>
+                <span className="text-muted-foreground">HEX</span>
+                <span className="font-mono font-semibold">{colorInstance.toHex().toUpperCase()}</span>
+            </div>
+             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(colorInstance.toRgbString(), 'RGB')}>
+                <span className="text-muted-foreground">RGB</span>
+                <span className="font-mono font-semibold">{colorInstance.toRgbString()}</span>
+            </div>
+             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(colorInstance.toHslString(), 'HSL')}>
+                <span className="text-muted-foreground">HSL</span>
+                <span className="font-mono font-semibold">{colorInstance.toHslString()}</span>
+            </div>
+        </div>
+     )
+  }
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div
-          onClick={() => {
-            if (onSetActiveColor) {
-              onSetActiveColor(color);
-            }
-          }}
-          className="relative w-full aspect-[3/2] cursor-pointer group/card rounded-lg overflow-hidden shadow-md"
-          style={{ backgroundColor: hex }}
-          title="Click for details"
-        >
-          {onAdd && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if(onAdd) onAdd(color);
-              }}
-              className="bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-xs opacity-0 group-hover/card:opacity-100 transition-opacity z-10 shadow-lg hover:bg-primary/90 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              title="Add to palette"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          )}
-          {isMainPalette && onRemove && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if(onRemove) onRemove(color);
-              }}
-              className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover/card:opacity-100 transition-opacity"
-              title="Remove color"
-            >
-              X
-            </button>
-          )}
+    <Card className="overflow-hidden shadow-sm group w-full cursor-pointer" onClick={() => handleCopy(color.toUpperCase(), 'HEX')}>
+      <div className="relative h-24 w-full" style={{ backgroundColor: color }}>
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button size="icon" className="h-8 w-8" onClick={handleSave} title="Save color">
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-64">
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h4 className="font-medium leading-none capitalize">{name}</h4>
-            <p className="text-sm text-muted-foreground">
-              Click a value to copy it.
-            </p>
-          </div>
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, hex, 'HEX')}>
-              <span className="text-muted-foreground">HEX</span>
-              <span className="font-mono font-semibold text-right break-all">{hex}</span>
-            </div>
-            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'RGB')}>
-              <span className="text-muted-foreground">RGB</span>
-              <span className="font-mono font-semibold text-right break-all">{`${rgb.r}, ${rgb.g}, ${rgb.b}`}</span>
-            </div>
-            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={(e) => handleCopy(e, `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`, 'HSL')}>
-              <span className="text-muted-foreground">HSL</span>
-              <span className="font-mono font-semibold text-right break-all">{`${hsl.h}, ${hsl.s}%, ${hsl.l}%`}</span>
-            </div>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+      </div>
+      <CardContent className="p-3">
+        <p className="font-semibold text-sm truncate" title={descriptiveName}>{descriptiveName}</p>
+        <p className="text-xs text-muted-foreground font-mono">{info || color.toUpperCase()}</p>
+      </CardContent>
+    </Card>
   );
-};
+});
+
+ColorBox.displayName = 'ColorBox';

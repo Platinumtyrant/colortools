@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +33,7 @@ import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SavedPalettes } from '@/components/palettes/SavedPalettes';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
+import { ColorBox } from '@/components/colors/ColorBox';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -408,11 +409,6 @@ function PaletteBuilderPage() {
   };
 
 
-  const colorName = colord(mainColor).toName({ closest: true });
-  const colorCmyk = colord(mainColor).toCmyk();
-  const colorLch = colord(mainColor).toLch();
-  const colorLab = colord(mainColor).toLab();
-
   const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
 
   const analysisSourcePalette = useMemo(() => {
@@ -658,14 +654,16 @@ function PaletteBuilderPage() {
                                 style={{ backgroundColor: mainColor, color: isContrastMode ? contrastTextColor : 'inherit' }}
                                 >
                                 {!isContrastMode && (
-                                    <Button
-                                        onClick={handleAddColorToPalette}
-                                        size="icon"
-                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        title="Add color to palette"
-                                    >
-                                        <Plus className="h-6 w-6" />
-                                    </Button>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <Button
+                                            onClick={handleAddColorToPalette}
+                                            size="icon"
+                                            className="rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            title="Add color to palette"
+                                        >
+                                            <Plus className="h-6 w-6" />
+                                        </Button>
+                                    </div>
                                 )}
                                 {isContrastMode && (
                                     <div className="select-none">
@@ -684,38 +682,9 @@ function PaletteBuilderPage() {
                                     transition={{ duration: 0.2 }}
                                 >
                                     {isContrastMode ? (
-                                    <WCAGDisplay bgColor={mainColor} textColor={contrastTextColor} />
+                                        <WCAGDisplay bgColor={mainColor} textColor={contrastTextColor} />
                                     ) : (
-                                    <div className="space-y-1 text-sm">
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Name</span>
-                                            <span className="font-mono font-semibold capitalize">{colorName}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">HEX</span>
-                                            <span className="font-mono font-semibold">{mainColor.toUpperCase()}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">RGB</span>
-                                            <span className="font-mono font-semibold">{colord(mainColor).toRgbString()}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">HSL</span>
-                                            <span className="font-mono font-semibold">{colord(mainColor).toHslString()}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">CMYK</span>
-                                            <span className="font-mono font-semibold">{`cmyk(${colorCmyk.c}, ${colorCmyk.m}, ${colorCmyk.y}, ${colorCmyk.k})`}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">LCH</span>
-                                            <span className="font-mono font-semibold">{`lch(${colorLch.l}, ${colorLch.c}, ${colorLch.h})`}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">CIELAB</span>
-                                            <span className="font-mono font-semibold">{`lab(${colorLab.l}, ${colorLab.a}, ${colorLab.b})`}</span>
-                                        </div>
-                                    </div>
+                                        <ColorBox color={mainColor} isPrimaryDisplay />
                                     )}
                                 </motion.div>
                                 </AnimatePresence>

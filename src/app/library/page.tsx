@@ -14,7 +14,8 @@ import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input';
+import { getDescriptiveColorName } from '@/lib/colors';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -36,8 +37,37 @@ const migratePalettes = (palettes: any): SavedPalette[] => {
   }));
 };
 
+const IndividualColorCard = ({ color, onDelete }: { color: string, onDelete: (color: string) => void }) => {
+    const descriptiveName = getDescriptiveColorName(color);
+    const { toast } = useToast();
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(color.toUpperCase()).then(() => {
+            toast({ title: "Copied!", description: `${color.toUpperCase()} copied to clipboard.` });
+        });
+    };
+
+    return (
+        <Card className="overflow-hidden shadow-sm group cursor-pointer" onClick={handleCopy}>
+            <div className="relative h-24 w-full" style={{ backgroundColor: color }}>
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onDelete(color); }}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+            <CardContent className="p-3">
+                <p className="font-semibold text-sm truncate" title={descriptiveName}>{descriptiveName}</p>
+                <p className="text-xs text-muted-foreground font-mono">{color.toUpperCase()}</p>
+            </CardContent>
+        </Card>
+    );
+};
+
+
 export default function LibraryPage() {
   const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>([]);
+  const [savedIndividualColors, setSavedIndividualColors] = useState<string[]>([]);
   const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
   const [newPaletteName, setNewPaletteName] = useState('');
   const { toast } = useToast();
@@ -53,15 +83,28 @@ export default function LibraryPage() {
           localStorage.setItem('saved_palettes', JSON.stringify(migrated));
         }
       }
+      
+      const savedColorsJSON = localStorage.getItem('saved_individual_colors');
+      if (savedColorsJSON) {
+          setSavedIndividualColors(JSON.parse(savedColorsJSON));
+      }
+
     } catch (error) {
-      console.error("Failed to parse saved palettes from localStorage", error);
+      console.error("Failed to parse saved items from localStorage", error);
       toast({
-        title: "Error loading palettes",
-        description: "Could not load your saved palettes.",
+        title: "Error loading items",
+        description: "Could not load your saved palettes or colors.",
         variant: "destructive",
       });
     }
   }, [toast]);
+
+  const handleDeleteIndividualColor = useCallback((colorToDelete: string) => {
+    const newColors = savedIndividualColors.filter(c => c !== colorToDelete);
+    setSavedIndividualColors(newColors);
+    localStorage.setItem('saved_individual_colors', JSON.stringify(newColors));
+    toast({ title: 'Color removed' });
+  }, [savedIndividualColors, toast]);
 
   const handleUpdateName = useCallback((idToUpdate: number) => {
     if (!newPaletteName.trim()) {
@@ -225,7 +268,7 @@ export default function LibraryPage() {
   }, [toast]);
 
 
-  const NoPalettesState = () => (
+  const NoItemsState = () => (
     <div className="flex h-full min-h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center">
       <LibraryIcon className="mx-auto h-12 w-12 text-muted-foreground" />
       <h3 className="mt-4 text-lg font-medium">
@@ -237,131 +280,151 @@ export default function LibraryPage() {
     </div>
   );
 
+  const hasItems = savedPalettes.length > 0 || savedIndividualColors.length > 0;
+
   return (
-    <main className="flex-1 w-full p-4 md:p-8">
-       <CardHeader className="p-0 mb-8">
+    <main className="flex-1 w-full p-4 md:p-8 space-y-8">
+       <CardHeader className="p-0">
         <CardTitle className="text-3xl">My Library</CardTitle>
-        <CardDescription>Browse and manage your saved palettes. Find pre-built collections on the Inspiration page.</CardDescription>
+        <CardDescription>Browse and manage your saved palettes and colors. Find pre-built collections on the Inspiration page.</CardDescription>
       </CardHeader>
       
-      {savedPalettes.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {savedPalettes.map((palette) => (
-            <Card key={palette.id} className="overflow-hidden bg-card flex flex-col">
-              <CardContent className="p-0 flex-grow">
-                <div className="flex flex-wrap h-24">
-                  {palette.colors.map((color, index) => (
-                    <div
-                      key={`${color}-${index}`}
-                      style={{
-                        backgroundColor: color,
-                        flexGrow: 1,
-                        minWidth: '10px'
-                      }}
-                    />
-                  ))}
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    {editingPaletteId === palette.id ? (
-                      <Input
-                        value={newPaletteName}
-                        onChange={(e) => setNewPaletteName(e.target.value)}
-                        onBlur={() => handleUpdateName(palette.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleUpdateName(palette.id);
-                          } else if (e.key === 'Escape') {
-                            setEditingPaletteId(null);
-                          }
-                        }}
-                        autoFocus
-                        className="h-8"
-                      />
-                    ) : (
-                      <>
-                        <p className="text-md font-semibold truncate" title={palette.name}>
-                          {palette.name}
-                        </p>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 shrink-0"
-                                onClick={() => {
-                                  setEditingPaletteId(palette.id);
-                                  setNewPaletteName(palette.name);
-                                }}
-                              >
-                                <Pencil className="h-3 w-3" />
-                                <span className="sr-only">Edit Name</span>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Edit Name</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-1">
-                    {palette.colors.map((color, index) => (
-                      <span key={`${color}-${index}`} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="justify-end gap-1 p-4 pt-0">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/?edit=${palette.id}`}>
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit Palette in Builder</span>
-                          </Link>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Edit Palette in Builder</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeletePalette(palette.id)}>
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete Palette</span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Delete Palette</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button>
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => exportPaletteAsSvg(palette)}>SVG</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => exportPaletteAsPng(palette)}>PNG</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => exportPaletteAsJson(palette)}>Tokens (JSON)</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+      {!hasItems ? (
+        <NoItemsState />
       ) : (
-        <NoPalettesState />
+        <>
+            {savedIndividualColors.length > 0 && (
+                 <section>
+                    <h2 className="text-2xl font-semibold mb-4">My Individual Colors</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-4">
+                        {savedIndividualColors.map(color => (
+                            <IndividualColorCard key={color} color={color} onDelete={handleDeleteIndividualColor} />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {savedPalettes.length > 0 && (
+                <section>
+                    <h2 className="text-2xl font-semibold mb-4">My Palettes</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {savedPalettes.map((palette) => (
+                            <Card key={palette.id} className="overflow-hidden bg-card flex flex-col">
+                            <CardContent className="p-0 flex-grow">
+                                <div className="flex flex-wrap h-24">
+                                {palette.colors.map((color, index) => (
+                                    <div
+                                    key={`${color}-${index}`}
+                                    style={{
+                                        backgroundColor: color,
+                                        flexGrow: 1,
+                                        minWidth: '10px'
+                                    }}
+                                    />
+                                ))}
+                                </div>
+                                <div className="p-4">
+                                <div className="flex items-center justify-between gap-2 mb-2">
+                                    {editingPaletteId === palette.id ? (
+                                    <Input
+                                        value={newPaletteName}
+                                        onChange={(e) => setNewPaletteName(e.target.value)}
+                                        onBlur={() => handleUpdateName(palette.id)}
+                                        onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleUpdateName(palette.id);
+                                        } else if (e.key === 'Escape') {
+                                            setEditingPaletteId(null);
+                                        }
+                                        }}
+                                        autoFocus
+                                        className="h-8"
+                                    />
+                                    ) : (
+                                    <>
+                                        <p className="text-md font-semibold truncate" title={palette.name}>
+                                        {palette.name}
+                                        </p>
+                                        <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 shrink-0"
+                                                onClick={() => {
+                                                setEditingPaletteId(palette.id);
+                                                setNewPaletteName(palette.name);
+                                                }}
+                                            >
+                                                <Pencil className="h-3 w-3" />
+                                                <span className="sr-only">Edit Name</span>
+                                            </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                            <p>Edit Name</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        </TooltipProvider>
+                                    </>
+                                    )}
+                                </div>
+                                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                                    {palette.colors.map((color, index) => (
+                                    <span key={`${color}-${index}`} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
+                                    ))}
+                                </div>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="justify-end gap-1 p-4 pt-0">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" asChild>
+                                        <Link href={`/?edit=${palette.id}`}>
+                                            <Pencil className="h-4 w-4" />
+                                            <span className="sr-only">Edit Palette in Builder</span>
+                                        </Link>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Edit Palette in Builder</p>
+                                    </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => handleDeletePalette(palette.id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Delete Palette</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Delete Palette</p>
+                                    </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                    <Button>
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Export
+                                    </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => exportPaletteAsSvg(palette)}>SVG</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => exportPaletteAsPng(palette)}>PNG</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => exportPaletteAsJson(palette)}>Tokens (JSON)</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                </section>
+            )}
+        </>
       )}
     </main>
   );
