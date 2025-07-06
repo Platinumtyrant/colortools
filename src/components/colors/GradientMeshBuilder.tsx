@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, RotateCcw } from 'lucide-react';
 import { colord } from 'colord';
 
 interface Point {
@@ -60,6 +60,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         return newPoints;
     });
     
+    const [rotation, setRotation] = useState(0);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     
     const previewRef = useRef<HTMLDivElement>(null);
@@ -153,8 +154,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         const backgroundImage = points.map(p => 
             `radial-gradient(at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent ${p.spread}%)`
         ).join(',\n    ');
-        return `background-color: ${backgroundColor};\nbackground-image: ${backgroundImage};`;
-    }, [points]);
+        return `.your-element {\n  background-color: ${backgroundColor};\n  background-image: ${backgroundImage};\n  transform: rotate(${rotation}deg);\n}`;
+    }, [points, rotation]);
     
     const backgroundStyle = useMemo(() => {
         if (points.length === 0) return {};
@@ -181,23 +182,28 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             </CardHeader>
             <CardContent className="grid lg:grid-cols-2 gap-8 p-0">
                 <div className="lg:col-span-1 space-y-4">
-                    <div
-                        ref={previewRef}
-                        className="relative w-full aspect-video rounded-lg border border-border cursor-move"
-                        style={backgroundStyle}
-                        onMouseDown={handleMouseDown}
-                    >
-                        {points.map((point) => (
-                            <div
-                                key={point.id}
-                                className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg pointer-events-none"
-                                style={{
-                                    left: `${point.x}%`,
-                                    top: `${point.y}%`,
-                                    backgroundColor: point.color,
-                                }}
-                            />
-                        ))}
+                    <div className="relative w-full aspect-video rounded-lg border border-border overflow-hidden">
+                        <div
+                            className="absolute inset-0"
+                            style={{ ...backgroundStyle, transform: `rotate(${rotation}deg)` }}
+                        />
+                        <div
+                            ref={previewRef}
+                            className="absolute inset-0 cursor-move"
+                            onMouseDown={handleMouseDown}
+                        >
+                            {points.map((point) => (
+                                <div
+                                    key={point.id}
+                                    className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg pointer-events-none"
+                                    style={{
+                                        left: `${point.x}%`,
+                                        top: `${point.y}%`,
+                                        backgroundColor: point.color,
+                                    }}
+                                />
+                            ))}
+                        </div>
                     </div>
                     <div className="relative">
                         <pre className="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto text-xs">
@@ -221,6 +227,17 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                     <Plus className="mr-2 h-4 w-4" /> Add Point
                                 </Button>
                                 <span className="text-sm text-muted-foreground">{points.length} / 6 points</span>
+                            </div>
+                            <div className="space-y-2 mb-4">
+                                <Label htmlFor="rotation-slider" className="text-sm">Rotation: {rotation}°</Label>
+                                <Slider
+                                    id="rotation-slider"
+                                    min={0}
+                                    max={360}
+                                    step={1}
+                                    value={[rotation]}
+                                    onValueChange={(value) => setRotation(value[0])}
+                                />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
                                 {points.map((point, index) => (
