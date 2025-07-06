@@ -37,7 +37,7 @@ const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onC
         onClick={onCopy}
     >
         <span className="text-muted-foreground whitespace-nowrap">{label}</span>
-        <span className="font-mono font-semibold text-right break-all">{value}</span> 
+        <span className="font-mono font-semibold text-right truncate">{value}</span> 
     </div>
 );
 
