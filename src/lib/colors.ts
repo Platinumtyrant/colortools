@@ -22,41 +22,63 @@ const capitalize = (str: string) => {
         .join(' ');
 };
 
-export interface DescriptiveNameResult {
-    name: string;
-    source: 'pantone' | 'ntc' | 'basic' | 'colord' | 'hex';
+export interface AllDescriptiveNamesResult {
+    primary: { name: string; source: string };
+    all: { source: string; name: string }[];
 }
 
-export const useDescriptiveColorName = (hexColor: string): DescriptiveNameResult => {
+export const useAllDescriptiveColorNames = (hexColor: string): AllDescriptiveNamesResult => {
     const pantoneLookup = usePantone();
+    const allNames: { source: string; name: string }[] = [];
 
-    if (!colord(hexColor).isValid()) return { name: "Invalid Color", source: 'hex' };
+    if (!colord(hexColor).isValid()) {
+        const invalidResult = { name: "Invalid Color", source: 'HEX' };
+        return { primary: invalidResult, all: [invalidResult] };
+    }
+
     const lowerHex = colord(hexColor).toHex().toLowerCase();
 
+    // 1. Pantone
     if (pantoneLookup && pantoneLookup.has(lowerHex)) {
-        return { name: pantoneLookup.get(lowerHex)!, source: 'pantone' };
+        allNames.push({ source: 'Pantone', name: pantoneLookup.get(lowerHex)! });
     }
-    
+
+    // 2. Namer (NTC & Basic)
     try {
         const names = namer(lowerHex);
         const ntcName = names.ntc[0]?.name;
         if (ntcName) {
-            return { name: capitalize(ntcName), source: 'ntc' };
+            allNames.push({ source: 'NTC', name: capitalize(ntcName) });
         }
         const basicName = names.basic[0]?.name;
         if (basicName) {
-            return { name: capitalize(basicName), source: 'basic' };
+            allNames.push({ source: 'Basic', name: capitalize(basicName) });
         }
     } catch (e) {
         console.error("Error getting color name from color-namer:", e);
     }
 
+    // 3. Colord
     const colordName = colord(lowerHex).toName({ closest: true });
     if (colordName) {
-        return { name: capitalize(colordName), source: 'colord' };
+        allNames.push({ source: 'Colord', name: capitalize(colordName) });
+    }
+    
+    // Deduplicate names, giving priority to earlier sources
+    const uniqueNames = allNames.reduce((acc, current) => {
+        if (!acc.find(item => item.name.toLowerCase() === current.name.toLowerCase())) {
+            acc.push(current);
+        }
+        return acc;
+    }, [] as { source: string; name: string }[]);
+
+
+    if (uniqueNames.length > 0) {
+        return { primary: uniqueNames[0], all: uniqueNames };
     }
 
-    return { name: lowerHex.toUpperCase(), source: 'hex' };
+    const hexResult = { name: lowerHex.toUpperCase(), source: 'HEX' };
+    return { primary: hexResult, all: [hexResult] };
 };
 
 

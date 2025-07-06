@@ -7,7 +7,7 @@ import namesPlugin from "colord/plugins/names";
 import cmykPlugin from "colord/plugins/cmyk";
 import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
-import { useDescriptiveColorName } from "@/lib/colors";
+import { useAllDescriptiveColorNames } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,7 +83,7 @@ const ColorBoxInner = ({
     onAddToPalette,
     onRemoveFromPalette,
 }: ColorBoxProps) => {
-    const { name: descriptiveName, source } = name ? { name, source: 'pantone' } : useDescriptiveColorName(color);
+    const { primary, all: allNames } = name ? { primary: { name, source: 'Pantone' }, all: [{ name, source: 'Pantone' }] } : useAllDescriptiveColorNames(color);
     const { toast } = useToast();
     
     const handleCopy = (e: React.MouseEvent) => {
@@ -111,14 +111,29 @@ const ColorBoxInner = ({
                         )}
                     </div>
                 </div>
-                <CardContent className="p-4 flex-grow flex flex-col justify-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                        <p className="font-semibold text-lg text-center" title={descriptiveName}>{descriptiveName}</p>
-                        {source === 'pantone' && (
-                            <Badge variant="outline" className="text-xs px-2 py-0.5 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
+                <CardContent className="p-4 flex-grow flex flex-col justify-start">
+                    <div className="text-center mb-4">
+                        <p className="font-semibold text-lg" title={primary.name}>{primary.name}</p>
+                        <p className="text-xs text-muted-foreground">{primary.source}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <ColorDetails color={color} />
+                        {allNames.length > 1 && (
+                            <>
+                                <Separator />
+                                <div className="space-y-1 text-sm">
+                                    <h4 className="font-medium text-xs text-muted-foreground mb-2">OTHER NAMES</h4>
+                                    {allNames.slice(1).map((nameObj) => (
+                                        <div key={nameObj.source} className="grid grid-cols-2 items-center gap-x-2 text-xs">
+                                            <span className="text-muted-foreground whitespace-nowrap">{nameObj.source}</span>
+                                            <span className="font-medium text-right truncate">{nameObj.name}</span> 
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
                     </div>
-                    <ColorDetails color={color} />
                 </CardContent>
             </Card>
         );
@@ -160,8 +175,8 @@ const ColorBoxInner = ({
                     </div>
                     <CardContent className="p-2">
                         <div className="flex items-center justify-between">
-                            <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
-                            {source === 'pantone' && (
+                            <p className="font-semibold text-xs truncate" title={primary.name}>{primary.name}</p>
+                            {primary.source === 'Pantone' && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
                             )}
                         </div>
@@ -172,7 +187,7 @@ const ColorBoxInner = ({
             <PopoverContent className="w-[300px] p-0">
                 <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
                 <div className="p-3">
-                    <p className="font-semibold text-base text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
+                    <p className="font-semibold text-base text-center mb-2" title={primary.name}>{primary.name}</p>
                     <ColorDetails color={color} />
                     {popoverActions && (
                         <>
