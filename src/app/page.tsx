@@ -33,6 +33,8 @@ import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { Slider } from '@/components/ui/slider';
 import type { ColorResult } from 'react-color';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -518,6 +520,11 @@ function PaletteBuilderPage() {
   const analysisPanel = useMemo(() => (
     <div className="space-y-6">
         <h3 className="text-lg font-semibold">Palette Analysis</h3>
+        <div className="flex justify-between items-center text-sm">
+            <Label>Detected Harmony</Label>
+            <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
+        </div>
+        <Separator />
         <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <div className="flex items-center space-x-2">
@@ -595,7 +602,7 @@ function PaletteBuilderPage() {
       correctLightness, stableSetCorrectLightness,
       simulationType, stableSetSimulationType,
       isPaletteColorblindSafe, simulatedPalette, graphData,
-      handleApplyAnalyzedPalette
+      handleApplyAnalyzedPalette, detectedHarmony
   ]);
 
   const paletteActions = (
@@ -648,9 +655,6 @@ function PaletteBuilderPage() {
       </div>
       
       <div className="flex items-center gap-4">
-        <div className="text-sm text-muted-foreground">
-            Detected Harmony: <span className="font-semibold text-foreground">{detectedHarmony}</span>
-        </div>
         <Button onClick={handleOpenSaveDialog}>
           {editingPaletteId ? <Pencil className="mr-2 h-4 w-4" /> : null}
           {editingPaletteId ? 'Update Palette' : 'Save'}
@@ -698,9 +702,9 @@ function PaletteBuilderPage() {
             </DialogContent>
         </Dialog>
 
-        <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
+        <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr,1.5fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
             <div className="flex flex-col gap-8 min-h-0">
-                <section className="grid grid-cols-1 md:grid-cols-2 md:items-center gap-8 w-full">
+                <section className="grid grid-cols-1 md:items-center gap-8 w-full">
                     <div className="w-full flex justify-center">
                          <div className="flex items-center justify-center gap-4">
                             <div className="flex flex-col items-center gap-4">
