@@ -15,7 +15,7 @@ import labPlugin from 'colord/plugins/lab';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from '@/components/ui/input';
-import { getDescriptiveColorName } from '@/lib/colors';
+import { ColorBox } from '@/components/colors/ColorBox';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -36,34 +36,6 @@ const migratePalettes = (palettes: any): SavedPalette[] => {
     colors,
   }));
 };
-
-const IndividualColorCard = ({ color, onDelete }: { color: string, onDelete: (color: string) => void }) => {
-    const descriptiveName = getDescriptiveColorName(color);
-    const { toast } = useToast();
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(color.toUpperCase()).then(() => {
-            toast({ title: "Copied!", description: `${color.toUpperCase()} copied to clipboard.` });
-        });
-    };
-
-    return (
-        <Card className="overflow-hidden shadow-sm group cursor-pointer" onClick={handleCopy}>
-            <div className="relative h-24 w-full" style={{ backgroundColor: color }}>
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onDelete(color); }}>
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-            <CardContent className="p-3">
-                <p className="font-semibold text-sm truncate" title={descriptiveName}>{descriptiveName}</p>
-                <p className="text-xs text-muted-foreground font-mono">{color.toUpperCase()}</p>
-            </CardContent>
-        </Card>
-    );
-};
-
 
 export default function LibraryPage() {
   const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>([]);
@@ -298,7 +270,13 @@ export default function LibraryPage() {
                     <h2 className="text-2xl font-semibold mb-4">My Individual Colors</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-4">
                         {savedIndividualColors.map(color => (
-                            <IndividualColorCard key={color} color={color} onDelete={handleDeleteIndividualColor} />
+                            <ColorBox 
+                                key={color} 
+                                color={color} 
+                                onActionClick={(e) => { e.stopPropagation(); handleDeleteIndividualColor(color); }}
+                                actionIcon={<Trash2 className="h-4 w-4" />}
+                                actionTitle="Delete color"
+                            />
                         ))}
                     </div>
                 </section>

@@ -637,59 +637,50 @@ function PaletteBuilderPage() {
                     </div>
 
                     <div className="w-full flex justify-center">
-                        <Card className="w-full max-w-sm h-full flex flex-col">
-                            <CardHeader>
-                                <Button
-                                    onClick={() => setIsContrastMode(prev => !prev)}
-                                    variant="outline"
-                                    className="w-full"
-                                >
-                                    <Contrast className="mr-2 h-4 w-4" />
-                                    {isContrastMode ? 'Back to Builder' : 'Check Contrast'}
-                                </Button>
-                            </CardHeader>
-                            <CardContent className="space-y-4 flex-grow">
-                                <div 
-                                className="relative group w-full h-24 rounded-md border flex items-center justify-center text-center p-4"
-                                style={{ backgroundColor: mainColor, color: isContrastMode ? contrastTextColor : 'inherit' }}
-                                >
-                                {!isContrastMode && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <Button
-                                            onClick={handleAddColorToPalette}
-                                            size="icon"
-                                            className="rounded-full h-12 w-12 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            title="Add color to palette"
-                                        >
-                                            <Plus className="h-6 w-6" />
-                                        </Button>
-                                    </div>
+                        <div className="w-full max-w-sm h-full flex flex-col gap-4">
+                            <Button
+                                onClick={() => setIsContrastMode(prev => !prev)}
+                                variant="outline"
+                                className="w-full"
+                            >
+                                <Contrast className="mr-2 h-4 w-4" />
+                                {isContrastMode ? 'Back to Builder' : 'Check Contrast'}
+                            </Button>
+                            <AnimatePresence mode="wait">
+                            <motion.div
+                                key={isContrastMode ? 'contrast' : 'details'}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {isContrastMode ? (
+                                    <Card>
+                                        <CardContent className="p-4 space-y-4">
+                                            <div 
+                                                className="relative group w-full h-24 rounded-md border flex items-center justify-center text-center p-4"
+                                                style={{ backgroundColor: mainColor, color: contrastTextColor }}
+                                            >
+                                                <div className="select-none">
+                                                    <h2 className="text-3xl font-bold">Aa</h2>
+                                                    <p className="text-sm">Sample Text</p>
+                                                </div>
+                                            </div>
+                                            <WCAGDisplay bgColor={mainColor} textColor={contrastTextColor} />
+                                        </CardContent>
+                                    </Card>
+                                ) : (
+                                    <ColorBox 
+                                        color={mainColor} 
+                                        onActionClick={handleAddColorToPalette} 
+                                        actionIcon={<Plus className="h-4 w-4" />}
+                                        actionTitle="Add color to palette"
+                                        showDetails={true}
+                                    />
                                 )}
-                                {isContrastMode && (
-                                    <div className="select-none">
-                                        <h2 className="text-3xl font-bold">Aa</h2>
-                                        <p className="text-sm">Sample Text</p>
-                                    </div>
-                                )}
-                                </div>
-                                
-                                <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={isContrastMode ? 'contrast' : 'details'}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    {isContrastMode ? (
-                                        <WCAGDisplay bgColor={mainColor} textColor={contrastTextColor} />
-                                    ) : (
-                                        <ColorBox color={mainColor} isPrimaryDisplay />
-                                    )}
-                                </motion.div>
-                                </AnimatePresence>
-                            </CardContent>
-                        </Card>
+                            </motion.div>
+                            </AnimatePresence>
+                        </div>
                     </div>
 
                     <div className="w-full flex justify-center lg:justify-end">
