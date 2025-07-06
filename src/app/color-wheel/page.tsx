@@ -8,7 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Slider } from '@/components/ui/slider';
 import { colord } from 'colord';
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Separator } from '@/components/ui/separator';
 import {
     getComplementary,
     getAnalogous,
@@ -23,7 +24,7 @@ import {
 import type { ColorResult } from '@uiw/react-color';
 import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
 import { Label } from '@/components/ui/label';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ColorBox } from '@/components/colors/ColorBox';
 
 const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mod.default), {
@@ -48,7 +49,9 @@ const HarmonyDescription = ({ title, description }: { title: string, description
 
 export default function ColorWheelPage() {
     const [activeColor, setActiveColor] = useState('#ff6347');
-    const [tintShadeCount, setTintShadeCount] = useState(5);
+    const [tintCount, setTintCount] = useState(5);
+    const [toneCount, setToneCount] = useState(5);
+    const [shadeCount, setShadeCount] = useState(5);
 
     const activeHsl = useMemo(() => colord(activeColor).toHsl(), [activeColor]);
 
@@ -63,6 +66,7 @@ export default function ColorWheelPage() {
         splitComplementary: getSplitComplementary(activeColor),
         triadic: getTriadic(activeColor),
         tetradic: getRectangular(activeColor),
+        square: getSquare(activeColor),
     }), [activeColor]);
 
     const harmonyInfo = useMemo(() => [
@@ -122,7 +126,7 @@ export default function ColorWheelPage() {
         },
         { 
             name: "Square", 
-            colors: getSquare(activeColor), 
+            colors: harmonies.square, 
             description: (
                  <>
                     <p>The square color scheme includes four colors evenly spaced on the color wheel, forming a square.</p>
@@ -149,15 +153,9 @@ export default function ColorWheelPage() {
         },
     ], [activeColor, harmonies]);
 
-    const [activeHarmonyName, setActiveHarmonyName] = useState(harmonyInfo[0].name);
-
-    const activeHarmony = useMemo(() => {
-        return harmonyInfo.find(h => h.name === activeHarmonyName) || harmonyInfo[0];
-    }, [activeHarmonyName, harmonyInfo]);
-
-    const tints = useMemo(() => getTints(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
-    const shades = useMemo(() => getShades(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
-    const tones = useMemo(() => getTones(activeColor, tintShadeCount), [activeColor, tintShadeCount]);
+    const tints = useMemo(() => getTints(activeColor, tintCount), [activeColor, tintCount]);
+    const shades = useMemo(() => getShades(activeColor, shadeCount), [activeColor, shadeCount]);
+    const tones = useMemo(() => getTones(activeColor, toneCount), [activeColor, toneCount]);
 
     return (
         <main className="flex-1 w-full p-4 md:p-8 space-y-8">
@@ -200,7 +198,7 @@ export default function ColorWheelPage() {
                         <CardDescription>Select a tab to view a different harmonic relationship based on your selected color.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Tabs defaultValue={harmonyInfo[0].name} onValueChange={setActiveHarmonyName} className="w-full">
+                        <Tabs defaultValue={harmonyInfo[0].name} className="w-full">
                             <TabsList className="flex-wrap h-auto justify-start">
                                 {harmonyInfo.map((harmony) => (
                                     <TabsTrigger key={harmony.name} value={harmony.name}>
@@ -208,26 +206,26 @@ export default function ColorWheelPage() {
                                     </TabsTrigger>
                                 ))}
                             </TabsList>
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={activeHarmony.name}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.25 }}
-                                >
-                                    <div className="mt-6 grid md:grid-cols-[200px_1fr] items-center gap-8 p-4 min-h-[250px]">
+                            {harmonyInfo.map(harmony => (
+                                <TabsContent key={harmony.name} value={harmony.name}>
+                                     <motion.div
+                                        key={harmony.name}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="mt-6 grid md:grid-cols-[200px_1fr] items-center gap-8 p-4 min-h-[160px]"
+                                    >
                                         <div className="mx-auto">
-                                            <HarmonyColorWheel colors={activeHarmony.colors} size={200} />
+                                            <HarmonyColorWheel colors={harmony.colors} size={200} />
                                         </div>
-                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 items-start min-h-[144px] content-center">
-                                            {activeHarmony.colors.map((c) => (
+                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 items-start content-center min-h-[144px]">
+                                            {harmony.colors.map((c) => (
                                                 <ColorBox key={c} color={c} showDetails />
                                             ))}
                                         </div>
-                                    </div>
-                                </motion.div>
-                            </AnimatePresence>
+                                    </motion.div>
+                                </TabsContent>
+                            ))}
                         </Tabs>
                     </CardContent>
                 </Card>
@@ -238,40 +236,64 @@ export default function ColorWheelPage() {
                         <CardDescription>Explore variations of your selected color by mixing it with white (tints), gray (tones), or black (shades).</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                           <div className="flex justify-between items-center">
-                             <Label htmlFor="tint-shade-count">Count</Label>
-                             <span className="text-sm font-medium">{tintShadeCount}</span>
-                           </div>
-                           <Slider
-                                id="tint-shade-count"
-                                min={2}
-                                max={30}
-                                step={1}
-                                value={[tintShadeCount]}
-                                onValueChange={(value) => setTintShadeCount(value[0])}
-                            />
-                        </div>
+                       <div className="space-y-4">
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <Label htmlFor="tint-count" className="font-medium">Tints</Label>
+                                    <span className="text-sm font-medium">{tintCount}</span>
+                                </div>
+                                <Slider
+                                    id="tint-count"
+                                    min={2}
+                                    max={30}
+                                    step={1}
+                                    value={[tintCount]}
+                                    onValueChange={(value) => setTintCount(value[0])}
+                                />
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+                                    {tints.map((c, i) => <ColorBox key={`tint-${c}-${i}`} color={c} />)}
+                                </div>
+                            </div>
+                            
+                            <Separator />
 
-                        <div className="space-y-6">
-                           <div>
-                             <h4 className="text-sm font-medium text-muted-foreground mb-3">Tints</h4>
-                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                               {tints.map((c, i) => <ColorBox key={`tint-${c}-${i}`} color={c} />)}
-                             </div>
-                           </div>
-                           <div>
-                             <h4 className="text-sm font-medium text-muted-foreground mb-3">Tones</h4>
-                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                               {tones.map((c, i) => <ColorBox key={`tone-${c}-${i}`} color={c} />)}
-                             </div>
-                           </div>
-                           <div>
-                             <h4 className="text-sm font-medium text-muted-foreground mb-3">Shades</h4>
-                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                               {shades.map((c, i) => <ColorBox key={`shade-${c}-${i}`} color={c} />)}
-                             </div>
-                           </div>
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <Label htmlFor="tone-count" className="font-medium">Tones</Label>
+                                    <span className="text-sm font-medium">{toneCount}</span>
+                                </div>
+                                <Slider
+                                    id="tone-count"
+                                    min={2}
+                                    max={30}
+                                    step={1}
+                                    value={[toneCount]}
+                                    onValueChange={(value) => setToneCount(value[0])}
+                                />
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+                                    {tones.map((c, i) => <ColorBox key={`tone-${c}-${i}`} color={c} />)}
+                                </div>
+                            </div>
+
+                            <Separator />
+                            
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <Label htmlFor="shade-count" className="font-medium">Shades</Label>
+                                    <span className="text-sm font-medium">{shadeCount}</span>
+                                </div>
+                                <Slider
+                                    id="shade-count"
+                                    min={2}
+                                    max={30}
+                                    step={1}
+                                    value={[shadeCount]}
+                                    onValueChange={(value) => setShadeCount(value[0])}
+                                />
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+                                    {shades.map((c, i) => <ColorBox key={`shade-${c}-${i}`} color={c} />)}
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
