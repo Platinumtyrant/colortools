@@ -41,6 +41,7 @@ import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 
 // Type definition for the experimental EyeDropper API
@@ -605,12 +606,22 @@ function PaletteBuilderPage() {
                         </div>
                         
                         <div className="space-y-1.5">
-                            <Label>Background Color</Label>
-                            <ColorPickerClient
-                                color={contrastBgColor}
-                                onChange={(color: ColorResult) => setContrastBgColor(color.hex)}
-                            />
-                        </div>
+                             <Label>Background Color</Label>
+                             <Popover>
+                                 <PopoverTrigger asChild>
+                                     <Button variant="outline" className="w-full h-10 justify-start px-3">
+                                         <div className="w-6 h-6 rounded border mr-2" style={{ backgroundColor: contrastBgColor }} />
+                                         <span className="font-mono text-sm">{contrastBgColor.toUpperCase()}</span>
+                                     </Button>
+                                 </PopoverTrigger>
+                                 <PopoverContent className="w-auto p-0 border-none">
+                                     <ColorPickerClient
+                                         color={contrastBgColor}
+                                         onChange={(color: ColorResult) => setContrastBgColor(color.hex)}
+                                     />
+                                 </PopoverContent>
+                             </Popover>
+                         </div>
 
                         <div
                             className="p-4 rounded-lg text-center border-2 border-dashed"
@@ -739,8 +750,8 @@ function PaletteBuilderPage() {
 
             <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1.2fr,2fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
                 <div className="flex flex-col gap-8 min-h-0">
-                    <section className="grid grid-cols-1 md:items-center gap-8 w-full">
-                        <div className="w-full flex justify-center">
+                    <section className="flex flex-col lg:flex-row items-center justify-center gap-8 w-full">
+                        <div className="w-full lg:w-auto flex justify-center">
                             <div className="flex items-center justify-center gap-4">
                                 <div className="flex flex-col items-center gap-4">
                                     <ColorWheel
@@ -787,7 +798,7 @@ function PaletteBuilderPage() {
                             </div>
                         </div>
 
-                        <div className="w-full flex justify-center">
+                        <div className="w-full lg:w-auto flex justify-center">
                              <div className="w-full max-w-sm relative group/container" onClick={() => setEditingColorId(null)} >
                                  <ColorBox
                                     variant="default"
@@ -819,3 +830,4 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
