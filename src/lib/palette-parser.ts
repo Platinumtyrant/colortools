@@ -17,10 +17,10 @@ export interface CategorizedPalette extends PrebuiltPalette {
 
 const brandKeywords = [
     'gucci', 'discord', 'windows', 'materialize', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
-    'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'ios', 'bmw', 'amazon', 'fedex', 
+    'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'bmw', 'amazon', 'fedex', 
     'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
-    'linktree', 'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
-    'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
+    'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
+    'shell', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
     'snapchat', 'youtube', 'illustrator', 'us dollar'
 ];
 
@@ -111,6 +111,7 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
   try {
     const htmlContent = await fs.readFile(filePath, 'utf-8');
 
+    const excludedKeywords = ['minecraft', 'ios', 'linktree', 'kpmg', 'xkcd'];
     const allPalettes: CategorizedPalette[] = [];
     const paletteChunks = htmlContent.split('<h3>').slice(1);
 
@@ -123,7 +124,10 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
       const colors = colorMatches.map(match => match[1].toUpperCase());
       const uniqueColors = [...new Set(colors)];
 
-      if (uniqueColors.length > 1 && !paletteName.toLowerCase().includes('minecraft')) {
+      const lowerCaseName = paletteName.toLowerCase();
+      const shouldExclude = excludedKeywords.some(keyword => lowerCaseName.includes(keyword));
+
+      if (uniqueColors.length > 1 && !shouldExclude) {
            allPalettes.push({
              name: paletteName,
              colors: uniqueColors,
