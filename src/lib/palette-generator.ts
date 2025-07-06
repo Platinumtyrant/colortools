@@ -73,87 +73,77 @@ export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor
 export function generatePalette(options: GenerationOptions): string[] {
     const { numColors, type, lockedColors } = options;
 
-    const colorsToScale = (lockedColors && lockedColors.length > 0) ? lockedColors : [getRandomColor()];
+    const baseColor = (lockedColors && lockedColors.length > 0) ? lockedColors[0] : getRandomColor();
     
-    if (colorsToScale.some(c => !chroma.valid(c))) {
+    if (!chroma.valid(baseColor)) {
         throw new Error("Invalid base color provided.");
     }
-    
-    let initialPalette: string[];
 
-    const sortbyHue = (a: string, b: string) => {
-        const hA = chroma(a).hsl()[0];
-        const hB = chroma(b).hsl()[0];
-        return (isNaN(hA) ? 0 : hA) - (isNaN(hB) ? 0 : hB);
-    };
+    const baseHsl = chroma(baseColor).hsl();
+    const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
+    const s = baseHsl[1];
+    const l = baseHsl[2];
 
-    switch (type) {
-        case 'analogous': {
-            const base = colorsToScale[0];
-            const baseHsl = chroma(base).hsl();
-            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
-            const s = baseHsl[1];
-            const l = baseHsl[2];
-
-            const analogousPalette: string[] = [];
-            const angleStep = 60 / (numColors > 1 ? numColors - 1 : 1); // Total 60 degree arc
-
-            for (let i = 0; i < numColors; i++) {
-                const hueOffset = (i * angleStep) - 30; // Center the arc around the base hue
-                const newHue = (h + hueOffset + 360) % 360;
-                
-                // Add subtle variations to saturation and lightness to avoid a flat look
-                // This creates a gentle "arc" in lightness and saturation as well
-                const position = i / (numColors - 1 || 1); // 0 to 1
-                const lightnessFactor = 1.0 - 0.15 * Math.sin(position * Math.PI); // Peak lightness in middle
-                const saturationFactor = 0.85 + 0.15 * Math.sin(position * Math.PI); // Peak saturation at ends
-
-                const newLightness = Math.max(0.05, Math.min(0.95, l * lightnessFactor));
-                const newSaturation = Math.max(0.1, Math.min(1.0, s * saturationFactor));
-
-                analogousPalette.push(chroma.hsl(newHue, newSaturation, newLightness).hex());
-            }
-
-            initialPalette = analogousPalette;
-            break;
-        }
-        case 'triadic': {
-            const base = colorsToScale[0];
-            const baseHsl = chroma(base).hsl();
-            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
-            const s = baseHsl[1];
-            const l = baseHsl[2];
-
-            const secondColor = chroma.hsl((h + 120) % 360, s, l).hex();
-            const thirdColor = chroma.hsl((h + 240) % 360, s, l).hex();
-            const fullScale = [...colorsToScale, secondColor, thirdColor].sort(sortbyHue);
-            initialPalette = chroma.scale(fullScale).mode('oklch').colors(numColors);
-            break;
-        }
-        case 'complementary': {
-            const base = colorsToScale[0];
-            const baseHsl = chroma(base).hsl();
-            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
-            const s = baseHsl[1];
-            const l = baseHsl[2];
-
-            const complement = chroma.hsl((h + 180) % 360, s, l).hex();
-            const fullScale = [...colorsToScale, complement].sort(sortbyHue);
-            initialPalette = chroma.scale(fullScale).mode('oklch').colors(numColors);
-            break;
-        }
-        case 'tints': {
-            initialPalette = getTints(colorsToScale[0], numColors);
-            break;
-        }
-        case 'shades': {
-            initialPalette = getShades(colorsToScale[0], numColors);
-            break;
-        }
-        default:
-            initialPalette = chroma.scale(colorsToScale).mode('oklch').colors(numColors);
-            break;
+    if (type === 'tints') {
+        return getTints(baseColor, numColors);
+    }
+    if (type === 'shades') {
+        return getShades(baseColor, numColors);
     }
 
-    return initialPalette;
+    let anchorHues: number[] = [h];
+    if (type === 'analogous') {
+        const palette: string[] = [];
+        const angleRange = 60; // Total range for analogous colors
+        for (let i = 0; i < numColors; i++) {
+            const position = numColors > 1 ? i / (numColors - 1) : 0.5;
+            const hueOffset = (position - 0.5) * angleRange; // from -30 to +30
+            const newHue = (h + hueOffset + 360) % 360;
+
+            const lightnessVariation = 0.1 * Math.sin(position * Math.PI); // small arc
+            const newLightness = Math.max(0.1, Math.min(0.9, l + lightnessVariation));
+            const newSaturation = Math.max(0.2, Math.min(1.0, s));
+
+            palette.push(chroma.hsl(newHue, newSaturation, newLightness).hex());
+        }
+        return palette;
+    }
+    
+    if (type === 'complementary') {
+        anchorHues.push((h + 180) % 360);
+    }
+    if (type === 'triadic') {
+        anchorHues.push((h + 120) % 360);
+        anchorHues.push((h + 240) % 360);
+    }
+
+    const finalPalette: string[] = [];
+    const colorsPerAnchor = Math.ceil(numColors / anchorHues.length);
+
+    anchorHues.forEach(anchorHue => {
+        if (finalPalette.length >= numColors) return;
+
+        finalPalette.push(chroma.hsl(anchorHue, s, l).hex());
+
+        for (let i = 1; i < colorsPerAnchor; i++) {
+            if (finalPalette.length >= numColors) break;
+            
+            const lightnessOffset = (i % 2 === 0 ? -1 : 1) * 0.05 * Math.ceil(i / 2);
+            const saturationOffset = -0.05 * i;
+            
+            const newLightness = Math.max(0.1, Math.min(0.9, l + lightnessOffset));
+            const newSaturation = Math.max(0.2, Math.min(1.0, s + saturationOffset));
+
+            finalPalette.push(chroma.hsl(anchorHue, newSaturation, newLightness).hex());
+        }
+    });
+    
+    const sortedPalette = finalPalette.slice(0, numColors).sort((a,b) => {
+        const hA = chroma(a).hsl()[0];
+        const hB = chroma(b).hsl()[0];
+        if (isNaN(hA) || isNaN(hB)) return 0;
+        return hA - hB;
+    });
+
+    return sortedPalette;
 }
