@@ -89,7 +89,19 @@ const ColorBoxInner = ({
     onSetActiveColor,
     isLocked,
 }: ColorBoxProps) => {
-    const { primary, all: allNames } = name ? { primary: { name, source: 'Pantone' }, all: [{ name, source: 'Pantone' }] } : useAllDescriptiveColorNames(color);
+    const allDescriptiveNames = useAllDescriptiveColorNames(color);
+
+    const primary = name 
+        ? { name, source: 'Pantone' } 
+        : allDescriptiveNames.primary;
+        
+    const allNames = name 
+        ? [
+            { source: 'Pantone', name },
+            ...allDescriptiveNames.all.filter(n => n.name.toLowerCase() !== name.toLowerCase())
+          ]
+        : allDescriptiveNames.all;
+        
     const { toast } = useToast();
     
     const handleCopy = (e: React.MouseEvent) => {
