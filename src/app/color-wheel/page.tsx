@@ -6,19 +6,17 @@ import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Slider } from '@/components/ui/slider';
 import { colord } from 'colord';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     getComplementary,
     getAnalogous,
     getSplitComplementary,
     getTriadic,
     getSquare,
-    getRectangular,
-    getTints,
     getTones,
+    getTints,
     getShades,
 } from '@/lib/colors';
 import type { ColorResult } from '@uiw/react-color';
@@ -35,41 +33,6 @@ const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mo
       </div>
   )
 });
-
-const SmallSwatch = ({ color }: { color: string }) => (
-    <TooltipProvider>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <div className="h-10 w-10 rounded-md border" style={{ backgroundColor: color }} />
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>{color.toUpperCase()}</p>
-            </TooltipContent>
-        </Tooltip>
-    </TooltipProvider>
-);
-
-const HarmonySwatch = ({ color }: { color: string }) => (
-    <TooltipProvider>
-        <Tooltip>
-            <TooltipTrigger asChild>
-                <div className="h-16 w-16 rounded-lg border shadow-sm" style={{ backgroundColor: color }} />
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>{color.toUpperCase()}</p>
-            </TooltipContent>
-        </Tooltip>
-    </TooltipProvider>
-);
-
-const ColorStrip = ({ title, colors }: { title: string, colors: string[] }) => (
-    <div className="space-y-3">
-      <h4 className="text-sm font-medium text-muted-foreground">{title}</h4>
-      <div className="flex flex-wrap gap-2">
-        {colors.map((c, i) => <SmallSwatch key={`${title}-${c}-${i}`} color={c} />)}
-      </div>
-    </div>
-);
 
 const HarmonyDescription = ({ title, description }: { title: string, description: React.ReactNode }) => (
     <AccordionItem value={title}>
@@ -229,7 +192,7 @@ export default function ColorWheelPage() {
                 </div>
             </div>
             
-            <section className="w-full max-w-3xl mx-auto space-y-8">
+            <section className="w-full max-w-4xl mx-auto space-y-8">
                 <Card>
                     <CardHeader>
                         <CardTitle>Color Harmonies</CardTitle>
@@ -244,24 +207,26 @@ export default function ColorWheelPage() {
                                     </TabsTrigger>
                                 ))}
                             </TabsList>
-                            <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 p-4 min-h-[250px]">
-                                <HarmonyColorWheel colors={activeHarmony.colors} size={200} />
-                                <div className="flex flex-wrap gap-4 justify-center content-center max-w-[200px] min-h-[144px]">
-                                    <AnimatePresence mode="wait">
-                                    {activeHarmony.colors.map((c) => (
-                                        <motion.div
-                                            key={`${activeHarmony.name}-${c}`}
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.8 }}
-                                            transition={{ duration: 0.2 }}
-                                        >
-                                            <HarmonySwatch color={c} />
-                                        </motion.div>
-                                    ))}
-                                    </AnimatePresence>
-                                </div>
-                            </div>
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={activeHarmony.name}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.25 }}
+                                >
+                                    <div className="mt-6 grid md:grid-cols-[200px_1fr] items-center gap-8 p-4 min-h-[250px]">
+                                        <div className="mx-auto">
+                                            <HarmonyColorWheel colors={activeHarmony.colors} size={200} />
+                                        </div>
+                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 items-start min-h-[144px] content-center">
+                                            {activeHarmony.colors.map((c) => (
+                                                <ColorBox key={c} color={c} showDetails />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </AnimatePresence>
                         </Tabs>
                     </CardContent>
                 </Card>
@@ -287,15 +252,29 @@ export default function ColorWheelPage() {
                             />
                         </div>
 
-                        <div className="space-y-4">
-                            <ColorStrip title="Tints" colors={tints} />
-                            <ColorStrip title="Tones" colors={tones} />
-                            <ColorStrip title="Shades" colors={shades} />
+                        <div className="space-y-6">
+                           <div>
+                             <h4 className="text-sm font-medium text-muted-foreground mb-3">Tints</h4>
+                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                               {tints.map((c, i) => <ColorBox key={`tint-${c}-${i}`} color={c} />)}
+                             </div>
+                           </div>
+                           <div>
+                             <h4 className="text-sm font-medium text-muted-foreground mb-3">Tones</h4>
+                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                               {tones.map((c, i) => <ColorBox key={`tone-${c}-${i}`} color={c} />)}
+                             </div>
+                           </div>
+                           <div>
+                             <h4 className="text-sm font-medium text-muted-foreground mb-3">Shades</h4>
+                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                               {shades.map((c, i) => <ColorBox key={`shade-${c}-${i}`} color={c} />)}
+                             </div>
+                           </div>
                         </div>
                     </CardContent>
                 </Card>
             </section>
-
 
             <section className="w-full max-w-3xl mx-auto">
                 <Card>
