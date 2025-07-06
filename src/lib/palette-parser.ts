@@ -18,7 +18,7 @@ export interface CategorizedPalette extends PrebuiltPalette {
 const brandKeywords = [
     'gucci', 'discord', 'windows', 'materialize', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
     'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'ios', 'bmw', 'amazon', 'fedex', 
-    'google', 'telegram', 'steam', 'valorant', 'minecraft', 'rolex', 'samsung', 'logitech', 'figma', 
+    'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
     'linktree', 'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
     'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
     'snapchat', 'youtube', 'illustrator', 'us dollar'
@@ -118,12 +118,12 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
       const paletteNameMatch = chunk.match(/(.*?)<\/h3>/);
       const paletteName = paletteNameMatch ? paletteNameMatch[1].trim() : 'Unnamed Palette';
       
-      const colorMatches = [...chunk.matchAll(/style="background-color:(#[0-9a-fA-F]{6});/gi)];
+      const colorMatches = [...chunk.matchAll(/style="background-color:(#[0-9a-fA-F]{6});?/gi)];
       
       const colors = colorMatches.map(match => match[1].toUpperCase());
       const uniqueColors = [...new Set(colors)];
 
-      if (uniqueColors.length > 1) {
+      if (uniqueColors.length > 1 && !paletteName.toLowerCase().includes('minecraft')) {
            allPalettes.push({
              name: paletteName,
              colors: uniqueColors,

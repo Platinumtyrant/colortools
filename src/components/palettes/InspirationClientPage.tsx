@@ -16,6 +16,29 @@ interface InspirationClientPageProps {
   allPalettes: CategorizedPalette[];
 }
 
+const brandKeywords = [
+    'gucci', 'discord', 'windows', 'materialize', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
+    'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'ios', 'bmw', 'amazon', 'fedex', 
+    'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
+    'linktree', 'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
+    'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
+    'snapchat', 'youtube', 'illustrator', 'us dollar'
+];
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+function getBrandFromPaletteName(name: string): string | null {
+  const lowerName = name.toLowerCase();
+  for (const keyword of brandKeywords) {
+    if (lowerName.includes(keyword)) {
+        if (keyword === 'vs code') return 'Visual Studio'; // Group vs code with visual studio
+        return keyword.split(' ').map(capitalize).join(' ');
+    }
+  }
+  return null;
+}
+
+
 export function InspirationClientPage({ allPalettes }: InspirationClientPageProps) {
   const { toast } = useToast();
   const { palette, setPalette } = usePaletteBuilder();
@@ -114,6 +137,42 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
   const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor', 'Brands', 'Flags'];
   const orderedCategories = categoryOrder.filter(cat => palettesByCategory[cat]);
 
+  const renderPalette = (palette: CategorizedPalette, paletteIndex: number) => (
+      <div className="group/palette" key={`${palette.name}-${paletteIndex}`}>
+          <div className="flex justify-between items-center mb-2">
+              <p className="text-sm font-medium truncate cursor-pointer" title={palette.name} onClick={() => handleSavePalette(palette)}>{palette.name}</p>
+               <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 opacity-0 group-hover/palette:opacity-100 transition-opacity"
+                onClick={() => handleSavePalette(palette)}
+                title="Save this palette"
+              >
+                  <Plus className="h-4 w-4" />
+              </Button>
+          </div>
+           <div className="flex flex-wrap gap-2">
+              {palette.colors.map((color, index) => {
+                 const normalizedColor = colord(color).toHex();
+                 const isInLibrary = libraryHexes.has(normalizedColor);
+                 const isInPalette = paletteHexes.has(normalizedColor);
+                 return (
+                      <div key={`${color}-${index}`} className="w-40">
+                          <ColorBox
+                              color={color}
+                              variant="compact"
+                              onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color) : undefined}
+                              onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color) : undefined}
+                              onAddToPalette={!isInPalette ? () => handleAddToPalette(color) : undefined}
+                              onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color) : undefined}
+                          />
+                      </div>
+                  );
+              })}
+          </div>
+      </div>
+  );
+
   return (
     <Tabs defaultValue={orderedCategories[0]} className="w-full">
       <TabsList className="grid w-full grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11">
@@ -122,47 +181,47 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
         ))}
       </TabsList>
       
-      {orderedCategories.map(category => (
-        <TabsContent key={category} value={category} className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
-            {palettesByCategory[category].map((palette, paletteIndex) => (
-                <div className="group/palette" key={`${palette.name}-${paletteIndex}`}>
-                    <div className="flex justify-between items-center mb-2">
-                        <p className="text-sm font-medium truncate cursor-pointer" title={palette.name} onClick={() => handleSavePalette(palette)}>{palette.name}</p>
-                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 opacity-0 group-hover/palette:opacity-100 transition-opacity"
-                          onClick={() => handleSavePalette(palette)}
-                          title="Save this palette"
-                        >
-                            <Plus className="h-4 w-4" />
-                        </Button>
-                    </div>
-                     <div className="flex flex-wrap gap-2">
-                        {palette.colors.map((color, index) => {
-                           const normalizedColor = colord(color).toHex();
-                           const isInLibrary = libraryHexes.has(normalizedColor);
-                           const isInPalette = paletteHexes.has(normalizedColor);
-                           return (
-                                <div key={`${color}-${index}`} className="w-40">
-                                    <ColorBox
-                                        color={color}
-                                        variant="compact"
-                                        onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color) : undefined}
-                                        onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color) : undefined}
-                                        onAddToPalette={!isInPalette ? () => handleAddToPalette(color) : undefined}
-                                        onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color) : undefined}
-                                    />
+      {orderedCategories.map(category => {
+        if (category === 'Brands') {
+            const brands = palettesByCategory[category].reduce((acc, palette) => {
+              const brandName = getBrandFromPaletteName(palette.name) || 'Other Brands';
+              if (!acc[brandName]) {
+                acc[brandName] = [];
+              }
+              acc[brandName].push(palette);
+              return acc;
+            }, {} as Record<string, CategorizedPalette[]>);
+    
+            const sortedBrands = Object.keys(brands).sort((a, b) => {
+                if (a === 'Other Brands') return 1;
+                if (b === 'Other Brands') return -1;
+                return a.localeCompare(b);
+            });
+
+            return (
+                <TabsContent key={category} value={category} className="mt-6">
+                    <div className="space-y-10">
+                        {sortedBrands.map(brandName => (
+                            <div key={brandName}>
+                                <h3 className="text-xl font-semibold mb-4 border-b pb-2">{brandName}</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
+                                    {brands[brandName].map(renderPalette)}
                                 </div>
-                            );
-                        })}
+                            </div>
+                        ))}
                     </div>
-                </div>
-            ))}
-          </div>
-        </TabsContent>
-      ))}
+                </TabsContent>
+            )
+        }
+        
+        return (
+            <TabsContent key={category} value={category} className="mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
+                {palettesByCategory[category].map(renderPalette)}
+              </div>
+            </TabsContent>
+        )
+      })}
     </Tabs>
   );
 }
