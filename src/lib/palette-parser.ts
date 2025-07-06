@@ -118,15 +118,16 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
       const paletteNameMatch = chunk.match(/(.*?)<\/h3>/);
       const paletteName = paletteNameMatch ? paletteNameMatch[1].trim() : 'Unnamed Palette';
       
-      const colorMatches = [...chunk.matchAll(/(?:style="background-color:(#[0-9a-fA-F]{6});"|>(#[0-9a-fA-F]{6})<\/div>)/gi)];
+      const colorMatches = [...chunk.matchAll(/style="background-color:(#[0-9a-fA-F]{6});/gi)];
       
-      const colors = colorMatches.map(match => (match[1] || match[2]).toUpperCase()).filter(c => c);
+      const colors = colorMatches.map(match => match[1].toUpperCase());
+      const uniqueColors = [...new Set(colors)];
 
-      if (colors.length > 1) {
+      if (uniqueColors.length > 1) {
            allPalettes.push({
              name: paletteName,
-             colors,
-             category: categorizePalette(colors, paletteName),
+             colors: uniqueColors,
+             category: categorizePalette(uniqueColors, paletteName),
            });
       }
     }
