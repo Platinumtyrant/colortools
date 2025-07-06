@@ -139,31 +139,21 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                             <Plus className="h-4 w-4" />
                         </Button>
                     </div>
-                    <div className="flex flex-wrap w-full cursor-pointer overflow-hidden rounded-md border">
+                     <div className="flex flex-wrap gap-2 rounded-md border p-2">
                         {palette.colors.map((color, index) => {
                            const normalizedColor = colord(color).toHex();
                            const isInLibrary = libraryHexes.has(normalizedColor);
                            const isInPalette = paletteHexes.has(normalizedColor);
                            return (
-                                <div
-                                    key={`${color}-${index}`}
-                                    className="relative flex-grow group/color"
-                                    style={{
-                                        backgroundColor: color,
-                                        height: palette.colors.length > 10 ? '2rem' : '4rem',
-                                        minWidth: '20px'
-                                    }}
-                                >
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover/color:opacity-100 transition-opacity">
-                                         <ColorBox
-                                            color={color}
-                                            variant="compact"
-                                            onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color) : undefined}
-                                            onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color) : undefined}
-                                            onAddToPalette={!isInPalette ? () => handleAddToPalette(color) : undefined}
-                                            onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color) : undefined}
-                                        />
-                                    </div>
+                                <div key={`${color}-${index}`} className="w-16">
+                                    <ColorBox
+                                        color={color}
+                                        variant="compact"
+                                        onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color) : undefined}
+                                        onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color) : undefined}
+                                        onAddToPalette={!isInPalette ? () => handleAddToPalette(color) : undefined}
+                                        onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color) : undefined}
+                                    />
                                 </div>
                             );
                         })}

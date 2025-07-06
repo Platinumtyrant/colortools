@@ -319,117 +319,104 @@ export default function LibraryPage() {
             {savedPalettes.length > 0 && (
                 <section>
                     <h2 className="text-2xl font-semibold mb-4">My Palettes</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {savedPalettes.map((palette) => (
-                            <Card key={palette.id} className="overflow-hidden bg-card flex flex-col">
-                            <CardContent className="p-0 flex-grow">
-                                <div className="flex flex-wrap h-24">
-                                {palette.colors.map((color, index) => (
-                                    <div
-                                    key={`${color}-${index}`}
-                                    style={{
-                                        backgroundColor: color,
-                                        flexGrow: 1,
-                                        minWidth: '10px'
-                                    }}
-                                    />
-                                ))}
-                                </div>
-                                <div className="p-4">
-                                <div className="flex items-center justify-between gap-2 mb-2">
+                          <Card key={palette.id} className="bg-card flex flex-col justify-between">
+                            <div>
+                                <CardHeader className="flex flex-row items-center justify-between p-4">
+                                  <div className="flex-1 min-w-0">
                                     {editingPaletteId === palette.id ? (
-                                    <Input
-                                        value={newPaletteName}
-                                        onChange={(e) => setNewPaletteName(e.target.value)}
-                                        onBlur={() => handleUpdateName(palette.id)}
-                                        onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleUpdateName(palette.id);
-                                        } else if (e.key === 'Escape') {
-                                            setEditingPaletteId(null);
-                                        }
-                                        }}
-                                        autoFocus
-                                        className="h-8"
-                                    />
+                                        <Input
+                                            value={newPaletteName}
+                                            onChange={(e) => setNewPaletteName(e.target.value)}
+                                            onBlur={() => handleUpdateName(palette.id)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') handleUpdateName(palette.id);
+                                                else if (e.key === 'Escape') setEditingPaletteId(null);
+                                            }}
+                                            autoFocus
+                                            className="h-8 w-full"
+                                        />
                                     ) : (
-                                    <>
-                                        <p className="text-md font-semibold truncate" title={palette.name}>
-                                        {palette.name}
-                                        </p>
-                                        <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6 shrink-0"
-                                                onClick={() => {
-                                                setEditingPaletteId(palette.id);
-                                                setNewPaletteName(palette.name);
-                                                }}
-                                            >
-                                                <Pencil className="h-3 w-3" />
-                                                <span className="sr-only">Edit Name</span>
-                                            </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                            <p>Edit Name</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                        </TooltipProvider>
-                                    </>
+                                        <CardTitle className="text-lg truncate" title={palette.name}>{palette.name}</CardTitle>
                                     )}
-                                </div>
-                                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                                    {palette.colors.map((color, index) => (
-                                    <span key={`${color}-${index}`} className="font-mono text-xs text-muted-foreground">{color.toUpperCase()}</span>
-                                    ))}
-                                </div>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="justify-end gap-1 p-4 pt-0">
-                                <TooltipProvider>
-                                    <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" onClick={() => handleLoadForEditing(palette)}>
-                                            <Pencil className="h-4 w-4" />
-                                            <span className="sr-only">Edit Palette in Builder</span>
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Edit Palette in Builder</p>
-                                    </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" onClick={() => handleDeletePalette(palette.id)}>
-                                        <Trash2 className="h-4 w-4" />
-                                        <span className="sr-only">Delete Palette</span>
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Delete Palette</p>
-                                    </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                                  </div>
+                                    
+                                    <div className="flex items-center shrink-0">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-7 w-7"
+                                                        onClick={() => {
+                                                            if (editingPaletteId === palette.id) handleUpdateName(palette.id);
+                                                            else {
+                                                                setEditingPaletteId(palette.id);
+                                                                setNewPaletteName(palette.name);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Edit Name</p></TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
 
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                    <Button>
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Export
-                                    </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent>
-                                    <DropdownMenuItem onClick={() => exportPaletteAsSvg(palette)}>SVG</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => exportPaletteAsPng(palette)}>PNG</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => exportPaletteAsJson(palette)}>Tokens (JSON)</DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                    <Download className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem onClick={() => exportPaletteAsSvg(palette)}>SVG</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => exportPaletteAsPng(palette)}>PNG</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => exportPaletteAsJson(palette)}>Tokens (JSON)</DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDeletePalette(palette.id)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Delete Palette</p></TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent className="p-4 pt-0">
+                                    <div className="flex flex-wrap gap-2">
+                                        {palette.colors.map((color, index) => {
+                                            const normalizedColor = colord(color).toHex();
+                                            const isInPalette = paletteHexes.has(normalizedColor);
+                                            return (
+                                                <div key={`${color}-${index}`} className="flex-1 min-w-[3.5rem]">
+                                                    <ColorBox
+                                                        color={color}
+                                                        variant="compact"
+                                                        onAddToPalette={!isInPalette ? () => handleAddToPalette(color) : undefined}
+                                                        onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color) : undefined}
+                                                    />
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </CardContent>
+                            </div>
+                            <CardFooter className="p-4">
+                                <Button className="w-full" onClick={() => handleLoadForEditing(palette)}>
+                                    <Palette className="mr-2 h-4 w-4" />
+                                    Load in Builder
+                                </Button>
                             </CardFooter>
-                            </Card>
+                          </Card>
                         ))}
                     </div>
                 </section>
