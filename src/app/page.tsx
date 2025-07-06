@@ -27,7 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, Pencil, Plus, Sparkles, Pipette, Unlock } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, Pencil, Plus, Sparkles, Pipette, Unlock, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -117,6 +117,7 @@ function PaletteBuilderPage() {
   const [mainColor, setMainColor] = useState('#FF9800');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
+  const [isHarmonyLocked, setIsHarmonyLocked] = useState(false);
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
@@ -168,44 +169,48 @@ function PaletteBuilderPage() {
         const isInitial = prevPalette.length === 0;
         const currentLockedColors = prevPalette.filter(c => c.locked);
         const currentLockedHexes = currentLockedColors.map(c => c.hex);
-        
-        let baseColors: string[];
-        if (currentLockedHexes.length > 0) {
-            baseColors = currentLockedHexes;
-        } else {
-            baseColors = [mainColor];
-        }
-
         const numColors = isInitial ? 5 : (prevPalette.length || 5);
-        const numToGenerate = numColors - currentLockedHexes.length;
 
-        if (numToGenerate <= 0) {
-            return prevPalette;
-        }
+        if (currentLockedHexes.length > 0) {
+            // Generate colors to fill the gaps left by unlocked colors
+            const numToGenerate = numColors - currentLockedHexes.length;
+            if (numToGenerate <= 0) return prevPalette;
 
-        const newHexes = generatePalette({
-            numColors: numToGenerate,
-            type: generationType,
-            baseColors: baseColors
-        });
+            const newHexes = generatePalette({
+                numColors: numToGenerate,
+                type: generationType,
+                baseColors: currentLockedHexes
+            });
 
-        // Ensure the main color is included on initial generation
-        if (isInitial) {
-          newHexes[0] = mainColor;
-        }
-
-        const newPalette: PaletteColor[] = [];
-        let newHexIndex = 0;
-        for (let i = 0; i < numColors; i++) {
-            const originalColor = prevPalette[i];
-            if (originalColor?.locked) {
-                newPalette.push(originalColor);
-            } else {
-                const newId = isInitial ? Date.now() + i : (originalColor?.id || Date.now() + i);
-                newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
+            const newPalette: PaletteColor[] = [];
+            let newHexIndex = 0;
+            for (let i = 0; i < numColors; i++) {
+                const originalColor = prevPalette[i];
+                if (originalColor?.locked) {
+                    newPalette.push(originalColor);
+                } else {
+                    const newId = isInitial ? Date.now() + i : (originalColor?.id || Date.now() + i);
+                    newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
+                }
             }
+            return newPalette;
+        } else {
+            // No locked colors, regenerate the whole palette based on mainColor
+            const newHexes = generatePalette({
+                numColors,
+                type: generationType,
+                baseColors: [mainColor],
+            });
+
+            // Ensure the main color is always first for consistency
+            newHexes[0] = mainColor;
+
+            return newHexes.map((hex, i) => ({
+                id: prevPalette[i]?.id || Date.now() + i,
+                hex,
+                locked: false,
+            }));
         }
-        return newPalette;
     });
   }, [generationType, mainColor]);
 
@@ -402,9 +407,11 @@ function PaletteBuilderPage() {
     setEditingPaletteId(null);
     setPalette(prev => prev.map(c => ({...c, locked: false})));
     setMainColor(getRandomColor());
-    setGenerationType(allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)]);
+    if (!isHarmonyLocked) {
+      setGenerationType(allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)]);
+    }
     toast({ title: "Palette Randomized!" });
-  }, [toast]);
+  }, [toast, isHarmonyLocked]);
 
   const handleUnlockAll = useCallback(() => {
     setPalette(prev => prev.map(c => ({...c, locked: false})));
@@ -574,7 +581,7 @@ function PaletteBuilderPage() {
     <div className="flex w-full justify-between items-center gap-4 flex-wrap">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <Button onClick={handleMix} size="sm">
+          <Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}>
               <Dices className="mr-2 h-4 w-4" />
               Mix
           </Button>
@@ -592,7 +599,7 @@ function PaletteBuilderPage() {
           <Select 
               value={generationType} 
               onValueChange={(value) => setGenerationType(value as GenerationType)}
-              disabled={hasLockedColors}
+              disabled={hasLockedColors || isHarmonyLocked}
             >
             <SelectTrigger id="generationType" className="w-[150px] h-9">
               <SelectValue placeholder="Select type" />
@@ -603,7 +610,19 @@ function PaletteBuilderPage() {
               ))}
             </SelectContent>
           </Select>
-          {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change.</p>}
+          <TooltipProvider>
+            <ShadTooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setIsHarmonyLocked(v => !v)}>
+                  {isHarmonyLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isHarmonyLocked ? 'Unlock' : 'Lock'} Harmony Type</p>
+              </TooltipContent>
+            </ShadTooltip>
+          </TooltipProvider>
+          {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change type.</p>}
         </div>
       </div>
       

@@ -94,15 +94,16 @@ export function generatePalette(options: GenerationOptions): string[] {
 
     const colors: string[] = [];
 
-    // Helper function to create subtle variations around a main color
+    // Helper function to create subtle variations around a main anchor hue
     const createVariations = (baseHue: number, count: number) => {
         if (count <= 0) return [];
         const variations: string[] = [];
         for (let i = 0; i < count; i++) {
-            // Create small variations in Lightness and Chroma
-            const l_var = l + (Math.random() - 0.5) * 20; // lightness variation +/- 10
-            const c_var = c + (Math.random() - 0.5) * 15; // chroma variation +/- 7.5
-            const h_var = baseHue + (Math.random() - 0.5) * 15; // hue variation +/- 7.5
+            // Create small variations in Lightness and Chroma for a more organic feel
+            // The first color (i=0) is closer to the original, subsequent ones vary more.
+            const l_var = l + (Math.random() - 0.5) * (15 + i * 5);
+            const c_var = c + (Math.random() - 0.5) * (10 + i * 5);
+            const h_var = baseHue + (Math.random() - 0.5) * (10 + i * 2.5);
             variations.push(
                 chroma.lch(
                     Math.max(10, Math.min(95, l_var)), 
@@ -116,46 +117,39 @@ export function generatePalette(options: GenerationOptions): string[] {
 
     switch (type) {
         case 'analogous': {
-            const angleRange = 60;
+            const angleRange = 60; // Total arc for the analogous palette
             const angleStep = numColors > 1 ? angleRange / (numColors - 1) : 0;
             for (let i = 0; i < numColors; i++) {
                 const hueOffset = -(angleRange / 2) + i * angleStep;
                 const newHue = (h + hueOffset + 360) % 360;
-                // Add some subtle variation in lightness for a more organic feel
-                const lightnessVariation = Math.sin((i / (numColors > 1 ? numColors -1 : 1)) * Math.PI) * 10;
+                // Add some subtle variation in lightness and chroma for a more organic feel
+                 const lightnessVariation = (Math.sin((i / (numColors > 1 ? numColors - 1 : 1)) * Math.PI) * 10);
                 const newLightness = l + (i % 2 === 0 ? lightnessVariation : -lightnessVariation);
+                const newChroma = c * (0.9 + Math.random() * 0.2); // Vary chroma by +/- 10%
 
                 colors.push(chroma.lch(
                     Math.max(10, Math.min(95, newLightness)), 
-                    c, 
+                    Math.max(0, newChroma), 
                     newHue
                 ).hex());
             }
             break;
         }
 
-        case 'complementary': {
-            const baseCount = Math.ceil(numColors / 2);
-            const complementCount = numColors - baseCount;
-            const complementHue = (h + 180) % 360;
-            
-            colors.push(...createVariations(h, baseCount));
-            colors.push(...createVariations(complementHue, complementCount));
-            break;
-        }
-
+       case 'complementary':
         case 'triadic': {
-            const hue2 = (h + 120) % 360;
-            const hue3 = (h + 240) % 360;
+            const anchors = type === 'complementary' 
+                ? [h, (h + 180) % 360] 
+                : [h, (h + 120) % 360, (h + 240) % 360];
 
-            const counts = [0, 0, 0];
+            const colorsPerAnchor = Array(anchors.length).fill(0);
             for (let i = 0; i < numColors; i++) {
-                counts[i % 3]++;
+                colorsPerAnchor[i % anchors.length]++;
             }
 
-            colors.push(...createVariations(h, counts[0]));
-            colors.push(...createVariations(hue2, counts[1]));
-            colors.push(...createVariations(hue3, counts[2]));
+            anchors.forEach((anchorHue, index) => {
+                colors.push(...createVariations(anchorHue, colorsPerAnchor[index]));
+            });
             break;
         }
         
