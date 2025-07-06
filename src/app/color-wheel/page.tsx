@@ -185,7 +185,7 @@ export default function ColorWheelPage() {
                         />
                     </div>
                 </div>
-                <div className="w-full max-w-xs h-[280px]">
+                <div className="w-full max-w-sm h-[280px]">
                     <ColorBox color={activeColor} variant="default" />
                 </div>
             </div>
@@ -251,9 +251,7 @@ export default function ColorWheelPage() {
                                 />
                                 <div className="flex flex-wrap gap-4 mt-4">
                                     {tints.map((c, i) => (
-                                        <div key={`tint-${c}-${i}`} className="w-40">
-                                            <ColorBox color={c} variant="compact" />
-                                        </div>
+                                        <ColorBox key={`tint-${c}-${i}`} color={c} variant="compact" />
                                     ))}
                                 </div>
                             </div>
@@ -275,9 +273,7 @@ export default function ColorWheelPage() {
                                 />
                                 <div className="flex flex-wrap gap-4 mt-4">
                                     {tones.map((c, i) => (
-                                        <div key={`tone-${c}-${i}`} className="w-40">
-                                            <ColorBox color={c} variant="compact" />
-                                        </div>
+                                        <ColorBox key={`tone-${c}-${i}`} color={c} variant="compact" />
                                     ))}
                                 </div>
                             </div>
@@ -299,9 +295,7 @@ export default function ColorWheelPage() {
                                 />
                                 <div className="flex flex-wrap gap-4 mt-4">
                                     {shades.map((c, i) => (
-                                        <div key={`shade-${c}-${i}`} className="w-40">
-                                            <ColorBox color={c} variant="compact" />
-                                        </div>
+                                        <ColorBox key={`shade-${c}-${i}`} color={c} variant="compact" />
                                     ))}
                                 </div>
                             </div>

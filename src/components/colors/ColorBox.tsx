@@ -56,7 +56,7 @@ const ColorDetails = ({ color }: { color: string }) => {
 
 
     return (
-        <div className="space-y-1 text-sm p-3">
+        <div className="space-y-1 text-sm">
              <DetailRow label="HEX" value={hex} onCopy={() => handleCopy(hex, 'HEX')} />
              <DetailRow label="RGB" value={rgb} onCopy={() => handleCopy(rgb, 'RGB')} />
              <DetailRow label="HSL" value={hsl} onCopy={() => handleCopy(hsl, 'HSL')} />
@@ -108,7 +108,7 @@ export const ColorBox = React.memo(({
                         </Button>
                     </div>
                 </div>
-                <CardContent className="p-3 flex-grow flex flex-col justify-center">
+                <CardContent className="p-4 flex-grow flex flex-col justify-center">
                     <p className="font-semibold text-lg text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
                     <ColorDetails color={color} />
                 </CardContent>
@@ -135,7 +135,10 @@ export const ColorBox = React.memo(({
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-64 p-0">
-                                 <ColorDetails color={color} />
+                                <div className="h-12 w-full rounded-t-md" style={{backgroundColor: color}} />
+                                <div className="p-3">
+                                    <ColorDetails color={color} />
+                                </div>
                             </PopoverContent>
                         </Popover>
                     </div>

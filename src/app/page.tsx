@@ -635,7 +635,7 @@ function PaletteBuilderPage() {
                     </div>
 
                     <div className="w-full flex justify-center">
-                        <div className="w-full max-w-sm h-full">
+                        <div className="w-full max-w-md h-full">
                             <ColorBox 
                                 variant="default"
                                 color={mainColor} 
