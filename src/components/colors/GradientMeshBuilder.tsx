@@ -34,7 +34,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             { id: 2, x: 80, y: 80, color: '#8c9eff', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
         ];
 
-        if (!initialColors || initialColors.length < 2) {
+        if (!initialColors || initialColors.length < 1) {
             return defaultPoints;
         }
 
@@ -65,46 +65,36 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
     
-    const activeDragPointId = useRef<number | null>(null);
-    const activeDragHandleType = useRef<'position' | 'spreadX' | 'spreadY' | null>(null);
-    const isDraggingRef = useRef(false);
-
     const handlePointInteractionStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
         e.preventDefault();
         e.stopPropagation();
 
-        isDraggingRef.current = false;
-        activeDragPointId.current = pointId;
-        activeDragHandleType.current = handleType;
         const dragStartPos = { x: e.clientX, y: e.clientY };
+        let hasDragged = false;
         
-        if (handleType === 'position') {
-            setActivePointId(pointId);
-        }
-
         const handleDocumentMouseMove = (moveEvent: MouseEvent) => {
             const dx = moveEvent.clientX - dragStartPos.x;
             const dy = moveEvent.clientY - dragStartPos.y;
 
-            if (!isDraggingRef.current && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-                isDraggingRef.current = true;
+            if (!hasDragged && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+                hasDragged = true;
                 if (handleType === 'position' || handleType === 'spreadX' || handleType === 'spreadY') {
-                    setPopoverOpen({}); // Close popovers on drag start
+                    // Close any open popovers on drag start
+                    setPopoverOpen({});
                 }
             }
 
-            if (isDraggingRef.current) {
+            if (hasDragged) {
                 if (!previewRef.current) return;
                 const rect = previewRef.current.getBoundingClientRect();
                 
                 setPoints(currentPoints => {
-                    const pointToUpdate = currentPoints.find(p => p.id === activeDragPointId.current);
+                    const pointToUpdate = currentPoints.find(p => p.id === pointId);
                     if (!pointToUpdate) return currentPoints;
 
                     let newProps: Partial<Point> = {};
-                    const currentHandleType = activeDragHandleType.current;
 
-                    if (currentHandleType === 'position') {
+                    if (handleType === 'position') {
                         const newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
                         const newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
                         newProps.x = Math.max(0, Math.min(100, newX));
@@ -125,16 +115,16 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                         const unrotatedDx = mouseDx * cosA - mouseDy * sinA;
                         const unrotatedDy = mouseDx * sinA + mouseDy * cosA;
 
-                        if (currentHandleType === 'spreadX') {
+                        if (handleType === 'spreadX') {
                             const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 200;
                             newProps.spreadX = Math.max(5, Math.min(200, newSpreadX));
-                        } else if (currentHandleType === 'spreadY') {
+                        } else if (handleType === 'spreadY') {
                             const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 200;
                             newProps.spreadY = Math.max(5, Math.min(200, newSpreadY));
                         }
                     }
                     
-                    return currentPoints.map(p => p.id === pointToUpdate.id ? { ...p, ...newProps } : p);
+                    return currentPoints.map(p => p.id === pointId ? { ...p, ...newProps } : p);
                 });
             }
         };
@@ -143,21 +133,15 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             document.removeEventListener('mousemove', handleDocumentMouseMove);
             document.removeEventListener('mouseup', handleDocumentMouseUp);
 
-            if (!isDraggingRef.current && activeDragHandleType.current === 'position') {
-                setPopoverOpen(prev => {
-                    const pointIdToToggle = activeDragPointId.current!;
-                    return { ...prev, [pointIdToToggle]: !prev[pointIdToToggle] };
-                });
+            if (!hasDragged && handleType === 'position') {
+                setActivePointId(pointId);
+                setPopoverOpen(prev => ({ [pointId]: !prev[pointId] }));
             }
-            
-            isDraggingRef.current = false;
-            activeDragPointId.current = null;
-            activeDragHandleType.current = null;
         };
 
         document.addEventListener('mousemove', handleDocumentMouseMove);
         document.addEventListener('mouseup', handleDocumentMouseUp);
-    }, [setActivePointId, setPoints, setPopoverOpen]);
+    }, []);
 
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
@@ -183,7 +167,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const handleRemovePoint = useCallback((idToRemove: number) => {
         setPoints(prev => {
             if (prev.length <= 2) {
-                toast({ title: "A minimum of 2 overlay points is required." });
+                toast({ title: "A minimum of 2 points is required." });
                 return prev;
             }
             if (activePointId === idToRemove) {
@@ -208,6 +192,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
   position: relative;
   width: 100%;
   height: 100%;
+  background-color: ${points[0]?.color || '#000000'};
   overflow: hidden;
 }
 
@@ -262,6 +247,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                             ref={previewRef}
                             className="absolute inset-0 cursor-pointer"
                             onClick={handleBackgroundClick}
+                            style={{ backgroundColor: points[0]?.color || '#000000' }}
                         >
                              {points.map(point => (
                                 <div
