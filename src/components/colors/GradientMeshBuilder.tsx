@@ -20,6 +20,8 @@ interface Point {
   color: string;
   spreadX: number;
   spreadY: number;
+  rotation: number;
+  strength: number;
 }
 
 interface GradientMeshBuilderProps {
@@ -29,8 +31,8 @@ interface GradientMeshBuilderProps {
 export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps) => {
     const [points, setPoints] = useState<Point[]>(() => {
         const defaultPoints = [
-            { id: 1, x: 20, y: 20, color: '#ff8a80', spreadX: 50, spreadY: 50 },
-            { id: 2, x: 80, y: 80, color: '#8c9eff', spreadX: 50, spreadY: 50 },
+            { id: 1, x: 20, y: 20, color: '#ff8a80', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
+            { id: 2, x: 80, y: 80, color: '#8c9eff', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
         ];
 
         if (!initialColors || initialColors.length === 0) {
@@ -55,6 +57,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                 y: base.y,
                 spreadX: base.spread,
                 spreadY: base.spread,
+                rotation: 0,
+                strength: 75
             };
         });
 
@@ -68,6 +72,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                     : colord(newPoints[0].color).lighten(0.3).toHex(),
                 spreadX: basePoints[1].spread,
                 spreadY: basePoints[1].spread,
+                rotation: 0,
+                strength: 75,
             });
         }
         if (newPoints.length === 0) return defaultPoints;
@@ -76,7 +82,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     
     const [activePointId, setActivePointId] = useState<number | null>(null);
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const [gradientStrength, setGradientStrength] = useState(75);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
@@ -94,6 +99,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                 color: `hsl(${Math.random() * 360}, 80%, 70%)`,
                 spreadX: 50,
                 spreadY: 50,
+                rotation: 0,
+                strength: 75,
             };
             nextId.current++;
             return [...prev, newPoint];
@@ -171,32 +178,52 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     }
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
+        const target = e.target as HTMLElement;
+        if (target.contains(previewRef.current) || target === previewRef.current) {
             setActivePointId(null);
             setPopoverOpen(false);
         }
     }, []);
-
-    const gradientCss = useMemo(() => {
-        const backgroundColor = '#111827';
-        const backgroundImage = points.map(p => 
-            `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent ${gradientStrength}%)`
-        ).join(',\n    ');
-        return `.your-element {\n  background-color: ${backgroundColor};\n  background-image: ${backgroundImage};\n}`;
-    }, [points, gradientStrength]);
     
-    const backgroundStyle = useMemo(() => {
-        if (points.length === 0) return {};
-        const backgroundColor = '#111827';
-        const backgroundImage = points.map(p => 
-             `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent ${gradientStrength}%)`
-        ).join(',');
-        return { backgroundColor, backgroundImage };
-    }, [points, gradientStrength]);
+    const gradientCss = useMemo(() => {
+        const containerCss = `
+.mesh-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #111827;
+  overflow: hidden;
+}
+
+.mesh-point {
+  position: absolute;
+  mix-blend-mode: screen; /* Or try other modes like 'lighten' */
+}
+`;
+        const pointsCss = points.map((p, i) => `
+.mesh-point-${i + 1} {
+  left: ${p.x.toFixed(1)}%;
+  top: ${p.y.toFixed(1)}%;
+  width: ${p.spreadX * 2}%;
+  height: ${p.spreadY * 2}%;
+  transform: translate(-50%, -50%) rotate(${p.rotation}deg);
+  background-image: radial-gradient(ellipse, ${p.color} 0px, transparent ${p.strength}%);
+}
+`).join('');
+
+        const htmlStructure = `
+<!-- HTML Structure -->
+<div class="mesh-container">
+${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).join('\n')}
+</div>
+`;
+
+        return `/* CSS */\n${containerCss}\n${pointsCss}\n\n${htmlStructure}`;
+    }, [points]);
     
     const handleCopyCss = () => {
         navigator.clipboard.writeText(gradientCss).then(() => {
-            toast({ title: "CSS Copied!", description: "Gradient CSS has been copied to your clipboard." });
+            toast({ title: "HTML & CSS Copied!", description: "Gradient structure has been copied." });
         }).catch(err => {
             console.error("Failed to copy CSS: ", err);
         });
@@ -216,11 +243,25 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                         <div
                             ref={previewRef}
                             className="absolute inset-0 cursor-pointer"
-                            style={backgroundStyle}
+                            style={{ backgroundColor: '#111827' }}
                             onClick={handleBackgroundClick}
                         >
+                             {points.map(point => (
+                                <div
+                                    key={`grad-${point.id}`}
+                                    className="absolute mix-blend-screen"
+                                    style={{
+                                        left: `${point.x}%`,
+                                        top: `${point.y}%`,
+                                        width: `${point.spreadX * 2}%`,
+                                        height: `${point.spreadY * 2}%`,
+                                        transform: `translate(-50%, -50%) rotate(${point.rotation}deg)`,
+                                        backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
+                                    }}
+                                />
+                             ))}
                             {points.map((point) => (
-                                <Popover key={point.id} open={popoverOpen && activePointId === point.id} onOpenChange={setPopoverOpen}>
+                                <Popover key={point.id} open={popoverOpen && activePointId === point.id} onOpenChange={(isOpen) => { if (!isOpen) setPopoverOpen(false); }}>
                                     <PopoverTrigger asChild>
                                         <div
                                             className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
@@ -262,6 +303,22 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                                 onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, spreadY: value[0] } : p))}
                                             />
                                         </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor={`strength-${point.id}`} className="text-xs">Strength: {point.strength.toFixed(0)}%</Label>
+                                            <Slider
+                                                id={`strength-${point.id}`}
+                                                min={10} max={100} step={1} value={[point.strength]}
+                                                onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, strength: value[0] } : p))}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor={`rotation-${point.id}`} className="text-xs">Rotation: {point.rotation.toFixed(0)}°</Label>
+                                            <Slider
+                                                id={`rotation-${point.id}`}
+                                                min={0} max={360} step={1} value={[point.rotation]}
+                                                onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, rotation: value[0] } : p))}
+                                            />
+                                        </div>
                                     </PopoverContent>
                                 </Popover>
                             ))}
@@ -281,14 +338,15 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                                     top: `${activePoint.y}%`,
                                                     width: `${spreadXInPixels * 2}px`,
                                                     height: `${spreadYInPixels * 2}px`,
+                                                    transform: `rotate(${activePoint.rotation}deg)`
                                                 }}
                                             />
                                             <div
                                                 className="absolute -translate-y-1/2 w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ew-resize"
                                                 style={{
-                                                    left: `calc(${activePoint.x}% + ${spreadXInPixels}px)`,
+                                                    left: `${activePoint.x}%`,
                                                     top: `${activePoint.y}%`,
-                                                    transform: 'translateX(-50%)',
+                                                    transform: `translateX(-50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
                                                 onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadX')}
@@ -297,8 +355,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                                 className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
                                                 style={{
                                                     left: `${activePoint.x}%`,
-                                                    top: `calc(${activePoint.y}% + ${spreadYInPixels}px)`,
-                                                    transform: 'translateY(-50%)',
+                                                    top: `${activePoint.y}%`,
+                                                    transform: `translateY(-50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
                                                 onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadY')}
@@ -316,22 +374,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                             </code>
                         </pre>
                         <div className="absolute top-2 right-2 flex items-center gap-4 bg-background/50 p-2 rounded-lg border border-border/50 shadow-lg">
-                           <div className="flex items-center gap-2">
-                                <Label htmlFor="strength-slider" className="text-xs text-foreground shrink-0">Strength</Label>
-                                <Slider
-                                    id="strength-slider"
-                                    min={10}
-                                    max={100}
-                                    step={1}
-                                    value={[gradientStrength]}
-                                    onValueChange={(value) => setGradientStrength(value[0])}
-                                    className="w-32"
-                                />
-                            </div>
                             <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
                                 <Plus className="mr-2 h-4 w-4" /> Add Point
                             </Button>
-                            <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
+                            <Button onClick={handleCopyCss} size="sm">Copy HTML & CSS</Button>
                         </div>
                     </div>
                 </div>
