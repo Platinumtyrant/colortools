@@ -27,17 +27,17 @@ interface GradientMeshBuilderProps {
 export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps) => {
     const [points, setPoints] = useState<Point[]>(() => {
         const defaultPoints = [
-            { id: 1, x: 10, y: 10, color: '#ff8a80', spread: 50 },
-            { id: 2, x: 90, y: 90, color: '#8c9eff', spread: 50 },
+            { id: 1, x: 20, y: 20, color: '#ff8a80', spread: 50 },
+            { id: 2, x: 80, y: 80, color: '#8c9eff', spread: 50 },
         ];
         if (!initialColors || initialColors.length === 0) {
             return defaultPoints;
         }
         const basePoints = [
-            { x: 10, y: 10, spread: 50 },
-            { x: 90, y: 90, spread: 50 },
-            { x: 10, y: 90, spread: 50 },
-            { x: 90, y: 10, spread: 50 },
+            { x: 20, y: 20, spread: 50 },
+            { x: 80, y: 80, spread: 50 },
+            { x: 20, y: 80, spread: 50 },
+            { x: 80, y: 20, spread: 50 },
             { x: 50, y: 50, spread: 50 },
             { x: 25, y: 75, spread: 50 },
         ];
@@ -60,11 +60,9 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         return newPoints;
     });
     
+    const [activePointId, setActivePointId] = useState<number | null>(null);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
-    
     const previewRef = useRef<HTMLDivElement>(null);
-    const draggingPointIdRef = useRef<number | null>(null);
-
     const { toast } = useToast();
 
     const handlePointChange = (id: number, newProps: Partial<Point>) => {
@@ -79,7 +77,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             }
             const newPoint: Point = {
                 id: nextId.current,
-                x: Math.random() * 80 + 10, // Avoid edges
+                x: Math.random() * 80 + 10,
                 y: Math.random() * 80 + 10,
                 color: `hsl(${Math.random() * 360}, 80%, 70%)`,
                 spread: 50,
@@ -95,58 +93,54 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                 toast({ title: "A minimum of 2 points is required." });
                 return prev;
             }
+            if (activePointId === idToRemove) {
+                setActivePointId(null);
+            }
             return prev.filter(p => p.id !== idToRemove);
         });
-    }, [toast]);
+    }, [toast, activePointId]);
+    
+    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spread') => {
+        e.stopPropagation();
+        setActivePointId(pointId);
 
-    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!previewRef.current) return;
         const rect = previewRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const xPercent = (x / rect.width) * 100;
-        const yPercent = (y / rect.height) * 100;
-
-        let closestPointId: number | null = null;
-        let minDistance = Infinity;
-
-        points.forEach(point => {
-            const distance = Math.sqrt(Math.pow(point.x - xPercent, 2) + Math.pow(point.y - yPercent, 2));
-            if (distance < 10) { // 10% tolerance for grabbing a point
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestPointId = point.id;
-                }
-            }
-        });
         
-        if (closestPointId !== null) {
-            draggingPointIdRef.current = closestPointId;
-            
-            const handleMouseMove = (moveEvent: MouseEvent) => {
-                if (draggingPointIdRef.current === null || !previewRef.current) return;
-                
-                const moveRect = previewRef.current.getBoundingClientRect();
-                let newX = ((moveEvent.clientX - moveRect.left) / moveRect.width) * 100;
-                let newY = ((moveEvent.clientY - moveRect.top) / moveRect.height) * 100;
-                
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            const currentPoint = points.find(p => p.id === pointId);
+            if (!currentPoint) return;
+
+            let newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+            let newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
+
+            if (handleType === 'position') {
                 newX = Math.max(0, Math.min(100, newX));
                 newY = Math.max(0, Math.min(100, newY));
+                handlePointChange(pointId, { x: newX, y: newY });
+            } else if (handleType === 'spread') {
+                const dx = newX - currentPoint.x;
+                const dy = newY - currentPoint.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const newSpread = Math.max(5, Math.min(100, distance));
+                handlePointChange(pointId, { spread: newSpread });
+            }
+        };
 
-                handlePointChange(draggingPointIdRef.current, { x: newX, y: newY });
-            };
+        const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
 
-            const handleMouseUp = () => {
-                draggingPointIdRef.current = null;
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-            };
-
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        }
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
     }, [points]);
+    
+    const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.target === e.currentTarget) {
+            setActivePointId(null);
+        }
+    }, []);
 
     const gradientCss = useMemo(() => {
         const backgroundColor = points.length > 0 ? points[0].color : 'transparent';
@@ -181,27 +175,55 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             </CardHeader>
             <CardContent className="grid lg:grid-cols-2 gap-8 p-0">
                 <div className="lg:col-span-1 space-y-4">
-                    <div className="relative w-full aspect-video rounded-lg border border-border overflow-hidden">
-                        <div
-                            className="absolute inset-0"
-                            style={backgroundStyle}
-                        />
+                    <div className="relative w-full aspect-square rounded-lg border border-border overflow-hidden">
                         <div
                             ref={previewRef}
-                            className="absolute inset-0 cursor-move"
-                            onMouseDown={handleMouseDown}
+                            className="absolute inset-0 cursor-pointer"
+                            style={backgroundStyle}
+                            onClick={handleBackgroundClick}
                         >
-                            {points.map((point) => (
-                                <div
-                                    key={point.id}
-                                    className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg pointer-events-none"
-                                    style={{
-                                        left: `${point.x}%`,
-                                        top: `${point.y}%`,
-                                        backgroundColor: point.color,
-                                    }}
-                                />
-                            ))}
+                            {points.map((point) => {
+                                const isActive = activePointId === point.id;
+                                const previewWidth = previewRef.current?.offsetWidth || 0;
+                                const spreadInPixels = (point.spread / 100) * previewWidth;
+
+                                return (
+                                    <React.Fragment key={point.id}>
+                                        {isActive && (
+                                            <>
+                                                <div
+                                                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-white/50 pointer-events-none"
+                                                    style={{
+                                                        left: `${point.x}%`,
+                                                        top: `${point.y}%`,
+                                                        width: `${spreadInPixels}px`,
+                                                        height: `${spreadInPixels}px`,
+                                                    }}
+                                                />
+                                                <div
+                                                    className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-grab active:cursor-grabbing"
+                                                    style={{
+                                                        left: `calc(${point.x}% + ${spreadInPixels / 2}px)`,
+                                                        top: `${point.y}%`,
+                                                    }}
+                                                    onMouseDown={(e) => handleMouseDown(e, point.id, 'spread')}
+                                                />
+                                            </>
+                                        )}
+                                        <div
+                                            className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
+                                            style={{
+                                                left: `${point.x}%`,
+                                                top: `${point.y}%`,
+                                                backgroundColor: point.color,
+                                                boxShadow: isActive ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
+                                                zIndex: isActive ? 10 : 1,
+                                            }}
+                                            onMouseDown={(e) => handleMouseDown(e, point.id, 'position')}
+                                        />
+                                    </React.Fragment>
+                                );
+                            })}
                         </div>
                     </div>
                     <div className="relative">
@@ -218,7 +240,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                     <Card>
                         <CardHeader>
                             <CardTitle>Controls</CardTitle>
-                            <CardDescription>Add up to 6 points. Drag points on the preview.</CardDescription>
+                            <CardDescription>Click a point to edit, or drag handles to adjust.</CardDescription>
                         </CardHeader>
                         <CardContent>
                              <div className="flex justify-between items-center mb-4">
@@ -230,7 +252,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
                                 {points.map((point, index) => (
-                                    <Card key={point.id} className="p-4 space-y-3 bg-card-foreground/5">
+                                    <Card key={point.id} className={`p-4 space-y-3 transition-shadow ${activePointId === point.id ? 'ring-2 ring-primary shadow-lg' : 'bg-card-foreground/5'}`}>
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-2">
                                                 <Popover>
@@ -254,23 +276,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                         
                                         <div className="p-2 rounded-md bg-muted/50 border text-center font-mono text-xs">{point.color}</div>
                                         <div className="space-y-2">
-                                            <Label htmlFor={`x-slider-${point.id}`} className="text-xs">X: {point.x.toFixed(0)}%</Label>
-                                            <Slider
-                                                id={`x-slider-${point.id}`}
-                                                min={0} max={100} step={1} value={[point.x]}
-                                                onValueChange={(value) => handlePointChange(point.id, { x: value[0] })}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`y-slider-${point.id}`} className="text-xs">Y: {point.y.toFixed(0)}%</Label>
-                                            <Slider
-                                                id={`y-slider-${point.id}`}
-                                                min={0} max={100} step={1} value={[point.y]}
-                                                onValueChange={(value) => handlePointChange(point.id, { y: value[0] })}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`spread-${point.id}`} className="text-xs">Spread: {point.spread}%</Label>
+                                            <Label htmlFor={`spread-${point.id}`} className="text-xs">Spread: {point.spread.toFixed(0)}%</Label>
                                             <Slider
                                                 id={`spread-${point.id}`}
                                                 min={0} max={100} step={1} value={[point.spread]}
