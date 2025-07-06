@@ -15,6 +15,7 @@ import namesPlugin from 'colord/plugins/names';
 import cmykPlugin from 'colord/plugins/cmyk';
 import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
+import hwbPlugin from 'colord/plugins/hwb';
 import chroma from 'chroma-js';
 import { generatePalette, getRandomColor, type GenerationType, adjustForColorblindSafety } from '@/lib/palette-generator';
 import type { PaletteColor } from '@/lib/palette-generator';
@@ -26,7 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Dices, Pencil, Sparkles, Pipette, Unlock, Lock, Library } from 'lucide-react';
+import { CheckCircle2, Dices, Pencil, Sparkles, Pipette, Unlock, Lock, Library, Copy, MousePointerClick } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
@@ -52,6 +53,8 @@ declare global {
   }
 }
 
+extend([hwbPlugin, cmykPlugin, lchPlugin, labPlugin]);
+
 const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mod.default), {
   ssr: false,
   loading: () => (
@@ -61,16 +64,39 @@ const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mo
   )
 });
 
+type ColorSpace = 'lch' | 'lab' | 'hsl' | 'hwb' | 'srgb';
+
+const colorSpaceInfo: Record<ColorSpace, { name: string; components: string[]; descriptions: string[] }> = {
+  lch: { name: 'LCH', components: ['L', 'C', 'H'], descriptions: ['Lightness (0-100)', 'Chroma (0-150)', 'Hue (0-360)'] },
+  lab: { name: 'Lab', components: ['L*', 'a*', 'b*'], descriptions: ['Lightness', 'Green-Red', 'Blue-Yellow'] },
+  hsl: { name: 'HSL', components: ['H', 'S', 'L'], descriptions: ['Hue (0-360)', 'Saturation (0-1)', 'Lightness (0-1)'] },
+  hwb: { name: 'HWB', components: ['H', 'W', 'B'], descriptions: ['Hue (0-360)', 'Whiteness (0-100)', 'Blackness (0-100)'] },
+  srgb: { name: 'sRGB', components: ['R', 'G', 'B'], descriptions: ['Red (0-255)', 'Green (0-255)', 'Blue (0-255)'] },
+};
+
 
 // Helper to get graph data
-const getGraphData = (colors: string[]) => {
-  if (!colors || colors.length === 0) return { lightness: [], saturation: [], hue: [] };
-  const lch = colors.map(c => chroma(c).lch());
-  return {
-    lightness: lch.map((c, i) => ({ name: i + 1, value: c[0] })),
-    saturation: lch.map((c, i) => ({ name: i + 1, value: c[1] })),
-    hue: lch.map((c, i) => ({ name: i + 1, value: isNaN(c[2]) ? 0 : c[2] })),
-  };
+const getGraphData = (colors: string[], space: ColorSpace) => {
+    if (!colors || colors.length === 0) return [];
+    
+    let components: [number, number, number][] = [];
+    switch (space) {
+        case 'lch':   components = colors.map(c => chroma(c).lch()); break;
+        case 'lab':   components = colors.map(c => chroma(c).lab()); break;
+        case 'hsl':   components = colors.map(c => chroma(c).hsl()); break;
+        case 'hwb':   components = colors.map(c => colord(c).toHwb()).map(o => [o.h, o.w, o.b]); break;
+        case 'srgb':  components = colors.map(c => chroma(c).rgb()); break;
+        default:      components = colors.map(c => chroma(c).lch());
+    }
+
+    return components[0].map((_, i) => ({
+      data: components.map((c, j) => ({
+        name: j + 1,
+        value: isNaN(c[i]) ? 0 : c[i]
+      })),
+      title: colorSpaceInfo[space].components[i],
+      description: colorSpaceInfo[space].descriptions[i]
+    }));
 };
 
 // Graph Component
@@ -96,7 +122,7 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
           tickLine={false} 
           axisLine={false} 
           domain={['dataMin', 'dataMax']}
-          tickFormatter={(value) => typeof value === 'number' ? value.toFixed(0) : value}
+          tickFormatter={(value) => typeof value === 'number' ? value.toFixed(1) : value}
         />
         <Tooltip
           contentStyle={{
@@ -111,7 +137,7 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
   </div>
 );
 
-const allGenerationTypes: GenerationType[] = ['analogous', 'triadic', 'complementary', 'tints', 'shades'];
+const allGenerationTypes: GenerationType[] = ['analogous', 'shorter', 'longer', 'triadic', 'complementary', 'monochromatic', 'tints', 'shades'];
 
 function PaletteBuilderPage() {
     const { 
@@ -126,6 +152,7 @@ function PaletteBuilderPage() {
     const [correctLightness, setCorrectLightness] = useState(true);
     const [useBezier, setUseBezier] = useState(true);
     const [inputValue, setInputValue] = useState(mainColor);
+    const [colorSpace, setColorSpace] = useState<ColorSpace>('lch');
     
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [newPaletteName, setNewPaletteName] = useState("");
@@ -353,7 +380,7 @@ function PaletteBuilderPage() {
             let newHex: string;
 
             if (colorBefore && colorAfter) {
-                newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'oklch').hex();
+                newHex = chroma.mix(colorBefore, colorAfter, 0.5, 'lch').hex();
             } else if (colorBefore) {
                 newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
             } else if (colorAfter) {
@@ -409,18 +436,25 @@ function PaletteBuilderPage() {
 
     const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
 
+    const interpolationMode = useMemo(() => {
+        // HWB and sRGB don't have direct interpolation modes in chroma-js,
+        // so we fall back to a perceptually uniform space.
+        if (colorSpace === 'hwb' || colorSpace === 'srgb') return 'lch';
+        return colorSpace;
+    }, [colorSpace]);
+    
     const analysisSourcePalette = useMemo(() => {
         if (paletteHexes.length < 2) return paletteHexes;
         if (!useBezier && !correctLightness) {
             return paletteHexes;
         }
         const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
-        let scale = chroma.scale(interpolator).mode('oklch');
+        let scale = chroma.scale(interpolator).mode(interpolationMode as any);
         if (correctLightness) {
             scale = scale.correctLightness();
         }
         return scale.colors(paletteHexes.length);
-    }, [paletteHexes, useBezier, correctLightness]);
+    }, [paletteHexes, useBezier, correctLightness, interpolationMode]);
   
     const simulatedPalette = useMemo(() => {
         if (analysisSourcePalette.length === 0) return [];
@@ -428,7 +462,7 @@ function PaletteBuilderPage() {
         return source.map(color => simulate(color, simulationType));
     }, [analysisSourcePalette, paletteHexes, simulationType, useBezier, correctLightness]);
   
-    const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
+    const graphData = useMemo(() => getGraphData(analysisSourcePalette, colorSpace), [analysisSourcePalette, colorSpace]);
   
     const { isPaletteColorblindSafe } = useMemo(() => {
         if (palette.length < 2) return { isPaletteColorblindSafe: true, adjustedPalette: palette };
@@ -447,10 +481,6 @@ function PaletteBuilderPage() {
         return analyzePalette(palette.map(p => p.hex));
     }, [palette]);
 
-    const stableSetUseBezier = useCallback(setUseBezier, []);
-    const stableSetCorrectLightness = useCallback(setCorrectLightness, []);
-    const stableSetSimulationType = useCallback(setSimulationType, []);
-
     const analysisPanel = useMemo(() => (
         <div className="space-y-6">
             <h3 className="text-lg font-semibold">Palette Analysis</h3>
@@ -460,9 +490,22 @@ function PaletteBuilderPage() {
             </div>
             <Separator />
             <div className="flex flex-col gap-4">
+                 <div className="space-y-1.5">
+                    <Label className="text-sm">Color Space</Label>
+                    <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select colorspace..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(colorSpaceInfo).map(([key, value]) => (
+                                <SelectItem key={key} value={key}>{value.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     <div className="flex items-center space-x-2">
-                        <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => stableSetUseBezier(!!checked)} />
+                        <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
                         <TooltipProvider>
                             <ShadTooltip>
                                 <TooltipTrigger asChild>
@@ -475,13 +518,13 @@ function PaletteBuilderPage() {
                         </TooltipProvider>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => stableSetCorrectLightness(!!checked)} />
+                        <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
                         <Label htmlFor="correctLightness">Correct lightness</Label>
                     </div>
                 </div>
                 <div className="flex flex-col items-start gap-2">
-                    <Label className="text-sm">Simulate:</Label>
-                    <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => stableSetSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                    <Label className="text-sm">Simulate Deficiency:</Label>
+                    <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
                         <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
                         <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
                         <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
@@ -525,18 +568,29 @@ function PaletteBuilderPage() {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 gap-2 pt-4">
-                    <ChartDisplay data={graphData.lightness} title="Lightness" color="hsl(var(--chart-1))" description="How light or dark the color is, from black (0) to white (100)." />
-                    <ChartDisplay data={graphData.saturation} title="Saturation" color="hsl(var(--chart-2))" description="The intensity of the color, from gray (0) to a pure, vivid color." />
-                    <ChartDisplay data={graphData.hue} title="Hue" color="hsl(var(--chart-3))" description="The color's position on the color wheel, measured in degrees (0-360)." />
+                    {graphData.map((graph, i) => (
+                        <ChartDisplay 
+                            key={graph.title} 
+                            data={graph.data} 
+                            title={graph.title}
+                            description={graph.description}
+                            color={`hsl(var(--chart-${(i % 5) + 1}))`} 
+                        />
+                    ))}
                 </div>
             </motion.div>
         </div>
     ), [
-        useBezier, stableSetUseBezier, 
-        correctLightness, stableSetCorrectLightness,
-        simulationType, stableSetSimulationType,
-        isPaletteColorblindSafe, simulatedPalette, graphData,
-        handleApplyAnalyzedPalette, detectedHarmony
+        useBezier,
+        correctLightness,
+        simulationType,
+        isPaletteColorblindSafe,
+        simulatedPalette,
+        graphData,
+        handleApplyAnalyzedPalette,
+        detectedHarmony,
+        colorSpace,
+        setColorSpace,
     ]);
 
     const paletteActions = (
@@ -687,7 +741,7 @@ function PaletteBuilderPage() {
                         </div>
 
                         <div className="w-full flex justify-center">
-                             <div className="w-full max-w-sm" onClick={() => setEditingColorId(null)} >
+                             <div className="w-full max-w-sm relative group/container" onClick={() => setEditingColorId(null)} >
                                  <ColorBox
                                     variant="default"
                                     color={mainColor}

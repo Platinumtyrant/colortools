@@ -3,7 +3,7 @@ import chroma from 'chroma-js';
 import { getTints, getShades } from './colors';
 import { simulate, type SimulationType } from './colorblind';
 
-export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades';
+export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades' | 'monochromatic' | 'shorter' | 'longer';
 
 export interface PaletteColor {
   id: number;
@@ -86,6 +86,13 @@ export function generatePalette(options: GenerationOptions): string[] {
     if (type === 'shades') {
         return getShades(baseColor, numColors);
     }
+    if (type === 'monochromatic') {
+        return chroma.scale([
+            chroma(baseColor).darken(2),
+            baseColor,
+            chroma(baseColor).brighten(2)
+        ]).mode('lch').colors(numColors);
+    }
 
     const baseLCH = chroma(baseColor).lch();
     const l = baseLCH[0];
@@ -116,8 +123,13 @@ export function generatePalette(options: GenerationOptions): string[] {
     };
 
     switch (type) {
-        case 'analogous': {
-            const angleRange = 60; // Total arc for the analogous palette
+        case 'analogous':
+        case 'shorter':
+        case 'longer': {
+            let angleRange = 60; // default for analogous
+            if (type === 'shorter') angleRange = 40;
+            if (type === 'longer') angleRange = 120;
+
             const angleStep = numColors > 1 ? angleRange / (numColors - 1) : 0;
             for (let i = 0; i < numColors; i++) {
                 const hueOffset = -(angleRange / 2) + i * angleStep;
