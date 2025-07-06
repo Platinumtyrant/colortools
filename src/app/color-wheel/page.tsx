@@ -167,8 +167,8 @@ export default function ColorWheelPage() {
                 </CardDescription>
             </CardHeader>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center justify-center gap-8 max-w-5xl mx-auto">
-                <div className="flex items-center justify-center gap-4 lg:col-span-2">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-12 max-w-5xl mx-auto">
+                <div className="flex items-center justify-center gap-4">
                     <ColorWheel
                         color={activeColor}
                         onChange={(color: ColorResult) => setActiveColor(color.hex)}
@@ -186,7 +186,7 @@ export default function ColorWheelPage() {
                     </div>
                 </div>
 
-                <div className="w-full max-w-sm mx-auto">
+                <div className="w-full max-w-xs">
                     <ColorBox color={activeColor} showDetails={true} />
                 </div>
             </div>
@@ -213,7 +213,7 @@ export default function ColorWheelPage() {
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         transition={{ duration: 0.5 }}
-                                        className="mt-6 grid md:grid-cols-[200px_1fr] items-center gap-8 p-4 min-h-[160px]"
+                                        className="mt-6 grid md:grid-cols-2 items-center gap-8 p-4 min-h-[160px]"
                                     >
                                         <div className="mx-auto">
                                             <HarmonyColorWheel colors={harmony.colors} size={200} />
