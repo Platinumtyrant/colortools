@@ -158,7 +158,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
         document.addEventListener('mousemove', handleDocumentMouseMove);
         document.addEventListener('mouseup', handleDocumentMouseUp);
-    }, []);
+    }, [setActivePointId]);
 
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
@@ -259,10 +259,10 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
             </CardHeader>
             <CardContent className="flex flex-col gap-8 p-0">
                 <div className="space-y-4">
-                    <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden">
+                    <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-gray-900">
                         <div
                             ref={previewRef}
-                            className="absolute inset-0 cursor-pointer bg-gray-900"
+                            className="absolute inset-0 cursor-pointer"
                             onClick={handleBackgroundClick}
                         >
                              {points.map(point => (
@@ -411,5 +411,3 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
         </Card>
     );
 };
-
-    
