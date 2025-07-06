@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -66,7 +67,7 @@ export const Palette = ({
                         className="w-40"
                     >
                         <div className={cn("absolute inset-0 rounded-lg ring-2 ring-offset-2 ring-offset-background transition-all pointer-events-none", isActive ? "ring-primary" : "ring-transparent")} />
-                        <ColorBox
+                         <ColorBox
                             color={color.hex}
                             variant="compact"
                             onRemoveFromPalette={() => onRemoveColor(color.id)}
@@ -78,7 +79,7 @@ export const Palette = ({
                         />
                     </motion.div>
 
-                    <div className="absolute top-1/2 -right-4 -translate-y-1/2 z-10">
+                    <div className="absolute top-1/2 left-full -translate-y-1/2 -translate-x-1/2 ml-2 z-10">
                         <Button
                             size="icon"
                             className="z-10 h-6 w-6 rounded-full opacity-0 group-hover/container:opacity-100 transition-opacity bg-background border shadow-md hover:bg-muted"
