@@ -7,7 +7,7 @@ import namesPlugin from "colord/plugins/names";
 import cmykPlugin from "colord/plugins/cmyk";
 import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
-import { getDescriptiveColorName, saveColorToLibrary } from "@/lib/colors";
+import { useDescriptiveColorName, saveColorToLibrary } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,7 +68,7 @@ export const ColorDetails = ({ color }: { color: string }) => {
 };
 
 
-export const ColorBox = React.memo(({
+const ColorBoxInner = ({
     color,
     name,
     info,
@@ -78,7 +78,7 @@ export const ColorBox = React.memo(({
     variant = 'compact'
 }: ColorBoxProps) => {
     const { toast } = useToast();
-    const { name: descriptiveName, source } = name ? { name, source: 'pantone' } : getDescriptiveColorName(color);
+    const { name: descriptiveName, source } = name ? { name, source: 'pantone' } : useDescriptiveColorName(color);
     
     const handleSaveDefault = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -162,6 +162,7 @@ export const ColorBox = React.memo(({
             </Card>
         </div>
     );
-});
+};
 
+export const ColorBox = React.memo(ColorBoxInner);
 ColorBox.displayName = 'ColorBox';

@@ -1,4 +1,6 @@
 
+"use client";
+
 import { colord, extend, type HslColor } from 'colord';
 import hwbPlugin from 'colord/plugins/hwb';
 import labPlugin from 'colord/plugins/lab';
@@ -8,7 +10,7 @@ import mixPlugin from 'colord/plugins/mix';
 import namesPlugin from 'colord/plugins/names';
 import chroma from 'chroma-js';
 import namer from 'color-namer';
-import { pantoneLookup } from './pantone-colors';
+import { usePantone } from '@/contexts/SidebarExtensionContext';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
@@ -25,11 +27,13 @@ export interface DescriptiveNameResult {
     source: 'pantone' | 'ntc' | 'basic' | 'colord' | 'hex';
 }
 
-export const getDescriptiveColorName = (hexColor: string): DescriptiveNameResult => {
+export const useDescriptiveColorName = (hexColor: string): DescriptiveNameResult => {
+    const pantoneLookup = usePantone();
+
     if (!colord(hexColor).isValid()) return { name: "Invalid Color", source: 'hex' };
     const lowerHex = colord(hexColor).toHex().toLowerCase();
 
-    if (pantoneLookup.has(lowerHex)) {
+    if (pantoneLookup && pantoneLookup.has(lowerHex)) {
         return { name: pantoneLookup.get(lowerHex)!, source: 'pantone' };
     }
     
