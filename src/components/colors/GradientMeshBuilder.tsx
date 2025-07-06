@@ -75,6 +75,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     });
     
     const [activePointId, setActivePointId] = useState<number | null>(null);
+    const [popoverOpen, setPopoverOpen] = useState(false);
+    const [gradientStrength, setGradientStrength] = useState(75);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
@@ -111,10 +113,9 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         });
     }, [toast, activePointId]);
     
-    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
+    const handleDragStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
         e.preventDefault();
         e.stopPropagation();
-        setActivePointId(pointId);
 
         if (!previewRef.current) return;
         const rect = previewRef.current.getBoundingClientRect();
@@ -152,29 +153,46 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
     }, []);
+
+    const handlePointMouseDown = (e: React.MouseEvent<HTMLDivElement>, pointId: number) => {
+        if (activePointId === pointId) {
+            setPopoverOpen(p => !p);
+        } else {
+            setActivePointId(pointId);
+            setPopoverOpen(false);
+        }
+        handleDragStart(e, pointId, 'position');
+    };
+
+    const handleSpreadHandleMouseDown = (e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'spreadX' | 'spreadY') => {
+        setActivePointId(pointId);
+        setPopoverOpen(false);
+        handleDragStart(e, pointId, handleType);
+    }
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
             setActivePointId(null);
+            setPopoverOpen(false);
         }
     }, []);
 
     const gradientCss = useMemo(() => {
         const backgroundColor = '#111827';
         const backgroundImage = points.map(p => 
-            `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent 75%)`
+            `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent ${gradientStrength}%)`
         ).join(',\n    ');
         return `.your-element {\n  background-color: ${backgroundColor};\n  background-image: ${backgroundImage};\n}`;
-    }, [points]);
+    }, [points, gradientStrength]);
     
     const backgroundStyle = useMemo(() => {
         if (points.length === 0) return {};
         const backgroundColor = '#111827';
         const backgroundImage = points.map(p => 
-             `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent 75%)`
+             `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent ${gradientStrength}%)`
         ).join(',');
         return { backgroundColor, backgroundImage };
-    }, [points]);
+    }, [points, gradientStrength]);
     
     const handleCopyCss = () => {
         navigator.clipboard.writeText(gradientCss).then(() => {
@@ -202,7 +220,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                             onClick={handleBackgroundClick}
                         >
                             {points.map((point) => (
-                                <Popover key={point.id} onOpenChange={(isOpen) => { if(isOpen) setActivePointId(point.id); }}>
+                                <Popover key={point.id} open={popoverOpen && activePointId === point.id} onOpenChange={setPopoverOpen}>
                                     <PopoverTrigger asChild>
                                         <div
                                             className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
@@ -213,7 +231,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                                 boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                                 zIndex: activePointId === point.id ? 10 : 1,
                                             }}
-                                            onMouseDown={(e) => handleMouseDown(e, point.id, 'position')}
+                                            onMouseDown={(e) => handlePointMouseDown(e, point.id)}
                                         />
                                     </PopoverTrigger>
                                     <PopoverContent className="w-72 p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
@@ -273,7 +291,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                                     transform: 'translateX(-50%)',
                                                     zIndex: 11
                                                 }}
-                                                onMouseDown={(e) => handleMouseDown(e, activePoint.id, 'spreadX')}
+                                                onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadX')}
                                             />
                                             <div
                                                 className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
@@ -283,7 +301,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                                     transform: 'translateY(-50%)',
                                                     zIndex: 11
                                                 }}
-                                                onMouseDown={(e) => handleMouseDown(e, activePoint.id, 'spreadY')}
+                                                onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadY')}
                                             />
                                         </>
                                     );
@@ -297,7 +315,19 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                 {gradientCss}
                             </code>
                         </pre>
-                        <div className="absolute top-2 right-2 flex items-center gap-2">
+                        <div className="absolute top-2 right-2 flex items-center gap-4 bg-background/50 p-2 rounded-lg border border-border/50 shadow-lg">
+                           <div className="flex items-center gap-2">
+                                <Label htmlFor="strength-slider" className="text-xs text-foreground shrink-0">Strength</Label>
+                                <Slider
+                                    id="strength-slider"
+                                    min={10}
+                                    max={100}
+                                    step={1}
+                                    value={[gradientStrength]}
+                                    onValueChange={(value) => setGradientStrength(value[0])}
+                                    className="w-32"
+                                />
+                            </div>
                             <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
                                 <Plus className="mr-2 h-4 w-4" /> Add Point
                             </Button>
