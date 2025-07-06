@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Trash2, RotateCcw } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { colord } from 'colord';
 
 interface Point {
@@ -60,7 +60,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         return newPoints;
     });
     
-    const [rotation, setRotation] = useState(0);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     
     const previewRef = useRef<HTMLDivElement>(null);
@@ -154,8 +153,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         const backgroundImage = points.map(p => 
             `radial-gradient(at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent ${p.spread}%)`
         ).join(',\n    ');
-        return `.your-element {\n  background-color: ${backgroundColor};\n  background-image: ${backgroundImage};\n  transform: rotate(${rotation}deg);\n}`;
-    }, [points, rotation]);
+        return `.your-element {\n  background-color: ${backgroundColor};\n  background-image: ${backgroundImage};\n}`;
+    }, [points]);
     
     const backgroundStyle = useMemo(() => {
         if (points.length === 0) return {};
@@ -185,7 +184,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                     <div className="relative w-full aspect-video rounded-lg border border-border overflow-hidden">
                         <div
                             className="absolute inset-0"
-                            style={{ ...backgroundStyle, transform: `rotate(${rotation}deg)` }}
+                            style={backgroundStyle}
                         />
                         <div
                             ref={previewRef}
@@ -228,17 +227,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                 </Button>
                                 <span className="text-sm text-muted-foreground">{points.length} / 6 points</span>
                             </div>
-                            <div className="space-y-2 mb-4">
-                                <Label htmlFor="rotation-slider" className="text-sm">Rotation: {rotation}°</Label>
-                                <Slider
-                                    id="rotation-slider"
-                                    min={0}
-                                    max={360}
-                                    step={1}
-                                    value={[rotation]}
-                                    onValueChange={(value) => setRotation(value[0])}
-                                />
-                            </div>
+                            
                             <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
                                 {points.map((point, index) => (
                                     <Card key={point.id} className="p-4 space-y-3 bg-card-foreground/5">
@@ -265,13 +254,26 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                         
                                         <div className="p-2 rounded-md bg-muted/50 border text-center font-mono text-xs">{point.color}</div>
                                         <div className="space-y-2">
+                                            <Label htmlFor={`x-slider-${point.id}`} className="text-xs">X: {point.x.toFixed(0)}%</Label>
+                                            <Slider
+                                                id={`x-slider-${point.id}`}
+                                                min={0} max={100} step={1} value={[point.x]}
+                                                onValueChange={(value) => handlePointChange(point.id, { x: value[0] })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor={`y-slider-${point.id}`} className="text-xs">Y: {point.y.toFixed(0)}%</Label>
+                                            <Slider
+                                                id={`y-slider-${point.id}`}
+                                                min={0} max={100} step={1} value={[point.y]}
+                                                onValueChange={(value) => handlePointChange(point.id, { y: value[0] })}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
                                             <Label htmlFor={`spread-${point.id}`} className="text-xs">Spread: {point.spread}%</Label>
                                             <Slider
                                                 id={`spread-${point.id}`}
-                                                min={0}
-                                                max={100}
-                                                step={1}
-                                                value={[point.spread]}
+                                                min={0} max={100} step={1} value={[point.spread]}
                                                 onValueChange={(value) => handlePointChange(point.id, { spread: value[0] })}
                                             />
                                         </div>
