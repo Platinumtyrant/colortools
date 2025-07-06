@@ -10,8 +10,8 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus, Trash2, Code } from 'lucide-react';
-import { colord } from 'colord';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
+import { colord } from 'colord';
 
 interface Point {
   id: number;
@@ -88,6 +88,104 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const isDragging = useRef(false);
     const dragStartPos = useRef({ x: 0, y: 0 });
     const { toast } = useToast();
+    
+    const activeDragPointId = useRef<number | null>(null);
+    const activeDragHandleType = useRef<'position' | 'spreadX' | 'spreadY' | null>(null);
+
+
+    const handlePointInteractionStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (handleType === 'position') {
+            setActivePointId(pointId);
+        }
+
+        isDragging.current = false;
+        activeDragPointId.current = pointId;
+        activeDragHandleType.current = handleType;
+        dragStartPos.current = { x: e.clientX, y: e.clientY };
+
+        const handleDocumentMouseMove = (moveEvent: MouseEvent) => {
+            const dx = Math.abs(moveEvent.clientX - dragStartPos.current.x);
+            const dy = Math.abs(moveEvent.clientY - dragStartPos.current.y);
+
+            if (!isDragging.current && (dx > 3 || dy > 3)) {
+                isDragging.current = true;
+                // Close popovers only when a real drag starts
+                if (handleType === 'position' || handleType === 'spreadX' || handleType === 'spreadY') {
+                    setPopoverOpen({});
+                }
+            }
+
+            if (isDragging.current) {
+                if (!previewRef.current) return;
+                const rect = previewRef.current.getBoundingClientRect();
+                
+                setPoints(currentPoints => {
+                    const pointToUpdate = currentPoints.find(p => p.id === activeDragPointId.current);
+                    if (!pointToUpdate) return currentPoints;
+
+                    let newProps: Partial<Point> = {};
+                    const currentHandleType = activeDragHandleType.current;
+
+                    if (currentHandleType === 'position') {
+                        const newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+                        const newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
+                        newProps.x = Math.max(0, Math.min(100, newX));
+                        newProps.y = Math.max(0, Math.min(100, newY));
+                    } else {
+                        const centerX = rect.left + (pointToUpdate.x / 100) * rect.width;
+                        const centerY = rect.top + (pointToUpdate.y / 100) * rect.height;
+                        const mouseX = moveEvent.clientX;
+                        const mouseY = moveEvent.clientY;
+                        
+                        const dx = mouseX - centerX;
+                        const dy = mouseY - centerY;
+                        
+                        const rotationRad = -pointToUpdate.rotation * (Math.PI / 180);
+                        const cosA = Math.cos(rotationRad);
+                        const sinA = Math.sin(rotationRad);
+                        
+                        const unrotatedDx = dx * cosA - dy * sinA;
+                        const unrotatedDy = dx * sinA + dy * cosA;
+
+                        if (currentHandleType === 'spreadX') {
+                            const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 200;
+                            newProps.spreadX = Math.max(5, Math.min(200, newSpreadX));
+                        } else if (currentHandleType === 'spreadY') {
+                            const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 200;
+                            newProps.spreadY = Math.max(5, Math.min(200, newSpreadY));
+                        }
+                    }
+                    
+                    return currentPoints.map(p => p.id === pointToUpdate.id ? { ...p, ...newProps } : p);
+                });
+            }
+        };
+
+        const handleDocumentMouseUp = () => {
+            document.removeEventListener('mousemove', handleDocumentMouseMove);
+            document.removeEventListener('mouseup', handleDocumentMouseUp);
+
+            if (!isDragging.current && activeDragHandleType.current === 'position') {
+                setPopoverOpen(prev => {
+                    const pointIdToToggle = activeDragPointId.current!;
+                    const isOpen = !!prev[pointIdToToggle];
+                    const newPopoverState: Record<number, boolean> = {}; // Close all others
+                    newPopoverState[pointIdToToggle] = !isOpen;
+                    return newPopoverState;
+                });
+            }
+            
+            isDragging.current = false;
+            activeDragPointId.current = null;
+            activeDragHandleType.current = null;
+        };
+
+        document.addEventListener('mousemove', handleDocumentMouseMove);
+        document.addEventListener('mouseup', handleDocumentMouseUp);
+    }, []);
 
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
@@ -123,114 +221,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             return prev.filter(p => p.id !== idToRemove);
         });
     }, [toast, activePointId]);
-    
-     const handleDragStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!previewRef.current) return;
-        
-        let initialPoint: Point | undefined;
-        setPoints(currentPoints => {
-            initialPoint = currentPoints.find(p => p.id === pointId);
-            return currentPoints;
-        });
-
-        if (!initialPoint) return;
-
-        const rect = previewRef.current.getBoundingClientRect();
-        
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            setPoints(currentPoints => {
-                const pointToUpdate = currentPoints.find(p => p.id === pointId);
-                if (!pointToUpdate) return currentPoints;
-                
-                let newProps: Partial<Point> = {};
-
-                if (handleType === 'position') {
-                    const newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
-                    const newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
-                    newProps.x = Math.max(0, Math.min(100, newX));
-                    newProps.y = Math.max(0, Math.min(100, newY));
-                } else {
-                    const centerX = rect.left + (pointToUpdate.x / 100) * rect.width;
-                    const centerY = rect.top + (pointToUpdate.y / 100) * rect.height;
-                    const mouseX = moveEvent.clientX;
-                    const mouseY = moveEvent.clientY;
-
-                    const dx = mouseX - centerX;
-                    const dy = mouseY - centerY;
-
-                    const rotationRad = -pointToUpdate.rotation * (Math.PI / 180);
-                    const cosA = Math.cos(rotationRad);
-                    const sinA = Math.sin(rotationRad);
-
-                    const unrotatedDx = dx * cosA - dy * sinA;
-                    const unrotatedDy = dx * sinA + dy * cosA;
-                    
-                    if (handleType === 'spreadX') {
-                        const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 200;
-                        newProps.spreadX = Math.max(5, Math.min(200, newSpreadX));
-                    } else if (handleType === 'spreadY') {
-                        const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 200;
-                        newProps.spreadY = Math.max(5, Math.min(200, newSpreadY));
-                    }
-                }
-                
-                return currentPoints.map(p => p.id === pointId ? { ...p, ...newProps } : p);
-            });
-        };
-
-        const handleMouseUp = () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-            setTimeout(() => { isDragging.current = false; }, 0);
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    }, []);
-
-    const handlePointMouseDown = (e: React.MouseEvent<HTMLDivElement>, pointId: number) => {
-        setActivePointId(pointId);
-        isDragging.current = false;
-        dragStartPos.current = { x: e.clientX, y: e.clientY };
-
-        const handleMouseMove = (moveEvent: MouseEvent) => {
-            const dx = Math.abs(moveEvent.clientX - dragStartPos.current.x);
-            const dy = Math.abs(moveEvent.clientY - dragStartPos.current.y);
-            if (dx > 3 || dy > 3) { // Drag threshold
-                isDragging.current = true;
-                setPopoverOpen({});
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-                handleDragStart(e, pointId, 'position');
-            }
-        };
-
-        const handleMouseUp = () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-            if (!isDragging.current) {
-                // This is a click, toggle the popover
-                setPopoverOpen(prev => {
-                    const isOpen = !!prev[pointId];
-                    const newPopoverState: Record<number, boolean> = {}; // Close all others
-                    newPopoverState[pointId] = !isOpen;
-                    return newPopoverState;
-                });
-            }
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const handleSpreadHandleMouseDown = (e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'spreadX' | 'spreadY') => {
-        setActivePointId(pointId);
-        setPopoverOpen({});
-        handleDragStart(e, pointId, handleType);
-    }
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const target = e.target as HTMLElement;
@@ -330,7 +320,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                 boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                                 zIndex: activePointId === point.id ? 10 : 1,
                                             }}
-                                            onMouseDown={(e) => handlePointMouseDown(e, point.id)}
+                                            onMouseDown={(e) => handlePointInteractionStart(e, point.id, 'position')}
                                         />
                                     </PopoverTrigger>
                                     <PopoverContent className="w-72 p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
@@ -407,7 +397,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                     transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
-                                                onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadX')}
+                                                onMouseDown={(e) => handlePointInteractionStart(e, activePoint.id, 'spreadX')}
                                             />
                                             <div
                                                 className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
@@ -417,7 +407,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                     transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
-                                                onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadY')}
+                                                onMouseDown={(e) => handlePointInteractionStart(e, activePoint.id, 'spreadY')}
                                             />
                                         </>
                                     );
