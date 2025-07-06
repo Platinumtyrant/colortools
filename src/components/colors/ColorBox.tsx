@@ -26,6 +26,17 @@ interface ColorBoxProps {
   variant?: 'default' | 'compact';
 }
 
+const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onCopy: () => void }) => (
+    <div 
+        className="grid grid-cols-[min-content_1fr] items-center gap-x-4 cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm"
+        onClick={onCopy}
+    >
+        <span className="text-muted-foreground whitespace-nowrap">{label}</span>
+        <span className="font-mono font-semibold text-right break-words">{value}</span> 
+    </div>
+);
+
+
 const ColorDetails = ({ color }: { color: string }) => {
     const { toast } = useToast();
     const colorInstance = colord(color);
@@ -35,29 +46,22 @@ const ColorDetails = ({ color }: { color: string }) => {
             toast({ title: `${type} copied!`, description: textToCopy });
         });
     };
+    
+    const hex = colorInstance.toHex().toUpperCase();
+    const rgb = colorInstance.toRgbString();
+    const hsl = colorInstance.toHslString();
+    const cmyk = colorInstance.toCmykString();
+    const lchObj = colorInstance.toLch();
+    const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
+
 
     return (
         <div className="space-y-1 text-sm p-3">
-             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(colorInstance.toHex().toUpperCase(), 'HEX')}>
-                <span className="text-muted-foreground">HEX</span>
-                <span className="font-mono font-semibold">{colorInstance.toHex().toUpperCase()}</span>
-            </div>
-            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(colorInstance.toRgbString(), 'RGB')}>
-                <span className="text-muted-foreground">RGB</span>
-                <span className="font-mono font-semibold">{colorInstance.toRgbString()}</span>
-            </div>
-            <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(colorInstance.toHslString(), 'HSL')}>
-                <span className="text-muted-foreground">HSL</span>
-                <span className="font-mono font-semibold">{colorInstance.toHslString()}</span>
-            </div>
-             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(colorInstance.toCmykString(), 'CMYK')}>
-                <span className="text-muted-foreground">CMYK</span>
-                <span className="font-mono font-semibold">{colorInstance.toCmykString()}</span>
-            </div>
-             <div className="flex justify-between items-center cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm" onClick={() => handleCopy(`lch(${colord(color).toLch().l.toFixed(0)}, ${colord(color).toLch().c.toFixed(0)}, ${colord(color).toLch().h.toFixed(0)})`, 'LCH')}>
-                <span className="text-muted-foreground">LCH</span>
-                <span className="font-mono font-semibold">{`lch(${colord(color).toLch().l.toFixed(0)}, ${colord(color).toLch().c.toFixed(0)}, ${colord(color).toLch().h.toFixed(0)})`}</span>
-            </div>
+             <DetailRow label="HEX" value={hex} onCopy={() => handleCopy(hex, 'HEX')} />
+             <DetailRow label="RGB" value={rgb} onCopy={() => handleCopy(rgb, 'RGB')} />
+             <DetailRow label="HSL" value={hsl} onCopy={() => handleCopy(hsl, 'HSL')} />
+             <DetailRow label="CMYK" value={cmyk} onCopy={() => handleCopy(cmyk, 'CMYK')} />
+             <DetailRow label="LCH" value={lch} onCopy={() => handleCopy(lch, 'LCH')} />
         </div>
     );
 };
@@ -113,33 +117,35 @@ export const ColorBox = React.memo(({
     }
     
     return (
-        <Card className="overflow-hidden shadow-sm group w-full">
-            <div
-                className="relative h-20 w-full cursor-pointer"
-                style={{ backgroundColor: color }}
-                onClick={handleCopyHex}
-            >
-                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={finalActionClick} title={actionTitle}>
-                        {finalActionIcon}
-                    </Button>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                             <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => e.stopPropagation()} title="Show Details">
-                                <Info className="h-4 w-4" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-64 p-0">
-                             <ColorDetails color={color} />
-                        </PopoverContent>
-                    </Popover>
+        <div className="w-40">
+            <Card className="overflow-hidden shadow-sm group w-full">
+                <div
+                    className="relative h-20 w-full cursor-pointer"
+                    style={{ backgroundColor: color }}
+                    onClick={handleCopyHex}
+                >
+                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={finalActionClick} title={actionTitle}>
+                            {finalActionIcon}
+                        </Button>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                 <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => e.stopPropagation()} title="Show Details">
+                                    <Info className="h-4 w-4" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-64 p-0">
+                                 <ColorDetails color={color} />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
                 </div>
-            </div>
-            <CardContent className="p-2 cursor-pointer" onClick={handleCopyHex}>
-                <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
-                <p className="text-xs text-muted-foreground font-mono">{info || color.toUpperCase()}</p>
-            </CardContent>
-        </Card>
+                <CardContent className="p-2 cursor-pointer" onClick={handleCopyHex}>
+                    <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{info || color.toUpperCase()}</p>
+                </CardContent>
+            </Card>
+        </div>
     );
 });
 
