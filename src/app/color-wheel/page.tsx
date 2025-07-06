@@ -60,6 +60,11 @@ export default function ColorWheelPage() {
         setActiveColor(newColor);
     };
 
+    const handleSaturationChange = (newSaturation: number[]) => {
+        const newColor = colord({ ...activeHsl, s: newSaturation[0] }).toHex();
+        setActiveColor(newColor);
+    };
+
     const harmonies = useMemo(() => ({
         complementary: getComplementary(activeColor),
         analogous: getAnalogous(activeColor),
@@ -175,14 +180,27 @@ export default function ColorWheelPage() {
                         width={280}
                         height={280}
                     />
-                    <div className="h-[280px]">
-                        <Slider
-                            orientation="vertical"
-                            value={[activeHsl.l]}
-                            onValueChange={handleLightnessChange}
-                            max={100}
-                            step={1}
-                        />
+                     <div className="flex gap-4 h-[280px]">
+                        <div className="flex flex-col items-center gap-2">
+                            <Slider
+                                orientation="vertical"
+                                value={[activeHsl.s]}
+                                onValueChange={handleSaturationChange}
+                                max={100}
+                                step={1}
+                            />
+                            <Label className="text-xs text-muted-foreground">S</Label>
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <Slider
+                                orientation="vertical"
+                                value={[activeHsl.l]}
+                                onValueChange={handleLightnessChange}
+                                max={100}
+                                step={1}
+                            />
+                            <Label className="text-xs text-muted-foreground">L</Label>
+                        </div>
                     </div>
                 </div>
                 <div className="w-full max-w-sm h-full">
@@ -217,7 +235,7 @@ export default function ColorWheelPage() {
                                         <div className="mx-auto">
                                             <HarmonyColorWheel colors={harmony.colors} size={200} />
                                         </div>
-                                        <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                                        <div className="flex flex-wrap justify-center gap-4">
                                             {harmony.colors.map((c, i) => (
                                                 <ColorBox key={`${c}-${i}`} color={c} variant="compact" />
                                             ))}
