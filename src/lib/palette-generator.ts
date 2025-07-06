@@ -76,11 +76,9 @@ export function generatePalette(options: GenerationOptions): string[] {
 
     if (!chroma.valid(baseColor)) {
         console.error("Invalid base color provided to generatePalette:", baseColor);
-        // Fallback to a default random palette
         return Array.from({ length: numColors }, () => getRandomColor());
     }
-    
-    // Tints and shades have their own dedicated, robust logic which works well.
+
     if (type === 'tints') {
         return getTints(baseColor, numColors);
     }
@@ -88,51 +86,72 @@ export function generatePalette(options: GenerationOptions): string[] {
         return getShades(baseColor, numColors);
     }
 
-    // For harmonies, we will use the LCH color space for perceptually uniform manipulations.
     const baseLCH = chroma(baseColor).lch();
-    const h = isNaN(baseLCH[2]) ? 0 : baseLCH[2];
-    const c = baseLCH[1];
     const l = baseLCH[0];
+    const c = baseLCH[1];
+    const h = isNaN(baseLCH[2]) ? 0 : baseLCH[2];
 
-    let colors: string[] = [];
+    const colors: string[] = [];
+    
+    // Helper function to create subtle variations around a main color
+    const createVariations = (baseHue: number, count: number) => {
+        const variations: string[] = [];
+        for (let i = 0; i < count; i++) {
+            // Create small variations in Lightness and Chroma
+            const l_var = l + (Math.random() - 0.5) * 15; // lightness variation +/- 7.5
+            const c_var = c + (Math.random() - 0.5) * 10; // chroma variation +/- 5
+            const h_var = baseHue + (Math.random() - 0.5) * 10; // hue variation +/- 5
+            variations.push(
+                chroma.lch(
+                    Math.max(10, Math.min(95, l_var)), 
+                    Math.max(0, c_var), 
+                    (h_var + 360) % 360
+                ).hex()
+            );
+        }
+        return variations;
+    };
     
     switch (type) {
         case 'analogous': {
-            // Generate colors in a 60-degree arc around the base hue.
-            // This direct calculation avoids bunching colors together.
             const angleRange = 60;
+            const angleStep = numColors > 1 ? angleRange / (numColors - 1) : 0;
             for (let i = 0; i < numColors; i++) {
-                const position = numColors > 1 ? i / (numColors - 1) : 0.5;
-                const hueOffset = (position - 0.5) * angleRange;
+                const hueOffset = -(angleRange / 2) + i * angleStep;
                 const newHue = (h + hueOffset + 360) % 360;
-                
-                // Introduce subtle, non-linear lightness variation for a more organic feel.
-                const lightnessVariation = Math.sin(position * Math.PI) * 10;
+                 const lightnessVariation = Math.sin((i / (numColors -1)) * Math.PI) * 10;
                 const newLightness = Math.max(10, Math.min(95, l + lightnessVariation));
-                
+
                 colors.push(chroma.lch(newLightness, c, newHue).hex());
             }
             break;
         }
 
         case 'complementary': {
-            // Create a scale between the base color and its complement.
-            const complement = chroma.lch(l, c, (h + 180) % 360).hex();
-            // Using chroma.scale creates an even distribution of colors between the two points.
-            colors = chroma.scale([baseColor, complement]).mode('lch').colors(numColors);
+            const baseCount = Math.ceil(numColors / 2);
+            const complementCount = numColors - baseCount;
+            const complementHue = (h + 180) % 360;
+            
+            colors.push(...createVariations(h, baseCount));
+            colors.push(...createVariations(complementHue, complementCount));
             break;
         }
 
         case 'triadic': {
-            // Create a scale that cycles through all three triadic points.
-            const p2 = chroma.lch(l, c, (h + 120) % 360).hex();
-            const p3 = chroma.lch(l, c, (h + 240) % 360).hex();
-            // We generate numColors + 1 and slice to avoid repeating the first color at the end.
-            const scale = chroma.scale([baseColor, p2, p3, baseColor]).mode('lch').colors(numColors + 1);
-            colors = scale.slice(0, numColors);
+            const hue2 = (h + 120) % 360;
+            const hue3 = (h + 240) % 360;
+
+            const counts = [0, 0, 0];
+            for (let i = 0; i < numColors; i++) {
+                counts[i % 3]++;
+            }
+
+            colors.push(...createVariations(h, counts[0]));
+            colors.push(...createVariations(hue2, counts[1]));
+            colors.push(...createVariations(hue3, counts[2]));
             break;
         }
     }
 
-    return colors;
+    return colors.slice(0, numColors);
 }
