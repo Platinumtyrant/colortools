@@ -163,36 +163,36 @@ function PaletteBuilderPage() {
   }, [inputValue, mainColor]);
 
   const regeneratePalette = useCallback((isRandomizing = false) => {
-    setPalette(prevPalette => {
-        const lockedColors = prevPalette.filter(c => c.locked);
-        const lockedHexes = lockedColors.map(c => c.hex);
-        const numColors = prevPalette.length || 5;
-
-        let currentType = generationType;
-        if (isRandomizing) {
-          if (lockedColors.length > 0) {
+    let effectiveType = generationType;
+    let baseColors: string[];
+    const currentLockedHexes = palette.filter(c => c.locked).map(c => c.hex);
+    
+    if (currentLockedHexes.length > 0) {
+        baseColors = currentLockedHexes;
+        if(isRandomizing) {
             const nextType = generationCycle[0];
-            setGenerationCycle(prevCycle => [...prevCycle.slice(1), prevCycle[0]]);
+            setGenerationCycle(prev => [...prev.slice(1), prev[0]]);
             setGenerationType(nextType);
-            currentType = nextType;
-          } else {
-             setMainColor(getRandomColor());
-          }
+            effectiveType = nextType;
         }
-        
-        const baseColors = lockedHexes.length > 0 
-            ? lockedHexes 
-            : (isRandomizing ? [getRandomColor()] : [mainColor]);
-        
-        const newHexes = generatePalette({ 
-            numColors, 
-            type: currentType, 
-            lockedColors: baseColors,
+    } else if (isRandomizing) {
+        const newMain = getRandomColor();
+        setMainColor(newMain);
+        baseColors = [newMain];
+    } else {
+        baseColors = [mainColor];
+    }
+
+    setPalette(prevPalette => {
+        const numColors = prevPalette.length || 5;
+        const newHexes = generatePalette({
+            numColors: numColors - currentLockedHexes.length,
+            type: effectiveType,
+            baseColors: baseColors
         });
 
-        let newPalette: PaletteColor[] = [];
+        const newPalette: PaletteColor[] = [];
         let newHexIndex = 0;
-        
         for (let i = 0; i < numColors; i++) {
             const originalColor = prevPalette[i];
             if (originalColor?.locked) {
@@ -202,10 +202,9 @@ function PaletteBuilderPage() {
                 newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
             }
         }
-        
         return newPalette;
     });
-  }, [generationType, generationCycle, mainColor]);
+  }, [generationType, mainColor, palette, generationCycle]);
 
   // Handle loading palettes from Library or Inspiration pages
   useEffect(() => {

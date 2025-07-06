@@ -14,7 +14,7 @@ export interface PaletteColor {
 interface GenerationOptions {
     numColors: number;
     type: GenerationType;
-    lockedColors?: string[];
+    baseColors: string[];
 }
 
 export function getRandomColor(): string {
@@ -69,10 +69,11 @@ export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor
   return adjustedPalette;
 }
 
-
 export function generatePalette(options: GenerationOptions): string[] {
-    const { numColors, type, lockedColors } = options;
-    const baseColor = (lockedColors && lockedColors.length > 0) ? lockedColors[0] : getRandomColor();
+    const { numColors, type, baseColors } = options;
+    if (numColors <= 0) return [];
+    
+    const baseColor = (baseColors && baseColors.length > 0) ? baseColors[0] : getRandomColor();
 
     if (!chroma.valid(baseColor)) {
         console.error("Invalid base color provided to generatePalette:", baseColor);
@@ -92,15 +93,16 @@ export function generatePalette(options: GenerationOptions): string[] {
     const h = isNaN(baseLCH[2]) ? 0 : baseLCH[2];
 
     const colors: string[] = [];
-    
+
     // Helper function to create subtle variations around a main color
     const createVariations = (baseHue: number, count: number) => {
+        if (count <= 0) return [];
         const variations: string[] = [];
         for (let i = 0; i < count; i++) {
             // Create small variations in Lightness and Chroma
-            const l_var = l + (Math.random() - 0.5) * 15; // lightness variation +/- 7.5
-            const c_var = c + (Math.random() - 0.5) * 10; // chroma variation +/- 5
-            const h_var = baseHue + (Math.random() - 0.5) * 10; // hue variation +/- 5
+            const l_var = l + (Math.random() - 0.5) * 20; // lightness variation +/- 10
+            const c_var = c + (Math.random() - 0.5) * 15; // chroma variation +/- 7.5
+            const h_var = baseHue + (Math.random() - 0.5) * 15; // hue variation +/- 7.5
             variations.push(
                 chroma.lch(
                     Math.max(10, Math.min(95, l_var)), 
@@ -111,7 +113,7 @@ export function generatePalette(options: GenerationOptions): string[] {
         }
         return variations;
     };
-    
+
     switch (type) {
         case 'analogous': {
             const angleRange = 60;
@@ -119,10 +121,15 @@ export function generatePalette(options: GenerationOptions): string[] {
             for (let i = 0; i < numColors; i++) {
                 const hueOffset = -(angleRange / 2) + i * angleStep;
                 const newHue = (h + hueOffset + 360) % 360;
-                 const lightnessVariation = Math.sin((i / (numColors -1)) * Math.PI) * 10;
-                const newLightness = Math.max(10, Math.min(95, l + lightnessVariation));
+                // Add some subtle variation in lightness for a more organic feel
+                const lightnessVariation = Math.sin((i / (numColors > 1 ? numColors -1 : 1)) * Math.PI) * 10;
+                const newLightness = l + (i % 2 === 0 ? lightnessVariation : -lightnessVariation);
 
-                colors.push(chroma.lch(newLightness, c, newHue).hex());
+                colors.push(chroma.lch(
+                    Math.max(10, Math.min(95, newLightness)), 
+                    c, 
+                    newHue
+                ).hex());
             }
             break;
         }
@@ -151,7 +158,20 @@ export function generatePalette(options: GenerationOptions): string[] {
             colors.push(...createVariations(hue3, counts[2]));
             break;
         }
+        
+        default:
+             // Fallback to analogous if type is unknown
+            for (let i = 0; i < numColors; i++) {
+                colors.push(chroma(baseColor).set('hsl.h', `+${i * 10}`).hex());
+            }
+            break;
     }
-
-    return colors.slice(0, numColors);
+    
+    // Sort colors by hue to maintain a logical visual order
+    return colors.slice(0, numColors).sort((a, b) => {
+        const h1 = chroma(a).lch()[2];
+        const h2 = chroma(b).lch()[2];
+        if (isNaN(h1) || isNaN(h2)) return 0;
+        return h1-h2;
+    });
 }
