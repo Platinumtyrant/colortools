@@ -65,7 +65,7 @@ const HarmonyDescription = ({ title, description }: { title: string, description
     </AccordionItem>
 );
 
-export default function ColorWheelPage() {
+export default function ColorWheelPage({}) {
     const [activeColor, setActiveColor] = useState('#ff6347');
     const [tintCount, setTintCount] = useState(5);
     const [toneCount, setToneCount] = useState(5);
