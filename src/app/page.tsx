@@ -7,7 +7,6 @@ import dynamic from 'next/dynamic';
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,9 +26,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, Pencil, Plus, Sparkles, Pipette, Unlock, Lock } from 'lucide-react';
+import { CheckCircle2, Dices, Pencil, Plus, Sparkles, Pipette, Unlock, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
 import { ColorBox } from '@/components/colors/ColorBox';
@@ -171,49 +169,66 @@ function PaletteBuilderPage() {
         const currentLockedHexes = currentLockedColors.map(c => c.hex);
         const numColors = isInitial ? 5 : (prevPalette.length || 5);
 
+        let baseForGeneration = [mainColor];
+        
+        // If there are locked colors, they become the base for generation
         if (currentLockedHexes.length > 0) {
-            // Generate colors to fill the gaps left by unlocked colors
-            const numToGenerate = numColors - currentLockedHexes.length;
-            if (numToGenerate <= 0) return prevPalette;
+            baseForGeneration = currentLockedHexes;
+        }
 
-            const newHexes = generatePalette({
-                numColors: numToGenerate,
-                type: generationType,
-                baseColors: currentLockedHexes
-            });
+        const newHexes = generatePalette({
+            numColors: numColors,
+            type: generationType,
+            baseColors: baseForGeneration,
+        });
 
-            const newPalette: PaletteColor[] = [];
-            let newHexIndex = 0;
-            for (let i = 0; i < numColors; i++) {
-                const originalColor = prevPalette[i];
-                if (originalColor?.locked) {
-                    newPalette.push(originalColor);
+        // Smartly merge new colors with locked ones
+        if (currentLockedHexes.length > 0) {
+            const finalPalette: PaletteColor[] = [];
+            const newHexesPool = newHexes.filter(h => !currentLockedHexes.includes(h));
+            
+            for(let i = 0; i < numColors; i++) {
+                if (prevPalette[i]?.locked) {
+                    finalPalette.push(prevPalette[i]);
                 } else {
-                    const newId = isInitial ? Date.now() + i : (originalColor?.id || Date.now() + i);
-                    newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
+                    const newHex = newHexesPool.shift() || getRandomColor();
+                    finalPalette.push({ id: prevPalette[i]?.id || Date.now() + i, hex: newHex, locked: false });
                 }
             }
-            return newPalette;
-        } else {
-            // No locked colors, regenerate the whole palette based on mainColor
-            const newHexes = generatePalette({
-                numColors,
-                type: generationType,
-                baseColors: [mainColor],
-            });
-
-            // Ensure the main color is always first for consistency
-            newHexes[0] = mainColor;
-
-            return newHexes.map((hex, i) => ({
-                id: prevPalette[i]?.id || Date.now() + i,
-                hex,
-                locked: false,
-            }));
+            return finalPalette;
         }
+
+        // If no colors are locked, but it's not the initial generation, keep the main color
+        if (!isInitial) {
+             newHexes[0] = mainColor;
+        }
+        
+        return newHexes.map((hex, i) => ({
+            id: prevPalette[i]?.id || Date.now() + i,
+            hex,
+            locked: false,
+        }));
     });
   }, [generationType, mainColor]);
 
+  const regenerateWithActiveColor = useCallback(() => {
+    const newHexes = generatePalette({
+        numColors: palette.length || 5,
+        type: generationType,
+        baseColors: [mainColor],
+    });
+    
+    newHexes[0] = mainColor;
+
+    setPalette(prevPalette => {
+        return newHexes.map((hex, i) => ({
+            id: prevPalette[i]?.id || Date.now() + i,
+            hex: hex,
+            locked: prevPalette[i]?.locked || false
+        }));
+    });
+
+  }, [generationType, mainColor, palette.length]);
 
   // Handle loading palettes from Library or Inspiration pages & initial load
   useEffect(() => {
@@ -260,15 +275,20 @@ function PaletteBuilderPage() {
     }
     
     if (!loadedFromStorage) {
-        regeneratePalette();
+        // Initial palette generation
+        const initialHexes = generatePalette({
+            numColors: 5,
+            type: 'analogous',
+            baseColors: [mainColor],
+        });
+        initialHexes[0] = mainColor;
+        setPalette(initialHexes.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
     }
     isInitialLoad.current = false;
 
-  }, [searchParams, router, toast, regeneratePalette]);
+  }, [searchParams, router, toast]);
 
   useEffect(() => {
-    // Regenerate palette whenever the main color or generation type changes,
-    // unless there are locked colors.
     if (!hasLockedColors && !isInitialLoad.current) {
         regeneratePalette();
     }
@@ -401,7 +421,8 @@ function PaletteBuilderPage() {
         const nextIndex = (currentIndex + 1) % allGenerationTypes.length;
         return allGenerationTypes[nextIndex];
     });
-  }, []);
+    regenerateWithActiveColor();
+  }, [regenerateWithActiveColor]);
 
   const handleRandomize = useCallback(() => {
     setEditingPaletteId(null);
@@ -581,7 +602,7 @@ function PaletteBuilderPage() {
     <div className="flex w-full justify-between items-center gap-4 flex-wrap">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}>
+          <Button onClick={handleMix} size="sm">
               <Dices className="mr-2 h-4 w-4" />
               Mix
           </Button>
@@ -632,55 +653,54 @@ function PaletteBuilderPage() {
         </div>
         <Button onClick={handleOpenSaveDialog}>
           {editingPaletteId ? <Pencil className="mr-2 h-4 w-4" /> : null}
-          {editingPaletteId ? 'Update Palette' : 'Save to Library'}
+          {editingPaletteId ? 'Update Palette' : 'Save'}
         </Button>
       </div>
     </div>
   );
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full overflow-hidden">
         <Sidebar>
             <SidebarContent className="p-4">
                 {analysisPanel}
             </SidebarContent>
         </Sidebar>
-        <div className="flex-1 flex flex-col overflow-auto">
-            <div className="p-4 md:p-8 flex flex-col gap-8">
-                {/* Save Dialog */}
-                <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <form onSubmit={handleSaveToLibrary}>
-                            <DialogHeader>
-                                <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
-                                <DialogDescription>
-                                    Give your palette a name. Click save when you're done.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="name" className="text-right">
-                                        Name
-                                    </Label>
-                                    <Input
-                                        id="name"
-                                        value={newPaletteName}
-                                        onChange={(e) => setNewPaletteName(e.target.value)}
-                                        className="col-span-3"
-                                        placeholder="e.g. Sunset Vibes"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="submit">{editingPaletteId ? 'Update' : 'Save'} palette</Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-                
-                {/* Top Section: Picker and Active Color Details */}
-                <section className="grid grid-cols-1 lg:grid-cols-2 lg:items-center gap-8 w-full max-w-5xl mx-auto">
+
+        <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <form onSubmit={handleSaveToLibrary}>
+                    <DialogHeader>
+                        <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
+                        <DialogDescription>
+                            Give your palette a name. Click save when you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right">
+                                Name
+                            </Label>
+                            <Input
+                                id="name"
+                                value={newPaletteName}
+                                onChange={(e) => setNewPaletteName(e.target.value)}
+                                className="col-span-3"
+                                placeholder="e.g. Sunset Vibes"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button type="submit">{editingPaletteId ? 'Update' : 'Save'}</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+
+        <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
+            <div className="flex flex-col gap-8 min-h-0">
+                <section className="grid grid-cols-1 md:grid-cols-2 md:items-center gap-8 w-full">
                     <div className="w-full flex justify-center">
                          <div className="flex items-center justify-center gap-4">
                             <div className="flex flex-col items-center gap-4">
@@ -740,10 +760,10 @@ function PaletteBuilderPage() {
                         </div>
                     </div>
                 </section>
-                
-                {/* Palette Display Section */}
-                <section className="w-full max-w-5xl mx-auto flex-grow flex flex-col min-h-[200px]">
-                    <Palette
+            </div>
+            
+            <section className="flex flex-col min-h-0 lg:min-h-full">
+                <Palette
                     palette={palette}
                     onColorChange={handleColorUpdateInPalette}
                     onLockToggle={handleLockToggle}
@@ -751,13 +771,11 @@ function PaletteBuilderPage() {
                     onAddColor={handleAddColorAtIndex}
                     onColorClick={(c) => setMainColor(c.hex)}
                     actions={paletteActions}
-                    />
-                </section>
-            </div>
-        </div>
+                />
+            </section>
+        </main>
     </div>
   );
 }
 
 export default PaletteBuilderPage;
-
