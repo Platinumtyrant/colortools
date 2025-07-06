@@ -610,7 +610,7 @@ function PaletteBuilderPage() {
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <ContrastGrid colors={paletteHexes} />
-                                 <div className="space-y-1.5">
+                                <div className="space-y-1.5">
                                     <Label>Text Color</Label>
                                     <div className="flex items-center gap-2 p-2 rounded-md border border-input h-10">
                                         <div className="w-6 h-6 rounded border" style={{ backgroundColor: mainColor }} />
@@ -638,10 +638,10 @@ function PaletteBuilderPage() {
                             </div>
                             <div className="space-y-4">
                                 <div
-                                    className="p-4 rounded-lg text-center border-2 border-dashed flex items-center justify-center min-h-[100px]"
+                                    className="p-4 rounded-lg text-center border-2 border-dashed flex items-center justify-center h-40"
                                     style={{ backgroundColor: contrastBgColor, color: mainColor }}
                                 >
-                                    <p className="font-bold text-3xl">Aa</p>
+                                    <p className="font-bold text-[64pt]">Aa</p>
                                 </div>
                                 
                                 <WCAGDisplay textColor={mainColor} bgColor={contrastBgColor} />
@@ -808,7 +808,7 @@ function PaletteBuilderPage() {
                         </div>
 
                         <div className="w-full lg:w-auto flex justify-center">
-                             <div className="w-full max-w-sm relative group/container" onClick={() => setEditingColorId(null)} >
+                             <div className="w-full max-w-sm relative group/container h-72" onClick={() => setEditingColorId(null)} >
                                  <ColorBox
                                     variant="default"
                                     color={mainColor}
@@ -851,3 +851,4 @@ export default PaletteBuilderPage;
     
 
     
+
