@@ -3,7 +3,7 @@ import chroma from 'chroma-js';
 import { getTints, getShades } from './colors';
 import { simulate, type SimulationType } from './colorblind';
 
-export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades' | 'monochromatic' | 'shorter' | 'longer';
+export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades';
 
 export interface PaletteColor {
   id: number;
@@ -86,14 +86,7 @@ export function generatePalette(options: GenerationOptions): string[] {
     if (type === 'shades') {
         return getShades(baseColor, numColors);
     }
-    if (type === 'monochromatic') {
-        return chroma.scale([
-            chroma(baseColor).darken(2),
-            baseColor,
-            chroma(baseColor).brighten(2)
-        ]).mode('lch').colors(numColors);
-    }
-
+    
     const baseLCH = chroma(baseColor).lch();
     const l = baseLCH[0];
     const c = baseLCH[1];
@@ -109,7 +102,7 @@ export function generatePalette(options: GenerationOptions): string[] {
             // Create small variations in Lightness and Chroma for a more organic feel
             // The first color (i=0) is closer to the original, subsequent ones vary more.
             const l_var = l + (Math.random() - 0.5) * (15 + i * 5);
-            const c_var = c + (Math.random() - 0.5) * (10 + i * 5);
+            const c_var = c + (Math.random() - 0.5) * (10 + i * 2.5);
             const h_var = baseHue + (Math.random() - 0.5) * (10 + i * 2.5);
             variations.push(
                 chroma.lch(
@@ -123,13 +116,8 @@ export function generatePalette(options: GenerationOptions): string[] {
     };
 
     switch (type) {
-        case 'analogous':
-        case 'shorter':
-        case 'longer': {
-            let angleRange = 60; // default for analogous
-            if (type === 'shorter') angleRange = 40;
-            if (type === 'longer') angleRange = 120;
-
+        case 'analogous': {
+            const angleRange = 60;
             const angleStep = numColors > 1 ? angleRange / (numColors - 1) : 0;
             for (let i = 0; i < numColors; i++) {
                 const hueOffset = -(angleRange / 2) + i * angleStep;

@@ -137,7 +137,7 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
   </div>
 );
 
-const allGenerationTypes: GenerationType[] = ['analogous', 'shorter', 'longer', 'triadic', 'complementary', 'monochromatic', 'tints', 'shades'];
+const allGenerationTypes: GenerationType[] = ['analogous', 'triadic', 'complementary', 'tints', 'shades'];
 
 function PaletteBuilderPage() {
     const { 
