@@ -497,149 +497,156 @@ function PaletteBuilderPage() {
                         <TabsTrigger value="analysis">Spectrum</TabsTrigger>
                         <TabsTrigger value="contrast">Contrast</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="analysis" className="p-4 space-y-6">
-                        <div className="flex justify-between items-center text-sm">
-                            <Label>Detected Harmony</Label>
-                            <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
-                        </div>
-                        <Separator />
-                        <div className="flex flex-col gap-4">
-                             <div className="space-y-1.5">
-                                <Label className="text-sm">Color Space</Label>
-                                <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select colorspace..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Object.entries(colorSpaceInfo).map(([key, value]) => (
-                                            <SelectItem key={key} value={key}>{value.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                                    <TooltipProvider>
-                                        <ShadTooltip>
-                                            <TooltipTrigger asChild>
-                                                <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
-                                            </TooltipContent>
-                                        </ShadTooltip>
-                                    </TooltipProvider>
+                    <TabsContent value="analysis" className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center text-sm">
+                                    <Label>Detected Harmony</Label>
+                                    <Badge variant="outline" className="font-semibold">{detectedHarmony}</Badge>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
-                                    <Label htmlFor="correctLightness">Correct lightness</Label>
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start gap-2">
-                                <Label className="text-sm">Simulate Deficiency:</Label>
-                                <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
-                                    <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
-                                    <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
-                                    <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
-                                    <Label htmlFor="sb-deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
-                                    <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
-                                    <Label htmlFor="sb-deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
-                                    <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
-                                    <Label htmlFor="sb-protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
-                                    <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
-                                    <Label htmlFor="sb-tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
-                                </RadioGroup>
-                            </div>
-                        </div>
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                            <div className="h-5">
-                                <AnimatePresence>
-                                    {isPaletteColorblindSafe && (
-                                        <motion.span
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="flex items-center text-sm text-green-500"
-                                        >
-                                            <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
-                                        </motion.span>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                            <div className="relative group/palette w-full h-16 rounded-md border">
-                                <div className="absolute inset-0 overflow-hidden rounded-md">
-                                    <div className="h-full w-full flex">
-                                        {simulatedPalette.map((color, index) => (
-                                            <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                                        ))}
+                                <Separator />
+                                <div className="flex flex-col gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-sm">Color Space</Label>
+                                        <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select colorspace..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {Object.entries(colorSpaceInfo).map(([key, value]) => (
+                                                    <SelectItem key={key} value={key}>{value.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                                            <TooltipProvider>
+                                                <ShadTooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                                                    </TooltipContent>
+                                                </ShadTooltip>
+                                            </TooltipProvider>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
+                                            <Label htmlFor="correctLightness">Correct lightness</Label>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-start gap-2">
+                                        <Label className="text-sm">Simulate Deficiency:</Label>
+                                        <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                                            <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
+                                            <Label htmlFor="sb-normal" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                                            <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
+                                            <Label htmlFor="sb-deutan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
+                                            <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
+                                            <Label htmlFor="sb-deuteranomaly" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
+                                            <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
+                                            <Label htmlFor="sb-protan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
+                                            <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
+                                            <Label htmlFor="sb-tritan" className={cn("px-3 py-1 cursor-pointer text-sm rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
+                                        </RadioGroup>
                                     </div>
                                 </div>
-                                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover/palette:opacity-100">
-                                    <Button
-                                        onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
-                                        variant="secondary"
-                                        className="pointer-events-auto"
-                                    >
-                                        <Sparkles className="mr-2 h-4 w-4" />
-                                        Use This Palette
-                                    </Button>
+                            </div>
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                                <div className="h-5">
+                                    <AnimatePresence>
+                                        {isPaletteColorblindSafe && (
+                                            <motion.span
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="flex items-center text-sm text-green-500"
+                                            >
+                                                <CheckCircle2 className="mr-2 h-4 w-4" /> This palette appears to be colorblind-safe.
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-2 pt-4">
-                                {graphData.map((graph, i) => (
-                                    <ChartDisplay 
-                                        key={`${graph.title}-${i}`}
-                                        data={graph.data} 
-                                        title={graph.title} 
-                                        description={graph.description}
-                                        color={`hsl(var(--chart-${(i % 5) + 1}))`}
-                                    />
-                                ))}
-                            </div>
-                        </motion.div>
+                                <div className="relative group/palette w-full h-16">
+                                    <div className="group-hover/palette:opacity-100 transition-opacity absolute inset-0 -bottom-10 flex items-center justify-center opacity-0 pointer-events-none">
+                                        <Button
+                                            onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
+                                            variant="secondary"
+                                            className="pointer-events-auto"
+                                        >
+                                            <Sparkles className="mr-2 h-4 w-4" />
+                                            Use This Palette
+                                        </Button>
+                                    </div>
+                                    <div className="absolute inset-0 overflow-hidden rounded-md border">
+                                        <div className="h-full w-full flex">
+                                            {simulatedPalette.map((color, index) => (
+                                                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2 pt-4">
+                                    {graphData.map((graph, i) => (
+                                        <ChartDisplay 
+                                            key={`${graph.title}-${i}`}
+                                            data={graph.data} 
+                                            title={graph.title} 
+                                            description={graph.description}
+                                            color={`hsl(var(--chart-${(i % 5) + 1}))`}
+                                        />
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </div>
                     </TabsContent>
-                    <TabsContent value="contrast" className="p-4 space-y-6">
-                        <ContrastGrid colors={paletteHexes} />
-                        <Separator />
-                        <div className="space-y-4">
-                            <div className="space-y-1.5">
-                                <Label>Text Color</Label>
-                                <div className="flex items-center gap-2 p-2 rounded-md border border-input h-10">
-                                    <div className="w-6 h-6 rounded border" style={{ backgroundColor: mainColor }} />
-                                    <span className="font-mono text-sm">{mainColor.toUpperCase()}</span>
+                    <TabsContent value="contrast" className="p-4">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <ContrastGrid colors={paletteHexes} />
+                            </div>
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label>Text Color</Label>
+                                    <div className="flex items-center gap-2 p-2 rounded-md border border-input h-10">
+                                        <div className="w-6 h-6 rounded border" style={{ backgroundColor: mainColor }} />
+                                        <span className="font-mono text-sm">{mainColor.toUpperCase()}</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">Controlled by the main color picker.</p>
                                 </div>
-                                <p className="text-xs text-muted-foreground">Controlled by the main color picker.</p>
+                                
+                                <div className="space-y-1.5">
+                                    <Label>Background Color</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className="w-full h-10 justify-start px-3">
+                                                <div className="w-6 h-6 rounded border mr-2" style={{ backgroundColor: contrastBgColor }} />
+                                                <span className="font-mono text-sm">{contrastBgColor.toUpperCase()}</span>
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 border-none">
+                                            <ColorPickerClient
+                                                color={contrastBgColor}
+                                                onChange={(color: ColorResult) => setContrastBgColor(color.hex)}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+        
+                                <div
+                                    className="p-4 rounded-lg text-center border-2 border-dashed"
+                                    style={{ backgroundColor: contrastBgColor, color: mainColor }}
+                                >
+                                    <p className="font-bold text-lg">Aa</p>
+                                    <p>The quick brown fox jumps over the lazy dog.</p>
+                                </div>
+                                
+                                <WCAGDisplay textColor={mainColor} bgColor={contrastBgColor} />
                             </div>
-                            
-                            <div className="space-y-1.5">
-                                 <Label>Background Color</Label>
-                                 <Popover>
-                                     <PopoverTrigger asChild>
-                                         <Button variant="outline" className="w-full h-10 justify-start px-3">
-                                             <div className="w-6 h-6 rounded border mr-2" style={{ backgroundColor: contrastBgColor }} />
-                                             <span className="font-mono text-sm">{contrastBgColor.toUpperCase()}</span>
-                                         </Button>
-                                     </PopoverTrigger>
-                                     <PopoverContent className="w-auto p-0 border-none">
-                                         <ColorPickerClient
-                                             color={contrastBgColor}
-                                             onChange={(color: ColorResult) => setContrastBgColor(color.hex)}
-                                         />
-                                     </PopoverContent>
-                                 </Popover>
-                             </div>
-    
-                            <div
-                                className="p-4 rounded-lg text-center border-2 border-dashed"
-                                style={{ backgroundColor: contrastBgColor, color: mainColor }}
-                            >
-                                <p className="font-bold text-lg">Aa</p>
-                                <p>The quick brown fox jumps over the lazy dog.</p>
-                            </div>
-                            
-                            <WCAGDisplay textColor={mainColor} bgColor={contrastBgColor} />
                         </div>
                     </TabsContent>
                 </Tabs>
@@ -840,3 +847,6 @@ export default PaletteBuilderPage;
 
 
 
+
+
+    
