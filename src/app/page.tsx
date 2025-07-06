@@ -27,7 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Contrast, Dices, RotateCcw, Pencil, Plus, Sparkles, Pipette } from 'lucide-react';
+import { CheckCircle2, Contrast, Dices, Pencil, Plus, Sparkles, Pipette, Unlock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -111,11 +111,12 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
   </div>
 );
 
+const allGenerationTypes: GenerationType[] = ['analogous', 'triadic', 'complementary', 'tints', 'shades'];
+
 function PaletteBuilderPage() {
   const [mainColor, setMainColor] = useState('#FF9800');
   const [palette, setPalette] = useState<PaletteColor[]>([]);
   const [generationType, setGenerationType] = useState<GenerationType>('analogous');
-  const [generationCycle, setGenerationCycle] = useState<GenerationType[]>(['analogous', 'triadic', 'complementary', 'tints', 'shades']);
   const [simulationType, setSimulationType] = useState<SimulationType>('normal');
   const [correctLightness, setCorrectLightness] = useState(true);
   const [useBezier, setUseBezier] = useState(true);
@@ -129,8 +130,8 @@ function PaletteBuilderPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isInitialLoad = useRef(true);
-
-  const isGenerationLocked = useMemo(() => palette.every(c => c.locked), [palette]);
+  
+  const hasLockedColors = useMemo(() => palette.some(c => c.locked), [palette]);
   
   useEffect(() => {
     setInputValue(mainColor);
@@ -162,34 +163,36 @@ function PaletteBuilderPage() {
       }
   }, [inputValue, mainColor]);
 
-  const regeneratePalette = useCallback((isRandomizing = false) => {
-    let effectiveType = generationType;
-    let baseColors: string[];
-    const currentLockedHexes = palette.filter(c => c.locked).map(c => c.hex);
-    
-    if (currentLockedHexes.length > 0) {
-        baseColors = currentLockedHexes;
-        if(isRandomizing) {
-            const nextType = generationCycle[0];
-            setGenerationCycle(prev => [...prev.slice(1), prev[0]]);
-            setGenerationType(nextType);
-            effectiveType = nextType;
-        }
-    } else if (isRandomizing) {
-        const newMain = getRandomColor();
-        setMainColor(newMain);
-        baseColors = [newMain];
-    } else {
-        baseColors = [mainColor];
-    }
-
+  const regeneratePalette = useCallback(() => {
     setPalette(prevPalette => {
-        const numColors = prevPalette.length || 5;
+        const isInitial = prevPalette.length === 0;
+        const currentLockedColors = prevPalette.filter(c => c.locked);
+        const currentLockedHexes = currentLockedColors.map(c => c.hex);
+        
+        let baseColors: string[];
+        if (currentLockedHexes.length > 0) {
+            baseColors = currentLockedHexes;
+        } else {
+            baseColors = [mainColor];
+        }
+
+        const numColors = isInitial ? 5 : (prevPalette.length || 5);
+        const numToGenerate = numColors - currentLockedHexes.length;
+
+        if (numToGenerate <= 0) {
+            return prevPalette;
+        }
+
         const newHexes = generatePalette({
-            numColors: numColors - currentLockedHexes.length,
-            type: effectiveType,
+            numColors: numToGenerate,
+            type: generationType,
             baseColors: baseColors
         });
+
+        // Ensure the main color is included on initial generation
+        if (isInitial) {
+          newHexes[0] = mainColor;
+        }
 
         const newPalette: PaletteColor[] = [];
         let newHexIndex = 0;
@@ -198,18 +201,23 @@ function PaletteBuilderPage() {
             if (originalColor?.locked) {
                 newPalette.push(originalColor);
             } else {
-                const newId = originalColor?.id || Date.now() + i;
+                const newId = isInitial ? Date.now() + i : (originalColor?.id || Date.now() + i);
                 newPalette.push({ id: newId, hex: newHexes[newHexIndex++], locked: false });
             }
         }
         return newPalette;
     });
-  }, [generationType, mainColor, palette, generationCycle]);
+  }, [generationType, mainColor]);
 
-  // Handle loading palettes from Library or Inspiration pages
+
+  // Handle loading palettes from Library or Inspiration pages & initial load
   useEffect(() => {
+    if (!isInitialLoad.current) return;
+
     const editIdStr = searchParams.get('edit');
     const fromInspiration = searchParams.has('from_inspiration');
+
+    let loadedFromStorage = false;
 
     if (editIdStr) {
       const id = parseInt(editIdStr, 10);
@@ -218,6 +226,7 @@ function PaletteBuilderPage() {
         const savedPalettes = JSON.parse(savedPalettesJSON) as { id: number; name: string; colors: string[] }[];
         const paletteToEdit = savedPalettes.find(p => p.id === id);
         if (paletteToEdit) {
+          loadedFromStorage = true;
           setEditingPaletteId(id);
           setPalette(paletteToEdit.colors.map((hex, i) => ({ id: Date.now() + i, hex, locked: false })));
           setMainColor(paletteToEdit.colors[0] || '#FF9800');
@@ -229,27 +238,37 @@ function PaletteBuilderPage() {
     } else if (fromInspiration) {
       const paletteToLoadJSON = localStorage.getItem('palette_to_load');
       if (paletteToLoadJSON) {
-        localStorage.removeItem('palette_to_load'); // Remove immediately
+        localStorage.removeItem('palette_to_load');
         try {
             const paletteToLoad = JSON.parse(paletteToLoadJSON);
             if (paletteToLoad && paletteToLoad.colors) {
+              loadedFromStorage = true;
               setEditingPaletteId(null);
               setPalette(paletteToLoad.colors.map((hex: string, i: number) => ({ id: Date.now() + i, hex, locked: false })));
               setMainColor(paletteToLoad.colors[0] || '#FF9800');
               setNewPaletteName(paletteToLoad.name || 'New Palette');
               toast({ title: "Palette Loaded", description: `Loaded "${paletteToLoad.name}" from Inspiration.` });
             }
-        } catch (e) {
-            console.error("Failed to parse palette from storage", e);
-        }
-        // Clean up the URL after loading
+        } catch (e) { console.error("Failed to parse palette from storage", e); }
         router.replace('/', { scroll: false });
       }
-    } else if (isInitialLoad.current) {
-      isInitialLoad.current = false;
-      regeneratePalette();
     }
+    
+    if (!loadedFromStorage) {
+        regeneratePalette();
+    }
+    isInitialLoad.current = false;
+
   }, [searchParams, router, toast, regeneratePalette]);
+
+  useEffect(() => {
+    // Regenerate palette whenever the main color or generation type changes,
+    // unless there are locked colors.
+    if (!hasLockedColors && !isInitialLoad.current) {
+        regeneratePalette();
+    }
+  }, [mainColor, generationType, hasLockedColors, regeneratePalette]);
+
 
   const handleAddColorToPalette = useCallback(() => {
       if (palette.length >= 20) {
@@ -371,12 +390,26 @@ function PaletteBuilderPage() {
       });
   }, [palette.length, toast]);
 
-  const handleReset = useCallback(() => {
+  const handleMix = useCallback(() => {
+    setGenerationType(prevType => {
+        const currentIndex = allGenerationTypes.indexOf(prevType);
+        const nextIndex = (currentIndex + 1) % allGenerationTypes.length;
+        return allGenerationTypes[nextIndex];
+    });
+  }, []);
+
+  const handleRandomize = useCallback(() => {
     setEditingPaletteId(null);
-    setPalette([]);
-    setTimeout(() => regeneratePalette(true), 0);
-    toast({ title: "Palette Reset" });
-  }, [regeneratePalette, toast]);
+    setPalette(prev => prev.map(c => ({...c, locked: false})));
+    setMainColor(getRandomColor());
+    setGenerationType(allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)]);
+    toast({ title: "Palette Randomized!" });
+  }, [toast]);
+
+  const handleUnlockAll = useCallback(() => {
+    setPalette(prev => prev.map(c => ({...c, locked: false})));
+    toast({ title: "All colors unlocked" });
+  }, [toast]);
 
   const handleApplyAnalyzedPalette = useCallback((newHexes: string[]) => {
     setPalette(newHexes.map((hex, i) => ({ 
@@ -541,13 +574,17 @@ function PaletteBuilderPage() {
     <div className="flex w-full justify-between items-center gap-4 flex-wrap">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <Button onClick={() => regeneratePalette(true)} size="sm">
+          <Button onClick={handleMix} size="sm">
               <Dices className="mr-2 h-4 w-4" />
               Mix
           </Button>
-          <Button onClick={handleReset} variant="outline" size="sm">
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Reset
+          <Button onClick={handleRandomize} size="sm" variant="outline">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Randomize
+          </Button>
+          <Button onClick={handleUnlockAll} variant="outline" size="sm" disabled={!hasLockedColors}>
+              <Unlock className="mr-2 h-4 w-4" />
+              Unlock All
           </Button>
         </div>
         <div className="flex items-center gap-2">
@@ -555,20 +592,18 @@ function PaletteBuilderPage() {
           <Select 
               value={generationType} 
               onValueChange={(value) => setGenerationType(value as GenerationType)}
-              disabled={isGenerationLocked}
+              disabled={hasLockedColors}
             >
             <SelectTrigger id="generationType" className="w-[150px] h-9">
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="analogous">Analogous</SelectItem>
-              <SelectItem value="triadic">Triadic</SelectItem>
-              <SelectItem value="complementary">Complementary</SelectItem>
-              <SelectItem value="tints">Tints</SelectItem>
-              <SelectItem value="shades">Shades</SelectItem>
+              {allGenerationTypes.map(type => (
+                <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          {isGenerationLocked && <p className="text-xs text-muted-foreground mt-1">Unlock all to change.</p>}
+          {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change.</p>}
         </div>
       </div>
       
@@ -706,3 +741,4 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
