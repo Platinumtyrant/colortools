@@ -570,17 +570,19 @@ function PaletteBuilderPage() {
                                     </AnimatePresence>
                                 </div>
                                 <div className="relative group/palette w-full h-16">
-                                    <div className="group-hover/palette:opacity-100 transition-opacity absolute inset-0 -bottom-10 flex items-center justify-center opacity-0 pointer-events-none">
-                                        <Button
-                                            onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
-                                            variant="secondary"
-                                            className="pointer-events-auto"
-                                        >
-                                            <Sparkles className="mr-2 h-4 w-4" />
-                                            Use This Palette
-                                        </Button>
+                                    <div className="absolute inset-0 overflow-hidden rounded-md border group-hover/palette:opacity-100 transition-opacity">
+                                        <div className="absolute inset-0 -bottom-10 flex items-center justify-center opacity-0 pointer-events-none group-hover/palette:opacity-100">
+                                            <Button
+                                                onClick={() => handleApplyAnalyzedPalette(simulatedPalette)}
+                                                variant="secondary"
+                                                className="pointer-events-auto"
+                                            >
+                                                <Sparkles className="mr-2 h-4 w-4" />
+                                                Use This Palette
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="absolute inset-0 overflow-hidden rounded-md border">
+                                    <div className="absolute inset-0 overflow-hidden rounded-md border pointer-events-none">
                                         <div className="h-full w-full flex">
                                             {simulatedPalette.map((color, index) => (
                                                 <div key={index} style={{ backgroundColor: color }} className="flex-1" />
@@ -608,8 +610,7 @@ function PaletteBuilderPage() {
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <ContrastGrid colors={paletteHexes} />
-                                <div className="text-xs text-muted-foreground pt-1">Text color (vertical) on background color (horizontal).</div>
-                                <div className="space-y-1.5">
+                                 <div className="space-y-1.5">
                                     <Label>Text Color</Label>
                                     <div className="flex items-center gap-2 p-2 rounded-md border border-input h-10">
                                         <div className="w-6 h-6 rounded border" style={{ backgroundColor: mainColor }} />
@@ -637,11 +638,10 @@ function PaletteBuilderPage() {
                             </div>
                             <div className="space-y-4">
                                 <div
-                                    className="p-4 rounded-lg text-center border-2 border-dashed"
+                                    className="p-4 rounded-lg text-center border-2 border-dashed flex items-center justify-center min-h-[100px]"
                                     style={{ backgroundColor: contrastBgColor, color: mainColor }}
                                 >
-                                    <p className="font-bold text-lg">Aa</p>
-                                    <p>The quick brown fox jumps over the lazy dog.</p>
+                                    <p className="font-bold text-3xl">Aa</p>
                                 </div>
                                 
                                 <WCAGDisplay textColor={mainColor} bgColor={contrastBgColor} />
