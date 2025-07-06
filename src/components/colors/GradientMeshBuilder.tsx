@@ -86,6 +86,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef(false);
+    const dragStartPos = useRef({ x: 0, y: 0 });
     const { toast } = useToast();
 
     const handleAddPoint = useCallback(() => {
@@ -184,20 +185,61 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
     const handlePointMouseDown = (e: React.MouseEvent<HTMLDivElement>, pointId: number) => {
         setActivePointId(pointId);
-        handleDragStart(e, pointId, 'position');
-    };
+        isDragging.current = false;
+        dragStartPos.current = { x: e.clientX, y: e.clientY };
 
-    const handlePointClick = (e: React.MouseEvent<HTMLDivElement>, pointId: number) => {
-        if (isDragging.current) return;
-        
-        e.stopPropagation();
-        setActivePointId(pointId);
-        setPopoverOpen(prev => {
-            const isOpen = !!prev[pointId];
-            const newPopoverState: Record<number, boolean> = {}; // Close all others
-            newPopoverState[pointId] = !isOpen; // Toggle the clicked one
-            return newPopoverState;
-        });
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            const dx = Math.abs(moveEvent.clientX - dragStartPos.current.x);
+            const dy = Math.abs(moveEvent.clientY - dragStartPos.current.y);
+            if (dx > 3 || dy > 3) { // Drag threshold
+                if (!isDragging.current) {
+                    isDragging.current = true;
+                    // Close popover if it's open when drag starts
+                    setPopoverOpen({});
+                    
+                    // Manually start the position drag handler
+                    if (!previewRef.current) return;
+                    const rect = previewRef.current.getBoundingClientRect();
+                    const dragHandler = (mmEvent: MouseEvent) => {
+                        setPoints(currentPoints => {
+                            const newX = ((mmEvent.clientX - rect.left) / rect.width) * 100;
+                            const newY = ((mmEvent.clientY - rect.top) / rect.height) * 100;
+                            return currentPoints.map(p => p.id === pointId ? { 
+                                ...p, 
+                                x: Math.max(0, Math.min(100, newX)),
+                                y: Math.max(0, Math.min(100, newY))
+                            } : p);
+                        });
+                    };
+                    
+                    const stopDragHandler = () => {
+                        document.removeEventListener('mousemove', dragHandler);
+                        document.removeEventListener('mouseup', stopDragHandler);
+                    };
+
+                    document.addEventListener('mousemove', dragHandler);
+                    document.addEventListener('mouseup', stopDragHandler);
+                }
+            }
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            if (!isDragging.current) {
+                // This is a click, toggle the popover
+                setPopoverOpen(prev => {
+                    const isOpen = !!prev[pointId];
+                    const newPopoverState: Record<number, boolean> = {};
+                    newPopoverState[pointId] = !isOpen;
+                    return newPopoverState;
+                });
+            }
+            isDragging.current = false;
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
     };
 
     const handleSpreadHandleMouseDown = (e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'spreadX' | 'spreadY') => {
@@ -227,6 +269,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 .mesh-point {
   position: absolute;
   mix-blend-mode: screen; /* Or try other modes like 'lighten' */
+  border-radius: 50%;
 }
 `;
         const pointsCss = points.map((p, i) => `
@@ -278,7 +321,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                              {points.map(point => (
                                 <div
                                     key={`grad-${point.id}`}
-                                    className="absolute mix-blend-screen"
+                                    className="absolute mix-blend-screen rounded-full"
                                     style={{
                                         left: `${point.x}%`,
                                         top: `${point.y}%`,
@@ -302,7 +345,6 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                 zIndex: activePointId === point.id ? 10 : 1,
                                             }}
                                             onMouseDown={(e) => handlePointMouseDown(e, point.id)}
-                                            onClick={(e) => handlePointClick(e, point.id)}
                                         />
                                     </PopoverTrigger>
                                     <PopoverContent className="w-72 p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
