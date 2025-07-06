@@ -72,18 +72,15 @@ export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor
 
 export function generatePalette(options: GenerationOptions): string[] {
     const { numColors, type, lockedColors } = options;
-
     const baseColor = (lockedColors && lockedColors.length > 0) ? lockedColors[0] : getRandomColor();
-    
+
     if (!chroma.valid(baseColor)) {
-        throw new Error("Invalid base color provided.");
+        console.error("Invalid base color provided to generatePalette:", baseColor);
+        // Fallback to a default random palette
+        return Array.from({ length: numColors }, () => getRandomColor());
     }
-
-    const baseHsl = chroma(baseColor).hsl();
-    const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
-    const s = baseHsl[1];
-    const l = baseHsl[2];
-
+    
+    // Tints and shades have their own dedicated, robust logic which works well.
     if (type === 'tints') {
         return getTints(baseColor, numColors);
     }
@@ -91,59 +88,51 @@ export function generatePalette(options: GenerationOptions): string[] {
         return getShades(baseColor, numColors);
     }
 
-    let anchorHues: number[] = [h];
-    if (type === 'analogous') {
-        const palette: string[] = [];
-        const angleRange = 60; // Total range for analogous colors
-        for (let i = 0; i < numColors; i++) {
-            const position = numColors > 1 ? i / (numColors - 1) : 0.5;
-            const hueOffset = (position - 0.5) * angleRange; // from -30 to +30
-            const newHue = (h + hueOffset + 360) % 360;
+    // For harmonies, we will use the LCH color space for perceptually uniform manipulations.
+    const baseLCH = chroma(baseColor).lch();
+    const h = isNaN(baseLCH[2]) ? 0 : baseLCH[2];
+    const c = baseLCH[1];
+    const l = baseLCH[0];
 
-            const lightnessVariation = 0.1 * Math.sin(position * Math.PI); // small arc
-            const newLightness = Math.max(0.1, Math.min(0.9, l + lightnessVariation));
-            const newSaturation = Math.max(0.2, Math.min(1.0, s));
-
-            palette.push(chroma.hsl(newHue, newSaturation, newLightness).hex());
-        }
-        return palette;
-    }
+    let colors: string[] = [];
     
-    if (type === 'complementary') {
-        anchorHues.push((h + 180) % 360);
-    }
-    if (type === 'triadic') {
-        anchorHues.push((h + 120) % 360);
-        anchorHues.push((h + 240) % 360);
-    }
-
-    const finalPalette: string[] = [];
-    const colorsPerAnchor = Math.ceil(numColors / anchorHues.length);
-
-    anchorHues.forEach(anchorHue => {
-        if (finalPalette.length >= numColors) return;
-
-        finalPalette.push(chroma.hsl(anchorHue, s, l).hex());
-
-        for (let i = 1; i < colorsPerAnchor; i++) {
-            if (finalPalette.length >= numColors) break;
-            
-            const lightnessOffset = (i % 2 === 0 ? -1 : 1) * 0.05 * Math.ceil(i / 2);
-            const saturationOffset = -0.05 * i;
-            
-            const newLightness = Math.max(0.1, Math.min(0.9, l + lightnessOffset));
-            const newSaturation = Math.max(0.2, Math.min(1.0, s + saturationOffset));
-
-            finalPalette.push(chroma.hsl(anchorHue, newSaturation, newLightness).hex());
+    switch (type) {
+        case 'analogous': {
+            // Generate colors in a 60-degree arc around the base hue.
+            // This direct calculation avoids bunching colors together.
+            const angleRange = 60;
+            for (let i = 0; i < numColors; i++) {
+                const position = numColors > 1 ? i / (numColors - 1) : 0.5;
+                const hueOffset = (position - 0.5) * angleRange;
+                const newHue = (h + hueOffset + 360) % 360;
+                
+                // Introduce subtle, non-linear lightness variation for a more organic feel.
+                const lightnessVariation = Math.sin(position * Math.PI) * 10;
+                const newLightness = Math.max(10, Math.min(95, l + lightnessVariation));
+                
+                colors.push(chroma.lch(newLightness, c, newHue).hex());
+            }
+            break;
         }
-    });
-    
-    const sortedPalette = finalPalette.slice(0, numColors).sort((a,b) => {
-        const hA = chroma(a).hsl()[0];
-        const hB = chroma(b).hsl()[0];
-        if (isNaN(hA) || isNaN(hB)) return 0;
-        return hA - hB;
-    });
 
-    return sortedPalette;
+        case 'complementary': {
+            // Create a scale between the base color and its complement.
+            const complement = chroma.lch(l, c, (h + 180) % 360).hex();
+            // Using chroma.scale creates an even distribution of colors between the two points.
+            colors = chroma.scale([baseColor, complement]).mode('lch').colors(numColors);
+            break;
+        }
+
+        case 'triadic': {
+            // Create a scale that cycles through all three triadic points.
+            const p2 = chroma.lch(l, c, (h + 120) % 360).hex();
+            const p3 = chroma.lch(l, c, (h + 240) % 360).hex();
+            // We generate numColors + 1 and slice to avoid repeating the first color at the end.
+            const scale = chroma.scale([baseColor, p2, p3, baseColor]).mode('lch').colors(numColors + 1);
+            colors = scale.slice(0, numColors);
+            break;
+        }
+    }
+
+    return colors;
 }
