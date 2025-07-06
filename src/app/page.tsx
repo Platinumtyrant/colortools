@@ -38,9 +38,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
-import { ContrastGrid } from '@/components/colors/ContrastGrid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ManualContrastChecker } from '@/components/colors/ManualContrastChecker';
+import ColorPickerClient from '@/components/colors/ColorPickerClient';
+import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 
 
 // Type definition for the experimental EyeDropper API
@@ -157,6 +157,7 @@ function PaletteBuilderPage() {
     const [useBezier, setUseBezier] = useState(true);
     const [inputValue, setInputValue] = useState(mainColor);
     const [colorSpace, setColorSpace] = useState<ColorSpace>('lch');
+    const [contrastBgColor, setContrastBgColor] = useState('#ffffff');
     
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [newPaletteName, setNewPaletteName] = useState("");
@@ -582,7 +583,7 @@ function PaletteBuilderPage() {
                         <div className="grid grid-cols-1 gap-2 pt-4">
                             {graphData.map((graph, i) => (
                                 <ChartDisplay 
-                                    key={`${graph.title}-${i}`} 
+                                    key={`${graph.title}-${i}`}
                                     data={graph.data} 
                                     title={graph.title} 
                                     description={graph.description}
@@ -593,9 +594,34 @@ function PaletteBuilderPage() {
                     </motion.div>
                 </TabsContent>
                 <TabsContent value="contrast" className="p-4 space-y-6">
-                    <ContrastGrid colors={paletteHexes} />
-                    <Separator />
-                    <ManualContrastChecker colors={paletteHexes} />
+                    <div className="space-y-4">
+                        <div className="space-y-1.5">
+                            <Label>Text Color</Label>
+                            <div className="flex items-center gap-2 p-2 rounded-md border border-input h-10">
+                                <div className="w-6 h-6 rounded border" style={{ backgroundColor: mainColor }} />
+                                <span className="font-mono text-sm">{mainColor.toUpperCase()}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Controlled by the main color picker.</p>
+                        </div>
+                        
+                        <div className="space-y-1.5">
+                            <Label>Background Color</Label>
+                            <ColorPickerClient
+                                color={contrastBgColor}
+                                onChange={(color: ColorResult) => setContrastBgColor(color.hex)}
+                            />
+                        </div>
+
+                        <div
+                            className="p-4 rounded-lg text-center border-2 border-dashed"
+                            style={{ backgroundColor: contrastBgColor, color: mainColor }}
+                        >
+                            <p className="font-bold text-lg">Aa</p>
+                            <p>The quick brown fox jumps over the lazy dog.</p>
+                        </div>
+                        
+                        <WCAGDisplay textColor={mainColor} bgColor={contrastBgColor} />
+                    </div>
                 </TabsContent>
             </Tabs>
         </div>
@@ -610,6 +636,8 @@ function PaletteBuilderPage() {
         detectedHarmony,
         colorSpace,
         paletteHexes,
+        mainColor,
+        contrastBgColor,
     ]);
 
     const paletteActions = (
