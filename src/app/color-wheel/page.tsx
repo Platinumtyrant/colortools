@@ -118,7 +118,7 @@ export default function ColorWheelPage() {
                  <>
                     <p>A triadic color scheme involves three colors that are evenly spaced on the color wheel, creating an equilateral triangle.</p>
                     <ul className="list-disc pl-5">
-                        <li>This scheme is very popular and offers visual contrast while retaining balance and color richness.</li>
+                        <li>This is very popular and offers visual contrast while retaining balance and color richness.</li>
                         <li>Examples: Red, yellow, and blue; orange, green, and purple.</li>
                     </ul>
                 </>
@@ -198,7 +198,7 @@ export default function ColorWheelPage() {
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue={harmonyInfo[0].name} className="w-full">
-                            <TabsList className="flex-wrap h-auto justify-center">
+                             <TabsList className="flex-wrap h-auto justify-center">
                                 {harmonyInfo.map((harmony) => (
                                     <TabsTrigger key={harmony.name} value={harmony.name}>
                                         {harmony.name}
@@ -218,8 +218,8 @@ export default function ColorWheelPage() {
                                             <HarmonyColorWheel colors={harmony.colors} size={200} />
                                         </div>
                                         <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                            {harmony.colors.map((c) => (
-                                                <ColorBox key={c} color={c} variant="compact" />
+                                            {harmony.colors.map((c, i) => (
+                                                <ColorBox key={`${c}-${i}`} color={c} variant="compact" />
                                             ))}
                                         </div>
                                     </motion.div>
