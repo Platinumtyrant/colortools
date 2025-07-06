@@ -97,7 +97,7 @@ const ColorBoxInner = ({
     if (variant === 'default') {
         return (
              <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col cursor-pointer">
-                <div className="relative h-80 w-full" style={{ backgroundColor: color }}>
+                <div className="relative h-72 w-full" style={{ backgroundColor: color }}>
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
                         {onAddToLibrary && (
                             <Button size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }} title="Save to Library">
