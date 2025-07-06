@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Code } from 'lucide-react';
 import { colord } from 'colord';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 
@@ -82,6 +82,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     
     const [activePointId, setActivePointId] = useState<number | null>(null);
     const [popoverOpen, setPopoverOpen] = useState(false);
+    const [isCodeVisible, setIsCodeVisible] = useState(false);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
@@ -120,7 +121,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         });
     }, [toast, activePointId]);
     
-    const handleDragStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
+     const handleDragStart = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -128,24 +129,40 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         const rect = previewRef.current.getBoundingClientRect();
 
         const handleMouseMove = (moveEvent: MouseEvent) => {
-            const newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
-            const newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
-            
             setPoints(currentPoints => {
                 const pointToUpdate = currentPoints.find(p => p.id === pointId);
                 if (!pointToUpdate) return currentPoints;
-
+                
                 let newProps: Partial<Point> = {};
 
                 if (handleType === 'position') {
+                    const newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+                    const newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
                     newProps.x = Math.max(0, Math.min(100, newX));
                     newProps.y = Math.max(0, Math.min(100, newY));
-                } else if (handleType === 'spreadX') {
-                    const dx = newX - pointToUpdate.x;
-                    newProps.spreadX = Math.max(5, Math.min(100, Math.abs(dx)));
-                } else if (handleType === 'spreadY') {
-                    const dy = newY - pointToUpdate.y;
-                    newProps.spreadY = Math.max(5, Math.min(100, Math.abs(dy)));
+                } else {
+                    const centerX = (pointToUpdate.x / 100) * rect.width;
+                    const centerY = (pointToUpdate.y / 100) * rect.height;
+                    const mouseX = moveEvent.clientX - rect.left;
+                    const mouseY = moveEvent.clientY - rect.top;
+
+                    const dx = mouseX - centerX;
+                    const dy = mouseY - centerY;
+
+                    const rotationRad = -pointToUpdate.rotation * (Math.PI / 180);
+                    const cosA = Math.cos(rotationRad);
+                    const sinA = Math.sin(rotationRad);
+
+                    const unrotatedDx = dx * cosA - dy * sinA;
+                    const unrotatedDy = dx * sinA + dy * cosA;
+                    
+                    if (handleType === 'spreadX') {
+                        const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 100;
+                        newProps.spreadX = Math.max(5, Math.min(100, newSpreadX));
+                    } else if (handleType === 'spreadY') {
+                        const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 100;
+                        newProps.spreadY = Math.max(5, Math.min(100, newSpreadY));
+                    }
                 }
                 
                 return currentPoints.map(p => p.id === pointId ? { ...p, ...newProps } : p);
@@ -338,25 +355,25 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                     top: `${activePoint.y}%`,
                                                     width: `${spreadXInPixels * 2}px`,
                                                     height: `${spreadYInPixels * 2}px`,
-                                                    transform: `rotate(${activePoint.rotation}deg)`
+                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg)`
                                                 }}
                                             />
                                             <div
-                                                className="absolute -translate-y-1/2 w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ew-resize"
+                                                className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ew-resize"
                                                 style={{
                                                     left: `${activePoint.x}%`,
                                                     top: `${activePoint.y}%`,
-                                                    transform: `translateX(-50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels}px) rotate(${-activePoint.rotation}deg)`,
+                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
                                                 onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadX')}
                                             />
                                             <div
-                                                className="absolute -translate-x-1/2 w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
+                                                className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
                                                 style={{
                                                     left: `${activePoint.x}%`,
                                                     top: `${activePoint.y}%`,
-                                                    transform: `translateY(-50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels}px) rotate(${-activePoint.rotation}deg)`,
+                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels}px) rotate(${-activePoint.rotation}deg)`,
                                                     zIndex: 11
                                                 }}
                                                 onMouseDown={(e) => handleSpreadHandleMouseDown(e, activePoint.id, 'spreadY')}
@@ -366,20 +383,26 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                 })()
                             )}
                         </div>
-                    </div>
-                    <div className="relative">
-                        <pre className="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto text-xs">
-                            <code>
-                                {gradientCss}
-                            </code>
-                        </pre>
-                        <div className="absolute top-2 right-2 flex items-center gap-4 bg-background/50 p-2 rounded-lg border border-border/50 shadow-lg">
-                            <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
-                                <Plus className="mr-2 h-4 w-4" /> Add Point
+                        <div className="absolute top-2 right-2 flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/50 shadow-lg">
+                             <Button onClick={() => setIsCodeVisible(v => !v)} size="sm" variant="ghost">
+                                <Code className="mr-2 h-4 w-4" />
+                                {isCodeVisible ? 'Hide Code' : 'Show Code'}
                             </Button>
-                            <Button onClick={handleCopyCss} size="sm">Copy HTML & CSS</Button>
+                            <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
+                                <Plus className="mr-2 h-4 w-4" /> Point
+                            </Button>
+                            <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
                         </div>
                     </div>
+                    {isCodeVisible && (
+                        <div className="relative mt-4">
+                            <pre className="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto text-xs">
+                                <code>
+                                    {gradientCss}
+                                </code>
+                            </pre>
+                        </div>
+                    )}
                 </div>
             </CardContent>
         </Card>
