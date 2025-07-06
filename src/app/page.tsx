@@ -808,7 +808,7 @@ function PaletteBuilderPage() {
                         </div>
 
                         <div className="w-full lg:w-auto flex justify-center">
-                             <div className="w-full max-w-sm relative group/container h-72" onClick={() => setEditingColorId(null)} >
+                             <div className="w-full max-w-sm relative group/container h-60" onClick={() => setEditingColorId(null)} >
                                  <ColorBox
                                     variant="default"
                                     color={mainColor}
@@ -851,4 +851,5 @@ export default PaletteBuilderPage;
     
 
     
+
 

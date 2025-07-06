@@ -346,7 +346,7 @@ export default function ColorWheelPage({}) {
                         </div>
                     </div>
                 </div>
-                <div className="w-full max-w-sm h-full">
+                <div className="w-full max-w-sm h-60">
                      <ColorBox
                         variant="default"
                         color={activeColor}
