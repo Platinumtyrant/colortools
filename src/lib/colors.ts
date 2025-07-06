@@ -7,11 +7,37 @@ import a11yPlugin from 'colord/plugins/a11y';
 import mixPlugin from 'colord/plugins/mix';
 import namesPlugin from 'colord/plugins/names';
 import chroma from 'chroma-js';
+import namer from 'color-namer';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
+const capitalize = (str: string) => {
+    if (!str) return '';
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
+
 export const getDescriptiveColorName = (hexColor: string): string => {
-    return colord(hexColor).toName({ closest: true }) || hexColor;
+    if (!colord(hexColor).isValid()) return "Invalid Color";
+    try {
+        const names = namer(hexColor);
+        // Prioritize 'ntc' for more descriptive names, fallback to 'basic'.
+        const ntcName = names.ntc[0]?.name;
+        if (ntcName) {
+            return capitalize(ntcName);
+        }
+        const basicName = names.basic[0]?.name;
+        if (basicName) {
+            return capitalize(basicName);
+        }
+    } catch (e) {
+        console.error("Error getting color name from color-namer:", e);
+    }
+    // Fallback to colord's name generator if color-namer fails or has no result
+    const colordName = colord(hexColor).toName({ closest: true });
+    return colordName ? capitalize(colordName) : hexColor.toUpperCase();
 };
 
 
