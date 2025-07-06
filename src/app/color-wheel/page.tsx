@@ -185,10 +185,7 @@ export default function ColorWheelPage() {
                         />
                     </div>
                 </div>
-
-                <div className="w-full max-w-xs">
-                    <ColorBox color={activeColor} showDetails={true} />
-                </div>
+                <ColorBox color={activeColor} variant="default" />
             </div>
             
             <section className="w-full max-w-4xl mx-auto space-y-8">
@@ -213,14 +210,14 @@ export default function ColorWheelPage() {
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         transition={{ duration: 0.5 }}
-                                        className="mt-6 grid md:grid-cols-2 items-center gap-8 p-4 min-h-[160px]"
+                                        className="mt-6 grid md:grid-cols-2 items-center gap-8 p-4"
                                     >
                                         <div className="mx-auto">
                                             <HarmonyColorWheel colors={harmony.colors} size={200} />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 items-start content-center min-h-[144px]">
+                                        <div className="grid grid-cols-2 gap-4 items-start content-center">
                                             {harmony.colors.map((c) => (
-                                                <ColorBox key={c} color={c} showDetails />
+                                                <ColorBox key={c} color={c} variant="compact" />
                                             ))}
                                         </div>
                                     </motion.div>
@@ -251,7 +248,7 @@ export default function ColorWheelPage() {
                                     onValueChange={(value) => setTintCount(value[0])}
                                 />
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                                    {tints.map((c, i) => <ColorBox key={`tint-${c}-${i}`} color={c} />)}
+                                    {tints.map((c, i) => <ColorBox key={`tint-${c}-${i}`} color={c} variant="compact" />)}
                                 </div>
                             </div>
                             
@@ -271,7 +268,7 @@ export default function ColorWheelPage() {
                                     onValueChange={(value) => setToneCount(value[0])}
                                 />
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                                    {tones.map((c, i) => <ColorBox key={`tone-${c}-${i}`} color={c} />)}
+                                    {tones.map((c, i) => <ColorBox key={`tone-${c}-${i}`} color={c} variant="compact" />)}
                                 </div>
                             </div>
 
@@ -291,7 +288,7 @@ export default function ColorWheelPage() {
                                     onValueChange={(value) => setShadeCount(value[0])}
                                 />
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                                    {shades.map((c, i) => <ColorBox key={`shade-${c}-${i}`} color={c} />)}
+                                    {shades.map((c, i) => <ColorBox key={`shade-${c}-${i}`} color={c} variant="compact" />)}
                                 </div>
                             </div>
                         </div>

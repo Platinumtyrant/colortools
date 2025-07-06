@@ -671,11 +671,11 @@ function PaletteBuilderPage() {
                                     </Card>
                                 ) : (
                                     <ColorBox 
+                                        variant="default"
                                         color={mainColor} 
                                         onActionClick={handleAddColorToPalette} 
                                         actionIcon={<Plus className="h-4 w-4" />}
                                         actionTitle="Add color to palette"
-                                        showDetails={true}
                                     />
                                 )}
                             </motion.div>
