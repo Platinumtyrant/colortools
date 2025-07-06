@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { SketchPicker, type ColorResult } from 'react-color';
+import type { ColorResult } from 'react-color';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Plus, Trash2 } from 'lucide-react';
 import { colord } from 'colord';
+import ColorPickerClient from '@/components/colors/ColorPickerClient';
 
 interface Point {
   id: number;
@@ -158,7 +159,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     }, []);
 
     const gradientCss = useMemo(() => {
-        const backgroundColor = points.length > 0 ? points[0].color : 'transparent';
+        const backgroundColor = '#111827';
         const backgroundImage = points.map(p => 
             `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent 75%)`
         ).join(',\n    ');
@@ -167,7 +168,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     
     const backgroundStyle = useMemo(() => {
         if (points.length === 0) return {};
-        const backgroundColor = points[0].color;
+        const backgroundColor = '#111827';
         const backgroundImage = points.map(p => 
              `radial-gradient(ellipse ${p.spreadX.toFixed(1)}% ${p.spreadY.toFixed(1)}% at ${p.x.toFixed(1)}% ${p.y.toFixed(1)}%, ${p.color} 0px, transparent 75%)`
         ).join(',');
@@ -286,10 +287,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                                                     <PopoverTrigger asChild>
                                                         <button className="w-4 h-4 border" style={{ backgroundColor: point.color }} />
                                                     </PopoverTrigger>
-                                                    <PopoverContent>
-                                                        <SketchPicker
+                                                    <PopoverContent className="w-auto p-0 border-0" onClick={(e) => e.stopPropagation()}>
+                                                        <ColorPickerClient
                                                             color={point.color}
-                                                            onChangeComplete={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, color: c.hex } : p))}
+                                                            onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, color: c.hex } : p))}
                                                         />
                                                     </PopoverContent>
                                                 </Popover>
