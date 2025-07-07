@@ -230,6 +230,13 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
   background-color: ${points[0]?.color || '#000000'};
 }
 
+/* This inner container is scaled up to prevent blur clipping */
+.mesh-inner {
+    position: absolute;
+    inset: 0;
+    transform: scale(1.2);
+}
+
 .mesh-point {
   position: absolute;
   mix-blend-mode: lighten;
@@ -251,7 +258,9 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         const htmlStructure = `
 <!-- HTML Structure -->
 <div class="mesh-container">
-${points.map((_, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).join('\n')}
+  <div class="mesh-inner">
+${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`).join('\n')}
+  </div>
 </div>
 `;
 
@@ -352,11 +361,13 @@ ${points.map((_, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                  <div className="grid grid-cols-1 lg:grid-cols-[2.5fr,1fr] gap-8">
                     <div className="space-y-4">
                         <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden">
+                            {/* Visual Layer - Scaled to prevent blur clipping */}
                             <div
-                                ref={previewRef}
-                                className="absolute inset-0 cursor-pointer"
-                                onClick={handleBackgroundClick}
-                                style={{ backgroundColor: points[0]?.color || '#000000' }}
+                                className="absolute inset-0"
+                                style={{
+                                    backgroundColor: points[0]?.color || '#000000',
+                                    transform: 'scale(1.2)'
+                                }}
                             >
                                 {points.map(point => (
                                     <div
@@ -373,6 +384,14 @@ ${points.map((_, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                         }}
                                     />
                                 ))}
+                            </div>
+
+                             {/* Interactive Layer - Not scaled for accurate mouse coords */}
+                             <div 
+                                ref={previewRef}
+                                className="absolute inset-0 cursor-pointer"
+                                onClick={handleBackgroundClick}
+                             >
                                 {points.map((point) => (
                                      <div
                                         key={point.id}
@@ -384,7 +403,7 @@ ${points.map((_, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                             boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                             zIndex: activePointId === point.id ? 12 : 1,
                                         }}
-                                        onClick={() => handlePointClick(point.id)}
+                                        onClick={(e) => { e.stopPropagation(); handlePointClick(point.id); }}
                                         onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
                                     />
                                 ))}
@@ -431,7 +450,8 @@ ${points.map((_, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                         );
                                     })()
                                 )}
-                            </div>
+                             </div>
+
                             <div className="absolute top-2 right-2 flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/50 shadow-lg">
                                 <Button onClick={() => setIsCodeVisible(v => !v)} size="sm" variant="ghost">
                                     <Code className="mr-2 h-4 w-4" />
