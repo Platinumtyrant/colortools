@@ -193,8 +193,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     }, [toast, activePointId, openPopoverId]);
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        const target = e.target as HTMLElement;
-        if (target.contains(previewRef.current) || target === previewRef.current) {
+        if (e.target === previewRef.current) {
             setActivePointId(null);
             setOpenPopoverId(null);
         }
@@ -295,9 +294,7 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                     </PopoverTrigger>
                                     <PopoverContent
                                         className="w-72 p-4 space-y-4"
-                                        onClick={(e) => e.stopPropagation()}
                                         onMouseDown={(e) => e.stopPropagation()}
-                                        onOpenAutoFocus={(e) => e.preventDefault()}
                                     >
                                         <div className="flex justify-between items-center">
                                             <h3 className="text-sm font-semibold">Point {points.findIndex(p => p.id === point.id) + 1}</h3>
