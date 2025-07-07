@@ -58,7 +58,7 @@ export const ColorDetails = ({ color }: { color: string }) => {
     const hex = colorInstance.toHex().toUpperCase();
     const rgb = colorInstance.toRgbString();
     const hsl = colorInstance.toHslString();
-    const cmyk = colorInstance.isLight() ? `device-cmyk(${colorInstance.toCmyk().c}% ${colorInstance.toCmyk().m}% ${colorInstance.toCmyk().y}% ${colorInstance.toCmyk().k}% / ${colorInstance.toCmyk().a})` : colorInstance.toCmykString();
+    const cmyk = colorInstance.toCmykString();
     const lchObj = colorInstance.toLch();
     const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
 
