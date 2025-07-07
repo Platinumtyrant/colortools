@@ -27,6 +27,88 @@ interface GradientMeshBuilderProps {
     initialColors?: string[];
 }
 
+interface EditorPanelProps {
+    activePoint: Point | undefined;
+    points: Point[];
+    setPoints: React.Dispatch<React.SetStateAction<Point[]>>;
+    handleRemovePoint: (id: number) => void;
+}
+
+const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoints, handleRemovePoint }) => {
+    if (!activePoint) {
+        return (
+            <Card className="h-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed">
+                 <Move className="w-12 h-12 text-muted-foreground mb-4" />
+                 <h3 className="text-lg font-semibold">Select a Point</h3>
+                 <p className="text-sm text-muted-foreground">Click on a point in the mesh to start editing its properties.</p>
+            </Card>
+        )
+    }
+    
+    return (
+        <Card className="h-full flex flex-col">
+            <CardHeader className="flex-shrink-0">
+                <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg">Editing Point {points.findIndex(p => p.id === activePoint.id) + 1}</CardTitle>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => handleRemovePoint(activePoint.id)} disabled={points.length <= 1}>
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Remove Point</span>
+                    </Button>
+                </div>
+            </CardHeader>
+            <CardContent className="flex-grow overflow-y-auto space-y-4 p-4">
+                <Popover>
+                    <PopoverTrigger asChild>
+                         <Button variant="outline" className="w-full h-12 justify-start gap-4">
+                            <div className="h-8 w-8 rounded-md border" style={{backgroundColor: activePoint.color}}></div>
+                            <span>{activePoint.color}</span>
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0">
+                       <ColorPickerClient
+                            color={activePoint.color}
+                            onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
+                        />
+                    </PopoverContent>
+                </Popover>
+                <div className="space-y-2">
+                    <Label htmlFor={`spreadX-${activePoint.id}`} className="text-xs">Spread X: {activePoint.spreadX.toFixed(0)}%</Label>
+                    <Slider
+                        id={`spreadX-${activePoint.id}`}
+                        min={0} max={200} step={1} value={[activePoint.spreadX]}
+                        onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, spreadX: value[0] } : p))}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor={`spreadY-${activePoint.id}`} className="text-xs">Spread Y: {activePoint.spreadY.toFixed(0)}%</Label>
+                    <Slider
+                        id={`spreadY-${activePoint.id}`}
+                        min={0} max={200} step={1} value={[activePoint.spreadY]}
+                        onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, spreadY: value[0] } : p))}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor={`strength-${activePoint.id}`} className="text-xs">Strength: {activePoint.strength.toFixed(0)}%</Label>
+                    <Slider
+                        id={`strength-${activePoint.id}`}
+                        min={10} max={100} step={1} value={[activePoint.strength]}
+                        onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, strength: value[0] } : p))}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor={`rotation-${activePoint.id}`} className="text-xs">Rotation: {activePoint.rotation.toFixed(0)}°</Label>
+                    <Slider
+                        id={`rotation-${activePoint.id}`}
+                        min={0} max={360} step={1} value={[activePoint.rotation]}
+                        onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, rotation: value[0] } : p))}
+                    />
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
+
 export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps) => {
     const [points, setPoints] = useState<Point[]>(() => {
         const defaultPoints = [
@@ -277,80 +359,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
     
     const activePoint = useMemo(() => points.find(p => p.id === activePointId), [points, activePointId]);
 
-    const EditorPanel = () => {
-        if (!activePoint) {
-            return (
-                <Card className="h-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed">
-                     <Move className="w-12 h-12 text-muted-foreground mb-4" />
-                     <h3 className="text-lg font-semibold">Select a Point</h3>
-                     <p className="text-sm text-muted-foreground">Click on a point in the mesh to start editing its properties.</p>
-                </Card>
-            )
-        }
-        
-        return (
-            <Card className="h-full flex flex-col">
-                <CardHeader className="flex-shrink-0">
-                    <div className="flex justify-between items-center">
-                        <CardTitle className="text-lg">Editing Point {points.findIndex(p => p.id === activePoint.id) + 1}</CardTitle>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => handleRemovePoint(activePoint.id)} disabled={points.length <= 1}>
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Remove Point</span>
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="flex-grow overflow-y-auto space-y-4 p-4">
-                    <Popover>
-                        <PopoverTrigger asChild>
-                             <Button variant="outline" className="w-full h-12 justify-start gap-4">
-                                <div className="h-8 w-8 rounded-md border" style={{backgroundColor: activePoint.color}}></div>
-                                <span>{activePoint.color}</span>
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0" onMouseDown={(e) => e.stopPropagation()}>
-                           <ColorPickerClient
-                                color={activePoint.color}
-                                onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
-                            />
-                        </PopoverContent>
-                    </Popover>
-                    <div className="space-y-2">
-                        <Label htmlFor={`spreadX-${activePoint.id}`} className="text-xs">Spread X: {activePoint.spreadX.toFixed(0)}%</Label>
-                        <Slider
-                            id={`spreadX-${activePoint.id}`}
-                            min={0} max={200} step={1} value={[activePoint.spreadX]}
-                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, spreadX: value[0] } : p))}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor={`spreadY-${activePoint.id}`} className="text-xs">Spread Y: {activePoint.spreadY.toFixed(0)}%</Label>
-                        <Slider
-                            id={`spreadY-${activePoint.id}`}
-                            min={0} max={200} step={1} value={[activePoint.spreadY]}
-                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, spreadY: value[0] } : p))}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor={`strength-${activePoint.id}`} className="text-xs">Strength: {activePoint.strength.toFixed(0)}%</Label>
-                        <Slider
-                            id={`strength-${activePoint.id}`}
-                            min={10} max={100} step={1} value={[activePoint.strength]}
-                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, strength: value[0] } : p))}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor={`rotation-${activePoint.id}`} className="text-xs">Rotation: {activePoint.rotation.toFixed(0)}°</Label>
-                        <Slider
-                            id={`rotation-${activePoint.id}`}
-                            min={0} max={360} step={1} value={[activePoint.rotation]}
-                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, rotation: value[0] } : p))}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
             <CardHeader className="p-0 mb-4">
@@ -472,7 +480,12 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                         )}
                     </div>
 
-                    <EditorPanel />
+                    <EditorPanel 
+                        activePoint={activePoint} 
+                        points={points}
+                        setPoints={setPoints}
+                        handleRemovePoint={handleRemovePoint}
+                    />
                  </div>
             </CardContent>
         </Card>
