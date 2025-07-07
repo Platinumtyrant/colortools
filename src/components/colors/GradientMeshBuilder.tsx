@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Code, Move } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Point {
   id: number;
@@ -59,11 +60,39 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     
     const [activePointId, setActivePointId] = useState<number | null>(points[0]?.id ?? null);
     const [isCodeVisible, setIsCodeVisible] = useState(false);
+    const [blurRadius, setBlurRadius] = useState(50);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
     const dragInfo = useRef<{isDragging: boolean, pointId: number | null}>({ isDragging: false, pointId: null });
     
+    useEffect(() => {
+        const calculateBlur = () => {
+            if (previewRef.current) {
+                const width = previewRef.current.offsetWidth;
+                // Heuristic: blur is ~6% of container width. Min 30px, Max 80px.
+                // This will make the blur effect scale with the container size, reducing clipping on smaller viewports.
+                const newBlur = Math.max(30, Math.min(80, width * 0.06));
+                setBlurRadius(newBlur);
+            }
+        };
+
+        const observer = new ResizeObserver(calculateBlur);
+        if (previewRef.current) {
+            observer.observe(previewRef.current);
+        }
+
+        calculateBlur(); // Initial calculation
+
+        return () => {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            if (previewRef.current) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                observer.unobserve(previewRef.current);
+            }
+        };
+    }, []);
+
     const handlePointClick = useCallback((pointId: number) => {
         if (!dragInfo.current.isDragging) {
             setActivePointId(pointId);
@@ -166,6 +195,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                 strength: 75,
             };
             nextId.current++;
+            setActivePointId(newPoint.id);
             return [...prev, newPoint];
         });
     }, [toast]);
@@ -177,13 +207,14 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                 return prev;
             }
             if (activePointId === idToRemove) {
-                setActivePointId(null);
+                 setActivePointId(prev.find(p => p.id !== idToRemove)?.id || null);
             }
             return prev.filter(p => p.id !== idToRemove);
         });
     }, [toast, activePointId]);
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        // Only deselect if the click is directly on the background div itself
         if (e.target === e.currentTarget) {
             setActivePointId(null);
         }
@@ -202,7 +233,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 .mesh-point {
   position: absolute;
   mix-blend-mode: lighten;
-  filter: blur(50px);
+  filter: blur(${blurRadius.toFixed(0)}px);
   border-radius: 50%;
 }
 `;
@@ -220,12 +251,12 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         const htmlStructure = `
 <!-- HTML Structure -->
 <div class="mesh-container">
-${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).join('\n')}
+${points.map((_, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).join('\n')}
 </div>
 `;
 
         return `/* CSS */\n${containerCss}\n${pointsCss}\n\n${htmlStructure}`;
-    }, [points]);
+    }, [points, blurRadius]);
     
     const handleCopyCss = () => {
         navigator.clipboard.writeText(gradientCss).then(() => {
@@ -260,10 +291,20 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                     </div>
                 </CardHeader>
                 <CardContent className="flex-grow overflow-y-auto space-y-4 p-4">
-                    <ColorPickerClient
-                        color={activePoint.color}
-                        onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
-                    />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                             <Button variant="outline" className="w-full h-12 justify-start gap-4">
+                                <div className="h-8 w-8 rounded-md border" style={{backgroundColor: activePoint.color}}></div>
+                                <span>{activePoint.color}</span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0" onMouseDown={(e) => e.stopPropagation()}>
+                           <ColorPickerClient
+                                color={activePoint.color}
+                                onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
+                            />
+                        </PopoverContent>
+                    </Popover>
                     <div className="space-y-2">
                         <Label htmlFor={`spreadX-${activePoint.id}`} className="text-xs">Spread X: {activePoint.spreadX.toFixed(0)}%</Label>
                         <Slider
@@ -328,14 +369,14 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                             height: `${point.spreadY * 2}%`,
                                             transform: `translate(-50%, -50%) rotate(${point.rotation}deg)`,
                                             backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
-                                            filter: 'blur(50px)',
+                                            filter: `blur(${blurRadius}px)`,
                                         }}
                                     />
                                 ))}
                                 {points.map((point) => (
                                      <div
                                         key={point.id}
-                                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move rounded-full"
                                         style={{
                                             left: `${point.x}%`,
                                             top: `${point.y}%`,
