@@ -29,7 +29,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle2, Dices, Pencil, Sparkles, Pipette, Unlock, Lock, Library, Copy, MousePointerClick } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { Slider } from '@/components/ui/slider';
 import type { ColorResult } from 'react-color';
@@ -656,7 +656,7 @@ function PaletteBuilderPage() {
     const paletteActions = (
         <div className="flex w-full flex-col gap-4">
             <div className="flex items-center gap-2 flex-wrap">
-                 <Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}>
+                <Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}>
                     <Dices className="mr-2 h-4 w-4" />
                     Mix
                 </Button>
@@ -677,30 +677,40 @@ function PaletteBuilderPage() {
                 <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
                 <Select 
                     value={generationType} 
-                    onValueChange={(value) => setGenerationType(value as GenerationType)}
-                    disabled={hasLockedColors || isHarmonyLocked}
+                    onValueChange={(value) => {
+                        if (!isHarmonyLocked) {
+                            setGenerationType(value as GenerationType);
+                        }
+                    }}
+                    disabled={hasLockedColors}
                 >
                     <SelectTrigger id="generationType" className="w-[150px] h-9">
-                        <SelectValue placeholder="Select type" />
+                        <div className="flex items-center gap-1.5">
+                           <SelectValue placeholder="Select type" />
+                           {isHarmonyLocked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        </div>
                     </SelectTrigger>
                     <SelectContent>
-                        {allGenerationTypes.map(type => (
-                            <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-                        ))}
+                        <SelectGroup>
+                            {allGenerationTypes.map(type => (
+                                <SelectItem key={type} value={type} className="capitalize" disabled={isHarmonyLocked}>
+                                    {type}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                        <Separator className="my-1" />
+                        <div className="p-1">
+                            <button
+                                onPointerDown={(e) => e.preventDefault()}
+                                onClick={() => setIsHarmonyLocked(v => !v)}
+                                className="w-full flex items-center justify-start gap-2 text-sm p-1.5 rounded-sm hover:bg-accent focus:bg-accent outline-none"
+                            >
+                                {isHarmonyLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                                <span>{isHarmonyLocked ? 'Unlock Harmony' : 'Lock Harmony'}</span>
+                            </button>
+                        </div>
                     </SelectContent>
                 </Select>
-                <TooltipProvider>
-                    <ShadTooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setIsHarmonyLocked(v => !v)}>
-                                {isHarmonyLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{isHarmonyLocked ? 'Unlock' : 'Lock'} Harmony Type</p>
-                        </TooltipContent>
-                    </ShadTooltip>
-                </TooltipProvider>
                 {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change type.</p>}
             </div>
         </div>
@@ -833,6 +843,7 @@ export default PaletteBuilderPage;
     
 
     
+
 
 
 
