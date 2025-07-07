@@ -29,7 +29,8 @@ function getBrandFromPaletteName(name: string): string | null {
 
   // Specific mappings first to consolidate brands
   if (lowerName.includes('windows') || lowerName.includes('visual studio') || lowerName.includes('vs code') || lowerName.includes('microsoft')) return 'Microsoft';
-  if (lowerName.includes('material design')) return 'Google';
+  if (lowerName.includes('apple') || lowerName.includes('ios')) return 'Apple';
+  if (lowerName.includes('material design') || lowerName.includes('chrome music lab')) return 'Google';
   if (lowerName.includes('bootstrap')) return 'Bootstrap';
   if (lowerName.includes('rubik\'s cube')) return 'Rubik\'s Cube';
   if (lowerName.includes('tetris')) return 'Tetris';
@@ -57,6 +58,10 @@ function getBrandFromPaletteName(name: string): string | null {
   return null;
 }
 
+
+interface InspirationClientPageProps {
+    allPalettes: CategorizedPalette[];
+}
 
 export function InspirationClientPage({ allPalettes }: InspirationClientPageProps) {
   const { toast } = useToast();
@@ -194,7 +199,7 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
 
   return (
     <Tabs defaultValue={orderedCategories[0]} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11">
+      <TabsList className="h-auto flex-wrap justify-start">
         {orderedCategories.map(category => (
           <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
         ))}

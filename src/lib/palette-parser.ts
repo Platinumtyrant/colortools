@@ -119,9 +119,7 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
     const htmlContent = await fs.readFile(filePath, 'utf-8');
 
     const excludedKeywords = [
-        'pantone 19-1664', 'parking app', 'luxiem', 'backrooms', 
-        'butt ghost dick penis', 'bts palette', 'neutral colors for room',
-        'ios', 'linktree', 'kpmg', 'xkcd', 'materialize', 'material design color palette (16 colors)', 'discord color roles'
+        'pantone 19-1664', 'parking app', 'luxiem', 'backrooms', 'butt ghost dick penis', 'bts palette', 'neutral colors for room', 'ios', 'linktree', 'kpmg', 'xkcd', 'materialize', 'material design color palette (16 colors)', 'discord color roles', 'minecraft'
     ];
     const allPalettes: CategorizedPalette[] = [];
     const paletteChunks = htmlContent.split('<h3>').slice(1);
