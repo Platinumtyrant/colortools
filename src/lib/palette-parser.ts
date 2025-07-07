@@ -20,7 +20,7 @@ const brandKeywords = [
     'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'bmw', 'amazon', 'fedex', 
     'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
     'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
-    'shell', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
+    'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
     'snapchat', 'youtube', 'illustrator', 'us dollar'
 ];
 
@@ -111,13 +111,17 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
   try {
     const htmlContent = await fs.readFile(filePath, 'utf-8');
 
-    const excludedKeywords = ['minecraft', 'ios', 'linktree', 'kpmg', 'xkcd'];
+    const excludedKeywords = [
+        'minecraft', 'ios', 'linktree', 'kpmg', 'xkcd', 
+        'pantone 19-1664', 'parking app', 'luxiem', 'backrooms', 
+        'butt ghost dick penis', 'bts palette', 'neutral colors for room'
+    ];
     const allPalettes: CategorizedPalette[] = [];
     const paletteChunks = htmlContent.split('<h3>').slice(1);
 
     for (const chunk of paletteChunks) {
       const paletteNameMatch = chunk.match(/(.*?)<\/h3>/);
-      const paletteName = paletteNameMatch ? paletteNameMatch[1].trim() : 'Unnamed Palette';
+      let paletteName = paletteNameMatch ? paletteNameMatch[1].trim() : 'Unnamed Palette';
       
       const colorMatches = [...chunk.matchAll(/style="background-color:(#[0-9a-fA-F]{6});?/gi)];
       
@@ -128,6 +132,14 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
       const shouldExclude = excludedKeywords.some(keyword => lowerCaseName.includes(keyword));
 
       if (uniqueColors.length > 1 && !shouldExclude) {
+           // Remove hex codes and related clutter from names
+           paletteName = paletteName
+               .replace(/\| Hex code:? #[\dA-F]{6}/gi, '')
+               .replace(/#[\dA-F]{6}/gi, '')
+               .replace(/hex color$/i, '')
+               .replace(/color$/i, '')
+               .trim();
+
            allPalettes.push({
              name: paletteName,
              colors: uniqueColors,
