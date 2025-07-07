@@ -35,6 +35,12 @@ const flagKeywords = [
 const categorizePalette = (colors: string[], name: string): string => {
   const lowerCaseName = name.toLowerCase();
 
+  // Specific keywords to force into 'Brands' category
+  const brandForcedKeywords = ['material design', 'bootstrap', 'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui'];
+  if (brandForcedKeywords.some(keyword => lowerCaseName.includes(keyword))) {
+    return 'Brands';
+  }
+
   for (const keyword of flagKeywords) {
     if (lowerCaseName.includes(keyword)) {
       return 'Flags';
@@ -115,7 +121,7 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
     const excludedKeywords = [
         'pantone 19-1664', 'parking app', 'luxiem', 'backrooms', 
         'butt ghost dick penis', 'bts palette', 'neutral colors for room',
-        'ios', 'linktree', 'kpmg', 'xkcd', 'materialize'
+        'ios', 'linktree', 'kpmg', 'xkcd', 'materialize', 'material design color palette (16 colors)', 'discord color roles'
     ];
     const allPalettes: CategorizedPalette[] = [];
     const paletteChunks = htmlContent.split('<h3>').slice(1);
