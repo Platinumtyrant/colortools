@@ -12,13 +12,18 @@ import { colord } from 'colord';
 import { ColorBox } from '../colors/ColorBox';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 
+interface InspirationClientPageProps {
+  allPalettes: CategorizedPalette[];
+}
+
 const brandKeywords = [
-    'gucci', 'discord', 'windows', 'materialize', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
+    'gucci', 'discord', 'windows', 'materialize', 'material design', 'bootstrap', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
     'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'ios', 'bmw', 'amazon', 'fedex', 
     'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
-    'linktree', 'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
+    'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
     'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
-    'snapchat', 'youtube', 'illustrator', 'us dollar'
+    'snapchat', 'youtube', 'illustrator', 'us dollar',
+    'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui'
 ];
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -29,9 +34,22 @@ function getBrandFromPaletteName(name: string): string | null {
   // Specific mappings first to consolidate brands
   if (lowerName.includes('ios') || lowerName.includes('apple')) return 'Apple';
   if (lowerName.includes('windows') || lowerName.includes('visual studio') || lowerName.includes('vs code') || lowerName.includes('microsoft')) return 'Microsoft';
+  if (lowerName.includes('materialize') || lowerName.includes('material design')) return 'Google';
+  if (lowerName.includes('bootstrap')) return 'Bootstrap';
+  if (lowerName.includes('rubik\'s cube')) return 'Rubik\'s Cube';
+  if (lowerName.includes('tetris')) return 'Tetris';
+  if (lowerName.includes('harry potter')) return 'Harry Potter';
+  if (lowerName.includes('washington commanders')) return 'Washington Commanders';
+  if (lowerName.includes('blender')) return 'Blender';
+  if (lowerName.includes('flat ui')) return 'Flat UI';
+
 
   // Keywords that have been explicitly mapped above
-  const handledKeywords = ['ios', 'apple', 'windows', 'visual studio', 'vs code', 'microsoft'];
+  const handledKeywords = [
+      'ios', 'apple', 'windows', 'visual studio', 'vs code', 'microsoft',
+      'materialize', 'material design', 'bootstrap', 'rubik\'s cube', 'tetris',
+      'harry potter', 'washington commanders', 'blender', 'flat ui'
+  ];
 
   for (const keyword of brandKeywords) {
     if (handledKeywords.includes(keyword)) continue;
