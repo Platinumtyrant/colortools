@@ -8,8 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Plus, Trash2, Code } from 'lucide-react';
+import { Plus, Trash2, Code, Move } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 
 interface Point {
@@ -59,7 +58,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     });
     
     const [activePointId, setActivePointId] = useState<number | null>(points[0]?.id ?? null);
-    const [openPopoverId, setOpenPopoverId] = useState<number | null>(null);
     const [isCodeVisible, setIsCodeVisible] = useState(false);
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
@@ -69,9 +67,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const handlePointClick = useCallback((pointId: number) => {
         if (!dragInfo.current.isDragging) {
             setActivePointId(pointId);
-            setOpenPopoverId(prevId => prevId === pointId ? null : pointId);
         }
-        dragInfo.current = { isDragging: false, pointId: null };
     }, []);
 
     const handlePointMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
@@ -90,7 +86,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             if (!moved && (dx > 3 || dy > 3)) {
                 moved = true;
                 dragInfo.current.isDragging = true;
-                setOpenPopoverId(null);
                  if (activePointId !== pointId) {
                     setActivePointId(pointId);
                 }
@@ -146,9 +141,8 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             document.removeEventListener('mouseup', handleDocumentMouseUp);
             if (!moved) {
                 handlePointClick(pointId);
-            } else {
-                dragInfo.current = { isDragging: false, pointId: null };
             }
+            dragInfo.current = { isDragging: false, pointId: null };
         };
 
         document.addEventListener('mousemove', handleDocumentMouseMove);
@@ -185,17 +179,13 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             if (activePointId === idToRemove) {
                 setActivePointId(null);
             }
-            if (openPopoverId === idToRemove) {
-                setOpenPopoverId(null);
-            }
             return prev.filter(p => p.id !== idToRemove);
         });
-    }, [toast, activePointId, openPopoverId]);
+    }, [toast, activePointId]);
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === previewRef.current) {
+        if (e.target === e.currentTarget) {
             setActivePointId(null);
-            setOpenPopoverId(null);
         }
     }, []);
     
@@ -247,164 +237,182 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
     
     const activePoint = useMemo(() => points.find(p => p.id === activePointId), [points, activePointId]);
 
+    const EditorPanel = () => {
+        if (!activePoint) {
+            return (
+                <Card className="h-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed">
+                     <Move className="w-12 h-12 text-muted-foreground mb-4" />
+                     <h3 className="text-lg font-semibold">Select a Point</h3>
+                     <p className="text-sm text-muted-foreground">Click on a point in the mesh to start editing its properties.</p>
+                </Card>
+            )
+        }
+        
+        return (
+            <Card className="h-full flex flex-col">
+                <CardHeader className="flex-shrink-0">
+                    <div className="flex justify-between items-center">
+                        <CardTitle className="text-lg">Editing Point {points.findIndex(p => p.id === activePoint.id) + 1}</CardTitle>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => handleRemovePoint(activePoint.id)} disabled={points.length <= 1}>
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove Point</span>
+                        </Button>
+                    </div>
+                </CardHeader>
+                <CardContent className="flex-grow overflow-y-auto space-y-4 p-4">
+                    <ColorPickerClient
+                        color={activePoint.color}
+                        onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
+                    />
+                    <div className="space-y-2">
+                        <Label htmlFor={`spreadX-${activePoint.id}`} className="text-xs">Spread X: {activePoint.spreadX.toFixed(0)}%</Label>
+                        <Slider
+                            id={`spreadX-${activePoint.id}`}
+                            min={0} max={200} step={1} value={[activePoint.spreadX]}
+                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, spreadX: value[0] } : p))}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor={`spreadY-${activePoint.id}`} className="text-xs">Spread Y: {activePoint.spreadY.toFixed(0)}%</Label>
+                        <Slider
+                            id={`spreadY-${activePoint.id}`}
+                            min={0} max={200} step={1} value={[activePoint.spreadY]}
+                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, spreadY: value[0] } : p))}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor={`strength-${activePoint.id}`} className="text-xs">Strength: {activePoint.strength.toFixed(0)}%</Label>
+                        <Slider
+                            id={`strength-${activePoint.id}`}
+                            min={10} max={100} step={1} value={[activePoint.strength]}
+                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, strength: value[0] } : p))}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor={`rotation-${activePoint.id}`} className="text-xs">Rotation: {activePoint.rotation.toFixed(0)}°</Label>
+                        <Slider
+                            id={`rotation-${activePoint.id}`}
+                            min={0} max={360} step={1} value={[activePoint.rotation]}
+                            onValueChange={(value) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, rotation: value[0] } : p))}
+                        />
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
             <CardHeader className="p-0 mb-4">
                 <CardTitle className="text-3xl">Gradient Mesh Builder</CardTitle>
                 <CardDescription>Create beautiful, complex gradients by adding and manipulating color points.</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-8 p-0">
-                <div className="space-y-4">
-                    <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden">
-                        <div
-                            ref={previewRef}
-                            className="absolute inset-0 cursor-pointer"
-                            onClick={handleBackgroundClick}
-                            style={{ backgroundColor: points[0]?.color || '#000000' }}
-                        >
-                            {points.map(point => (
-                                <div
-                                    key={`grad-${point.id}`}
-                                    className="absolute mix-blend-lighten rounded-full"
-                                    style={{
-                                        left: `${point.x}%`,
-                                        top: `${point.y}%`,
-                                        width: `${point.spreadX * 2}%`,
-                                        height: `${point.spreadY * 2}%`,
-                                        transform: `translate(-50%, -50%) rotate(${point.rotation}deg)`,
-                                        backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
-                                        filter: 'blur(50px)',
-                                    }}
-                                />
-                            ))}
-                            {points.map((point) => (
-                                <Popover key={point.id} open={openPopoverId === point.id} onOpenChange={(isOpen) => !isOpen && openPopoverId === point.id && setOpenPopoverId(null)}>
-                                     <PopoverTrigger asChild>
-                                        <div
-                                            className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
-                                            style={{
-                                                left: `${point.x}%`,
-                                                top: `${point.y}%`,
-                                                backgroundColor: point.color,
-                                                boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
-                                                zIndex: activePointId === point.id ? 12 : 1,
-                                            }}
-                                            onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
-                                        />
-                                    </PopoverTrigger>
-                                    <PopoverContent
-                                        className="w-72 p-4 space-y-4"
-                                        onMouseDown={(e) => e.stopPropagation()}
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <h3 className="text-sm font-semibold">Point {points.findIndex(p => p.id === point.id) + 1}</h3>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 1}>
-                                                <Trash2 className="h-3 w-3" />
-                                                <span className="sr-only">Remove Point</span>
-                                            </Button>
-                                        </div>
-                                        <ColorPickerClient
-                                            color={point.color}
-                                            onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, color: c.hex } : p))}
-                                        />
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`spreadX-${point.id}`} className="text-xs">Spread X: {point.spreadX.toFixed(0)}%</Label>
-                                            <Slider
-                                                id={`spreadX-${point.id}`}
-                                                min={0} max={200} step={1} value={[point.spreadX]}
-                                                onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, spreadX: value[0] } : p))}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`spreadY-${point.id}`} className="text-xs">Spread Y: {point.spreadY.toFixed(0)}%</Label>
-                                            <Slider
-                                                id={`spreadY-${point.id}`}
-                                                min={0} max={200} step={1} value={[point.spreadY]}
-                                                onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, spreadY: value[0] } : p))}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`strength-${point.id}`} className="text-xs">Strength: {point.strength.toFixed(0)}%</Label>
-                                            <Slider
-                                                id={`strength-${point.id}`}
-                                                min={10} max={100} step={1} value={[point.strength]}
-                                                onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, strength: value[0] } : p))}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor={`rotation-${point.id}`} className="text-xs">Rotation: {point.rotation.toFixed(0)}°</Label>
-                                            <Slider
-                                                id={`rotation-${point.id}`}
-                                                min={0} max={360} step={1} value={[point.rotation]}
-                                                onValueChange={(value) => setPoints(prev => prev.map(p => p.id === point.id ? { ...p, rotation: value[0] } : p))}
-                                            />
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
-                            ))}
-                            {activePoint && (
-                                (() => {
-                                    const previewWidth = previewRef.current?.offsetWidth || 0;
-                                    const previewHeight = previewRef.current?.offsetHeight || 0;
-                                    const spreadXInPixels = (activePoint.spreadX / 100) * previewWidth;
-                                    const spreadYInPixels = (activePoint.spreadY / 100) * previewHeight;
+            <CardContent className="p-0">
+                 <div className="grid grid-cols-1 lg:grid-cols-[2.5fr,1fr] gap-8">
+                    <div className="space-y-4">
+                        <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden">
+                            <div
+                                ref={previewRef}
+                                className="absolute inset-0 cursor-pointer"
+                                onClick={handleBackgroundClick}
+                                style={{ backgroundColor: points[0]?.color || '#000000' }}
+                            >
+                                {points.map(point => (
+                                    <div
+                                        key={`grad-${point.id}`}
+                                        className="absolute mix-blend-lighten rounded-full pointer-events-none"
+                                        style={{
+                                            left: `${point.x}%`,
+                                            top: `${point.y}%`,
+                                            width: `${point.spreadX * 2}%`,
+                                            height: `${point.spreadY * 2}%`,
+                                            transform: `translate(-50%, -50%) rotate(${point.rotation}deg)`,
+                                            backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
+                                            filter: 'blur(50px)',
+                                        }}
+                                    />
+                                ))}
+                                {points.map((point) => (
+                                     <div
+                                        key={point.id}
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-move"
+                                        style={{
+                                            left: `${point.x}%`,
+                                            top: `${point.y}%`,
+                                            backgroundColor: point.color,
+                                            boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
+                                            zIndex: activePointId === point.id ? 12 : 1,
+                                        }}
+                                        onClick={() => handlePointClick(point.id)}
+                                        onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
+                                    />
+                                ))}
+                                {activePoint && (
+                                    (() => {
+                                        const previewWidth = previewRef.current?.offsetWidth || 0;
+                                        const previewHeight = previewRef.current?.offsetHeight || 0;
+                                        const spreadXInPixels = (activePoint.spreadX / 100) * previewWidth;
+                                        const spreadYInPixels = (activePoint.spreadY / 100) * previewHeight;
 
-                                    return (
-                                        <>
-                                            <div
-                                                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-white/50 pointer-events-none"
-                                                style={{
-                                                    left: `${activePoint.x}%`,
-                                                    top: `${activePoint.y}%`,
-                                                    width: `${spreadXInPixels}px`,
-                                                    height: `${spreadYInPixels}px`,
-                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg)`
-                                                }}
-                                            />
-                                            <div
-                                                className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ew-resize"
-                                                style={{
-                                                    left: `${activePoint.x}%`,
-                                                    top: `${activePoint.y}%`,
-                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
-                                                    zIndex: 11
-                                                }}
-                                                onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadX')}
-                                            />
-                                            <div
-                                                className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
-                                                style={{
-                                                    left: `${activePoint.x}%`,
-                                                    top: `${activePoint.y}%`,
-                                                    transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
-                                                    zIndex: 11
-                                                }}
-                                                onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadY')}
-                                            />
-                                        </>
-                                    );
-                                })()
-                            )}
+                                        return (
+                                            <>
+                                                <div
+                                                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-white/50 pointer-events-none"
+                                                    style={{
+                                                        left: `${activePoint.x}%`,
+                                                        top: `${activePoint.y}%`,
+                                                        width: `${spreadXInPixels}px`,
+                                                        height: `${spreadYInPixels}px`,
+                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg)`
+                                                    }}
+                                                />
+                                                <div
+                                                    className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ew-resize"
+                                                    style={{
+                                                        left: `${activePoint.x}%`,
+                                                        top: `${activePoint.y}%`,
+                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
+                                                        zIndex: 11
+                                                    }}
+                                                    onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadX')}
+                                                />
+                                                <div
+                                                    className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
+                                                    style={{
+                                                        left: `${activePoint.x}%`,
+                                                        top: `${activePoint.y}%`,
+                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
+                                                        zIndex: 11
+                                                    }}
+                                                    onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadY')}
+                                                />
+                                            </>
+                                        );
+                                    })()
+                                )}
+                            </div>
+                            <div className="absolute top-2 right-2 flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/50 shadow-lg">
+                                <Button onClick={() => setIsCodeVisible(v => !v)} size="sm" variant="ghost">
+                                    <Code className="mr-2 h-4 w-4" />
+                                    {isCodeVisible ? 'Hide Code' : 'Show Code'}
+                                </Button>
+                                <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
+                                    <Plus className="mr-2 h-4 w-4" /> Point
+                                </Button>
+                                <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
+                            </div>
                         </div>
-                        <div className="absolute top-2 right-2 flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/50 shadow-lg">
-                             <Button onClick={() => setIsCodeVisible(v => !v)} size="sm" variant="ghost">
-                                <Code className="mr-2 h-4 w-4" />
-                                {isCodeVisible ? 'Hide Code' : 'Show Code'}
-                            </Button>
-                            <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
-                                <Plus className="mr-2 h-4 w-4" /> Point
-                            </Button>
-                            <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
-                        </div>
+                        {isCodeVisible && (
+                            <div className="relative mt-4">
+                                <pre className="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto text-xs">
+                                    <code>{gradientCss}</code>
+                                </pre>
+                            </div>
+                        )}
                     </div>
-                    {isCodeVisible && (
-                        <div className="relative mt-4">
-                            <pre className="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto text-xs">
-                                <code>{gradientCss}</code>
-                            </pre>
-                        </div>
-                    )}
-                </div>
+
+                    <EditorPanel />
+                 </div>
             </CardContent>
         </Card>
     );
