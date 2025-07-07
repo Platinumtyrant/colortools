@@ -12,13 +12,9 @@ import { colord } from 'colord';
 import { ColorBox } from '../colors/ColorBox';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 
-interface InspirationClientPageProps {
-  allPalettes: CategorizedPalette[];
-}
-
 const brandKeywords = [
-    'gucci', 'discord', 'windows', 'materialize', 'material design', 'bootstrap', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
-    'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'ios', 'bmw', 'amazon', 'fedex', 
+    'gucci', 'discord', 'windows', 'material design', 'bootstrap', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
+    'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'bmw', 'amazon', 'fedex', 
     'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
     'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
     'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
@@ -32,9 +28,8 @@ function getBrandFromPaletteName(name: string): string | null {
   const lowerName = name.toLowerCase();
 
   // Specific mappings first to consolidate brands
-  if (lowerName.includes('ios') || lowerName.includes('apple')) return 'Apple';
   if (lowerName.includes('windows') || lowerName.includes('visual studio') || lowerName.includes('vs code') || lowerName.includes('microsoft')) return 'Microsoft';
-  if (lowerName.includes('materialize') || lowerName.includes('material design')) return 'Google';
+  if (lowerName.includes('material design')) return 'Google';
   if (lowerName.includes('bootstrap')) return 'Bootstrap';
   if (lowerName.includes('rubik\'s cube')) return 'Rubik\'s Cube';
   if (lowerName.includes('tetris')) return 'Tetris';
@@ -46,8 +41,8 @@ function getBrandFromPaletteName(name: string): string | null {
 
   // Keywords that have been explicitly mapped above
   const handledKeywords = [
-      'ios', 'apple', 'windows', 'visual studio', 'vs code', 'microsoft',
-      'materialize', 'material design', 'bootstrap', 'rubik\'s cube', 'tetris',
+      'windows', 'visual studio', 'vs code', 'microsoft',
+      'material design', 'bootstrap', 'rubik\'s cube', 'tetris',
       'harry potter', 'washington commanders', 'blender', 'flat ui'
   ];
 

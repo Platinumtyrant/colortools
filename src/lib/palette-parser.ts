@@ -16,7 +16,7 @@ export interface CategorizedPalette extends PrebuiltPalette {
 }
 
 const brandKeywords = [
-    'gucci', 'discord', 'windows', 'materialize', 'material design', 'bootstrap', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
+    'gucci', 'discord', 'windows', 'material design', 'bootstrap', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
     'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'bmw', 'amazon', 'fedex', 
     'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
     'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
@@ -115,7 +115,7 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
     const excludedKeywords = [
         'pantone 19-1664', 'parking app', 'luxiem', 'backrooms', 
         'butt ghost dick penis', 'bts palette', 'neutral colors for room',
-        'ios', 'linktree', 'kpmg', 'xkcd'
+        'ios', 'linktree', 'kpmg', 'xkcd', 'materialize'
     ];
     const allPalettes: CategorizedPalette[] = [];
     const paletteChunks = htmlContent.split('<h3>').slice(1);
