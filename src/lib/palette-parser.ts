@@ -22,7 +22,8 @@ const brandKeywords = [
     'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
     'shell', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
     'snapchat', 'youtube', 'illustrator', 'us dollar',
-    'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui'
+    'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui',
+    'chrome music lab'
 ];
 
 const flagKeywords = [
@@ -36,7 +37,7 @@ const categorizePalette = (colors: string[], name: string): string => {
   const lowerCaseName = name.toLowerCase();
 
   // Specific keywords to force into 'Brands' category
-  const brandForcedKeywords = ['material design', 'bootstrap', 'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui'];
+  const brandForcedKeywords = ['material design', 'bootstrap', 'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui', 'chrome music lab'];
   if (brandForcedKeywords.some(keyword => lowerCaseName.includes(keyword))) {
     return 'Brands';
   }
@@ -119,7 +120,35 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
     const htmlContent = await fs.readFile(filePath, 'utf-8');
 
     const excludedKeywords = [
-        'pantone 19-1664', 'parking app', 'luxiem', 'backrooms', 'butt ghost dick penis', 'bts palette', 'neutral colors for room', 'ios', 'linktree', 'kpmg', 'xkcd', 'materialize', 'material design color palette (16 colors)', 'discord color roles', 'minecraft'
+        'materialize',
+        'minecraft',
+        'ios',
+        'linktree',
+        'kpmg',
+        'xkcd',
+        'pantone 19-1664',
+        'parking app',
+        'luxiem',
+        'backrooms',
+        'butt ghost dick penis',
+        'bts palette',
+        'neutral colors for room',
+        'material design color palette (16 colors)',
+        'discord color roles',
+        'french dispatch',
+        'spongebob yellow',
+        'rainbow colors palette',
+        '8 color palette',
+        '7 color palette',
+        '6 colors palette',
+        '10 rainbow colors',
+        'rainbow of 11',
+        '12 color rainbow',
+        '14 color palette',
+        '15 rainbow color palette',
+        'least used color rainbow',
+        '7 rainbow colors',
+        'pastel rainbow'
     ];
     const allPalettes: CategorizedPalette[] = [];
     const paletteChunks = htmlContent.split('<h3>').slice(1);
