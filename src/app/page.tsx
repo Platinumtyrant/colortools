@@ -608,9 +608,6 @@ function PaletteBuilderPage() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
                             <ContrastGrid colors={paletteHexes} />
-                            <div className="text-xs text-muted-foreground">
-                                <p>Text color (vertical) on background color (horizontal).</p>
-                            </div>
                             <div className="text-sm">Text Color: {mainColor.toUpperCase()}</div>
                              <div>
                                 <div className="text-sm mb-2">Background Color</div>
@@ -747,7 +744,7 @@ function PaletteBuilderPage() {
                 </DialogContent>
             </Dialog>
 
-            <main className="flex-1 grid grid-cols-1 lg:grid-cols-[2.5fr,1fr] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
+            <main className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_550px] gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
                 <div className="flex flex-col gap-8 min-h-0">
                     <section className="flex flex-col lg:flex-row items-center justify-center gap-8 w-full">
                         <div className="w-full lg:w-auto flex justify-center">
@@ -841,6 +838,7 @@ export default PaletteBuilderPage;
     
 
     
+
 
 
 
