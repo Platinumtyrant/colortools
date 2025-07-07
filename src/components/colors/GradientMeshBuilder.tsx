@@ -288,12 +288,17 @@ ${points.map((p, i) => `  <div class="mesh-point mesh-point-${i + 1}"></div>`).j
                                                 top: `${point.y}%`,
                                                 backgroundColor: point.color,
                                                 boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
-                                                zIndex: activePointId === point.id ? 10 : 1,
+                                                zIndex: activePointId === point.id ? 12 : 1,
                                             }}
                                             onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
                                         />
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-72 p-4 space-y-4" onClick={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => e.preventDefault()}>
+                                    <PopoverContent
+                                        className="w-72 p-4 space-y-4"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onOpenAutoFocus={(e) => e.preventDefault()}
+                                    >
                                         <div className="flex justify-between items-center">
                                             <h3 className="text-sm font-semibold">Point {points.findIndex(p => p.id === point.id) + 1}</h3>
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePoint(point.id)} disabled={points.length <= 1}>
