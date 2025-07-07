@@ -76,7 +76,7 @@ export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClient
                 <CardTitle className="text-3xl">Pantone Color Bridge</CardTitle>
                 <Badge variant="outline">Solid Coated</Badge>
             </div>
-          <CardDescription>An unofficial reference guide for Pantone colors, based on the Color Bridge (Solid Coated) library.</CardDescription>
+          <CardDescription>An unofficial reference for the Pantone Color Bridge guide. It shows each solid Pantone color alongside its closest four-color process (CMYK) match. This is essential for designers to preview how spot colors will appear when printed using standard Cyan, Magenta, Yellow, and Black inks.</CardDescription>
         </CardHeader>
         <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
           <TabsList className="h-auto flex-wrap justify-start">
