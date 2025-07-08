@@ -732,13 +732,13 @@ function PaletteBuilderPage() {
         <div className="flex h-full overflow-hidden">
             <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                 <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
+                        <DialogDescription>
+                            Give your palette a name. Click save when you're done.
+                        </DialogDescription>
+                    </DialogHeader>
                     <form onSubmit={handleSaveToLibrary}>
-                        <DialogHeader>
-                            <DialogTitle>{editingPaletteId ? 'Edit Palette' : 'Save Palette'}</DialogTitle>
-                            <DialogDescription>
-                                Give your palette a name. Click save when you're done.
-                            </DialogDescription>
-                        </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="name" className="text-right">
@@ -856,21 +856,3 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
-
-
-
-
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-

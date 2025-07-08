@@ -6,17 +6,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Camera, Zap, ZapOff, CameraOff, Image as ImageIcon, Crosshair, X } from 'lucide-react';
+import { Camera, Zap, ZapOff, CameraOff, Image as ImageIcon, Crosshair, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { colord } from 'colord';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CameraIdentifierPage() {
     const { toast } = useToast();
     const videoRef = useRef<HTMLVideoElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null); // Used for capturing snapshots
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationFrameId = useRef<number>();
+    const imageContainerRef = useRef<HTMLDivElement>(null);
+    const lastDragPosition = useRef<{ x: number, y: number } | null>(null);
 
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
@@ -24,6 +27,7 @@ export default function CameraIdentifierPage() {
     const [identifiedColor, setIdentifiedColor] = useState<string>('#FFFFFF');
     const [snapshot, setSnapshot] = useState<string | null>(null);
     const [crosshairPosition, setCrosshairPosition] = useState<{ x: number; y: number } | null>(null);
+    const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
     
     const { palette, setPalette } = usePaletteBuilder();
     const [libraryColors, setLibraryColors] = useState<string[]>([]);
@@ -31,6 +35,7 @@ export default function CameraIdentifierPage() {
     const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
 
     const isStreamActive = !!stream;
+    const isZoomed = transform.scale > 1;
 
     useEffect(() => {
         try {
@@ -96,14 +101,11 @@ export default function CameraIdentifierPage() {
         setIsDetecting(false);
     }, []);
     
-    // This effect handles attaching the stream to the video element and cleaning it up
     useEffect(() => {
         const video = videoRef.current;
         if (video && stream) {
             video.srcObject = stream;
         }
-
-        // When the stream is cleared (set to null) or the component unmounts, stop the tracks.
         return () => {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -114,7 +116,6 @@ export default function CameraIdentifierPage() {
         };
     }, [stream]);
     
-    // This effect runs once on mount to start the camera initially
     useEffect(() => {
         startCamera();
     }, [startCamera]);
@@ -169,32 +170,89 @@ export default function CameraIdentifierPage() {
         if (!context) return;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         setSnapshot(canvas.toDataURL('image/jpeg'));
-        setIsDetecting(false); // Stop live detection when snapshot is taken
+        setIsDetecting(false);
     };
     
     const handleClearSnapshot = () => {
         setSnapshot(null);
         setCrosshairPosition(null);
+        setTransform({ scale: 1, x: 0, y: 0 });
     };
     
     const handleIdentifyFromSnapshot = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!snapshot || !canvasRef.current) return;
+        if (!snapshot || !canvasRef.current || !imageContainerRef.current) return;
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d', { willReadFrequently: true });
         if (!context) return;
         
         const rect = e.currentTarget.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
         
-        const canvasX = (e.clientX - rect.left) * scaleX;
-        const canvasY = (e.clientY - rect.top) * scaleY;
+        // Calculate click coordinates relative to the image container
+        const xOnElement = e.clientX - rect.left;
+        const yOnElement = e.clientY - rect.top;
+        
+        // Inverse the transform to find where the click happened on the original, untransformed image
+        const xOnImage = (xOnElement - transform.x) / transform.scale;
+        const yOnImage = (yOnElement - transform.y) / transform.scale;
 
-        setCrosshairPosition({ x: (canvasX / canvas.width) * 100, y: (canvasY / canvas.height) * 100 });
+        // Scale these coordinates to the actual canvas resolution
+        const canvasX = xOnImage * (canvas.width / rect.width);
+        const canvasY = yOnImage * (canvas.height / rect.height);
+        
+        // Check if the click is within the bounds of the image
+        if (canvasX < 0 || canvasX > canvas.width || canvasY < 0 || canvasY > canvas.height) {
+            return;
+        }
+
+        setCrosshairPosition({ x: (xOnImage / rect.width) * 100, y: (yOnImage / rect.height) * 100 });
         
         const pixelData = context.getImageData(canvasX, canvasY, 1, 1).data;
         const hex = `#${("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6)}`;
         setIdentifiedColor(hex);
+    };
+
+    const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!snapshot || !imageContainerRef.current) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        if (transform.scale > 1) {
+            // Zoom out
+            setTransform({ scale: 1, x: 0, y: 0 });
+        } else {
+            // Zoom in
+            const newScale = 3;
+            setTransform({
+                scale: newScale,
+                // Center the new view on the clicked point
+                x: -x * (newScale - 1),
+                y: -y * (newScale - 1),
+            });
+        }
+    };
+
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isZoomed) return;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        lastDragPosition.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isZoomed || !lastDragPosition.current) return;
+        const dx = e.clientX - lastDragPosition.current.x;
+        const dy = e.clientY - lastDragPosition.current.y;
+        lastDragPosition.current = { x: e.clientX, y: e.clientY };
+
+        setTransform(t => ({
+            ...t,
+            x: t.x + dx,
+            y: t.y + dy,
+        }));
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        lastDragPosition.current = null;
     };
 
     return (
@@ -202,19 +260,44 @@ export default function CameraIdentifierPage() {
             <CardHeader className="p-0 text-center max-w-4xl mx-auto">
                 <CardTitle className="text-3xl">Live Color Identifier</CardTitle>
                 <CardDescription>
-                    Point your camera at an object to identify its color. Freeze the frame for precise selection.
+                    Point your camera to identify colors. Freeze the frame, then double-tap to zoom for precise selection.
                 </CardDescription>
             </CardHeader>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                 <Card className="relative aspect-video flex items-center justify-center overflow-hidden bg-muted">
                     <div
-                        className="w-full h-full relative"
+                        className="w-full h-full relative cursor-crosshair"
+                        ref={imageContainerRef}
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onDoubleClick={handleDoubleClick}
                         onClick={snapshot ? handleIdentifyFromSnapshot : undefined}
                     >
                          <video ref={videoRef} className={`h-full w-full object-cover ${snapshot ? 'hidden' : 'block'}`} autoPlay muted playsInline />
                          <canvas ref={canvasRef} className="hidden" />
-                         {snapshot && <img src={snapshot} alt="snapshot" className="h-full w-full object-contain cursor-crosshair" />}
+                         
+                         <AnimatePresence>
+                         {snapshot && (
+                            <motion.div
+                                className="h-full w-full"
+                                style={{
+                                    backgroundImage: `url(${snapshot})`,
+                                    backgroundSize: 'contain',
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'center',
+                                    cursor: isZoomed ? 'grab' : 'zoom-in',
+                                }}
+                                animate={{
+                                    scale: transform.scale,
+                                    x: transform.x,
+                                    y: transform.y,
+                                }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            />
+                         )}
+                         </AnimatePresence>
 
                          {snapshot ? (
                             crosshairPosition && (
@@ -270,10 +353,16 @@ export default function CameraIdentifierPage() {
                         )}
                     </div>
                     
-                    <Button onClick={() => setIsDetecting(p => !p)} disabled={!isStreamActive || !!snapshot}>
-                        {isDetecting ? <ZapOff className="mr-2 h-4 w-4" /> : <Zap className="mr-2 h-4 w-4" />}
-                        {isDetecting ? 'Stop Live Detection' : 'Start Live Detection'}
-                    </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button onClick={() => setIsDetecting(p => !p)} disabled={!isStreamActive || !!snapshot}>
+                            {isDetecting ? <ZapOff className="mr-2 h-4 w-4" /> : <Zap className="mr-2 h-4 w-4" />}
+                            {isDetecting ? 'Stop Live Detection' : 'Start Live Detection'}
+                        </Button>
+                         <Button onClick={() => handleDoubleClick} disabled={!snapshot || !isZoomed} variant="outline">
+                             <ZoomOut className="mr-2 h-4 w-4" />
+                             Reset Zoom
+                         </Button>
+                    </div>
 
                      <div className="relative group/container w-full" >
                          <ColorBox
