@@ -19,24 +19,26 @@ interface Point {
     x: number;
     y: number;
     color: string;
-    power: number;
+    strength: number;
+    falloff: number;
 }
 
 interface EditorPanelProps {
     activePoint: Point | undefined;
     onColorChange: (color: string) => void;
-    onPowerChange: (power: number) => void;
+    onStrengthChange: (strength: number) => void;
+    onFalloffChange: (falloff: number) => void;
     onRemovePoint: () => void;
     canRemovePoint: boolean;
 }
 
-const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange, onPowerChange, onRemovePoint, canRemovePoint }) => {
+const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange, onStrengthChange, onFalloffChange, onRemovePoint, canRemovePoint }) => {
     if (!activePoint) {
         return (
             <Card className="h-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed">
                  <Move className="w-12 h-12 text-muted-foreground mb-4" />
                  <h3 className="text-lg font-semibold">Select a Point</h3>
-                 <p className="text-sm text-muted-foreground">Click on a grid point to start editing its color and blend power.</p>
+                 <p className="text-sm text-muted-foreground">Click on a grid point to start editing its color and blend properties.</p>
             </Card>
         )
     }
@@ -72,16 +74,30 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange, o
                 />
                 <div className="p-4 border-t">
                     <div className="flex justify-between items-center mb-2">
-                        <Label htmlFor="point-power" className="text-sm">Blend Power</Label>
-                        <span className="text-sm font-mono">{activePoint.power.toFixed(1)}</span>
+                        <Label htmlFor="point-strength" className="text-sm">Strength</Label>
+                        <span className="text-sm font-mono">{activePoint.strength.toFixed(1)}</span>
                     </div>
                     <Slider
-                        id="point-power"
+                        id="point-strength"
                         min={1}
                         max={10}
                         step={0.1}
-                        value={[activePoint.power]}
-                        onValueChange={(value) => onPowerChange(value[0])}
+                        value={[activePoint.strength]}
+                        onValueChange={(value) => onStrengthChange(value[0])}
+                    />
+                </div>
+                 <div className="p-4 border-t">
+                    <div className="flex justify-between items-center mb-2">
+                        <Label htmlFor="point-falloff" className="text-sm">Falloff</Label>
+                        <span className="text-sm font-mono">{activePoint.falloff.toFixed(1)}</span>
+                    </div>
+                    <Slider
+                        id="point-falloff"
+                        min={1}
+                        max={10}
+                        step={0.1}
+                        value={[activePoint.falloff]}
+                        onValueChange={(value) => onFalloffChange(value[0])}
                     />
                 </div>
             </CardContent>
@@ -96,7 +112,6 @@ const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean
 
     let { width, height } = canvas;
     if (isPreview) {
-        // Render at a much lower resolution for speed, then scale up
         width = Math.round(width / 8);
         height = Math.round(height / 8);
     }
@@ -131,8 +146,10 @@ const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean
                     break;
                 }
                 
-                const exponent = (11 - points[i].power) / 2;
-                const weight = 1 / Math.pow(distSq, exponent);
+                const exponent = (11 - points[i].falloff) / 2;
+                const strengthMultiplier = points[i].strength / 5.0;
+                const weight = strengthMultiplier * (1 / Math.pow(distSq, exponent));
+
                 r += pointColors[i][0] * weight;
                 g += pointColors[i][1] * weight;
                 b += pointColors[i][2] * weight;
@@ -179,8 +196,8 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
             : defaultColors;
     
         const initialPoints: Point[] = [
-            { id: 1, x: 25, y: 25, color: startColors[0], power: 4 },
-            { id: 2, x: 75, y: 75, color: startColors[1], power: 4 },
+            { id: 1, x: 25, y: 25, color: startColors[0], strength: 5, falloff: 4 },
+            { id: 2, x: 75, y: 75, color: startColors[1], strength: 5, falloff: 4 },
         ];
         setPoints(initialPoints);
         setActivePointId(initialPoints[0].id);
@@ -260,10 +277,11 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
       svgContent += `<defs>`;
 
       points.forEach((point) => {
-          const radius = point.power * 15;
+          const radius = point.strength * 15;
+          const falloffStop = ((point.falloff -1) / 9) * 80;
           svgContent += `
               <radialGradient id="grad-${point.id}" cx="${point.x}%" cy="${point.y}%" r="${radius}%">
-                  <stop offset="0%" stop-color="${point.color}" />
+                  <stop offset="${falloffStop}%" stop-color="${point.color}" />
                   <stop offset="100%" stop-color="${point.color}" stop-opacity="0" />
               </radialGradient>`;
       });
@@ -327,12 +345,23 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         setPoints(prev => prev.map(p => p.id === activePointId ? { ...p, color: newColor } : p));
     }, [activePointId]);
 
-    const handlePowerChange = useCallback((newPower: number) => {
+    const handleStrengthChange = useCallback((newStrength: number) => {
         isUpdatingPower.current = true;
         if (!activePointId) return;
-        setPoints(prev => prev.map(p => p.id === activePointId ? { ...p, power: newPower } : p));
+        setPoints(prev => prev.map(p => p.id === activePointId ? { ...p, strength: newStrength } : p));
         
-        // Debounce setting the power update flag to false
+        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = setTimeout(() => {
+            isUpdatingPower.current = false;
+        }, 100);
+
+    }, [activePointId]);
+    
+    const handleFalloffChange = useCallback((newFalloff: number) => {
+        isUpdatingPower.current = true;
+        if (!activePointId) return;
+        setPoints(prev => prev.map(p => p.id === activePointId ? { ...p, falloff: newFalloff } : p));
+        
         if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
         debounceTimeout.current = setTimeout(() => {
             isUpdatingPower.current = false;
@@ -350,7 +379,8 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
             x: 50,
             y: 50,
             color: points.length > 0 ? chroma.average(points.map(p => p.color), 'lch').hex() : '#cccccc',
-            power: 4,
+            strength: 5,
+            falloff: 4,
         };
         setPoints(prev => [...prev, newPoint]);
         setActivePointId(newPoint.id);
@@ -456,7 +486,8 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                     <EditorPanel 
                         activePoint={activePoint} 
                         onColorChange={handleColorChange}
-                        onPowerChange={handlePowerChange}
+                        onStrengthChange={handleStrengthChange}
+                        onFalloffChange={handleFalloffChange}
                         onRemovePoint={handleRemovePoint}
                         canRemovePoint={canRemovePoint}
                     />
