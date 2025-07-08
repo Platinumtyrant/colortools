@@ -13,6 +13,25 @@ import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { colord } from 'colord';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const getAverageColor = (data: Uint8ClampedArray): string => {
+    let r = 0, g = 0, b = 0;
+    const pixelCount = data.length / 4;
+    if (pixelCount === 0) return '#FFFFFF';
+
+    for (let i = 0; i < data.length; i += 4) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+    }
+
+    r = Math.floor(r / pixelCount);
+    g = Math.floor(g / pixelCount);
+    b = Math.floor(b / pixelCount);
+
+    return "#" + ("000000" + ((r << 16) | (g << 8) | b).toString(16)).slice(-6);
+};
+
+
 export default function CameraIdentifierPage() {
     const { toast } = useToast();
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -136,9 +155,10 @@ export default function CameraIdentifierPage() {
         
         const centerX = video.videoWidth / 2;
         const centerY = video.videoHeight / 2;
+        const sampleSize = 5; // Sample a 5x5 area
         
-        const pixelData = context.getImageData(centerX, centerY, 1, 1).data;
-        const hex = "#" + ("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6);
+        const pixelData = context.getImageData(centerX - 2, centerY - 2, sampleSize, sampleSize).data;
+        const hex = getAverageColor(pixelData);
         
         setIdentifiedColor(hex);
         animationFrameId.current = requestAnimationFrame(detectColorFromVideo);
@@ -181,60 +201,77 @@ export default function CameraIdentifierPage() {
     
     const handleIdentifyFromSnapshot = useCallback((e: React.PointerEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>) => {
         if (!snapshot || !canvasRef.current || !imageContainerRef.current) return;
-        
+    
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d', { willReadFrequently: true });
         if (!context) return;
-        
+    
         const containerRect = imageContainerRef.current.getBoundingClientRect();
-        const containerWidth = containerRect.width;
-        const containerHeight = containerRect.height;
-        const imageWidth = canvas.width;
-        const imageHeight = canvas.height;
-
-        const containerRatio = containerWidth / containerHeight;
-        const imageRatio = imageWidth / imageHeight;
-
+        
+        // 1. Calculate where the user clicked inside the container div
+        const clickXInContainer = e.clientX - containerRect.left;
+        const clickYInContainer = e.clientY - containerRect.top;
+        
+        // 2. Reverse the zoom/pan transform to find where that click corresponds to on the un-transformed element
+        const pointOnUnzoomedElement = {
+            x: (clickXInContainer - transform.x) / transform.scale,
+            y: (clickYInContainer - transform.y) / transform.scale
+        };
+    
+        // 3. Calculate the dimensions and position of the 'contained' image inside the container
+        const { width: containerWidth, height: containerHeight } = containerRect;
+        const { width: imageWidth, height: imageHeight } = canvas;
+    
+        const imageAspectRatio = imageWidth / imageHeight;
+        const containerAspectRatio = containerWidth / containerHeight;
+    
         let renderedWidth, renderedHeight, offsetX, offsetY;
-        if (imageRatio > containerRatio) {
+        if (imageAspectRatio > containerAspectRatio) {
             renderedWidth = containerWidth;
-            renderedHeight = containerWidth / imageRatio;
+            renderedHeight = containerWidth / imageAspectRatio;
             offsetX = 0;
             offsetY = (containerHeight - renderedHeight) / 2;
         } else {
-            renderedWidth = containerHeight * imageRatio;
             renderedHeight = containerHeight;
+            renderedWidth = containerHeight * imageAspectRatio;
             offsetX = (containerWidth - renderedWidth) / 2;
             offsetY = 0;
         }
-        
-        const xOnElement = e.clientX - containerRect.left;
-        const yOnElement = e.clientY - containerRect.top;
-        
-        const unzoomedX = (xOnElement - transform.x) / transform.scale;
-        const unzoomedY = (yOnElement - transform.y) / transform.scale;
-
+    
+        // 4. Check if the click was inside the rendered image area (not the letterbox)
         if (
-            unzoomedX < offsetX ||
-            unzoomedX > offsetX + renderedWidth ||
-            unzoomedY < offsetY ||
-            unzoomedY > offsetY + renderedHeight
+            pointOnUnzoomedElement.x < offsetX ||
+            pointOnUnzoomedElement.x > offsetX + renderedWidth ||
+            pointOnUnzoomedElement.y < offsetY ||
+            pointOnUnzoomedElement.y > offsetY + renderedHeight
         ) {
-            return;
+            return; // Click was outside the image
         }
-
-        const imageXRatio = (unzoomedX - offsetX) / renderedWidth;
-        const imageYRatio = (unzoomedY - offsetY) / renderedHeight;
+    
+        // 5. Calculate the click position as a ratio of the rendered image's dimensions
+        const imageXRatio = (pointOnUnzoomedElement.x - offsetX) / renderedWidth;
+        const imageYRatio = (pointOnUnzoomedElement.y - offsetY) / renderedHeight;
         
-        setCrosshairPosition({ x: xOnElement, y: yOnElement });
+        // 6. Map the ratio to the original canvas's coordinates
+        const canvasX = Math.floor(imageXRatio * imageWidth);
+        const canvasY = Math.floor(imageYRatio * imageHeight);
         
-        const canvasX = imageXRatio * imageWidth;
-        const canvasY = imageYRatio * imageHeight;
+        // Set crosshair position to the visual click location
+        setCrosshairPosition({ x: clickXInContainer, y: clickYInContainer });
         
-        const pixelData = context.getImageData(canvasX, canvasY, 1, 1).data;
-        const hex = "#" + ("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6);
+        // 7. Get the average color from a 5x5 sample area around the target pixel
+        const sampleSize = 5;
+        const sampleData = context.getImageData(
+            Math.max(0, canvasX - 2),
+            Math.max(0, canvasY - 2),
+            sampleSize,
+            sampleSize
+        ).data;
+        
+        const hex = getAverageColor(sampleData);
         setIdentifiedColor(hex);
-    }, [snapshot, transform.scale, transform.x, transform.y]);
+    
+    }, [snapshot, transform.x, transform.y, transform.scale]);
 
 
     const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -350,7 +387,7 @@ export default function CameraIdentifierPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                 <Card className="relative aspect-video flex items-center justify-center overflow-hidden bg-muted">
                     <div
-                        className="w-full h-full relative"
+                        className="w-full h-full relative cursor-crosshair"
                         ref={imageContainerRef}
                         onPointerDown={handlePointerDown}
                         onPointerMove={handlePointerMove}
