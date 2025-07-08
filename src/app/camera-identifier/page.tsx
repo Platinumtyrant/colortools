@@ -19,10 +19,9 @@ export default function CameraIdentifierPage() {
     const animationFrameId = useRef<number>();
 
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-    const [isStreamActive, setIsStreamActive] = useState(false);
+    const [stream, setStream] = useState<MediaStream | null>(null);
     const [isDetecting, setIsDetecting] = useState(false);
     const [identifiedColor, setIdentifiedColor] = useState<string>('#FFFFFF');
-    const [stream, setStream] = useState<MediaStream | null>(null);
     const [snapshot, setSnapshot] = useState<string | null>(null);
     const [crosshairPosition, setCrosshairPosition] = useState<{ x: number; y: number } | null>(null);
     
@@ -30,6 +29,8 @@ export default function CameraIdentifierPage() {
     const [libraryColors, setLibraryColors] = useState<string[]>([]);
     const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
     const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
+
+    const isStreamActive = !!stream;
 
     useEffect(() => {
         try {
@@ -81,42 +82,42 @@ export default function CameraIdentifierPage() {
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             setStream(mediaStream);
-            setIsStreamActive(true);
             setHasCameraPermission(true);
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream;
-            }
         } catch (error) {
             console.error('Error accessing camera:', error);
             setHasCameraPermission(false);
-            setIsStreamActive(false);
+            setStream(null);
             toast({ variant: 'destructive', title: 'Camera Access Denied' });
         }
     }, [toast]);
     
     const stopCamera = useCallback(() => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-        if (videoRef.current) {
-            videoRef.current.srcObject = null;
-        }
-        setIsStreamActive(false);
+        setStream(null); // This triggers the useEffect cleanup to stop tracks
         setIsDetecting(false);
-        setStream(null);
-    }, [stream]);
-
-    // Initial camera start
+    }, []);
+    
+    // This effect handles attaching the stream to the video element and cleaning it up
     useEffect(() => {
-        startCamera();
-        // Cleanup on unmount
+        const video = videoRef.current;
+        if (video && stream) {
+            video.srcObject = stream;
+        }
+
+        // When the stream is cleared (set to null) or the component unmounts, stop the tracks.
         return () => {
-            stopCamera();
-            if (animationFrameId.current) {
-                cancelAnimationFrame(animationFrameId.current);
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (video) {
+                video.srcObject = null;
             }
         };
-    }, [startCamera, stopCamera]);
+    }, [stream]);
+    
+    // This effect runs once on mount to start the camera initially
+    useEffect(() => {
+        startCamera();
+    }, [startCamera]);
 
 
     const detectColorFromVideo = useCallback(() => {
@@ -223,11 +224,13 @@ export default function CameraIdentifierPage() {
                                 />
                             )
                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="w-8 h-8 border-2 border-white/75 rounded-full" />
-                                <div className="absolute w-1 h-8 bg-white/75 rounded-full" />
-                                <div className="absolute w-8 h-1 bg-white/75 rounded-full" />
-                            </div>
+                            isStreamActive && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="w-8 h-8 border-2 border-white/75 rounded-full" />
+                                    <div className="absolute w-1 h-8 bg-white/75 rounded-full" />
+                                    <div className="absolute w-8 h-1 bg-white/75 rounded-full" />
+                                </div>
+                            )
                          )}
 
                     </div>
