@@ -738,7 +738,7 @@ function PaletteBuilderPage() {
                             Give your palette a name. Click save when you're done.
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleSaveToLibrary}>
+                    <form id="save-palette-form" onSubmit={handleSaveToLibrary}>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="name" className="text-right">
@@ -754,10 +754,10 @@ function PaletteBuilderPage() {
                                 />
                             </div>
                         </div>
-                        <DialogFooter>
-                            <Button type="submit">{editingPaletteId ? 'Update' : 'Save'}</Button>
-                        </DialogFooter>
                     </form>
+                    <DialogFooter>
+                        <Button type="submit" form="save-palette-form">{editingPaletteId ? 'Update' : 'Save'}</Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 
