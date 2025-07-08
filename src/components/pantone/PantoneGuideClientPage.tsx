@@ -79,13 +79,15 @@ export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClient
           <CardDescription>An unofficial reference for the Pantone Color Bridge guide. It shows each solid Pantone color alongside its closest four-color process (CMYK) match. This is essential for designers to preview how spot colors will appear when printed using standard Cyan, Magenta, Yellow, and Black inks.</CardDescription>
         </CardHeader>
         <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
-          <TabsList className="h-auto flex-wrap justify-start">
-            {pantoneCategories.map((category) => (
-              <TabsTrigger key={category.name} value={category.name}>
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="flex justify-center">
+            <TabsList className="h-auto flex-wrap justify-center">
+              {pantoneCategories.map((category) => (
+                <TabsTrigger key={category.name} value={category.name}>
+                  {category.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
           
           {pantoneCategories.map(category => (
               <TabsContent key={category.name} value={category.name} className="mt-6">

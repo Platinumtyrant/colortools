@@ -208,11 +208,13 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
 
   return (
     <Tabs defaultValue={orderedCategories[0]} className="w-full">
-      <TabsList className="h-auto flex-wrap justify-start">
-        {orderedCategories.map(category => (
-          <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
-        ))}
-      </TabsList>
+      <div className="flex justify-center">
+        <TabsList className="h-auto flex-wrap justify-center">
+          {orderedCategories.map(category => (
+            <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
       
       {orderedCategories.map(category => {
         if (category === 'Brands') {
