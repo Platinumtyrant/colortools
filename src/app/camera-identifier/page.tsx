@@ -22,7 +22,8 @@ export default function CameraIdentifierPage() {
     const lastDragPosition = useRef<{ x: number, y: number } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+    const [hasCameraPermission, setHasCameraPermission] = useState<boolean>(false);
+    const [isRequestingPermission, setIsRequestingPermission] = useState<boolean>(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [isDetecting, setIsDetecting] = useState(false);
     const [identifiedColor, setIdentifiedColor] = useState<string>('#FFFFFF');
@@ -86,7 +87,7 @@ export default function CameraIdentifierPage() {
             return;
         }
         try {
-            setHasCameraPermission(null); // Show loading state
+            setIsRequestingPermission(true);
             const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             setStream(mediaStream);
             setHasCameraPermission(true);
@@ -95,6 +96,8 @@ export default function CameraIdentifierPage() {
             setHasCameraPermission(false);
             setStream(null);
             toast({ variant: 'destructive', title: 'Camera Access Denied' });
+        } finally {
+            setIsRequestingPermission(false);
         }
     }, [toast]);
     
@@ -344,7 +347,7 @@ export default function CameraIdentifierPage() {
 
                     </div>
 
-                    {hasCameraPermission === null && (
+                    {isRequestingPermission && (
                          <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-2">
                              <Camera className="h-8 w-8 animate-pulse text-muted-foreground" />
                              <p className="text-muted-foreground">Requesting camera access...</p>
