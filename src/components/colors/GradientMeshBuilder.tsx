@@ -146,7 +146,9 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         observer.observe(canvas);
 
         return () => {
-            observer.unobserve(canvas);
+            if (canvas) {
+                observer.unobserve(canvas);
+            }
         };
     }, [points]); 
 
@@ -243,7 +245,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                                             boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                             zIndex: 10,
                                         }}
-                                        onMouseDown={() => handlePointClick(index)}
+                                        onClick={() => handlePointClick(index)}
                                     />
                                 ))}
                             </div>
