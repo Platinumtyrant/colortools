@@ -161,9 +161,9 @@ const ColorBoxInner = ({
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <div className="group/container flex flex-col h-full w-full cursor-pointer rounded-md border bg-card text-card-foreground shadow-sm overflow-hidden">
+                <div className="group/container flex flex-col h-full w-full cursor-pointer rounded-md bg-card text-card-foreground shadow-sm overflow-hidden">
                     <div
-                        className="relative h-12 w-full"
+                        className="relative h-20 w-full rounded-b-md"
                         style={{ backgroundColor: color }}
                     >
                         <div className="absolute bottom-1 right-1 flex flex-row gap-1 opacity-0 group-hover/container:opacity-100 transition-opacity">
