@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Move, Download, Plus, Trash2 } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Label } from '../ui/label';
+import { Slider } from '../ui/slider';
 
 interface Point {
     id: number;
@@ -71,7 +73,7 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange, o
 };
 
 
-const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean) => {
+const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean, blendPower: number) => {
     const ctx = canvas.getContext('2d');
     if (!ctx || points.length === 0) return;
 
@@ -99,28 +101,29 @@ const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean
         for (let x = 0; x < width; x++) {
             let totalWeight = 0;
             let r = 0, g = 0, b = 0;
-            let exactMatch = false;
 
             for (let i = 0; i < points.length; i++) {
                 const dx = x - pointPositions[i].x;
                 const dy = y - pointPositions[i].y;
                 const distSq = dx * dx + dy * dy;
 
-                if (distSq < 0.1) {
+                if (distSq < 0.001) { // Prevent division by zero if we are exactly on a point
                     r = pointColors[i][0];
                     g = pointColors[i][1];
                     b = pointColors[i][2];
-                    exactMatch = true;
+                    totalWeight = 1;
                     break;
                 }
-                const weight = 1 / (distSq * distSq);
+                
+                // Inverse Distance Weighting: weight = 1 / (distance ^ power)
+                const weight = 1 / Math.pow(distSq, blendPower / 2);
                 r += pointColors[i][0] * weight;
                 g += pointColors[i][1] * weight;
                 b += pointColors[i][2] * weight;
                 totalWeight += weight;
             }
 
-            if (!exactMatch && totalWeight > 0) {
+            if (totalWeight > 0) {
                 r /= totalWeight;
                 g /= totalWeight;
                 b /= totalWeight;
@@ -138,7 +141,7 @@ const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean
 
     // Draw the (potentially scaled) result to the visible canvas
     ctx.imageSmoothingEnabled = isPreview;
-    ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingQuality = isPreview ? 'low' : 'high';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(offscreenCanvas, 0, 0, canvas.width, canvas.height);
 };
@@ -149,6 +152,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     const [points, setPoints] = useState<Point[]>([]);
     const [activePointId, setActivePointId] = useState<number | null>(null);
     const [draggingPointId, setDraggingPointId] = useState<number | null>(null);
+    const [blendPower, setBlendPower] = useState(4);
     const { toast } = useToast();
     const debounceTimeout = useRef<NodeJS.Timeout>();
 
@@ -169,10 +173,24 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        if (!canvas || !points.length) return;
+        
+        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
         const isPreview = draggingPointId !== null;
-        drawMesh(canvas, points, isPreview);
-    }, [points, draggingPointId]);
+        
+        if (isPreview) {
+            drawMesh(canvas, points, true, blendPower);
+        } else {
+            // Debounce the high-quality render
+            debounceTimeout.current = setTimeout(() => {
+                drawMesh(canvas, points, false, blendPower);
+            }, 50);
+        }
+
+        return () => {
+            if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+        };
+    }, [points, draggingPointId, blendPower]);
     
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -183,14 +201,20 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                 const { width, height } = entry.contentRect;
                 canvas.width = width;
                 canvas.height = height;
-                const isPreview = draggingPointId !== null;
-                drawMesh(canvas, points, isPreview);
+                drawMesh(canvas, points, false, blendPower);
             }
         });
 
-        observer.observe(canvas);
-        return () => observer.disconnect();
-    }, [points, draggingPointId]); 
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
+        return () => {
+            if (containerRef.current) {
+                observer.unobserve(containerRef.current);
+            }
+        };
+    }, [points, blendPower]);
 
     const handleExportPng = useCallback(async () => {
         if (points.length === 0) return;
@@ -200,7 +224,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         exportCanvas.width = exportWidth;
         exportCanvas.height = exportHeight;
         
-        drawMesh(exportCanvas, points, false); // false for high quality
+        drawMesh(exportCanvas, points, false, blendPower);
         
         const pngUrl = exportCanvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -211,7 +235,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         document.body.removeChild(link);
         
         toast({ title: "Mesh Exported as PNG!" });
-    }, [points, toast]);
+    }, [points, blendPower, toast]);
 
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, pointId: number) => {
@@ -244,21 +268,13 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
 
     const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
         if (draggingPointId !== null) {
-            (e.target as HTMLDivElement).releasePointerCapture(e.pointerId);
             setDraggingPointId(null);
         }
     };
     
     const handleColorChange = useCallback((newColor: string) => {
         if (!activePointId) return;
-        
         setPoints(prev => prev.map(p => p.id === activePointId ? { ...p, color: newColor } : p));
-        
-        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-        debounceTimeout.current = setTimeout(() => {
-            // The useEffect already handles re-rendering
-        }, 50);
-
     }, [activePointId]);
     
     const handleAddPoint = useCallback(() => {
@@ -312,35 +328,57 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
             <CardContent className="p-0">
                  <div className="grid grid-cols-1 lg:grid-cols-[2.5fr,1fr] gap-8">
                     <div className="space-y-4">
-                        <div className="flex justify-end gap-2">
-                            <TooltipProvider>
+                        <div className="flex justify-between items-center gap-4 flex-wrap">
+                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button onClick={handleAddPoint} size="sm" variant="outline">
-                                            <Plus className="mr-2 h-4 w-4" />
-                                            Add Point
-                                        </Button>
+                                        <div className="flex items-center gap-3 flex-1 min-w-[200px]">
+                                            <Label htmlFor="blend-power" className="text-sm shrink-0 cursor-help">Blend Power</Label>
+                                            <Slider
+                                                id="blend-power"
+                                                min={1}
+                                                max={10}
+                                                step={0.1}
+                                                value={[blendPower]}
+                                                onValueChange={(value) => setBlendPower(value[0])}
+                                            />
+                                        </div>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Add a new color point to the mesh.</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button onClick={handleExportPng} size="sm">
-                                            <Download className="mr-2 h-4 w-4" />
-                                            Export PNG
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Download a 1920x1080 PNG of the gradient.</p>
+                                        <p>Controls how sharply colors blend. Higher values create more defined color zones.</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>
+                            <div className="flex justify-end gap-2">
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button onClick={handleAddPoint} size="sm" variant="outline">
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                Add Point
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Add a new color point to the mesh.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button onClick={handleExportPng} size="sm">
+                                                <Download className="mr-2 h-4 w-4" />
+                                                Export PNG
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Download a 1920x1080 PNG of the gradient.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                         </div>
                         <div
                             ref={containerRef}
-                            className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-muted"
+                            className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-muted cursor-crosshair"
                             onPointerMove={handlePointerMove}
                             onPointerUp={handlePointerUp}
                             onPointerLeave={handlePointerUp}
