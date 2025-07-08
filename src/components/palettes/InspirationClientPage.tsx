@@ -11,6 +11,7 @@ import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { colord } from 'colord';
 import { ColorBox } from '../colors/ColorBox';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const brandKeywords = [
     'gucci', 'discord', 'windows', 'material design', 'bootstrap', 'cyberpunk', 'miku', 'trello', 'spotify', 'facebook', 
@@ -165,15 +166,23 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
       <div className="group/palette" key={`${palette.name}-${paletteIndex}`}>
           <div className="flex justify-between items-center mb-2">
               <p className="text-sm font-medium truncate cursor-pointer" title={palette.name} onClick={() => handleSavePalette(palette)}>{palette.name}</p>
-               <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 opacity-0 group-hover/palette:opacity-100 transition-opacity"
-                onClick={() => handleSavePalette(palette)}
-                title="Save this palette"
-              >
-                  <Plus className="h-4 w-4" />
-              </Button>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 opacity-0 group-hover/palette:opacity-100 transition-opacity"
+                                onClick={() => handleSavePalette(palette)}
+                            >
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Save this palette to your library</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
           </div>
            <div className="flex flex-wrap gap-2">
               {palette.colors.map((color, index) => {

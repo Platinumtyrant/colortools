@@ -15,6 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Plus, Trash2, Library, Palette as PaletteIcon, Copy, MousePointerClick, Lock, Unlock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "../ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -118,16 +120,22 @@ const ColorBoxInner = ({
              <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col cursor-pointer">
                 <div className="relative h-60 w-full" style={{ backgroundColor: color }}>
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
-                        {onAddToLibrary && (
-                            <Button size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }} title="Save to Library">
-                                <Library className="h-4 w-4" />
-                            </Button>
-                        )}
-                         {onRemoveFromLibrary && (
-                            <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }} title="Remove from Library">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        )}
+                        <TooltipProvider>
+                            {onAddToLibrary && (
+                                <Tooltip><TooltipTrigger asChild>
+                                    <Button size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }}>
+                                        <Library className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger><TooltipContent><p>Save to Library</p></TooltipContent></Tooltip>
+                            )}
+                            {onRemoveFromLibrary && (
+                                <Tooltip><TooltipTrigger asChild>
+                                    <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger><TooltipContent><p>Remove from Library</p></TooltipContent></Tooltip>
+                            )}
+                        </TooltipProvider>
                     </div>
                 </div>
                 <CardContent className="p-4 flex-grow flex flex-col justify-start">
@@ -167,39 +175,27 @@ const ColorBoxInner = ({
                         style={{ backgroundColor: color }}
                     >
                         <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 transform flex-row gap-1 opacity-0 transition-opacity group-hover/container:opacity-100">
-                            {onSetActiveColor && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onSetActiveColor(); }} title="Set as Active">
-                                    <MousePointerClick className="h-4 w-4" />
-                                </Button>
-                            )}
-                            {onLockToggle && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onLockToggle(); }} title={isLocked ? "Unlock" : "Lock"}>
-                                    {isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                                </Button>
-                            )}
-                            <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={handleCopy} title="Copy HEX">
-                                <Copy className="h-4 w-4" />
-                            </Button>
-                            {onAddToLibrary && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }} title="Save to Library">
-                                    <Library className="h-4 w-4" />
-                                </Button>
-                            )}
-                            {onRemoveFromLibrary && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }} title="Remove from Library">
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            )}
-                            {onAddToPalette && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToPalette(); }} title="Add to Palette">
-                                    <PaletteIcon className="h-4 w-4" />
-                                </Button>
-                            )}
-                             {onRemoveFromPalette && (
-                                <Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromPalette(); }} title="Remove from Palette">
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            )}
+                             <TooltipProvider delayDuration={200}>
+                                {onSetActiveColor && (
+                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onSetActiveColor(); }}><MousePointerClick className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Set as Active Color</p></TooltipContent></Tooltip>
+                                )}
+                                {onLockToggle && (
+                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onLockToggle(); }}>{isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}</Button></TooltipTrigger><TooltipContent><p>{isLocked ? "Unlock Color" : "Lock Color"}</p></TooltipContent></Tooltip>
+                                )}
+                                 <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={handleCopy}><Copy className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Copy HEX</p></TooltipContent></Tooltip>
+                                {onAddToLibrary && (
+                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }}><Library className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Save to Library</p></TooltipContent></Tooltip>
+                                )}
+                                {onRemoveFromLibrary && (
+                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }}><Trash2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Remove from Library</p></TooltipContent></Tooltip>
+                                )}
+                                {onAddToPalette && (
+                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToPalette(); }}><PaletteIcon className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Add to Current Palette</p></TooltipContent></Tooltip>
+                                )}
+                                {onRemoveFromPalette && (
+                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromPalette(); }}><Trash2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Remove from Palette</p></TooltipContent></Tooltip>
+                                )}
+                            </TooltipProvider>
                         </div>
                     </div>
                     <div className="p-2 flex-grow">

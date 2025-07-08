@@ -654,66 +654,78 @@ function PaletteBuilderPage() {
     ]);
 
     const paletteActions = (
-        <div className="flex w-full flex-col gap-4">
-            <div className="flex items-center gap-2 flex-wrap">
-                <Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}>
-                    <Dices className="mr-2 h-4 w-4" />
-                    Mix
-                </Button>
-                <Button onClick={handleRandomize} size="sm" variant="outline">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Randomize
-                </Button>
-                <Button onClick={handleUnlockAll} variant="outline" size="sm" disabled={!hasLockedColors}>
-                    <Unlock className="mr-2 h-4 w-4" />
-                    Unlock All
-                </Button>
-                <Button onClick={handleOpenSaveDialog}>
-                    {editingPaletteId ? <Pencil className="mr-2 h-4 w-4" /> : null}
-                    {editingPaletteId ? 'Update Palette' : 'Save'}
-                </Button>
+        <TooltipProvider>
+            <div className="flex w-full flex-col gap-4">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <ShadTooltip>
+                        <TooltipTrigger asChild><Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}><Dices className="mr-2 h-4 w-4" />Mix</Button></TooltipTrigger>
+                        <TooltipContent><p>Generates a new palette using a different harmony.</p></TooltipContent>
+                    </ShadTooltip>
+                     <ShadTooltip>
+                        <TooltipTrigger asChild><Button onClick={handleRandomize} size="sm" variant="outline"><Sparkles className="mr-2 h-4 w-4" />Randomize</Button></TooltipTrigger>
+                        <TooltipContent><p>Generates a completely new random palette.</p></TooltipContent>
+                    </ShadTooltip>
+                     <ShadTooltip>
+                        <TooltipTrigger asChild><Button onClick={handleUnlockAll} variant="outline" size="sm" disabled={!hasLockedColors}><Unlock className="mr-2 h-4 w-4" />Unlock All</Button></TooltipTrigger>
+                        <TooltipContent><p>Unlocks all colors in the current palette.</p></TooltipContent>
+                    </ShadTooltip>
+                     <ShadTooltip>
+                        <TooltipTrigger asChild>
+                            <Button onClick={handleOpenSaveDialog}>
+                                {editingPaletteId ? <Pencil className="mr-2 h-4 w-4" /> : null}
+                                {editingPaletteId ? 'Update Palette' : 'Save'}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Save the current palette to your library.</p></TooltipContent>
+                    </ShadTooltip>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
+                    <Select 
+                        value={generationType} 
+                        onValueChange={(value) => {
+                            if (!isHarmonyLocked) {
+                                setGenerationType(value as GenerationType);
+                            }
+                        }}
+                        disabled={hasLockedColors}
+                    >
+                        <SelectTrigger id="generationType" className="w-[150px] h-9">
+                            <div className="flex items-center gap-1.5">
+                            <SelectValue placeholder="Select type" />
+                            {isHarmonyLocked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                {allGenerationTypes.map(type => (
+                                    <SelectItem key={type} value={type} className="capitalize" disabled={isHarmonyLocked}>
+                                        {type}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                            <Separator className="my-1" />
+                             <ShadTooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="p-1">
+                                        <button
+                                            onPointerDown={(e) => e.preventDefault()}
+                                            onClick={() => setIsHarmonyLocked(v => !v)}
+                                            className="w-full flex items-center justify-start gap-2 text-sm p-1.5 rounded-sm hover:bg-accent focus:bg-accent outline-none"
+                                        >
+                                            {isHarmonyLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                                            <span>{isHarmonyLocked ? 'Unlock Harmony' : 'Lock Harmony'}</span>
+                                        </button>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="right"><p>Prevents the harmony type from changing during randomization.</p></TooltipContent>
+                            </ShadTooltip>
+                        </SelectContent>
+                    </Select>
+                    {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change type.</p>}
+                </div>
             </div>
-            <div className="flex items-center gap-2">
-                <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
-                <Select 
-                    value={generationType} 
-                    onValueChange={(value) => {
-                        if (!isHarmonyLocked) {
-                            setGenerationType(value as GenerationType);
-                        }
-                    }}
-                    disabled={hasLockedColors}
-                >
-                    <SelectTrigger id="generationType" className="w-[150px] h-9">
-                        <div className="flex items-center gap-1.5">
-                           <SelectValue placeholder="Select type" />
-                           {isHarmonyLocked && <Lock className="h-3 w-3 text-muted-foreground" />}
-                        </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            {allGenerationTypes.map(type => (
-                                <SelectItem key={type} value={type} className="capitalize" disabled={isHarmonyLocked}>
-                                    {type}
-                                </SelectItem>
-                            ))}
-                        </SelectGroup>
-                        <Separator className="my-1" />
-                        <div className="p-1">
-                            <button
-                                onPointerDown={(e) => e.preventDefault()}
-                                onClick={() => setIsHarmonyLocked(v => !v)}
-                                className="w-full flex items-center justify-start gap-2 text-sm p-1.5 rounded-sm hover:bg-accent focus:bg-accent outline-none"
-                            >
-                                {isHarmonyLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                                <span>{isHarmonyLocked ? 'Unlock Harmony' : 'Lock Harmony'}</span>
-                            </button>
-                        </div>
-                    </SelectContent>
-                </Select>
-                {hasLockedColors && <p className="text-xs text-muted-foreground mt-1">Unlock all to change type.</p>}
-            </div>
-        </div>
+        </TooltipProvider>
     );
 
     return (
@@ -768,10 +780,19 @@ function PaletteBuilderPage() {
                                             onBlur={handleInputBlur}
                                             className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
                                         />
-                                        <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
-                                            <Pipette className="h-4 w-4" />
-                                            <span className="sr-only">Pick from screen</span>
-                                        </Button>
+                                        <TooltipProvider>
+                                            <ShadTooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+                                                        <Pipette className="h-4 w-4" />
+                                                        <span className="sr-only">Pick from screen</span>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Pick a color from your screen</p>
+                                                </TooltipContent>
+                                            </ShadTooltip>
+                                        </TooltipProvider>
                                     </div>
                                 </div>
                                 <div className="flex gap-4 h-[280px]">
@@ -843,6 +864,7 @@ export default PaletteBuilderPage;
     
 
     
+
 
 
 
