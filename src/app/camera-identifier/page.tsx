@@ -20,6 +20,7 @@ export default function CameraIdentifierPage() {
     const animationFrameId = useRef<number>();
     const imageContainerRef = useRef<HTMLDivElement>(null);
     const lastDragPosition = useRef<{ x: number, y: number } | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
@@ -85,6 +86,7 @@ export default function CameraIdentifierPage() {
             return;
         }
         try {
+            setHasCameraPermission(null); // Show loading state
             const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             setStream(mediaStream);
             setHasCameraPermission(true);
@@ -97,7 +99,7 @@ export default function CameraIdentifierPage() {
     }, [toast]);
     
     const stopCamera = useCallback(() => {
-        setStream(null); // This triggers the useEffect cleanup to stop tracks
+        setStream(null);
         setIsDetecting(false);
     }, []);
     
@@ -115,11 +117,6 @@ export default function CameraIdentifierPage() {
             }
         };
     }, [stream]);
-    
-    useEffect(() => {
-        startCamera();
-    }, [startCamera]);
-
 
     const detectColorFromVideo = useCallback(() => {
         if (!videoRef.current || !canvasRef.current || videoRef.current.readyState < 2) {
@@ -177,6 +174,7 @@ export default function CameraIdentifierPage() {
         setSnapshot(null);
         setCrosshairPosition(null);
         setTransform({ scale: 1, x: 0, y: 0 });
+        stopCamera();
     };
     
     const handleIdentifyFromSnapshot = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -186,25 +184,17 @@ export default function CameraIdentifierPage() {
         if (!context) return;
         
         const rect = e.currentTarget.getBoundingClientRect();
-        
-        // Calculate click coordinates relative to the image container (this is the visual click position)
         const xOnElement = e.clientX - rect.left;
         const yOnElement = e.clientY - rect.top;
-        
-        // Inverse the transform to find where the click happened on the original, untransformed image
         const xOnImage = (xOnElement - transform.x) / transform.scale;
         const yOnImage = (yOnElement - transform.y) / transform.scale;
-
-        // Scale these coordinates to the actual canvas resolution for color picking
         const canvasX = xOnImage * (canvas.width / rect.width);
         const canvasY = yOnImage * (canvas.height / rect.height);
         
-        // Check if the click is within the bounds of the image
         if (canvasX < 0 || canvasX > canvas.width || canvasY < 0 || canvasY > canvas.height) {
             return;
         }
 
-        // Set the crosshair position to the VISUAL click location, so it's always aligned
         setCrosshairPosition({ x: (xOnElement / rect.width) * 100, y: (yOnElement / rect.height) * 100 });
         
         const pixelData = context.getImageData(canvasX, canvasY, 1, 1).data;
@@ -219,14 +209,11 @@ export default function CameraIdentifierPage() {
         const y = e.clientY - rect.top;
 
         if (transform.scale > 1) {
-            // Zoom out
             setTransform({ scale: 1, x: 0, y: 0 });
         } else {
-            // Zoom in
             const newScale = 3;
             setTransform({
                 scale: newScale,
-                // Center the new view on the clicked point
                 x: -x * (newScale - 1),
                 y: -y * (newScale - 1),
             });
@@ -248,24 +235,54 @@ export default function CameraIdentifierPage() {
         const dx = e.clientX - lastDragPosition.current.x;
         const dy = e.clientY - lastDragPosition.current.y;
         lastDragPosition.current = { x: e.clientX, y: e.clientY };
-
-        setTransform(t => ({
-            ...t,
-            x: t.x + dx,
-            y: t.y + dy,
-        }));
+        setTransform(t => ({ ...t, x: t.x + dx, y: t.y + dy }));
     };
 
     const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
         lastDragPosition.current = null;
     };
 
+    const handleUploadButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        stopCamera();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageUrl = e.target?.result as string;
+            if (!imageUrl) return;
+
+            const img = new Image();
+            img.onload = () => {
+                if (canvasRef.current) {
+                    const canvas = canvasRef.current;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const context = canvas.getContext('2d');
+                    if (context) {
+                        context.drawImage(img, 0, 0, img.width, img.height);
+                        setSnapshot(imageUrl);
+                    }
+                }
+            };
+            img.src = imageUrl;
+        };
+        reader.readAsDataURL(file);
+
+        if (event.target) event.target.value = '';
+    };
+
     return (
         <main className="flex-1 w-full p-4 md:p-8 space-y-8">
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             <CardHeader className="p-0 text-center max-w-4xl mx-auto">
                 <CardTitle className="text-3xl">Live Color Identifier</CardTitle>
                 <CardDescription>
-                    Point your camera to identify colors. Freeze the frame, then double-tap to zoom for precise selection.
+                    Point your camera or upload an image to identify colors. Freeze the frame, then double-tap to zoom for precise selection.
                 </CardDescription>
             </CardHeader>
             
@@ -280,7 +297,15 @@ export default function CameraIdentifierPage() {
                         onDoubleClick={handleDoubleClick}
                         onClick={snapshot ? handleIdentifyFromSnapshot : undefined}
                     >
-                         <video ref={videoRef} className={`h-full w-full object-cover ${snapshot ? 'hidden' : 'block'}`} autoPlay muted playsInline />
+                         {!isStreamActive && !snapshot && (
+                             <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2 text-center p-4">
+                                <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                                <p className="font-semibold mt-2">Identify Colors</p>
+                                <p className="text-sm text-muted-foreground">Start your camera or upload an image.</p>
+                            </div>
+                         )}
+
+                         <video ref={videoRef} className={`h-full w-full object-cover ${!isStreamActive || snapshot ? 'hidden' : 'block'}`} autoPlay muted playsInline />
                          <canvas ref={canvasRef} className="hidden" />
                          
                          <AnimatePresence>
@@ -294,11 +319,7 @@ export default function CameraIdentifierPage() {
                                     backgroundPosition: 'center',
                                     cursor: isZoomed ? 'grab' : 'zoom-in',
                                 }}
-                                animate={{
-                                    scale: transform.scale,
-                                    x: transform.x,
-                                    y: transform.y,
-                                }}
+                                animate={{ scale: transform.scale, x: transform.x, y: transform.y }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                             />
                          )}
@@ -330,17 +351,6 @@ export default function CameraIdentifierPage() {
                          </div>
                     )}
 
-                    {hasCameraPermission === false && (
-                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center p-4">
-                            <Alert variant="destructive">
-                                <CameraOff className="h-4 w-4" />
-                                <AlertTitle>Camera Access Denied</AlertTitle>
-                                <AlertDescription>
-                                    Please enable camera permissions and refresh the page.
-                                </AlertDescription>
-                            </Alert>
-                        </div>
-                    )}
                 </Card>
 
                 <div className="flex flex-col gap-4">
@@ -348,13 +358,17 @@ export default function CameraIdentifierPage() {
                         {isStreamActive ? (
                             <Button onClick={stopCamera} variant="outline"><CameraOff className="mr-2 h-4 w-4" /> Stop Camera</Button>
                         ) : (
-                            <Button onClick={startCamera}><Camera className="mr-2 h-4 w-4" /> Start Camera</Button>
+                            <Button onClick={startCamera} disabled={!!snapshot}><Camera className="mr-2 h-4 w-4" /> Start Camera</Button>
                         )}
-
+                        
                         {snapshot ? (
                              <Button onClick={handleClearSnapshot} variant="outline"><X className="mr-2 h-4 w-4" /> Clear Snapshot</Button>
                         ) : (
-                             <Button onClick={handleSnapshot} disabled={!isStreamActive}><ImageIcon className="mr-2 h-4 w-4" /> Freeze Frame</Button>
+                             isStreamActive ? (
+                                 <Button onClick={handleSnapshot}><ImageIcon className="mr-2 h-4 w-4" /> Freeze Frame</Button>
+                             ) : (
+                                 <Button onClick={handleUploadButtonClick} variant="outline"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</Button>
+                             )
                         )}
                     </div>
                     
