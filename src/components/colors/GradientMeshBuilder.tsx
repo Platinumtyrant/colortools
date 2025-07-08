@@ -7,7 +7,7 @@ import chroma from 'chroma-js';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Move, Download, Plus, Trash2, FileImage, FileText } from 'lucide-react';
+import { Move, Download, Plus, Trash2 } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '../ui/label';
@@ -267,44 +267,6 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         
         toast({ title: "Mesh Exported as PNG!" });
     }, [points, toast]);
-    
-    const handleExportSvg = useCallback(() => {
-      const svgWidth = 1920;
-      const svgHeight = 1080;
-
-      let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
-      svgContent += `<style>.blend { mix-blend-mode: screen; }</style>`;
-      svgContent += `<defs>`;
-
-      points.forEach((point) => {
-          const radius = point.strength * 15;
-          const falloffStop = ((point.falloff -1) / 9) * 80;
-          svgContent += `
-              <radialGradient id="grad-${point.id}" cx="${point.x}%" cy="${point.y}%" r="${radius}%">
-                  <stop offset="${falloffStop}%" stop-color="${point.color}" />
-                  <stop offset="100%" stop-color="${point.color}" stop-opacity="0" />
-              </radialGradient>`;
-      });
-
-      svgContent += `</defs>`;
-      svgContent += `<rect width="100%" height="100%" fill="black" />`;
-
-      points.forEach((point) => {
-          svgContent += `<rect width="100%" height="100%" fill="url(#grad-${point.id})" class="blend" />`;
-      });
-      svgContent += `</svg>`;
-
-      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'gradient-mesh.svg';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      toast({ title: "Mesh Exported as SVG!" });
-    }, [points, toast]);
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, pointId: number) => {
         e.preventDefault();
@@ -435,26 +397,18 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                                         <p>Add a new color point to the mesh.</p>
                                     </TooltipContent>
                                 </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button onClick={handleExportPng} size="sm">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Export PNG
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Export as a 1920x1080 PNG image.</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             </TooltipProvider>
-
-                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button size="sm">
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Export
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem onClick={handleExportPng}>
-                                        <FileImage className="mr-2 h-4 w-4" />
-                                        <span>PNG (1920x1080)</span>
-                                    </DropdownMenuItem>
-                                     <DropdownMenuItem onClick={handleExportSvg}>
-                                        <FileText className="mr-2 h-4 w-4" />
-                                        <span>SVG (Vector)</span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
                         </div>
                         <div
                             ref={containerRef}
