@@ -38,9 +38,9 @@ export default async function RootLayout({
           <PaletteBuilderProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="light"
+              defaultTheme="system"
               enableSystem
-              disableTransitionOnChange
+              themes={['light', 'dark', 'black']}
             >
               <MainLayout>
                 {children}

@@ -9,7 +9,7 @@ import hwbPlugin from 'colord/plugins/hwb';
 import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
 import chroma from 'chroma-js';
-
+import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,7 +25,7 @@ import { simulate, type SimulationType } from '@/lib/colorblind';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { ContrastGrid } from '@/components/colors/ContrastGrid';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
-import { CheckCircle2, AlertTriangle, Palette, Library } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Palette, Library, LineChart as LineChartIcon } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -111,8 +111,9 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
 
 export default function AnalysisPage() {
     const { toast } = useToast();
+    const { palette: paletteFromBuilder } = usePaletteBuilder();
     const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>([]);
-    const [activePalette, setActivePalette] = useState<SavedPalette | null>(null);
+    const [source, setSource] = useState<'builder' | number>('builder');
 
     const [simulationType, setSimulationType] = useState<SimulationType>('normal');
     const [correctLightness, setCorrectLightness] = useState(true);
@@ -133,22 +134,28 @@ export default function AnalysisPage() {
         }
     }, [toast]);
 
+    const paletteHexes = useMemo(() => {
+      if (source === 'builder') {
+        return paletteFromBuilder.map(p => p.hex);
+      }
+      const selected = savedPalettes.find(p => p.id === source);
+      return selected?.colors || [];
+    }, [source, paletteFromBuilder, savedPalettes]);
+    
     useEffect(() => {
-        if (activePalette && activePalette.colors.length > 0) {
-            setFgColor(activePalette.colors[0]);
-            setBgColor(activePalette.colors.length > 1 ? activePalette.colors[1] : '#FFFFFF');
-        }
-    }, [activePalette]);
+      // Initialize the color pickers if a palette is loaded, but don't force them to stay in sync
+      if (paletteHexes.length > 0 && fgColor === '#000000' && bgColor === '#FFFFFF') {
+          setFgColor(paletteHexes[0]);
+          if(paletteHexes.length > 1) {
+            setBgColor(paletteHexes[1]);
+          }
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [paletteHexes]);
 
-    const handleSelectPalette = (id: string) => {
-        const paletteId = parseInt(id, 10);
-        const selected = savedPalettes.find(p => p.id === paletteId);
-        if (selected) {
-            setActivePalette(selected);
-        }
+    const handleSelectSource = (id: string) => {
+        setSource(id === 'builder' ? 'builder' : parseInt(id, 10));
     }
-
-    const paletteHexes = useMemo(() => activePalette?.colors || [], [activePalette]);
 
     const interpolationMode = useMemo(() => {
         if (colorSpace === 'hwb' || colorSpace === 'srgb') return 'lch';
@@ -177,7 +184,7 @@ export default function AnalysisPage() {
     const graphData = useMemo(() => getGraphData(analysisSourcePalette, colorSpace), [analysisSourcePalette, colorSpace]);
     
     const isPaletteColorblindSafe = useMemo(() => {
-        if (!activePalette || activePalette.colors.length < 2) return true;
+        if (paletteHexes.length < 2) return true;
 
         for(let i=0; i < simulatedPalette.length - 1; i++){
             if(chroma.contrast(simulatedPalette[i], simulatedPalette[i+1]) < 1.15){
@@ -185,121 +192,161 @@ export default function AnalysisPage() {
             }
         }
         return true;
-    }, [activePalette, simulatedPalette]);
+    }, [paletteHexes, simulatedPalette]);
 
+    const hasPalette = paletteHexes.length > 0;
 
     const renderAnalysisPanel = () => (
-         <Card className="h-full flex flex-col mt-6">
-            <Tabs defaultValue="palette-analysis" className="w-full flex flex-col flex-grow">
-                <div className="p-4 border-b shrink-0">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="palette-analysis">Palette Analysis</TabsTrigger>
-                        <TabsTrigger value="contrast-checker">Contrast Checker</TabsTrigger>
-                    </TabsList>
-                </div>
-                <TabsContent value="palette-analysis" className="p-4 flex-grow min-h-0 overflow-y-auto">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center text-sm">
-                                <Label>Simulated View</Label>
-                                <AnimatePresence>
-                                    {isPaletteColorblindSafe ? (
-                                        <motion.span
-                                            key="safe"
-                                            initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
-                                            className="flex items-center text-xs text-green-500 gap-1.5"
-                                        >
-                                            <CheckCircle2 className="h-3.5 w-3.5" /> Adjacent contrast OK
-                                        </motion.span>
-                                    ) : (
-                                         <motion.span
-                                            key="unsafe"
-                                            initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
-                                            className="flex items-center text-xs text-amber-500 gap-1.5"
-                                        >
-                                            <AlertTriangle className="h-3.5 w-3.5" /> Low adjacent contrast
-                                        </motion.span>
-                                    )}
-                                </AnimatePresence>
-                            </div>
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center text-sm">
+                        <Label>Simulated View</Label>
+                        <AnimatePresence>
+                            {isPaletteColorblindSafe ? (
+                                <motion.span
+                                    key="safe"
+                                    initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                                    className="flex items-center text-xs text-green-500 gap-1.5"
+                                >
+                                    <CheckCircle2 className="h-3.5 w-3.5" /> Adjacent contrast OK
+                                </motion.span>
+                            ) : (
+                                 <motion.span
+                                    key="unsafe"
+                                    initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                                    className="flex items-center text-xs text-amber-500 gap-1.5"
+                                >
+                                    <AlertTriangle className="h-3.5 w-3.5" /> Low adjacent contrast
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
-                            <div className="relative group/palette w-full h-16 rounded-md overflow-hidden border">
-                                <div className="h-full w-full flex">
-                                    {simulatedPalette.map((color, index) => (
-                                        <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                    <div className="relative group/palette w-full h-16 rounded-md overflow-hidden border">
+                        <div className="h-full w-full flex">
+                            {simulatedPalette.map((color, index) => (
+                                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                       <div className="space-y-1.5">
+                            <Label className="text-sm">Simulate Deficiency</Label>
+                            <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                                <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
+                                <Label htmlFor="sb-normal" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                                <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
+                                <Label htmlFor="sb-deutan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
+                                <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
+                                <Label htmlFor="sb-deuteranomaly" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
+                                <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
+                                <Label htmlFor="sb-protan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
+                                <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
+                                <Label htmlFor="sb-tritan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
+                            </RadioGroup>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label className="text-sm">Graph Color Space</Label>
+                            <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select colorspace..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(colorSpaceInfo).map(([key, value]) => (
+                                        <SelectItem key={key} value={key}>{value.name}</SelectItem>
                                     ))}
-                                </div>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                                <TooltipProvider>
+                                    <ShadTooltip>
+                                        <TooltipTrigger asChild>
+                                            <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                                        </TooltipContent>
+                                    </ShadTooltip>
+                                </TooltipProvider>
                             </div>
-
-                            <div className="flex flex-col gap-4">
-                               <div className="space-y-1.5">
-                                    <Label className="text-sm">Simulate Deficiency</Label>
-                                    <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
-                                        <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
-                                        <Label htmlFor="sb-normal" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
-                                        <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
-                                        <Label htmlFor="sb-deutan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
-                                        <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
-                                        <Label htmlFor="sb-deuteranomaly" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
-                                        <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
-                                        <Label htmlFor="sb-protan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
-                                        <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
-                                        <Label htmlFor="sb-tritan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
-                                    </RadioGroup>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-sm">Graph Color Space</Label>
-                                    <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select colorspace..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {Object.entries(colorSpaceInfo).map(([key, value]) => (
-                                                <SelectItem key={key} value={key}>{value.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                                        <TooltipProvider>
-                                            <ShadTooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
-                                                </TooltipContent>
-                                            </ShadTooltip>
-                                        </TooltipProvider>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
-                                        <Label htmlFor="correctLightness">Correct lightness</Label>
-                                    </div>
-                                </div>
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
+                                <Label htmlFor="correctLightness">Correct lightness</Label>
                             </div>
                         </div>
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                            <div className="space-y-2 pt-4">
-                                {graphData.map((graph, i) => (
-                                    <ChartDisplay 
-                                        key={`${graph.title}-${i}`}
-                                        data={graph.data} 
-                                        title={graph.title} 
-                                        description={graph.description}
-                                        color={`hsl(var(--chart-${(i % 5) + 1}))`}
-                                    />
-                                ))}
-                            </div>
-                        </motion.div>
                     </div>
+                </div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                    <div className="space-y-2 pt-4">
+                        {graphData.map((graph, i) => (
+                            <ChartDisplay 
+                                key={`${graph.title}-${i}`}
+                                data={graph.data} 
+                                title={graph.title} 
+                                description={graph.description}
+                                color={`hsl(var(--chart-${(i % 5) + 1}))`}
+                            />
+                        ))}
+                    </div>
+                </motion.div>
+            </div>
+        </div>
+    );
+    
+    const renderNoPaletteState = () => (
+         <div className="flex h-full min-h-[50vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center mt-6">
+            <LineChartIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-medium">
+                No Palette Loaded
+            </h3>
+            <p className="mb-4 mt-2 text-sm text-muted-foreground">
+                The current palette in the builder is empty. <br />Go build one or select a saved palette to begin analysis.
+            </p>
+        </div>
+    );
+
+    return (
+        <main className="flex-1 w-full p-4 md:p-8">
+            <CardHeader className="p-0 mb-4">
+                <CardTitle className="text-3xl">Palette Analyzer</CardTitle>
+                <CardDescription>Select a palette to analyze its properties, color-blind simulations, and contrast ratios.</CardDescription>
+            </CardHeader>
+
+            <div className="max-w-xs mb-8">
+                <Select value={String(source)} onValueChange={handleSelectSource}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a palette..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                        <SelectItem value="builder">Current Builder Palette</SelectItem>
+                        {savedPalettes.length > 0 && (
+                            savedPalettes.map(p => (
+                                <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                            ))
+                        )}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+            </div>
+            
+             <Tabs defaultValue="palette-analysis" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="palette-analysis">Palette Analysis</TabsTrigger>
+                    <TabsTrigger value="contrast-checker">Contrast Checker</TabsTrigger>
+                </TabsList>
+                <TabsContent value="palette-analysis" className="p-4 flex-grow min-h-0 overflow-y-auto">
+                   {hasPalette ? renderAnalysisPanel() : renderNoPaletteState()}
                 </TabsContent>
                 <TabsContent value="contrast-checker" className="p-4 flex-grow min-h-0 overflow-y-auto">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
-                            <ContrastGrid colors={paletteHexes} />
+                             {hasPalette && <ContrastGrid colors={paletteHexes} />}
                         </div>
                         <div className="space-y-4">
                              <div className="grid grid-cols-2 gap-4">
@@ -345,46 +392,6 @@ export default function AnalysisPage() {
                     </div>
                 </TabsContent>
             </Tabs>
-        </Card>
-    );
-
-    return (
-        <main className="flex-1 w-full p-4 md:p-8">
-            <CardHeader className="p-0 mb-4">
-                <CardTitle className="text-3xl">Palette Analyzer</CardTitle>
-                <CardDescription>Select one of your saved palettes to analyze its properties, color-blind simulations, and contrast ratios.</CardDescription>
-            </CardHeader>
-
-            <div className="max-w-xs">
-                <Select onValueChange={handleSelectPalette}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a saved palette..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                        {savedPalettes.length > 0 ? (
-                            savedPalettes.map(p => (
-                                <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
-                            ))
-                        ) : (
-                            <SelectItem value="none" disabled>No palettes found</SelectItem>
-                        )}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-            </div>
-
-            {activePalette ? renderAnalysisPanel() : (
-                <div className="flex h-full min-h-[50vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center mt-6">
-                    <Library className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">
-                        No Palette Selected
-                    </h3>
-                    <p className="mb-4 mt-2 text-sm text-muted-foreground">
-                        Please select a palette from the dropdown above to begin analysis.
-                    </p>
-                </div>
-            )}
         </main>
     );
 }
