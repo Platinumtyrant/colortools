@@ -1,10 +1,11 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { PantoneCategory } from '@/lib/pantone-colors';
+import type { PantoneCategory, PantoneColor } from '@/lib/pantone-colors';
+import { sortPantoneNumerically } from '@/lib/pantone-colors';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { useToast } from '@/hooks/use-toast';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
@@ -64,41 +65,38 @@ export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: Pantone
     toast({ title: 'Color removed from palette.' });
   }, [setPalette, toast]);
 
-  const renderCategoryTabs = (categories: PantoneCategory[], system: 'pms' | 'fhi') => (
-    <Tabs defaultValue={categories[0]?.name} className="w-full">
-        <div className="flex justify-center">
-            <TabsList className="h-auto flex-wrap justify-center">
-                {categories.map((category) => (
-                    <TabsTrigger key={`${system}-${category.name}`} value={category.name}>{category.name}</TabsTrigger>
-                ))}
-            </TabsList>
-        </div>
-        {categories.map(category => (
-            <TabsContent key={`${system}-${category.name}`} value={category.name} className="mt-6">
-                <div className="flex flex-wrap gap-4">
-                    {category.colors.map((color, index) => {
-                        const normalizedColor = colord(color.hex).toHex();
-                        const isInLibrary = libraryHexes.has(normalizedColor);
-                        const isInPalette = paletteHexes.has(normalizedColor);
-                        return (
-                            <div className="w-40" key={`${color.name}-${index}`}>
-                                <ColorBox
-                                    color={color.hex}
-                                    name={color.name}
-                                    info={color.cmyk}
-                                    variant="compact"
-                                    onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
-                                    onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
-                                    onAddToPalette={!isInPalette ? () => handleAddToPalette(color.hex) : undefined}
-                                    onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color.hex) : undefined}
-                                />
-                            </div>
-                        )
-                    })}
+  const allPmsColors = useMemo(() => 
+    pmsCategories.flatMap(c => c.colors).sort(sortPantoneNumerically), 
+    [pmsCategories]
+  );
+  
+  const allFhiColors = useMemo(() => 
+    fhiCategories.flatMap(c => c.colors).sort(sortPantoneNumerically), 
+    [fhiCategories]
+  );
+  
+  const renderColorGrid = (colors: PantoneColor[]) => (
+    <div className="flex flex-wrap gap-4">
+        {colors.map((color, index) => {
+            const normalizedColor = colord(color.hex).toHex();
+            const isInLibrary = libraryHexes.has(normalizedColor);
+            const isInPalette = paletteHexes.has(normalizedColor);
+            return (
+                <div className="w-40" key={`${color.name}-${index}`}>
+                    <ColorBox
+                        color={color.hex}
+                        name={color.name}
+                        info={color.cmyk}
+                        variant="compact"
+                        onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
+                        onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
+                        onAddToPalette={!isInPalette ? () => handleAddToPalette(color.hex) : undefined}
+                        onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color.hex) : undefined}
+                    />
                 </div>
-            </TabsContent>
-        ))}
-    </Tabs>
+            )
+        })}
+    </div>
   );
 
   return (
@@ -116,10 +114,10 @@ export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: Pantone
                 </TabsList>
 
                 <TabsContent value="pms" className="mt-6">
-                    {pmsCategories.length > 0 ? renderCategoryTabs(pmsCategories, 'pms') : <p>No PMS color data available.</p>}
+                    {allPmsColors.length > 0 ? renderColorGrid(allPmsColors) : <p>No PMS color data available.</p>}
                 </TabsContent>
                 <TabsContent value="fhi" className="mt-6">
-                    {fhiCategories.length > 0 ? renderCategoryTabs(fhiCategories, 'fhi') : <p>No FHI color data available.</p>}
+                    {allFhiColors.length > 0 ? renderColorGrid(allFhiColors) : <p>No FHI color data available.</p>}
                 </TabsContent>
             </Tabs>
         </div>
