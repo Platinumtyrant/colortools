@@ -187,7 +187,7 @@ export default function CameraIdentifierPage() {
         
         const rect = e.currentTarget.getBoundingClientRect();
         
-        // Calculate click coordinates relative to the image container
+        // Calculate click coordinates relative to the image container (this is the visual click position)
         const xOnElement = e.clientX - rect.left;
         const yOnElement = e.clientY - rect.top;
         
@@ -195,7 +195,7 @@ export default function CameraIdentifierPage() {
         const xOnImage = (xOnElement - transform.x) / transform.scale;
         const yOnImage = (yOnElement - transform.y) / transform.scale;
 
-        // Scale these coordinates to the actual canvas resolution
+        // Scale these coordinates to the actual canvas resolution for color picking
         const canvasX = xOnImage * (canvas.width / rect.width);
         const canvasY = yOnImage * (canvas.height / rect.height);
         
@@ -204,7 +204,8 @@ export default function CameraIdentifierPage() {
             return;
         }
 
-        setCrosshairPosition({ x: (xOnImage / rect.width) * 100, y: (yOnImage / rect.height) * 100 });
+        // Set the crosshair position to the VISUAL click location, so it's always aligned
+        setCrosshairPosition({ x: (xOnElement / rect.width) * 100, y: (yOnElement / rect.height) * 100 });
         
         const pixelData = context.getImageData(canvasX, canvasY, 1, 1).data;
         const hex = `#${("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6)}`;
