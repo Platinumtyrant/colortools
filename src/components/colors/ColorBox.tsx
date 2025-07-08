@@ -10,12 +10,13 @@ import labPlugin from 'colord/plugins/lab';
 import { useAllDescriptiveColorNames } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Trash2, Library, Palette as PaletteIcon, Copy, MousePointerClick, Lock, Unlock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "../ui/button";
 
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
@@ -77,6 +78,35 @@ export const ColorDetails = ({ color }: { color: string }) => {
     );
 };
 
+const ActionIcon = ({ children, onClick, title, variant='ghost', className }: { 
+    children: React.ReactNode, 
+    onClick: (e: React.MouseEvent | React.KeyboardEvent) => void, 
+    title: string,
+    variant?: 'ghost' | 'destructive',
+    className?: string
+}) => {
+    const finalClassName = variant === 'destructive' 
+        ? "bg-rose-500/50 hover:bg-rose-500/80 text-white" 
+        : "bg-black/20 hover:bg-black/40 text-white";
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div 
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); onClick(e); }}
+                    onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); onClick(e); }}}
+                    className={cn(buttonVariants({ variant: 'ghost', size: 'icon'}), "h-7 w-7", finalClassName, className)}
+                >
+                    {children}
+                </div>
+            </TooltipTrigger>
+            <TooltipContent><p>{title}</p></TooltipContent>
+        </Tooltip>
+    );
+};
+
 
 const ColorBoxInner = ({
     color,
@@ -107,7 +137,7 @@ const ColorBoxInner = ({
         
     const { toast } = useToast();
     
-    const handleCopy = (e: React.MouseEvent) => {
+    const handleCopy = (e: React.MouseEvent | React.KeyboardEvent) => {
         e.stopPropagation(); // Prevent the popover from opening
         const hex = colord(color).toHex().toUpperCase();
         navigator.clipboard.writeText(hex).then(() => {
@@ -122,18 +152,24 @@ const ColorBoxInner = ({
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
                         <TooltipProvider>
                             {onAddToLibrary && (
-                                <Tooltip><TooltipTrigger asChild>
-                                    <Button size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }}>
-                                        <Library className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger><TooltipContent><p>Save to Library</p></TooltipContent></Tooltip>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div role="button" tabIndex={0} onClick={(e) => {e.stopPropagation(); onAddToLibrary()}} onKeyDown={(e) => {if(e.key === 'Enter' || e.key === ' ') onAddToLibrary()}} className={cn(buttonVariants({size: 'icon'}), "h-8 w-8")}>
+                                      <Library className="h-4 w-4" />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent><p>Save to Library</p></TooltipContent>
+                                </Tooltip>
                             )}
                             {onRemoveFromLibrary && (
-                                <Tooltip><TooltipTrigger asChild>
-                                    <Button size="icon" variant="destructive" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger><TooltipContent><p>Remove from Library</p></TooltipContent></Tooltip>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div role="button" tabIndex={0} onClick={(e) => {e.stopPropagation(); onRemoveFromLibrary()}} onKeyDown={(e) => {if(e.key === 'Enter' || e.key === ' ') onRemoveFromLibrary()}} className={cn(buttonVariants({size: 'icon', variant: 'destructive'}), "h-8 w-8")}>
+                                      <Trash2 className="h-4 w-4" />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent><p>Remove from Library</p></TooltipContent>
+                                </Tooltip>
                             )}
                         </TooltipProvider>
                     </div>
@@ -179,25 +215,13 @@ const ColorBoxInner = ({
                     >
                         <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 transform flex-row gap-1 opacity-0 transition-opacity group-hover/container:opacity-100">
                              <TooltipProvider delayDuration={200}>
-                                {onSetActiveColor && (
-                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onSetActiveColor(); }}><MousePointerClick className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Set as Active Color</p></TooltipContent></Tooltip>
-                                )}
-                                {onLockToggle && (
-                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onLockToggle(); }}>{isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}</Button></TooltipTrigger><TooltipContent><p>{isLocked ? "Unlock Color" : "Lock Color"}</p></TooltipContent></Tooltip>
-                                )}
-                                 <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={handleCopy}><Copy className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Copy HEX</p></TooltipContent></Tooltip>
-                                {onAddToLibrary && (
-                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToLibrary(); }}><Library className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Save to Library</p></TooltipContent></Tooltip>
-                                )}
-                                {onRemoveFromLibrary && (
-                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromLibrary(); }}><Trash2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Remove from Library</p></TooltipContent></Tooltip>
-                                )}
-                                {onAddToPalette && (
-                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onAddToPalette(); }}><PaletteIcon className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Add to Current Palette</p></TooltipContent></Tooltip>
-                                )}
-                                {onRemoveFromPalette && (
-                                     <Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 bg-rose-500/50 hover:bg-rose-500/80 text-white" onClick={(e) => { e.stopPropagation(); onRemoveFromPalette(); }}><Trash2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent><p>Remove from Palette</p></TooltipContent></Tooltip>
-                                )}
+                                {onSetActiveColor && <ActionIcon onClick={() => onSetActiveColor()} title="Set as Active Color"><MousePointerClick className="h-4 w-4" /></ActionIcon>}
+                                {onLockToggle && <ActionIcon onClick={() => onLockToggle()} title={isLocked ? "Unlock Color" : "Lock Color"}>{isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}</ActionIcon>}
+                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>
+                                {onAddToLibrary && <ActionIcon onClick={() => onAddToLibrary()} title="Save to Library"><Library className="h-4 w-4" /></ActionIcon>}
+                                {onRemoveFromLibrary && <ActionIcon onClick={() => onRemoveFromLibrary()} title="Remove from Library" variant="destructive"><Trash2 className="h-4 w-4" /></ActionIcon>}
+                                {onAddToPalette && <ActionIcon onClick={() => onAddToPalette()} title="Add to Current Palette"><PaletteIcon className="h-4 w-4" /></ActionIcon>}
+                                {onRemoveFromPalette && <ActionIcon onClick={() => onRemoveFromPalette()} title="Remove from Palette" variant="destructive"><Trash2 className="h-4 w-4" /></ActionIcon>}
                             </TooltipProvider>
                         </div>
                     </div>
