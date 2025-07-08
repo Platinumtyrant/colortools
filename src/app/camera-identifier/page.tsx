@@ -231,6 +231,10 @@ export default function CameraIdentifierPage() {
             });
         }
     };
+    
+    const handleResetZoom = () => {
+        setTransform({ scale: 1, x: 0, y: 0 });
+    };
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         if (!isZoomed) return;
@@ -358,7 +362,7 @@ export default function CameraIdentifierPage() {
                             {isDetecting ? <ZapOff className="mr-2 h-4 w-4" /> : <Zap className="mr-2 h-4 w-4" />}
                             {isDetecting ? 'Stop Live Detection' : 'Start Live Detection'}
                         </Button>
-                         <Button onClick={() => handleDoubleClick} disabled={!snapshot || !isZoomed} variant="outline">
+                         <Button onClick={handleResetZoom} disabled={!snapshot || !isZoomed} variant="outline">
                              <ZoomOut className="mr-2 h-4 w-4" />
                              Reset Zoom
                          </Button>
