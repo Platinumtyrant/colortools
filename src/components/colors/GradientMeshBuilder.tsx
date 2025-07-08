@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Move, Download } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Point {
@@ -43,21 +42,12 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoint
                     <CardTitle className="text-lg">Editing Point {points.findIndex(p => p.id === activePoint.id) + 1}</CardTitle>
                 </div>
             </CardHeader>
-            <CardContent className="flex-grow overflow-y-auto space-y-4 p-4">
-                <Popover>
-                    <PopoverTrigger asChild>
-                         <Button variant="outline" className="w-full h-12 justify-start gap-4">
-                            <div className="h-8 w-8 rounded-md border" style={{backgroundColor: activePoint.color}}></div>
-                            <span>{activePoint.color}</span>
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0">
-                       <ColorPickerClient
-                            color={activePoint.color}
-                            onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
-                        />
-                    </PopoverContent>
-                </Popover>
+            <CardContent className="flex-grow overflow-y-auto p-0">
+                <ColorPickerClient
+                    color={activePoint.color}
+                    onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
+                    className="border-0 shadow-none rounded-none"
+                />
             </CardContent>
         </Card>
     );
