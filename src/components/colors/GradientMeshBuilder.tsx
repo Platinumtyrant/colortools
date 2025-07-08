@@ -7,7 +7,7 @@ import chroma from 'chroma-js';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Move, Download, Copy } from 'lucide-react';
+import { Move, Download } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -135,23 +135,22 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     const debounceTimeout = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
-        const defaultColors = ['#f8cdda', '#1d2b64', '#fdfcfb', '#fde2e4', '#e6e6ea', '#fbfbfb'];
-        const gridColors = initialColors && initialColors.length > 0
-            ? Array.from({ length: 6 }, (_, i) => initialColors[i % initialColors.length])
+        // Default to two colors, one light and one dark, for a good starting gradient.
+        const defaultColors = ['#e0c3fc', '#8ec5fc'];
+        
+        // Use the first two colors if provided, otherwise use defaults.
+        const startColors = initialColors && initialColors.length > 1
+            ? [initialColors[0], initialColors[1]]
             : defaultColors;
-
+    
         const initialPoints: Point[] = [
-            { id: 1, x: 0, y: 0, color: gridColors[0] },
-            { id: 2, x: 50, y: 0, color: gridColors[1] },
-            { id: 3, x: 100, y: 0, color: gridColors[2] },
-            { id: 4, x: 0, y: 100, color: gridColors[3] },
-            { id: 5, x: 50, y: 100, color: gridColors[4] },
-            { id: 6, x: 100, y: 100, color: gridColors[5] }
+            { id: 1, x: 25, y: 25, color: startColors[0] },
+            { id: 2, x: 75, y: 75, color: startColors[1] },
         ];
         setPoints(initialPoints);
         setActivePointId(initialPoints[0].id);
     }, [initialColors]);
-
+    
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -178,7 +177,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     }, [points, draggingPointId]); 
 
     const handleExportPng = useCallback(async () => {
-        if (points.length < 6) return;
+        if (points.length === 0) return;
         const exportCanvas = document.createElement('canvas');
         const exportWidth = 1920;
         const exportHeight = 1080;
@@ -249,9 +248,6 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     }, [activePointId]);
 
     const activePoint = useMemo(() => points.find(p => p.id === activePointId), [points, activePointId]);
-    const gridConnections = [
-        [0, 1], [1, 2], [3, 4], [4, 5], [0, 3], [1, 4], [2, 5], 
-    ];
 
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
@@ -288,36 +284,22 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                             onPointerLeave={handlePointerUp}
                         >
                             <canvas ref={canvasRef} className="w-full h-full" />
-                            {points.length === 6 && (
-                                <>
-                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
-                                        {gridConnections.map(([p1Index, p2Index], i) => (
-                                            <line
-                                                key={`line-${i}`}
-                                                x1={`${points[p1Index].x}%`} y1={`${points[p1Index].y}%`}
-                                                x2={`${points[p2Index].x}%`} y2={`${points[p2Index].y}%`}
-                                                stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="4 4"
-                                            />
-                                        ))}
-                                    </svg>
-                                    <div className="absolute inset-0">
-                                        {points.map((point) => (
-                                            <div
-                                                key={point.id}
-                                                className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-grab active:cursor-grabbing rounded-full"
-                                                style={{
-                                                    left: `${point.x}%`,
-                                                    top: `${point.y}%`,
-                                                    backgroundColor: point.color,
-                                                    boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
-                                                    zIndex: 10,
-                                                }}
-                                                onPointerDown={(e) => handlePointerDown(e, point.id)}
-                                            />
-                                        ))}
-                                    </div>
-                                </>
-                            )}
+                            <div className="absolute inset-0">
+                                {points.map((point) => (
+                                    <div
+                                        key={point.id}
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-grab active:cursor-grabbing rounded-full"
+                                        style={{
+                                            left: `${point.x}%`,
+                                            top: `${point.y}%`,
+                                            backgroundColor: point.color,
+                                            boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
+                                            zIndex: 10,
+                                        }}
+                                        onPointerDown={(e) => handlePointerDown(e, point.id)}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
 
