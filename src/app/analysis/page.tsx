@@ -17,7 +17,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from '@/lib/utils';
@@ -25,7 +24,7 @@ import { simulate, type SimulationType } from '@/lib/colorblind';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { ContrastGrid } from '@/components/colors/ContrastGrid';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
-import { CheckCircle2, AlertTriangle, Palette, Library, LineChart as LineChartIcon } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, LineChart as LineChartIcon } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -114,6 +113,7 @@ export default function AnalysisPage() {
     const { palette: paletteFromBuilder } = usePaletteBuilder();
     const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>([]);
     const [source, setSource] = useState<'builder' | number>('builder');
+    const [isClient, setIsClient] = useState(false);
 
     const [simulationType, setSimulationType] = useState<SimulationType>('normal');
     const [correctLightness, setCorrectLightness] = useState(true);
@@ -123,6 +123,7 @@ export default function AnalysisPage() {
     const [bgColor, setBgColor] = useState('#FFFFFF');
 
     useEffect(() => {
+        setIsClient(true);
         try {
             const savedPalettesJSON = localStorage.getItem('saved_palettes');
             if (savedPalettesJSON) {
@@ -143,15 +144,13 @@ export default function AnalysisPage() {
     }, [source, paletteFromBuilder, savedPalettes]);
     
     useEffect(() => {
-      // Initialize the color pickers if a palette is loaded, but don't force them to stay in sync
       if (paletteHexes.length > 0 && fgColor === '#000000' && bgColor === '#FFFFFF') {
           setFgColor(paletteHexes[0]);
           if(paletteHexes.length > 1) {
             setBgColor(paletteHexes[1]);
           }
       }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [paletteHexes]);
+    }, [paletteHexes, fgColor, bgColor]);
 
     const handleSelectSource = (id: string) => {
         setSource(id === 'builder' ? 'builder' : parseInt(id, 10));
@@ -325,7 +324,7 @@ export default function AnalysisPage() {
                   <SelectContent>
                     <SelectGroup>
                         <SelectItem value="builder">Current Builder Palette</SelectItem>
-                        {savedPalettes.length > 0 && (
+                        {isClient && savedPalettes.length > 0 && (
                             savedPalettes.map(p => (
                                 <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
                             ))

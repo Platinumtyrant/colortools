@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { colord } from 'colord';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PantoneGuideClientPageProps {
   pmsCategories: PantoneCategory[];
@@ -21,11 +22,13 @@ export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: Pantone
   const { toast } = useToast();
   const { palette, setPalette } = usePaletteBuilder();
   const [libraryColors, setLibraryColors] = useState<string[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
   const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
   const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
 
   useEffect(() => {
+    setIsClient(true);
     try {
       const savedColorsJSON = localStorage.getItem('saved_individual_colors');
       if (savedColorsJSON) {
@@ -78,6 +81,10 @@ export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: Pantone
   const renderColorGrid = (colors: PantoneColor[]) => (
     <div className="flex flex-wrap gap-4">
         {colors.map((color, index) => {
+            if (!isClient) {
+              return <Skeleton key={index} className="w-40 h-[72px] rounded-md" />;
+            }
+
             const normalizedColor = colord(color.hex).toHex();
             const isInLibrary = libraryHexes.has(normalizedColor);
             const isInPalette = paletteHexes.has(normalizedColor);

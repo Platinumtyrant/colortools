@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { removeColorFromLibrary } from '@/lib/colors';
+import { Skeleton } from '@/components/ui/skeleton';
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -44,6 +45,7 @@ export default function LibraryPage() {
   const [savedIndividualColors, setSavedIndividualColors] = useState<string[]>([]);
   const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
   const [newPaletteName, setNewPaletteName] = useState('');
+  const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
   const { palette, setPalette, loadPalette } = usePaletteBuilder();
   const router = useRouter();
@@ -51,6 +53,7 @@ export default function LibraryPage() {
   const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
 
   useEffect(() => {
+    setIsClient(true);
     try {
       const savedPalettesJSON = localStorage.getItem('saved_palettes');
       if (savedPalettesJSON) {
@@ -279,8 +282,36 @@ export default function LibraryPage() {
       </p>
     </div>
   );
+  
+  const hasItems = isClient && (savedPalettes.length > 0 || savedIndividualColors.length > 0);
 
-  const hasItems = savedPalettes.length > 0 || savedIndividualColors.length > 0;
+  if (!isClient) {
+    return (
+      <main className="flex-1 w-full p-4 md:p-8 space-y-8">
+        <CardHeader className="p-0">
+          <CardTitle className="text-3xl">My Library</CardTitle>
+          <CardDescription>Browse and manage your saved palettes and colors. Find pre-built collections on the Inspiration page.</CardDescription>
+        </CardHeader>
+        <div className="space-y-10">
+          <div>
+            <Skeleton className="h-8 w-64 mb-4" />
+            <div className="flex flex-wrap gap-4">
+              <Skeleton className="h-[72px] w-40" />
+              <Skeleton className="h-[72px] w-40" />
+              <Skeleton className="h-[72px] w-40" />
+            </div>
+          </div>
+          <div>
+            <Skeleton className="h-8 w-48 mb-4" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Skeleton className="h-60 w-full" />
+              <Skeleton className="h-60 w-full" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 w-full p-4 md:p-8 space-y-8">

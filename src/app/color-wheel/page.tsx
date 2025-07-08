@@ -25,10 +25,10 @@ import type { ColorResult } from '@uiw/react-color';
 import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { ColorBox, ColorDetails } from '@/components/colors/ColorBox';
+import { ColorBox } from '@/components/colors/ColorBox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Pipette, Library, Palette as PaletteIcon, Trash2 } from 'lucide-react';
+import { Pipette } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
@@ -77,11 +77,13 @@ export default function ColorWheelPage({}) {
     const { toast } = useToast();
     const { palette, setPalette } = usePaletteBuilder();
     const [libraryColors, setLibraryColors] = useState<string[]>([]);
+    const [isClient, setIsClient] = useState(false);
 
     const paletteHexes = useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
     const libraryHexes = useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
 
     useEffect(() => {
+        setIsClient(true);
         try {
             const savedColorsJSON = localStorage.getItem('saved_individual_colors');
             if (savedColorsJSON) {
@@ -271,6 +273,9 @@ export default function ColorWheelPage({}) {
     const renderColorGrid = (colors: string[]) => (
         <div className="flex flex-wrap gap-4 mt-4">
             {colors.map((c, i) => {
+                if (!isClient) {
+                    return <Skeleton key={i} className="w-40 h-[72px]" />;
+                }
                 const normalizedColor = colord(c).toHex();
                 const isInLibrary = libraryHexes.has(normalizedColor);
                 const isInPalette = paletteHexes.has(normalizedColor);
@@ -350,8 +355,8 @@ export default function ColorWheelPage({}) {
                      <ColorBox
                         variant="default"
                         color={activeColor}
-                        onAddToLibrary={!libraryHexes.has(colord(activeColor).toHex()) ? () => handleToggleLibrary(activeColor) : undefined}
-                        onRemoveFromLibrary={libraryHexes.has(colord(activeColor).toHex()) ? () => handleToggleLibrary(activeColor) : undefined}
+                        onAddToLibrary={isClient && !libraryHexes.has(colord(activeColor).toHex()) ? () => handleToggleLibrary(activeColor) : undefined}
+                        onRemoveFromLibrary={isClient && libraryHexes.has(colord(activeColor).toHex()) ? () => handleToggleLibrary(activeColor) : undefined}
                     />
                 </div>
             </div>
@@ -385,6 +390,9 @@ export default function ColorWheelPage({}) {
                                         </div>
                                         <div className="flex flex-wrap justify-center gap-4">
                                             {harmony.colors.map((c, i) => {
+                                                if (!isClient) {
+                                                    return <Skeleton key={i} className="w-40 h-[72px]" />;
+                                                }
                                                 const normalizedColor = colord(c).toHex();
                                                 const isInLibrary = libraryHexes.has(normalizedColor);
                                                 const isInPalette = paletteHexes.has(normalizedColor);

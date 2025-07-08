@@ -5,7 +5,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Camera, Zap, ZapOff, CameraOff, Image as ImageIcon, Crosshair, X, ZoomOut } from 'lucide-react';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
@@ -51,8 +50,10 @@ export default function CameraIdentifierPage() {
     const [crosshairPosition, setCrosshairPosition] = useState<{ x: number; y: number } | null>(null);
     const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
     
+    const [isClient, setIsClient] = useState(false);
     const { palette, setPalette } = usePaletteBuilder();
     const [libraryColors, setLibraryColors] = useState<string[]>([]);
+    
     const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
     const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
 
@@ -60,6 +61,7 @@ export default function CameraIdentifierPage() {
     const isZoomed = transform.scale > 1;
 
     useEffect(() => {
+        setIsClient(true);
         try {
             const savedColorsJSON = localStorage.getItem('saved_individual_colors');
             if (savedColorsJSON) {
@@ -154,7 +156,7 @@ export default function CameraIdentifierPage() {
         
         const centerX = video.videoWidth / 2;
         const centerY = video.videoHeight / 2;
-        const sampleSize = 5; // Sample a 5x5 area
+        const sampleSize = 5;
         
         const pixelData = context.getImageData(centerX - 2, centerY - 2, sampleSize, sampleSize).data;
         const hex = getAverageColor(pixelData);
@@ -207,17 +209,14 @@ export default function CameraIdentifierPage() {
     
         const containerRect = imageContainerRef.current.getBoundingClientRect();
         
-        // 1. Calculate where the user clicked inside the container div
         const clickXInContainer = e.clientX - containerRect.left;
         const clickYInContainer = e.clientY - containerRect.top;
         
-        // 2. Reverse the zoom/pan transform to find where that click corresponds to on the un-transformed element
         const pointOnUnzoomedElement = {
             x: (clickXInContainer - transform.x) / transform.scale,
             y: (clickYInContainer - transform.y) / transform.scale
         };
     
-        // 3. Calculate the dimensions and position of the 'contained' image inside the container
         const { width: containerWidth, height: containerHeight } = containerRect;
         const { width: imageWidth, height: imageHeight } = canvas;
     
@@ -237,28 +236,23 @@ export default function CameraIdentifierPage() {
             offsetY = 0;
         }
     
-        // 4. Check if the click was inside the rendered image area (not the letterbox)
         if (
             pointOnUnzoomedElement.x < offsetX ||
             pointOnUnzoomedElement.x > offsetX + renderedWidth ||
             pointOnUnzoomedElement.y < offsetY ||
             pointOnUnzoomedElement.y > offsetY + renderedHeight
         ) {
-            return; // Click was outside the image
+            return;
         }
     
-        // 5. Calculate the click position as a ratio of the rendered image's dimensions
         const imageXRatio = (pointOnUnzoomedElement.x - offsetX) / renderedWidth;
         const imageYRatio = (pointOnUnzoomedElement.y - offsetY) / renderedHeight;
         
-        // 6. Map the ratio to the original canvas's coordinates
         const canvasX = Math.floor(imageXRatio * imageWidth);
         const canvasY = Math.floor(imageYRatio * imageHeight);
         
-        // Set crosshair position to the visual click location
         setCrosshairPosition({ x: clickXInContainer, y: clickYInContainer });
         
-        // 7. Get the average color from a 5x5 sample area around the target pixel
         const sampleSize = 5;
         const sampleData = context.getImageData(
             Math.max(0, canvasX - 2),
@@ -319,7 +313,7 @@ export default function CameraIdentifierPage() {
                 Math.pow(e.clientY - (pointerDownPosition.current?.y || 0), 2)
             );
             lastDragPosition.current = null;
-            if (distDragged > 5) { // If it was a meaningful drag, don't process as a tap
+            if (distDragged > 5) {
                 return;
             }
         }
@@ -331,7 +325,7 @@ export default function CameraIdentifierPage() {
             );
             const timeElapsed = Date.now() - pointerDownTime.current;
     
-            if (distMoved < 10 && timeElapsed < 250) { // Thresholds for a tap
+            if (distMoved < 10 && timeElapsed < 250) {
                 if (snapshot) {
                     handleIdentifyFromSnapshot(e);
                 }
@@ -372,6 +366,10 @@ export default function CameraIdentifierPage() {
 
         if (event.target) event.target.value = '';
     };
+
+    const normalizedIdentifiedColor = colord(identifiedColor).toHex();
+    const isIdentifiedInLibrary = isClient && libraryHexes.has(normalizedIdentifiedColor);
+    const isIdentifiedInPalette = isClient && paletteHexes.has(normalizedIdentifiedColor);
 
     return (
         <main className="flex-1 w-full p-4 md:p-8 space-y-8">
@@ -484,12 +482,12 @@ export default function CameraIdentifierPage() {
 
                      <div className="relative group/container w-full" >
                          <ColorBox
-                            variant="default"
                             color={identifiedColor}
-                            onAddToLibrary={!libraryHexes.has(colord(identifiedColor).toHex()) ? () => handleToggleLibrary(identifiedColor) : undefined}
-                            onRemoveFromLibrary={libraryHexes.has(colord(identifiedColor).toHex()) ? () => handleToggleLibrary(identifiedColor) : undefined}
-                            onAddToPalette={!paletteHexes.has(colord(identifiedColor).toHex()) ? () => handleAddToPalette(identifiedColor) : undefined}
-                            onRemoveFromPalette={paletteHexes.has(colord(identifiedColor).toHex()) ? () => handleRemoveFromPalette(identifiedColor) : undefined}
+                            variant="default"
+                            onAddToLibrary={isClient && !isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
+                            onRemoveFromLibrary={isClient && isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
+                            onAddToPalette={isClient && !isIdentifiedInPalette ? () => handleAddToPalette(identifiedColor) : undefined}
+                            onRemoveFromPalette={isClient && isIdentifiedInPalette ? () => handleRemoveFromPalette(identifiedColor) : undefined}
                         />
                     </div>
                 </div>
@@ -497,5 +495,3 @@ export default function CameraIdentifierPage() {
         </main>
     );
 }
-
-    
