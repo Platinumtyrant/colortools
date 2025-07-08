@@ -14,6 +14,7 @@ const navItems = [
     { href: '/mesh-gradient', label: 'Gradient Builder' },
     { href: '/camera-identifier', label: 'Camera Identifier' },
     { href: '/color-wheel', label: 'Color Wheel' },
+    { href: '/analysis', label: 'Palette Analysis' },
     { href: '/inspiration', label: 'Inspiration' },
     { href: '/pantone-guide', label: 'Pantone Guide' },
     { href: '/library', label: 'Library' },
