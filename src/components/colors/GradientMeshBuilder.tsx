@@ -7,7 +7,7 @@ import chroma from 'chroma-js';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Move, Download } from 'lucide-react';
+import { Move, Download, Copy } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -96,11 +96,12 @@ const drawMesh = (canvas: HTMLCanvasElement, points: Point[]) => {
 
 export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[] }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [points, setPoints] = useState<Point[]>([]);
     const [activePointId, setActivePointId] = useState<number | null>(null);
+    const [draggingPointId, setDraggingPointId] = useState<number | null>(null);
     const { toast } = useToast();
 
-    // Initialize points
     useEffect(() => {
         const defaultColors = ['#f8cdda', '#1d2b64', '#fdfcfb', '#fde2e4', '#e6e6ea', '#fbfbfb'];
         const gridColors = initialColors && initialColors.length > 0
@@ -119,7 +120,6 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         setActivePointId(initialPoints[0].id);
     }, [initialColors]);
 
-    // Initialize and update canvas
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -149,7 +149,6 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         }
     }, [points]);
 
-
     const handleExportPng = useCallback(async () => {
         if (points.length < 6) return;
 
@@ -174,6 +173,42 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     }, [points, toast]);
 
 
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, pointId: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        (e.target as HTMLDivElement).setPointerCapture(e.pointerId);
+        setDraggingPointId(pointId);
+        setActivePointId(pointId);
+    };
+
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (draggingPointId === null || !containerRef.current) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        const clampedX = Math.max(0, Math.min(100, x));
+        const clampedY = Math.max(0, Math.min(100, y));
+
+        setPoints(prevPoints => 
+            prevPoints.map(p => 
+                p.id === draggingPointId ? { ...p, x: clampedX, y: clampedY } : p
+            )
+        );
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (draggingPointId !== null) {
+            (e.target as HTMLDivElement).releasePointerCapture(e.pointerId);
+            setDraggingPointId(null);
+        }
+    };
+
+
     const handlePointClick = (index: number) => {
         setActivePointId(points[index].id);
     };
@@ -189,7 +224,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
             <CardHeader className="p-0 mb-4">
                 <CardTitle className="text-3xl">Gradient Mesh Builder</CardTitle>
                 <CardDescription>
-                    Create a true mesh gradient by manipulating the color of each point on the grid.
+                    Create a true mesh gradient by manipulating the color and position of each point on the grid.
                     Because this is rendered on a canvas, it cannot be exported to CSS.
                 </CardDescription>
             </CardHeader>
@@ -211,7 +246,13 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                                 </Tooltip>
                             </TooltipProvider>
                         </div>
-                        <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-muted">
+                        <div
+                            ref={containerRef}
+                            className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-muted"
+                            onPointerMove={handlePointerMove}
+                            onPointerUp={handlePointerUp}
+                            onPointerLeave={handlePointerUp}
+                        >
                             <canvas ref={canvasRef} className="w-full h-full" />
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
                                 {points.length === 6 && gridConnections.map(([p1Index, p2Index], i) => (
@@ -224,10 +265,10 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                                 ))}
                             </svg>
                             <div className="absolute inset-0">
-                                {points.length === 6 && points.map((point, index) => (
+                                {points.length === 6 && points.map((point) => (
                                     <div
                                         key={point.id}
-                                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-pointer rounded-full"
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-grab active:cursor-grabbing rounded-full"
                                         style={{
                                             left: `${point.x}%`,
                                             top: `${point.y}%`,
@@ -235,7 +276,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                                             boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                             zIndex: 10,
                                         }}
-                                        onClick={() => handlePointClick(index)}
+                                        onPointerDown={(e) => handlePointerDown(e, point.id)}
                                     />
                                 ))}
                             </div>
