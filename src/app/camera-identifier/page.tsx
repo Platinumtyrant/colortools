@@ -11,7 +11,6 @@ import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { colord } from 'colord';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const getAverageColor = (data: Uint8ClampedArray): string => {
     let r = 0, g = 0, b = 0;
@@ -393,7 +392,6 @@ export default function CameraIdentifierPage() {
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
                         onDoubleClick={handleDoubleClick}
-                        style={{ transformOrigin: '0 0' }}
                     >
                          {!isStreamActive && !snapshot && (
                              <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2 text-center p-4">
@@ -410,9 +408,8 @@ export default function CameraIdentifierPage() {
                          <video ref={videoRef} className={`h-full w-full object-cover ${!isStreamActive || snapshot ? 'hidden' : 'block'}`} autoPlay muted playsInline />
                          <canvas ref={canvasRef} className="hidden" />
                          
-                         <AnimatePresence>
                          {snapshot && (
-                            <motion.div
+                            <div
                                 className="h-full w-full"
                                 style={{
                                     backgroundImage: `url(${snapshot})`,
@@ -420,12 +417,12 @@ export default function CameraIdentifierPage() {
                                     backgroundRepeat: 'no-repeat',
                                     backgroundPosition: 'center',
                                     cursor: isZoomed ? 'grab' : 'zoom-in',
+                                    transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+                                    transformOrigin: '0 0',
+                                    willChange: 'transform',
                                 }}
-                                animate={{ scale: transform.scale, x: transform.x, y: transform.y }}
-                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                             />
                          )}
-                         </AnimatePresence>
 
                          {snapshot ? (
                             crosshairPosition && (
@@ -500,3 +497,5 @@ export default function CameraIdentifierPage() {
         </main>
     );
 }
+
+    
