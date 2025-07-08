@@ -78,7 +78,7 @@
     --sidebar-ring: 0 0% 98%;
   }
 
-  [data-theme="black"] {
+  .black {
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 0 0% 5%;
