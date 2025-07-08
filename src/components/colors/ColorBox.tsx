@@ -161,12 +161,12 @@ const ColorBoxInner = ({
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <div className="group/container flex flex-col h-full w-full cursor-pointer rounded-md bg-card text-card-foreground shadow-sm overflow-hidden">
+                <div className="group/container flex flex-col h-full w-full cursor-pointer bg-card text-card-foreground shadow-sm overflow-hidden rounded-md">
                     <div
-                        className="relative h-20 w-full rounded-b-md"
+                        className="relative h-12 w-full rounded-b-md"
                         style={{ backgroundColor: color }}
                     >
-                        <div className="absolute bottom-1 right-1 flex flex-row gap-1 opacity-0 group-hover/container:opacity-100 transition-opacity">
+                        <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 transform flex-row gap-1 opacity-0 transition-opacity group-hover/container:opacity-100">
                             {onSetActiveColor && (
                                 <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => { e.stopPropagation(); onSetActiveColor(); }} title="Set as Active">
                                     <MousePointerClick className="h-4 w-4" />
