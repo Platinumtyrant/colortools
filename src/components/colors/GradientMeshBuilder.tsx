@@ -131,7 +131,8 @@ const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean
                     break;
                 }
                 
-                const weight = 1 / Math.pow(distSq, points[i].power / 2);
+                const exponent = (11 - points[i].power) / 2;
+                const weight = 1 / Math.pow(distSq, exponent);
                 r += pointColors[i][0] * weight;
                 g += pointColors[i][1] * weight;
                 b += pointColors[i][2] * weight;
@@ -259,7 +260,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
       svgContent += `<defs>`;
 
       points.forEach((point) => {
-          const radius = (150 / point.power);
+          const radius = point.power * 15;
           svgContent += `
               <radialGradient id="grad-${point.id}" cx="${point.x}%" cy="${point.y}%" r="${radius}%">
                   <stop offset="0%" stop-color="${point.color}" />
