@@ -224,7 +224,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                         <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-muted">
                             <canvas ref={canvasRef} className="w-full h-full" />
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
-                                {gridConnections.map(([p1Index, p2Index], i) => (
+                                {points.length === 6 && gridConnections.map(([p1Index, p2Index], i) => (
                                     <line
                                         key={`line-${i}`}
                                         x1={`${points[p1Index].x}%`} y1={`${points[p1Index].y}%`}
@@ -234,7 +234,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                                 ))}
                             </svg>
                             <div className="absolute inset-0">
-                                {points.map((point, index) => (
+                                {points.length === 6 && points.map((point, index) => (
                                     <div
                                         key={point.id}
                                         className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-pointer rounded-full"
