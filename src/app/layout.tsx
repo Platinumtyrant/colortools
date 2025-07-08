@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
-import { getPantoneLookup } from "@/lib/palette-parser";
+import { getCombinedPantoneLookup } from "@/lib/palette-parser";
 import { PantoneProvider } from "@/contexts/SidebarExtensionContext";
 import { PaletteBuilderProvider } from "@/contexts/PaletteBuilderContext";
 
@@ -20,12 +20,12 @@ const notoSans = Noto_Sans({
   variable: '--font-noto-sans',
 });
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pantoneLookup = await getPantoneLookup();
+  const pantoneLookup = getCombinedPantoneLookup();
 
   return (
     <html lang="en" className={`${notoSans.variable}`} suppressHydrationWarning>
@@ -39,7 +39,6 @@ export default async function RootLayout({
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
-              enableSystem
               themes={['light', 'dark', 'black']}
             >
               <MainLayout>

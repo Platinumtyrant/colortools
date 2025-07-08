@@ -1,13 +1,16 @@
 
 import React from 'react';
-import { getPantoneCategories } from '@/lib/palette-parser';
+import { getPantonePmsCategories, getPantoneFhiCategories } from '@/lib/palette-parser';
 import { PantoneGuideClientPage } from '@/components/pantone/PantoneGuideClientPage';
 
-export default async function PantoneGuidePage() {
-    // The pantoneCategories are now fetched on the server at build time
-    // and passed as a prop to the client component.
-    const pantoneCategories = await getPantoneCategories();
+export default function PantoneGuidePage() {
+    const pmsCategories = getPantonePmsCategories();
+    const fhiCategories = getPantoneFhiCategories();
+    
     return (
-        <PantoneGuideClientPage pantoneCategories={pantoneCategories} />
+        <PantoneGuideClientPage 
+            pmsCategories={pmsCategories}
+            fhiCategories={fhiCategories}
+        />
     );
 }

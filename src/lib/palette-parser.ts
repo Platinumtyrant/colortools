@@ -1,10 +1,10 @@
 
-import fs from 'fs/promises';
-import path from 'path';
 import chroma from 'chroma-js';
 import type { PantoneCategory, PantoneColor } from './pantone-colors';
 import { sortPantoneNumerically, createPantoneLookup } from './pantone-colors';
-
+import { pantonePmsColors } from './data/pantone-pms';
+import { pantoneFhiColors } from './data/pantone-fhi';
+import { colord } from 'colord';
 
 export interface PrebuiltPalette {
   name: string;
@@ -102,7 +102,7 @@ const categorizePalette = (colors: string[], name: string): string => {
   const avgHue = hues.reduce((sum, h) => sum + h, 0) / hues.length;
 
   if (avgHue >= 330 || avgHue < 20) return 'Red';
-  if (avgHue < 45) return 'Orange';
+  if (avgHue < 50) return 'Orange';
   if (avgHue < 70) return 'Yellow';
   if (avgHue < 160) return 'Green';
   if (avgHue < 200) return 'Cyan';
@@ -113,96 +113,10 @@ const categorizePalette = (colors: string[], name: string): string => {
 };
 
 
-// This function is cached by Next.js during the build process on the server.
 export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
-  const filePath = path.join(process.cwd(), 'palettes.txt');
-  try {
-    const htmlContent = await fs.readFile(filePath, 'utf-8');
-
-    const excludedKeywords = [
-        'materialize',
-        'minecraft',
-        'ios',
-        'linktree',
-        'kpmg',
-        'xkcd',
-        'pantone 19-1664',
-        'parking app',
-        'luxiem',
-        'backrooms',
-        'butt ghost dick penis',
-        'bts palette',
-        'neutral colors for room',
-        'material design color palette (16 colors)',
-        'discord color roles',
-        'french dispatch',
-        'spongebob yellow',
-        'rainbow colors palette',
-        '8 color palette',
-        '7 color palette',
-        '6 colors palette',
-        '10 rainbow colors',
-        'rainbow of 11',
-        '12 color rainbow',
-        '14 color palette',
-        '15 rainbow color palette',
-        'least used color rainbow',
-        '7 rainbow colors',
-        'pastel rainbow'
-    ];
-    const allPalettes: CategorizedPalette[] = [];
-    const paletteChunks = htmlContent.split('<h3>').slice(1);
-
-    for (const chunk of paletteChunks) {
-      const paletteNameMatch = chunk.match(/(.*?)<\/h3>/);
-      let paletteName = paletteNameMatch ? paletteNameMatch[1].trim() : 'Unnamed Palette';
-      
-      const colorMatches = [...chunk.matchAll(/style="background-color:(#[0-9a-fA-F]{6});?/gi)];
-      
-      const colors = colorMatches.map(match => match[1].toUpperCase());
-      const uniqueColors = [...new Set(colors)];
-
-      const lowerCaseName = paletteName.toLowerCase();
-      const shouldExclude = excludedKeywords.some(keyword => lowerCaseName.includes(keyword));
-
-      if (uniqueColors.length > 1 && !shouldExclude) {
-           // Remove hex codes and related clutter from names
-           paletteName = paletteName
-               .replace(/\| Hex code:? #[\dA-F]{6}/gi, '')
-               .replace(/#[\dA-F]{6}/gi, '')
-               .replace(/hex color$/i, '')
-               .replace(/color$/i, '')
-               .trim();
-
-           allPalettes.push({
-             name: paletteName,
-             colors: uniqueColors,
-             category: categorizePalette(uniqueColors, paletteName),
-           });
-      }
-    }
-
-    // Sort the entire list by color category
-    const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor', 'Brands', 'Flags'];
-    allPalettes.sort((a, b) => {
-        const indexA = categoryOrder.indexOf(a.category);
-        const indexB = categoryOrder.indexOf(b.category);
-        if (indexA === indexB) return 0;
-        return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB);
-    });
-
-    return allPalettes;
-  } catch (error: any) {
-    if (error.code === 'ENOENT') {
-        // This is not a critical error. It just means the user hasn't provided a palettes.txt file.
-        // We can safely return an empty array and the Inspiration page will show an empty state.
-        console.log(`Note: 'palettes.txt' not found. Inspiration page will be empty. This is expected.`);
-    } else {
-        // For other errors, it's better to log them.
-        console.error("Failed to read or parse palettes.txt:", error);
-    }
+    // This function can be uncommented and adapted if a new palettes.txt file is provided.
+    // For now, it returns an empty array as the data source has been removed.
     return [];
-  }
 };
 
 const categorizeColorByHue = (hex: string): string => {
@@ -219,65 +133,57 @@ const categorizeColorByHue = (hex: string): string => {
   return 'Purple';
 };
 
-export async function getPantoneCategories(): Promise<PantoneCategory[]> {
-    const filePath = path.join(process.cwd(), 'pantone.txt');
-    try {
-        const fileContent = await fs.readFile(filePath, 'utf-8');
-        const lines = fileContent.split('\n');
-
-        const allColors: PantoneColor[] = [];
-        const colorRegex = /^(.*?),\s*(#[\dA-F]{6}),\s*\((.*?)\)/i;
-
-        for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (!trimmedLine) continue;
-
-            const match = trimmedLine.match(colorRegex);
-            if (match) {
-                const [, name, hex, cmykValues] = match;
-                allColors.push({
-                  name: name.trim(),
-                  hex: hex.trim().toUpperCase(),
-                  cmyk: `(${cmykValues})`
-                });
-            }
-        }
+const categorizeColors = (colors: PantoneColor[]): PantoneCategory[] => {
+    if (colors.length === 0) return [];
         
-        if (allColors.length === 0) return [];
-        
-        const categories: Record<string, PantoneColor[]> = {};
-        for (const color of allColors) {
-            const categoryName = categorizeColorByHue(color.hex);
-            if (!categories[categoryName]) {
-                categories[categoryName] = [];
-            }
-            categories[categoryName].push(color);
+    const categories: Record<string, PantoneColor[]> = {};
+    for (const color of colors) {
+        const categoryName = categorizeColorByHue(color.hex);
+        if (!categories[categoryName]) {
+            categories[categoryName] = [];
         }
-
-        const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome'];
-        
-        return categoryOrder
-            .map(name => {
-                if (!categories[name]) return null;
-                return {
-                    name,
-                    colors: categories[name].sort(sortPantoneNumerically)
-                };
-            })
-            .filter((c): c is PantoneCategory => c !== null);
-
-    } catch (error: any) {
-        if (error.code === 'ENOENT') {
-            console.log("Note: 'pantone.txt' not found. Pantone guide will be empty.");
-        } else {
-            console.error("Failed to read or parse pantone.txt:", error);
-        }
-        return [];
+        categories[categoryName].push(color);
     }
+
+    const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome'];
+    
+    return categoryOrder
+        .map(name => {
+            if (!categories[name]) return null;
+            return {
+                name,
+                colors: categories[name].sort(sortPantoneNumerically)
+            };
+        })
+        .filter((c): c is PantoneCategory => c !== null);
 }
 
+export function getPantonePmsCategories(): PantoneCategory[] {
+    return categorizeColors(pantonePmsColors);
+}
 
-export async function getPantoneLookup(): Promise<Map<string, string>> {
-    const categories = await getPantoneCategories();
-    return createPantoneLookup(categories);
+export function getPantoneFhiCategories(): PantoneCategory[] {
+    return categorizeColors(pantoneFhiColors);
+}
+
+export function getCombinedPantoneLookup(): Map<string, string> {
+    const pmsCategories = getPantonePmsCategories();
+    const fhiCategories = getPantoneFhiCategories();
+    const lookup = new Map<string, string>();
+
+    const addToLookup = (categories: PantoneCategory[]) => {
+        for (const category of categories) {
+            for (const color of category.colors) {
+                const hexKey = colord(color.hex).toHex(); // normalize
+                if (!lookup.has(hexKey)) {
+                    lookup.set(hexKey, color.name);
+                }
+            }
+        }
+    };
+    
+    addToLookup(pmsCategories);
+    addToLookup(fhiCategories);
+
+    return lookup;
 }

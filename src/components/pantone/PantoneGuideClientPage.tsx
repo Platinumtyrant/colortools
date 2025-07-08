@@ -10,13 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { colord } from 'colord';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
-import { Badge } from '@/components/ui/badge';
 
 interface PantoneGuideClientPageProps {
-  pantoneCategories: PantoneCategory[];
+  pmsCategories: PantoneCategory[];
+  fhiCategories: PantoneCategory[];
 }
 
-export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClientPageProps) {
+export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: PantoneGuideClientPageProps) {
   const { toast } = useToast();
   const { palette, setPalette } = usePaletteBuilder();
   const [libraryColors, setLibraryColors] = useState<string[]>([]);
@@ -64,62 +64,68 @@ export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClient
     toast({ title: 'Color removed from palette.' });
   }, [setPalette, toast]);
 
-  if (!pantoneCategories || pantoneCategories.length === 0) {
-    return <div>No Pantone colors found.</div>;
-  }
+  const renderCategoryTabs = (categories: PantoneCategory[], system: 'pms' | 'fhi') => (
+    <Tabs defaultValue={categories[0]?.name} className="w-full">
+        <div className="flex justify-center">
+            <TabsList className="h-auto flex-wrap justify-center">
+                {categories.map((category) => (
+                    <TabsTrigger key={`${system}-${category.name}`} value={category.name}>{category.name}</TabsTrigger>
+                ))}
+            </TabsList>
+        </div>
+        {categories.map(category => (
+            <TabsContent key={`${system}-${category.name}`} value={category.name} className="mt-6">
+                <div className="flex flex-wrap gap-4">
+                    {category.colors.map((color, index) => {
+                        const normalizedColor = colord(color.hex).toHex();
+                        const isInLibrary = libraryHexes.has(normalizedColor);
+                        const isInPalette = paletteHexes.has(normalizedColor);
+                        return (
+                            <div className="w-40" key={`${color.name}-${index}`}>
+                                <ColorBox
+                                    color={color.hex}
+                                    name={color.name}
+                                    info={color.cmyk}
+                                    variant="compact"
+                                    onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
+                                    onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
+                                    onAddToPalette={!isInPalette ? () => handleAddToPalette(color.hex) : undefined}
+                                    onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color.hex) : undefined}
+                                />
+                            </div>
+                        )
+                    })}
+                </div>
+            </TabsContent>
+        ))}
+    </Tabs>
+  );
 
   return (
     <div className="flex-1 w-full p-4 md:p-8 flex flex-col">
-      <div className="flex-grow">
-        <CardHeader className="p-0 mb-8 space-y-2">
-            <div className="flex items-center gap-4">
-                <CardTitle className="text-3xl">Pantone Color Bridge</CardTitle>
-                <Badge variant="outline">Solid Coated</Badge>
-            </div>
-          <CardDescription>An unofficial reference for the Pantone Color Bridge guide. It shows each solid Pantone color alongside its closest four-color process (CMYK) match. This is essential for designers to preview how spot colors will appear when printed using standard Cyan, Magenta, Yellow, and Black inks.</CardDescription>
-        </CardHeader>
-        <Tabs defaultValue={pantoneCategories[0].name} className="w-full">
-          <div className="flex justify-center">
-            <TabsList className="h-auto flex-wrap justify-center">
-              {pantoneCategories.map((category) => (
-                <TabsTrigger key={category.name} value={category.name}>
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-          
-          {pantoneCategories.map(category => (
-              <TabsContent key={category.name} value={category.name} className="mt-6">
-                  <div className="flex flex-wrap gap-4">
-                      {category.colors.map((color, index) => {
-                          const normalizedColor = colord(color.hex).toHex();
-                          const isInLibrary = libraryHexes.has(normalizedColor);
-                          const isInPalette = paletteHexes.has(normalizedColor);
-                          return (
-                            <div className="w-40" key={`${color.name}-${index}`}>
-                              <ColorBox
-                                  color={color.hex}
-                                  name={color.name}
-                                  info={color.cmyk}
-                                  variant="compact"
-                                  onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
-                                  onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
-                                  onAddToPalette={!isInPalette ? () => handleAddToPalette(color.hex) : undefined}
-                                  onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(color.hex) : undefined}
-                              />
-                            </div>
-                          )
-                      })}
-                  </div>
-              </TabsContent>
-          ))}
-        </Tabs>
-      </div>
+        <div className="flex-grow">
+            <CardHeader className="p-0 mb-8 space-y-2">
+                <CardTitle className="text-3xl">Pantone Color Guides</CardTitle>
+                <CardDescription>Browse official Pantone color systems. PMS is for print, while FHI is for fashion, home, and interiors.</CardDescription>
+            </CardHeader>
 
+            <Tabs defaultValue="pms" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="pms">PMS (Print)</TabsTrigger>
+                    <TabsTrigger value="fhi">FHI (Fashion, Home + Interiors)</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="pms" className="mt-6">
+                    {pmsCategories.length > 0 ? renderCategoryTabs(pmsCategories, 'pms') : <p>No PMS color data available.</p>}
+                </TabsContent>
+                <TabsContent value="fhi" className="mt-6">
+                    {fhiCategories.length > 0 ? renderCategoryTabs(fhiCategories, 'fhi') : <p>No FHI color data available.</p>}
+                </TabsContent>
+            </Tabs>
+        </div>
       <footer className="mt-8 pt-4 border-t text-center text-xs text-muted-foreground space-y-2">
-        <p>PANTONE® Colors displayed here may not match PANTONE-identified standards. Consult current PANTONE Color Publications for accurate color. PANTONE® and other Pantone, Inc. trademarks are the property of Pantone, Inc. © Pantone, Inc., 2005. All rights reserved.</p>
-        <p>Hardcopies of PANTONE Color Charts and reproductions thereof MAY NOT BE SOLD in any form. Pantone, Inc. is not responsible for any modifications made to such Charts which have not been approved by Pantone, Inc. PC = four-color Process (process) simulations of solid colors Coated (stock)</p>
+        <p>PANTONE® Colors displayed here may not match PANTONE-identified standards. Consult current PANTONE Color Publications for accurate color.</p>
+        <p>PANTONE® and other Pantone, Inc. trademarks are the property of Pantone, Inc. © Pantone, Inc., 2005. All rights reserved.</p>
       </footer>
     </div>
   );
