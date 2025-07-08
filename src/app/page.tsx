@@ -30,6 +30,7 @@ import type { ColorResult } from 'react-color';
 import { Separator } from '@/components/ui/separator';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 
 // Type definition for the experimental EyeDropper API
 interface EyeDropperResult {
@@ -74,6 +75,7 @@ function PaletteBuilderPage() {
     const [editingPaletteId, setEditingPaletteId] = useState<number | null>(null);
     const [editingColorId, setEditingColorId] = useState<number | null>(null);
     const [libraryColors, setLibraryColors] = useState<string[]>([]);
+    const [isClient, setIsClient] = useState(false);
     const libraryHexes = useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
 
     const { toast } = useToast();
@@ -81,6 +83,7 @@ function PaletteBuilderPage() {
     const isInitialLoad = useRef(true);
 
     useEffect(() => {
+        setIsClient(true);
         try {
             const savedColorsJSON = localStorage.getItem('saved_individual_colors');
             if (savedColorsJSON) {
@@ -509,29 +512,49 @@ function PaletteBuilderPage() {
 
                         <div className="w-full lg:w-auto flex justify-center">
                              <div className="w-full max-w-sm relative group/container" onClick={() => setEditingColorId(null)} >
-                                 <ColorBox
-                                    variant="default"
-                                    color={mainColor}
-                                    onAddToLibrary={!libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
-                                    onRemoveFromLibrary={libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
-                                />
+                                 {isClient ? (
+                                     <ColorBox
+                                        variant="default"
+                                        color={mainColor}
+                                        onAddToLibrary={!libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
+                                        onRemoveFromLibrary={libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
+                                    />
+                                 ) : (
+                                    <Skeleton className="w-full h-[450px] max-w-sm" />
+                                 )}
                             </div>
                         </div>
                     </section>
                 </div>
                 
                 <section className="flex flex-col min-h-0 lg:min-h-full">
-                    <Palette
-                        palette={palette}
-                        editingColorId={editingColorId}
-                        onLockToggle={handleLockToggle}
-                        onRemoveColor={handleRemoveColor}
-                        onAddColor={handleAddColorAtIndex}
-                        onSetActiveColor={handleSetActiveColor}
-                        actions={paletteActions}
-                        onToggleLibrary={handleToggleLibrary}
-                        libraryHexes={libraryHexes}
-                    />
+                    {isClient ? (
+                        <Palette
+                            palette={palette}
+                            editingColorId={editingColorId}
+                            onLockToggle={handleLockToggle}
+                            onRemoveColor={handleRemoveColor}
+                            onAddColor={handleAddColorAtIndex}
+                            onSetActiveColor={handleSetActiveColor}
+                            actions={paletteActions}
+                            onToggleLibrary={handleToggleLibrary}
+                            libraryHexes={libraryHexes}
+                        />
+                    ) : (
+                        <Card className="bg-card/50 overflow-hidden flex flex-col h-full">
+                            <CardHeader className="p-4 border-b">
+                                <Skeleton className="h-10 w-full max-w-xs" />
+                                <Skeleton className="h-9 w-40" />
+                            </CardHeader>
+                            <CardContent className="p-4 flex flex-col flex-grow min-w-0">
+                                 <div className="flex flex-wrap gap-x-4 gap-y-6 content-start">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Skeleton key={i} className="w-40 h-[72px] rounded-md" />
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </section>
             </main>
         </div>

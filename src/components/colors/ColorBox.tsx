@@ -169,7 +169,10 @@ const ColorBoxInner = ({
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <div className="group/container flex flex-col h-full w-full cursor-pointer bg-card text-card-foreground shadow-sm overflow-hidden rounded-md">
+                <button
+                    type="button"
+                    className="group/container flex flex-col h-full w-full cursor-pointer bg-card text-card-foreground shadow-sm overflow-hidden rounded-md text-left"
+                >
                     <div
                         className="relative h-9 w-full rounded-b-md"
                         style={{ backgroundColor: color }}
@@ -207,7 +210,7 @@ const ColorBoxInner = ({
                         </div>
                         <p className="text-xs text-muted-foreground font-mono">{color.toUpperCase()}</p>
                     </div>
-                </div>
+                </button>
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0">
                 <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
