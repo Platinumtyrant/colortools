@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Camera, Zap, ZapOff, CameraOff, Image as ImageIcon, Crosshair, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Camera, Zap, ZapOff, CameraOff, Image as ImageIcon, Crosshair, X, ZoomOut } from 'lucide-react';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
@@ -22,7 +22,6 @@ export default function CameraIdentifierPage() {
     const lastDragPosition = useRef<{ x: number, y: number } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [hasCameraPermission, setHasCameraPermission] = useState<boolean>(false);
     const [isRequestingPermission, setIsRequestingPermission] = useState<boolean>(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [isDetecting, setIsDetecting] = useState(false);
@@ -82,7 +81,6 @@ export default function CameraIdentifierPage() {
 
     const startCamera = useCallback(async () => {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            setHasCameraPermission(false);
             toast({ variant: 'destructive', title: 'Camera Not Supported' });
             return;
         }
@@ -90,10 +88,8 @@ export default function CameraIdentifierPage() {
             setIsRequestingPermission(true);
             const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             setStream(mediaStream);
-            setHasCameraPermission(true);
         } catch (error) {
             console.error('Error accessing camera:', error);
-            setHasCameraPermission(false);
             setStream(null);
             toast({ variant: 'destructive', title: 'Camera Access Denied' });
         } finally {
@@ -180,30 +176,62 @@ export default function CameraIdentifierPage() {
         stopCamera();
     };
     
-    const handleIdentifyFromSnapshot = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleIdentifyFromSnapshot = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!snapshot || !canvasRef.current || !imageContainerRef.current) return;
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d', { willReadFrequently: true });
         if (!context) return;
         
-        const rect = e.currentTarget.getBoundingClientRect();
-        const xOnElement = e.clientX - rect.left;
-        const yOnElement = e.clientY - rect.top;
-        const xOnImage = (xOnElement - transform.x) / transform.scale;
-        const yOnImage = (yOnElement - transform.y) / transform.scale;
-        const canvasX = xOnImage * (canvas.width / rect.width);
-        const canvasY = yOnImage * (canvas.height / rect.height);
+        const containerRect = e.currentTarget.getBoundingClientRect();
+        const containerWidth = containerRect.width;
+        const containerHeight = containerRect.height;
+        const imageWidth = canvas.width;
+        const imageHeight = canvas.height;
+
+        const containerRatio = containerWidth / containerHeight;
+        const imageRatio = imageWidth / imageHeight;
+
+        let renderedWidth, renderedHeight, offsetX, offsetY;
+        if (imageRatio > containerRatio) {
+            renderedWidth = containerWidth;
+            renderedHeight = containerWidth / imageRatio;
+            offsetX = 0;
+            offsetY = (containerHeight - renderedHeight) / 2;
+        } else {
+            renderedWidth = containerHeight * imageRatio;
+            renderedHeight = containerHeight;
+            offsetX = (containerWidth - renderedWidth) / 2;
+            offsetY = 0;
+        }
         
-        if (canvasX < 0 || canvasX > canvas.width || canvasY < 0 || canvasY > canvas.height) {
+        const xOnElement = e.clientX - containerRect.left;
+        const yOnElement = e.clientY - containerRect.top;
+        
+        const unzoomedX = (xOnElement - transform.x) / transform.scale;
+        const unzoomedY = (yOnElement - transform.y) / transform.scale;
+
+        if (
+            unzoomedX < offsetX ||
+            unzoomedX > offsetX + renderedWidth ||
+            unzoomedY < offsetY ||
+            unzoomedY > offsetY + renderedHeight
+        ) {
             return;
         }
 
-        setCrosshairPosition({ x: (xOnElement / rect.width) * 100, y: (yOnElement / rect.height) * 100 });
+        const imageXRatio = (unzoomedX - offsetX) / renderedWidth;
+        const imageYRatio = (unzoomedY - offsetY) / renderedHeight;
+        
+        const canvasX = imageXRatio * imageWidth;
+        const canvasY = imageYRatio * imageHeight;
+        
+        setCrosshairPosition({ x: (xOnElement / containerRect.width) * 100, y: (yOnElement / containerRect.height) * 100 });
         
         const pixelData = context.getImageData(canvasX, canvasY, 1, 1).data;
         const hex = `#${("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6)}`;
         setIdentifiedColor(hex);
-    };
+    }, [snapshot, transform.scale, transform.x, transform.y]);
+
 
     const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!snapshot || !imageContainerRef.current) return;
@@ -304,7 +332,11 @@ export default function CameraIdentifierPage() {
                              <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2 text-center p-4">
                                 <ImageIcon className="h-10 w-10 text-muted-foreground" />
                                 <p className="font-semibold mt-2">Identify Colors</p>
-                                <p className="text-sm text-muted-foreground">Start your camera or upload an image.</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Start your camera or upload an image.
+                                    <br />
+                                    (Max 5MB recommended for performance)
+                                </p>
                             </div>
                          )}
 
