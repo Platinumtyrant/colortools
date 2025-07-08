@@ -7,7 +7,7 @@ import chroma from 'chroma-js';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Move, Download } from 'lucide-react';
+import { Move, Download, Plus, Trash2 } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -21,9 +21,11 @@ interface Point {
 interface EditorPanelProps {
     activePoint: Point | undefined;
     onColorChange: (color: string) => void;
+    onRemovePoint: () => void;
+    canRemovePoint: boolean;
 }
 
-const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange }) => {
+const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange, onRemovePoint, canRemovePoint }) => {
     if (!activePoint) {
         return (
             <Card className="h-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed">
@@ -36,10 +38,26 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange })
     
     return (
         <Card className="h-full flex flex-col">
-            <CardHeader className="flex-shrink-0">
-                <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">Editing Point</CardTitle>
-                </div>
+            <CardHeader className="flex-shrink-0 flex-row items-center justify-between">
+                <CardTitle className="text-lg">Editing Point</CardTitle>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button 
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={onRemovePoint} 
+                                disabled={!canRemovePoint}
+                                aria-label="Remove Point"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{canRemovePoint ? "Remove selected point" : "Cannot remove, must have at least 2 points"}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto p-0">
                 <ColorPickerClient
@@ -135,10 +153,8 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     const debounceTimeout = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
-        // Default to two colors, one light and one dark, for a good starting gradient.
         const defaultColors = ['#e0c3fc', '#8ec5fc'];
         
-        // Use the first two colors if provided, otherwise use defaults.
         const startColors = initialColors && initialColors.length > 1
             ? [initialColors[0], initialColors[1]]
             : defaultColors;
@@ -236,18 +252,53 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     const handleColorChange = useCallback((newColor: string) => {
         if (!activePointId) return;
         
-        // Update points for instant visual feedback on the color picker itself
         setPoints(prev => prev.map(p => p.id === activePointId ? { ...p, color: newColor } : p));
         
-        // Debounce the re-rendering of the canvas
         if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
         debounceTimeout.current = setTimeout(() => {
-            // The useEffect already handles re-rendering, this just ensures it happens after a pause
+            // The useEffect already handles re-rendering
         }, 50);
 
     }, [activePointId]);
+    
+    const handleAddPoint = useCallback(() => {
+        if (points.length >= 10) { // Limit to 10 points for performance
+            toast({ title: "Maximum of 10 points reached.", variant: "destructive" });
+            return;
+        }
+        const newPoint: Point = {
+            id: Date.now(),
+            x: 50,
+            y: 50,
+            color: points.length > 0 ? chroma.average(points.map(p => p.color), 'lch').hex() : '#cccccc',
+        };
+        setPoints(prev => [...prev, newPoint]);
+        setActivePointId(newPoint.id);
+        toast({ title: "Point Added" });
+    }, [points, toast]);
+
+    const handleRemovePoint = useCallback(() => {
+        if (points.length <= 2) {
+            toast({ title: "Cannot have fewer than 2 points.", variant: "destructive" });
+            return;
+        }
+        if (!activePointId) return;
+
+        setPoints(prev => {
+            const newPoints = prev.filter(p => p.id !== activePointId);
+            if (newPoints.length > 0) {
+              setActivePointId(newPoints[0].id);
+            } else {
+              setActivePointId(null);
+            }
+            return newPoints;
+        });
+        toast({ title: "Point Removed" });
+    }, [points.length, activePointId, toast]);
+
 
     const activePoint = useMemo(() => points.find(p => p.id === activePointId), [points, activePointId]);
+    const canRemovePoint = points.length > 2;
 
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
@@ -263,6 +314,17 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                     <div className="space-y-4">
                         <div className="flex justify-end gap-2">
                             <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button onClick={handleAddPoint} size="sm" variant="outline">
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Point
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Add a new color point to the mesh.</p>
+                                    </TooltipContent>
+                                </Tooltip>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <Button onClick={handleExportPng} size="sm">
@@ -306,6 +368,8 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                     <EditorPanel 
                         activePoint={activePoint} 
                         onColorChange={handleColorChange}
+                        onRemovePoint={handleRemovePoint}
+                        canRemovePoint={canRemovePoint}
                     />
                  </div>
             </CardContent>
