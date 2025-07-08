@@ -19,8 +19,11 @@ export default function CameraIdentifierPage() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationFrameId = useRef<number>();
     const imageContainerRef = useRef<HTMLDivElement>(null);
-    const lastDragPosition = useRef<{ x: number, y: number } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    const lastDragPosition = useRef<{ x: number, y: number } | null>(null);
+    const pointerDownTime = useRef<number>(0);
+    const pointerDownPosition = useRef<{ x: number, y: number } | null>(null);
 
     const [isRequestingPermission, setIsRequestingPermission] = useState<boolean>(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
@@ -176,13 +179,14 @@ export default function CameraIdentifierPage() {
         stopCamera();
     };
     
-    const handleIdentifyFromSnapshot = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const handleIdentifyFromSnapshot = useCallback((e: React.PointerEvent<HTMLDivElement> | React.MouseEvent<HTMLDivElement>) => {
         if (!snapshot || !canvasRef.current || !imageContainerRef.current) return;
+        
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d', { willReadFrequently: true });
         if (!context) return;
         
-        const containerRect = e.currentTarget.getBoundingClientRect();
+        const containerRect = imageContainerRef.current.getBoundingClientRect();
         const containerWidth = containerRect.width;
         const containerHeight = containerRect.height;
         const imageWidth = canvas.width;
@@ -222,13 +226,13 @@ export default function CameraIdentifierPage() {
         const imageXRatio = (unzoomedX - offsetX) / renderedWidth;
         const imageYRatio = (unzoomedY - offsetY) / renderedHeight;
         
+        setCrosshairPosition({ x: xOnElement, y: yOnElement });
+        
         const canvasX = imageXRatio * imageWidth;
         const canvasY = imageYRatio * imageHeight;
         
-        setCrosshairPosition({ x: (xOnElement / containerRect.width) * 100, y: (yOnElement / containerRect.height) * 100 });
-        
         const pixelData = context.getImageData(canvasX, canvasY, 1, 1).data;
-        const hex = `#${("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6)}`;
+        const hex = `#${("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | (pixelData[2]).toString(16)).slice(-6)}`;
         setIdentifiedColor(hex);
     }, [snapshot, transform.scale, transform.x, transform.y]);
 
@@ -256,13 +260,16 @@ export default function CameraIdentifierPage() {
     };
 
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-        if (!isZoomed) return;
+        pointerDownTime.current = Date.now();
+        pointerDownPosition.current = { x: e.clientX, y: e.clientY };
+
+        if (!isZoomed || !snapshot) return;
         e.currentTarget.setPointerCapture(e.pointerId);
         lastDragPosition.current = { x: e.clientX, y: e.clientY };
     };
 
     const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-        if (!isZoomed || !lastDragPosition.current) return;
+        if (!isZoomed || !lastDragPosition.current || !snapshot) return;
         const dx = e.clientX - lastDragPosition.current.x;
         const dy = e.clientY - lastDragPosition.current.y;
         lastDragPosition.current = { x: e.clientX, y: e.clientY };
@@ -270,7 +277,24 @@ export default function CameraIdentifierPage() {
     };
 
     const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-        lastDragPosition.current = null;
+        if (lastDragPosition.current) {
+            lastDragPosition.current = null;
+            return; // It was a drag, so don't process as a tap
+        }
+        
+        if (pointerDownPosition.current) {
+            const distMoved = Math.sqrt(
+                Math.pow(e.clientX - pointerDownPosition.current.x, 2) +
+                Math.pow(e.clientY - pointerDownPosition.current.y, 2)
+            );
+            const timeElapsed = Date.now() - pointerDownTime.current;
+    
+            if (distMoved < 10 && timeElapsed < 250) { // Thresholds for a tap
+                if (snapshot) {
+                    handleIdentifyFromSnapshot(e);
+                }
+            }
+        }
     };
 
     const handleUploadButtonClick = () => {
@@ -320,13 +344,12 @@ export default function CameraIdentifierPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                 <Card className="relative aspect-video flex items-center justify-center overflow-hidden bg-muted">
                     <div
-                        className="w-full h-full relative cursor-crosshair"
+                        className="w-full h-full relative"
                         ref={imageContainerRef}
                         onPointerDown={handlePointerDown}
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
                         onDoubleClick={handleDoubleClick}
-                        onClick={snapshot ? handleIdentifyFromSnapshot : undefined}
                     >
                          {!isStreamActive && !snapshot && (
                              <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2 text-center p-4">
@@ -353,6 +376,7 @@ export default function CameraIdentifierPage() {
                                     backgroundRepeat: 'no-repeat',
                                     backgroundPosition: 'center',
                                     cursor: isZoomed ? 'grab' : 'zoom-in',
+                                    transformOrigin: '0 0',
                                 }}
                                 animate={{ scale: transform.scale, x: transform.x, y: transform.y }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -364,7 +388,7 @@ export default function CameraIdentifierPage() {
                             crosshairPosition && (
                                 <Crosshair 
                                     className="absolute transform -translate-x-1/2 -translate-y-1/2 text-white/80 pointer-events-none" 
-                                    style={{ left: `${crosshairPosition.x}%`, top: `${crosshairPosition.y}%` }} 
+                                    style={{ left: `${crosshairPosition.x}px`, top: `${crosshairPosition.y}px` }} 
                                 />
                             )
                          ) : (
@@ -433,3 +457,5 @@ export default function CameraIdentifierPage() {
         </main>
     );
 }
+
+    
