@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { PantoneCategory, PantoneColor } from '@/lib/pantone-colors';
+import type { PantoneColor } from '@/lib/pantone-colors';
 import { sortPantoneNumerically } from '@/lib/pantone-colors';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { useToast } from '@/hooks/use-toast';
@@ -14,11 +14,11 @@ import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface PantoneGuideClientPageProps {
-  pmsCategories: PantoneCategory[];
-  fhiCategories: PantoneCategory[];
+  pmsColors: PantoneColor[];
+  fhiColors: PantoneColor[];
 }
 
-export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: PantoneGuideClientPageProps) {
+export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideClientPageProps) {
   const { toast } = useToast();
   const { palette, setPalette } = usePaletteBuilder();
   const [libraryColors, setLibraryColors] = useState<string[]>([]);
@@ -68,15 +68,8 @@ export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: Pantone
     toast({ title: 'Color removed from palette.' });
   }, [setPalette, toast]);
 
-  const allPmsColors = useMemo(() => 
-    pmsCategories.flatMap(c => c.colors).sort(sortPantoneNumerically), 
-    [pmsCategories]
-  );
-  
-  const allFhiColors = useMemo(() => 
-    fhiCategories.flatMap(c => c.colors).sort(sortPantoneNumerically), 
-    [fhiCategories]
-  );
+  const sortedPmsColors = useMemo(() => pmsColors.sort(sortPantoneNumerically), [pmsColors]);
+  const sortedFhiColors = useMemo(() => fhiColors.sort(sortPantoneNumerically), [fhiColors]);
   
   const renderColorGrid = (colors: PantoneColor[]) => (
     <div className="flex flex-wrap gap-4">
@@ -121,16 +114,16 @@ export function PantoneGuideClientPage({ pmsCategories, fhiCategories }: Pantone
                 </TabsList>
 
                 <TabsContent value="pms" className="mt-6">
-                    {allPmsColors.length > 0 ? renderColorGrid(allPmsColors) : <p>No PMS color data available.</p>}
+                    {sortedPmsColors.length > 0 ? renderColorGrid(sortedPmsColors) : <p>No PMS color data available.</p>}
                 </TabsContent>
                 <TabsContent value="fhi" className="mt-6">
-                    {allFhiColors.length > 0 ? renderColorGrid(allFhiColors) : <p>No FHI color data available.</p>}
+                    {sortedFhiColors.length > 0 ? renderColorGrid(sortedFhiColors) : <p>No FHI color data available.</p>}
                 </TabsContent>
             </Tabs>
         </div>
       <footer className="mt-8 pt-4 border-t text-center text-xs text-muted-foreground space-y-2">
         <p>PANTONE® Colors displayed here may not match PANTONE-identified standards. Consult current PANTONE Color Publications for accurate color.</p>
-        <p>PANTONE® and other Pantone, Inc. trademarks are the property of Pantone, Inc. © Pantone, Inc., 2005. All rights reserved.</p>
+        <p>PANTONE® and other Pantone, Inc. trademarks are the property of Pantone, Inc. © Pantone, Inc., 2022. All rights reserved.</p>
       </footer>
     </div>
   );
