@@ -233,6 +233,7 @@ const ColorBoxInner = ({
                             )}
                         </div>
                         <p className="text-xs text-muted-foreground font-mono">{color.toUpperCase()}</p>
+                        {info && <p className="text-xs text-muted-foreground font-mono truncate">{info}</p>}
                     </div>
                 </button>
             </PopoverTrigger>
