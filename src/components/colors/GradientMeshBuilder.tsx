@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, Code, Move, RotateCw } from 'lucide-react';
+import { Code, Move, RotateCw } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -32,16 +32,15 @@ interface EditorPanelProps {
     activePoint: Point | undefined;
     points: Point[];
     setPoints: React.Dispatch<React.SetStateAction<Point[]>>;
-    handleRemovePoint: (id: number) => void;
 }
 
-const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoints, handleRemovePoint }) => {
+const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoints }) => {
     if (!activePoint) {
         return (
             <Card className="h-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed">
                  <Move className="w-12 h-12 text-muted-foreground mb-4" />
                  <h3 className="text-lg font-semibold">Select a Point</h3>
-                 <p className="text-sm text-muted-foreground">Click on a point in the mesh to start editing its properties.</p>
+                 <p className="text-sm text-muted-foreground">Click on a grid point to start editing its properties.</p>
             </Card>
         )
     }
@@ -51,10 +50,6 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoint
             <CardHeader className="flex-shrink-0">
                 <div className="flex justify-between items-center">
                     <CardTitle className="text-lg">Editing Point {points.findIndex(p => p.id === activePoint.id) + 1}</CardTitle>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => handleRemovePoint(activePoint.id)} disabled={points.length <= 1}>
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Remove Point</span>
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto space-y-4 p-4">
@@ -112,39 +107,23 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoint
 
 export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps) => {
     const [points, setPoints] = useState<Point[]>(() => {
-        const defaultPoints = [
-            { id: 1, x: 20, y: 20, color: '#ff8a80', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
-            { id: 2, x: 80, y: 80, color: '#8c9eff', spreadX: 50, spreadY: 50, rotation: 0, strength: 75 },
-        ];
+        const initialGridColors = initialColors?.length >= 6 
+            ? initialColors 
+            : ['rgb(0, 159, 255)', 'rgb(236, 47, 75)', 'rgb(101, 78, 163)', 'rgb(234, 175, 200)', 'rgb(252, 70, 107)', 'rgb(63, 94, 251)'];
 
-        if (!initialColors || initialColors.length < 1) {
-            return defaultPoints;
-        }
-
-        const basePositions = [
-            { x: 20, y: 20 }, { x: 80, y: 80 }, { x: 20, y: 80 },
-            { x: 80, y: 20 }, { x: 50, y: 50 }, { x: 25, y: 75 },
+        return [
+            { id: 1, x: 5, y: 5, color: initialGridColors[0], spreadX: 80, spreadY: 80, rotation: 0, strength: 60 },
+            { id: 2, x: 95, y: 5, color: initialGridColors[1], spreadX: 80, spreadY: 80, rotation: 0, strength: 60 },
+            { id: 3, x: 5, y: 50, color: initialGridColors[2], spreadX: 80, spreadY: 80, rotation: 0, strength: 60 },
+            { id: 4, x: 95, y: 50, color: initialGridColors[3], spreadX: 80, spreadY: 80, rotation: 0, strength: 60 },
+            { id: 5, x: 5, y: 95, color: initialGridColors[4], spreadX: 80, spreadY: 80, rotation: 0, strength: 60 },
+            { id: 6, x: 95, y: 95, color: initialGridColors[5], spreadX: 80, spreadY: 80, rotation: 0, strength: 60 },
         ];
-        
-        return initialColors.slice(0, 6).map((color, index) => {
-            const pos = basePositions[index % basePositions.length];
-            return {
-                id: index + 1,
-                color,
-                x: pos.x,
-                y: pos.y,
-                spreadX: 50,
-                spreadY: 50,
-                rotation: 0,
-                strength: 75
-            };
-        });
     });
     
     const [activePointId, setActivePointId] = useState<number | null>(points[0]?.id ?? null);
     const [isCodeVisible, setIsCodeVisible] = useState(false);
     const [blurRadius, setBlurRadius] = useState(50);
-    const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
     const dragInfo = useRef<{isDragging: boolean, pointId: number | null, handleType: 'position' | 'spreadX' | 'spreadY' | 'rotation' | null}>({ isDragging: false, pointId: null, handleType: null });
@@ -265,50 +244,14 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         document.addEventListener('mouseup', handleDocumentMouseUp);
     }, [points, activePointId]);
     
-    const handleAddPoint = useCallback(() => {
-        setPoints(prev => {
-            if (prev.length >= 6) {
-                toast({ title: "Maximum of 6 overlay points reached." });
-                return prev;
-            }
-            const newPoint: Point = {
-                id: nextId.current,
-                x: Math.random() * 80 + 10,
-                y: Math.random() * 80 + 10,
-                color: `hsl(${Math.random() * 360}, 80%, 70%)`,
-                spreadX: 50,
-                spreadY: 50,
-                rotation: 0,
-                strength: 75,
-            };
-            nextId.current++;
-            setActivePointId(newPoint.id);
-            return [...prev, newPoint];
-        });
-    }, [toast]);
-
-    const handleRemovePoint = useCallback((idToRemove: number) => {
-        setPoints(prev => {
-            if (prev.length <= 1) {
-                toast({ title: "A minimum of 1 point is required." });
-                return prev;
-            }
-            if (activePointId === idToRemove) {
-                 setActivePointId(prev.find(p => p.id !== idToRemove)?.id || null);
-            }
-            return prev.filter(p => p.id !== idToRemove);
-        });
-    }, [toast, activePointId]);
     
-    const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        // This check is important. If we are dragging, we don't want to deselect.
+    const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (dragInfo.current.isDragging) return;
         
-        // This ensures deselect only happens on the background, not on handles/points
         if (e.target === e.currentTarget) {
             setActivePointId(null);
         }
-    }, []);
+    };
     
     const gradientCss = useMemo(() => {
         const containerCss = `
@@ -366,12 +309,17 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
     };
     
     const activePoint = useMemo(() => points.find(p => p.id === activePointId), [points, activePointId]);
+    const gridConnections = [
+        [0, 1], [2, 3], [4, 5], // Horizontal
+        [0, 2], [2, 4], // Left Vertical
+        [1, 3], [3, 5], // Right Vertical
+    ];
 
     return (
         <Card className="bg-transparent border-0 shadow-none w-full">
             <CardHeader className="p-0 mb-4">
                 <CardTitle className="text-3xl">Gradient Mesh Builder</CardTitle>
-                <CardDescription>Create beautiful, complex gradients by adding and manipulating color points.</CardDescription>
+                <CardDescription>Create beautiful, complex gradients by manipulating the color points on the grid.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
                  <div className="grid grid-cols-1 lg:grid-cols-[2.5fr,1fr] gap-8">
@@ -382,7 +330,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                 className="absolute inset-0 cursor-pointer"
                                 onMouseDown={handleBackgroundClick}
                             >
-                                {/* Visual and Interactive Layer Combined */}
                                 <div
                                     className="absolute inset-0"
                                     style={{ backgroundColor: '#000' }}
@@ -404,8 +351,16 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                         />
                                     ))}
                                 </div>
-
-                                 {/* Handles drawn on top */}
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
+                                    {gridConnections.map(([p1Index, p2Index], i) => (
+                                        <line
+                                            key={`line-${i}`}
+                                            x1={`${points[p1Index].x}%`} y1={`${points[p1Index].y}%`}
+                                            x2={`${points[p2Index].x}%`} y2={`${points[p2Index].y}%`}
+                                            stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="4 4"
+                                        />
+                                    ))}
+                                </svg>
                                 {points.map((point) => (
                                     <TooltipProvider key={point.id} delayDuration={100}>
                                         <Tooltip>
@@ -448,7 +403,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
 
                                         return (
                                             <>
-                                                {/* Dashed ellipse outline */}
                                                 <div
                                                     className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-white/50 pointer-events-none"
                                                     style={{
@@ -459,7 +413,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                         transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg)`
                                                     }}
                                                 />
-                                                {/* Spread X Handle */}
                                                 <div
                                                     className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ew-resize"
                                                     style={{
@@ -470,7 +423,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                     }}
                                                     onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadX')}
                                                 />
-                                                {/* Spread Y Handle */}
                                                 <div
                                                     className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
                                                     style={{
@@ -481,7 +433,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                     }}
                                                     onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadY')}
                                                 />
-                                                {/* Rotation Handle */}
                                                 <div
                                                     className="absolute flex items-center justify-center w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-[grab]"
                                                     style={{
@@ -505,9 +456,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                     <Code className="mr-2 h-4 w-4" />
                                     {isCodeVisible ? 'Hide Code' : 'Show Code'}
                                 </Button>
-                                <Button onClick={handleAddPoint} size="sm" disabled={points.length >= 6}>
-                                    <Plus className="mr-2 h-4 w-4" /> Point
-                                </Button>
                                 <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
                             </div>
                         </div>
@@ -524,7 +472,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                         activePoint={activePoint} 
                         points={points}
                         setPoints={setPoints}
-                        handleRemovePoint={handleRemovePoint}
                     />
                  </div>
             </CardContent>
