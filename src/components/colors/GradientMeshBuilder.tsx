@@ -181,10 +181,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         if (!pointToDrag) return;
 
         const rect = previewRef.current!.getBoundingClientRect();
-        const clickX = e.clientX - rect.left;
-        const clickY = e.clientY - rect.top;
-        const pointCurrentX = (pointToDrag.x / 100) * rect.width;
-        const pointCurrentY = (pointToDrag.y / 100) * rect.height;
+        const clickX = e.clientX;
+        const clickY = e.clientY;
+        const pointCurrentX = rect.left + (pointToDrag.x / 100) * rect.width;
+        const pointCurrentY = rect.top + (pointToDrag.y / 100) * rect.height;
         const offsetX = clickX - pointCurrentX;
         const offsetY = clickY - pointCurrentY;
         
@@ -301,7 +301,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     }, [toast, activePointId]);
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        // This check is important. If we are dragging, we don't want to deselect.
         if (dragInfo.current.isDragging) return;
+        
+        // This ensures deselect only happens on the background, not on handles/points
         if (e.target === e.currentTarget) {
             setActivePointId(null);
         }
@@ -480,7 +483,7 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                 />
                                                 {/* Rotation Handle */}
                                                 <div
-                                                    className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-[grab]"
+                                                    className="absolute flex items-center justify-center w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-[grab]"
                                                     style={{
                                                         left: `${activePoint.x}%`,
                                                         top: `${activePoint.y}%`,
@@ -488,7 +491,9 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                         zIndex: 11
                                                     }}
                                                     onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'rotation')}
-                                                />
+                                                >
+                                                    <RotateCw className="w-2.5 h-2.5 text-slate-700" />
+                                                </div>
                                             </>
                                         );
                                     })()
