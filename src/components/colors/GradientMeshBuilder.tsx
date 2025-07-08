@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Code, Move, RotateCw, Download } from 'lucide-react';
+import { Code, Move, RotateCw, Download, Copy } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -384,6 +384,43 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
             <CardContent className="p-0">
                  <div className="grid grid-cols-1 lg:grid-cols-[2.5fr,1fr] gap-8">
                     <div className="space-y-4">
+                        <div className="flex justify-end gap-2">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button onClick={() => setIsCodeVisible(v => !v)} size="sm" variant="outline">
+                                            <Code className="mr-2 h-4 w-4" />
+                                            {isCodeVisible ? 'Hide Code' : 'Show Code'}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Toggle the visibility of the HTML/CSS code snippet.</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button onClick={handleCopyCss} size="sm" variant="outline">
+                                            <Copy className="mr-2 h-4 w-4" />
+                                            Copy CSS
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Copy the HTML and CSS to your clipboard.</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button onClick={handleExportPng} size="sm">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Export PNG
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Download a 1920x1080 PNG of the gradient.</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                         <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-muted">
                             <div 
                                 ref={previewRef}
@@ -511,18 +548,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                     })()
                                 )}
                              </div>
-
-                            <div className="absolute top-2 right-2 flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/50 shadow-lg">
-                                <Button onClick={() => setIsCodeVisible(v => !v)} size="sm" variant="ghost">
-                                    <Code className="mr-2 h-4 w-4" />
-                                    {isCodeVisible ? 'Hide Code' : 'Show Code'}
-                                </Button>
-                                <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
-                                <Button onClick={handleExportPng} size="sm">
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Export PNG
-                                </Button>
-                            </div>
                         </div>
                         {isCodeVisible && (
                             <div className="relative mt-4">
