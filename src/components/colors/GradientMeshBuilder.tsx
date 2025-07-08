@@ -174,23 +174,25 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const handlePointMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY' | 'rotation') => {
         e.preventDefault();
         e.stopPropagation();
-        
-        if (handleType === 'position' && e.altKey) {
-            handleType = 'rotation';
-        }
 
         dragInfo.current = { isDragging: false, pointId, handleType };
         
         const pointToDrag = points.find(p => p.id === pointId);
         if (!pointToDrag) return;
 
-        const startPos = { x: e.clientX, y: e.clientY };
-        const startPointPos = { x: pointToDrag.x, y: pointToDrag.y };
+        const rect = previewRef.current!.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        const pointCurrentX = (pointToDrag.x / 100) * rect.width;
+        const pointCurrentY = (pointToDrag.y / 100) * rect.height;
+        const offsetX = clickX - pointCurrentX;
+        const offsetY = clickY - pointCurrentY;
+        
         let moved = false;
         
         const handleDocumentMouseMove = (moveEvent: MouseEvent) => {
-            const dx = Math.abs(moveEvent.clientX - startPos.x);
-            const dy = Math.abs(moveEvent.clientY - startPos.y);
+            const dx = Math.abs(moveEvent.clientX - clickX);
+            const dy = Math.abs(moveEvent.clientY - clickY);
 
             if (!moved && (dx > 3 || dy > 3)) {
                 moved = true;
@@ -202,7 +204,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
             if (moved) {
                 if (!previewRef.current) return;
-                const rect = previewRef.current.getBoundingClientRect();
                 
                 setPoints(currentPoints => {
                     const pointToUpdate = currentPoints.find(p => p.id === pointId);
@@ -213,14 +214,10 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
                     switch (currentHandleType) {
                         case 'position': {
-                            const deltaX = moveEvent.clientX - startPos.x;
-                            const deltaY = moveEvent.clientY - startPos.y;
-                            const deltaPercentX = (deltaX / rect.width) * 100;
-                            const deltaPercentY = (deltaY / rect.height) * 100;
-                            const newX = startPointPos.x + deltaPercentX;
-                            const newY = startPointPos.y + deltaPercentY;
-                            newProps.x = Math.max(0, Math.min(100, newX));
-                            newProps.y = Math.max(0, Math.min(100, newY));
+                            const newXPercent = ((moveEvent.clientX - rect.left - offsetX) / rect.width) * 100;
+                            const newYPercent = ((moveEvent.clientY - rect.top - offsetY) / rect.height) * 100;
+                            newProps.x = Math.max(0, Math.min(100, newXPercent));
+                            newProps.y = Math.max(0, Math.min(100, newYPercent));
                             break;
                         }
                         case 'rotation': {
@@ -386,16 +383,11 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                 <div
                                     className="absolute inset-0"
                                     style={{ backgroundColor: points[0]?.color || '#000000' }}
-                                    onMouseDown={(e) => {
-                                        if (e.target === e.currentTarget && activePointId) {
-                                            handlePointMouseDown(e, activePointId, 'position');
-                                        }
-                                    }}
                                 >
                                     {points.map(point => (
                                         <div
                                             key={`grad-bg-${point.id}`}
-                                            className="absolute mix-blend-lighten rounded-full transition-transform duration-100 ease-in-out cursor-move group-hover:brightness-110 pointer-events-none"
+                                            className="absolute mix-blend-lighten rounded-full transition-transform duration-100 ease-in-out cursor-move group-hover:brightness-110"
                                             style={{
                                                 left: `${point.x}%`,
                                                 top: `${point.y}%`,
@@ -405,6 +397,7 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                 backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
                                                 filter: `blur(${blurRadius}px)`,
                                             }}
+                                            onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
                                         />
                                     ))}
                                 </div>
@@ -427,7 +420,7 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                 />
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>Drag to move. Alt+Drag to rotate.</p>
+                                                <p>Drag to move</p>
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
@@ -437,8 +430,7 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                         const previewWidth = previewRef.current?.offsetWidth || 0;
                                         const previewHeight = previewRef.current?.offsetHeight || 0;
                                         if (previewWidth === 0 || previewHeight === 0) return null;
-
-                                        // Check if handles are out of bounds and determine multiplier
+                                        
                                         const isOutOfBounds = (px: number, py: number) => px < 0 || px > previewWidth || py < 0 || py > previewHeight;
 
                                         const spreadXInPixels = (activePoint.spreadX / 100) * previewWidth;
@@ -485,6 +477,17 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                         zIndex: 11
                                                     }}
                                                     onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadY')}
+                                                />
+                                                {/* Rotation Handle */}
+                                                <div
+                                                    className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-[grab]"
+                                                    style={{
+                                                        left: `${activePoint.x}%`,
+                                                        top: `${activePoint.y}%`,
+                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${-yMultiplier * (spreadYInPixels / 2 + 20)}px) rotate(${-activePoint.rotation}deg)`,
+                                                        zIndex: 11
+                                                    }}
+                                                    onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'rotation')}
                                                 />
                                             </>
                                         );
