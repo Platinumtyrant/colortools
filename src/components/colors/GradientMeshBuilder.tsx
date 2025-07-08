@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Plus, Trash2, Code, Move } from 'lucide-react';
+import { Plus, Trash2, Code, Move, RotateCw } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -146,14 +146,12 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     const nextId = useRef(Math.max(...points.map(p => p.id), 0) + 1);
     const previewRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
-    const dragInfo = useRef<{isDragging: boolean, pointId: number | null}>({ isDragging: false, pointId: null });
+    const dragInfo = useRef<{isDragging: boolean, pointId: number | null, handleType: 'position' | 'spreadX' | 'spreadY' | 'rotation' | null}>({ isDragging: false, pointId: null, handleType: null });
     
     useEffect(() => {
         const calculateBlur = () => {
             if (previewRef.current) {
                 const width = previewRef.current.offsetWidth;
-                // Heuristic: blur is ~6% of container width. Min 30px, Max 80px.
-                // This will make the blur effect scale with the container size, reducing clipping on smaller viewports.
                 const newBlur = Math.max(30, Math.min(80, width * 0.06));
                 setBlurRadius(newBlur);
             }
@@ -163,29 +161,20 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         if (previewRef.current) {
             observer.observe(previewRef.current);
         }
-
-        calculateBlur(); // Initial calculation
+        calculateBlur(); 
 
         return () => {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
             if (previewRef.current) {
-                // eslint-disable-next-line react-hooks/exhaustive-deps
                 observer.unobserve(previewRef.current);
             }
         };
     }, []);
 
-    const handlePointClick = useCallback((pointId: number) => {
-        if (!dragInfo.current.isDragging) {
-            setActivePointId(pointId);
-        }
-    }, []);
-
-    const handlePointMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY') => {
+    const handlePointMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>, pointId: number, handleType: 'position' | 'spreadX' | 'spreadY' | 'rotation') => {
         e.preventDefault();
         e.stopPropagation();
 
-        dragInfo.current = { isDragging: false, pointId: pointId };
+        dragInfo.current = { isDragging: false, pointId, handleType };
         
         const startPos = { x: e.clientX, y: e.clientY };
         let moved = false;
@@ -212,33 +201,38 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
                     let newProps: Partial<Point> = {};
 
-                    if (handleType === 'position') {
-                        const newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
-                        const newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
-                        newProps.x = Math.max(0, Math.min(100, newX));
-                        newProps.y = Math.max(0, Math.min(100, newY));
-                    } else {
-                        const centerX = rect.left + (pointToUpdate.x / 100) * rect.width;
-                        const centerY = rect.top + (pointToUpdate.y / 100) * rect.height;
-                        const mouseX = moveEvent.clientX;
-                        const mouseY = moveEvent.clientY;
-                        
-                        const mouseDx = mouseX - centerX;
-                        const mouseDy = mouseY - centerY;
-                        
-                        const rotationRad = -pointToUpdate.rotation * (Math.PI / 180);
-                        const cosA = Math.cos(rotationRad);
-                        const sinA = Math.sin(rotationRad);
-                        
-                        const unrotatedDx = mouseDx * cosA - mouseDy * sinA;
-                        const unrotatedDy = mouseDx * sinA + mouseDy * cosA;
-
-                        if (handleType === 'spreadX') {
-                            const newSpreadX = (Math.abs(unrotatedDx) / rect.width) * 200;
-                            newProps.spreadX = Math.max(5, Math.min(200, newSpreadX));
-                        } else if (handleType === 'spreadY') {
-                            const newSpreadY = (Math.abs(unrotatedDy) / rect.height) * 200;
-                            newProps.spreadY = Math.max(5, Math.min(200, newSpreadY));
+                    switch (handleType) {
+                        case 'position': {
+                            const newX = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+                            const newY = ((moveEvent.clientY - rect.top) / rect.height) * 100;
+                            newProps.x = Math.max(0, Math.min(100, newX));
+                            newProps.y = Math.max(0, Math.min(100, newY));
+                            break;
+                        }
+                        case 'rotation': {
+                            const centerX = rect.left + (pointToUpdate.x / 100) * rect.width;
+                            const centerY = rect.top + (pointToUpdate.y / 100) * rect.height;
+                            const angle = Math.atan2(moveEvent.clientY - centerY, moveEvent.clientX - centerX) * (180 / Math.PI);
+                            newProps.rotation = (angle + 90 + 360) % 360; // Add 90 to make 'up' 0 degrees
+                            break;
+                        }
+                        case 'spreadX':
+                        case 'spreadY': {
+                            const centerX = rect.left + (pointToUpdate.x / 100) * rect.width;
+                            const centerY = rect.top + (pointToUpdate.y / 100) * rect.height;
+                            const mouseDx = moveEvent.clientX - centerX;
+                            const mouseDy = moveEvent.clientY - centerY;
+                            const rotationRad = -pointToUpdate.rotation * (Math.PI / 180);
+                            const cosA = Math.cos(rotationRad);
+                            const sinA = Math.sin(rotationRad);
+                            const unrotatedDx = mouseDx * cosA - mouseDy * sinA;
+                            const unrotatedDy = mouseDx * sinA + mouseDy * cosA;
+                            if (handleType === 'spreadX') {
+                                newProps.spreadX = Math.max(5, (Math.abs(unrotatedDx) / rect.width) * 200);
+                            } else {
+                                newProps.spreadY = Math.max(5, (Math.abs(unrotatedDy) / rect.height) * 200);
+                            }
+                            break;
                         }
                     }
                     
@@ -251,14 +245,14 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             document.removeEventListener('mousemove', handleDocumentMouseMove);
             document.removeEventListener('mouseup', handleDocumentMouseUp);
             if (!moved) {
-                handlePointClick(pointId);
+                 setActivePointId(pointId);
             }
-            dragInfo.current = { isDragging: false, pointId: null };
+            dragInfo.current = { isDragging: false, pointId: null, handleType: null };
         };
 
         document.addEventListener('mousemove', handleDocumentMouseMove);
         document.addEventListener('mouseup', handleDocumentMouseUp);
-    }, [handlePointClick, activePointId]);
+    }, [activePointId]);
     
     const handleAddPoint = useCallback(() => {
         setPoints(prev => {
@@ -296,7 +290,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
     }, [toast, activePointId]);
     
     const handleBackgroundClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        // Only deselect if the click is directly on the background div itself
         if (e.target === e.currentTarget) {
             setActivePointId(null);
         }
@@ -368,38 +361,37 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
             <CardContent className="p-0">
                  <div className="grid grid-cols-1 lg:grid-cols-[2.5fr,1fr] gap-8">
                     <div className="space-y-4">
-                        <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden">
-                            {/* Visual Layer - Scaled to prevent blur clipping */}
-                            <div
-                                className="absolute inset-0"
-                                style={{
-                                    backgroundColor: points[0]?.color || '#000000',
-                                    transform: 'scale(1.2)'
-                                }}
-                            >
-                                {points.map(point => (
-                                    <div
-                                        key={`grad-${point.id}`}
-                                        className="absolute mix-blend-lighten rounded-full pointer-events-none"
-                                        style={{
-                                            left: `${point.x}%`,
-                                            top: `${point.y}%`,
-                                            width: `${point.spreadX * 2}%`,
-                                            height: `${point.spreadY * 2}%`,
-                                            transform: `translate(-50%, -50%) rotate(${point.rotation}deg)`,
-                                            backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
-                                            filter: `blur(${blurRadius}px)`,
-                                        }}
-                                    />
-                                ))}
-                            </div>
-
-                             {/* Interactive Layer - Not scaled for accurate mouse coords */}
-                             <div 
+                        <div className="relative w-full aspect-[16/9] rounded-lg border border-border overflow-hidden bg-muted">
+                            <div 
                                 ref={previewRef}
                                 className="absolute inset-0 cursor-pointer"
                                 onClick={handleBackgroundClick}
-                             >
+                                onMouseDown={handleBackgroundClick} // Also deselect on mousedown
+                            >
+                                {/* Visual and Interactive Layer Combined */}
+                                <div
+                                    className="absolute inset-0"
+                                    style={{ backgroundColor: points[0]?.color || '#000000' }}
+                                >
+                                    {points.map(point => (
+                                        <div
+                                            key={`grad-bg-${point.id}`}
+                                            className="absolute mix-blend-lighten rounded-full transition-transform duration-100 ease-in-out cursor-move group-hover:brightness-110"
+                                            style={{
+                                                left: `${point.x}%`,
+                                                top: `${point.y}%`,
+                                                width: `${point.spreadX * 2}%`,
+                                                height: `${point.spreadY * 2}%`,
+                                                transform: `translate(-50%, -50%) rotate(${point.rotation}deg) scale(1.2)`,
+                                                backgroundImage: `radial-gradient(ellipse, ${point.color} 0px, transparent ${point.strength}%)`,
+                                                filter: `blur(${blurRadius}px)`,
+                                            }}
+                                            onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
+                                        />
+                                    ))}
+                                </div>
+
+                                 {/* Handles drawn on top */}
                                 {points.map((point) => (
                                      <div
                                         key={point.id}
@@ -418,11 +410,35 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                     (() => {
                                         const previewWidth = previewRef.current?.offsetWidth || 0;
                                         const previewHeight = previewRef.current?.offsetHeight || 0;
+                                        if (previewWidth === 0 || previewHeight === 0) return null;
+
+                                        const cx = (activePoint.x / 100) * previewWidth;
+                                        const cy = (activePoint.y / 100) * previewHeight;
+                                        const angle = activePoint.rotation * (Math.PI / 180);
+                                        const cosA = Math.cos(angle);
+                                        const sinA = Math.sin(angle);
+
+                                        // Check if handles are out of bounds and determine multiplier
+                                        const isOutOfBounds = (px: number, py: number) => px < 0 || px > previewWidth || py < 0 || py > previewHeight;
+
                                         const spreadXInPixels = (activePoint.spreadX / 100) * previewWidth;
+                                        const xHandleX = cx + (spreadXInPixels / 2) * cosA;
+                                        const xHandleY = cy + (spreadXInPixels / 2) * sinA;
+                                        const xMultiplier = isOutOfBounds(xHandleX, xHandleY) ? -1 : 1;
+                                        
                                         const spreadYInPixels = (activePoint.spreadY / 100) * previewHeight;
+                                        const yHandleX = cx - (spreadYInPixels / 2) * sinA;
+                                        const yHandleY = cy + (spreadYInPixels / 2) * cosA;
+                                        const yMultiplier = isOutOfBounds(yHandleX, yHandleY) ? -1 : 1;
+
+                                        const rotHandleDist = (spreadYInPixels / 2) + 20;
+                                        const rotHandleX = cx - rotHandleDist * sinA;
+                                        const rotHandleY = cy + rotHandleDist * cosA;
+                                        const rotMultiplier = isOutOfBounds(rotHandleX, rotHandleY) ? -1 : 1;
 
                                         return (
                                             <>
+                                                {/* Dashed ellipse outline */}
                                                 <div
                                                     className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-dashed border-white/50 pointer-events-none"
                                                     style={{
@@ -433,26 +449,42 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                                         transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg)`
                                                     }}
                                                 />
+                                                {/* Spread X Handle */}
                                                 <div
                                                     className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ew-resize"
                                                     style={{
                                                         left: `${activePoint.x}%`,
                                                         top: `${activePoint.y}%`,
-                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${spreadXInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
+                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateX(${xMultiplier * spreadXInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                         zIndex: 11
                                                     }}
                                                     onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadX')}
                                                 />
+                                                {/* Spread Y Handle */}
                                                 <div
                                                     className="absolute w-4 h-4 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg cursor-ns-resize"
                                                     style={{
                                                         left: `${activePoint.x}%`,
                                                         top: `${activePoint.y}%`,
-                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${spreadYInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
+                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${yMultiplier * spreadYInPixels / 2}px) rotate(${-activePoint.rotation}deg)`,
                                                         zIndex: 11
                                                     }}
                                                     onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'spreadY')}
                                                 />
+                                                {/* Rotation Handle */}
+                                                <div
+                                                    className="absolute w-6 h-6 rounded-full bg-white/80 border-2 border-slate-700 shadow-lg flex items-center justify-center"
+                                                    style={{
+                                                        cursor: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-6.219-8.56'%3E%3C/path%3E%3C/svg%3E") 12 12, auto`,
+                                                        left: `${activePoint.x}%`,
+                                                        top: `${activePoint.y}%`,
+                                                        transform: `translate(-50%, -50%) rotate(${activePoint.rotation}deg) translateY(${rotMultiplier * ((spreadYInPixels / 2) + 20)}px) rotate(${-activePoint.rotation}deg)`,
+                                                        zIndex: 11,
+                                                    }}
+                                                    onMouseDown={(e) => handlePointMouseDown(e, activePoint.id, 'rotation')}
+                                                >
+                                                    <RotateCw className="w-3 h-3 text-slate-700"/>
+                                                </div>
                                             </>
                                         );
                                     })()
