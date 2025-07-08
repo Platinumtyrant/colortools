@@ -411,7 +411,6 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                             boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                             zIndex: activePointId === point.id ? 12 : 1,
                                         }}
-                                        onClick={(e) => { e.stopPropagation(); handlePointClick(point.id); }}
                                         onMouseDown={(e) => handlePointMouseDown(e, point.id, 'position')}
                                     />
                                 ))}
