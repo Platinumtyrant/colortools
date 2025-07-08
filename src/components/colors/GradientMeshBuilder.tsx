@@ -317,7 +317,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: ${points[0]?.color || '#000000'};
+  background-color: #000000;
 }
 
 /* This inner container is scaled up to prevent blur clipping */
@@ -329,7 +329,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
 
 .mesh-point {
   position: absolute;
-  mix-blend-mode: lighten;
+  mix-blend-mode: screen;
   filter: blur(${blurRadius.toFixed(0)}px);
   border-radius: 50%;
 }
@@ -380,17 +380,17 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                             <div 
                                 ref={previewRef}
                                 className="absolute inset-0 cursor-pointer"
-                                onClick={handleBackgroundClick}
+                                onMouseDown={handleBackgroundClick}
                             >
                                 {/* Visual and Interactive Layer Combined */}
                                 <div
                                     className="absolute inset-0"
-                                    style={{ backgroundColor: points[0]?.color || '#000000' }}
+                                    style={{ backgroundColor: '#000' }}
                                 >
                                     {points.map(point => (
                                         <div
                                             key={`grad-bg-${point.id}`}
-                                            className="absolute mix-blend-lighten rounded-full transition-transform duration-100 ease-in-out cursor-move group-hover:brightness-110"
+                                            className="absolute mix-blend-screen rounded-full"
                                             style={{
                                                 left: `${point.x}%`,
                                                 top: `${point.y}%`,
