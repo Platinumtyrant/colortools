@@ -118,10 +118,8 @@ export function PantoneGuideClientPage({ pantoneCategories }: PantoneGuideClient
       </div>
 
       <footer className="mt-8 pt-4 border-t text-center text-xs text-muted-foreground space-y-2">
-        <p>PANTONE® Colors displayed here may not match PANTONE-identified standards. Consult current PANTONE Color Publications for accurate color.</p>
-        <p>PANTONE® and other Pantone, Inc. trademarks are the property of Pantone, Inc. © Pantone, Inc., 2005. All rights reserved.</p>
-        <p>Hardcopies of PANTONE Color Charts and reproductions thereof MAY NOT BE SOLD in any form.</p>
-        <p>Pantone, Inc. is not responsible for any modifications made to such Charts which have not been approved by Pantone, Inc. PC = four-color Process (process) simulations of solid colors Coated (stock)</p>
+        <p>PANTONE® Colors displayed here may not match PANTONE-identified standards. Consult current PANTONE Color Publications for accurate color. PANTONE® and other Pantone, Inc. trademarks are the property of Pantone, Inc. © Pantone, Inc., 2005. All rights reserved.</p>
+        <p>Hardcopies of PANTONE Color Charts and reproductions thereof MAY NOT BE SOLD in any form. Pantone, Inc. is not responsible for any modifications made to such Charts which have not been approved by Pantone, Inc. PC = four-color Process (process) simulations of solid colors Coated (stock)</p>
       </footer>
     </div>
   );
