@@ -103,8 +103,8 @@
     backface-visibility: hidden;
   }
   .scroll-fade {
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 2.5rem, black calc(100% - 2.5rem), transparent);
-    mask-image: linear-gradient(to bottom, transparent, black 2.5rem, black calc(100% - 2.5rem), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 4rem, black calc(100% - 4rem), transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 4rem, black calc(100% - 4rem), transparent);
   }
 }
 

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Code, Move, RotateCw } from 'lucide-react';
+import { Code, Move, RotateCw, Download } from 'lucide-react';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -111,7 +111,6 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
         let gridColors = defaultColors;
 
         if (initialColors && initialColors.length > 0) {
-            // Cycle through the initial colors to fill all 6 grid points
             gridColors = Array.from({ length: 6 }, (_, i) => initialColors[i % initialColors.length]);
         }
         
@@ -236,6 +235,86 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             setActivePointId(null);
         }
     };
+
+    const handleExportPng = useCallback(async () => {
+        const width = 1920;
+        const height = 1080;
+    
+        const exportBlurRadius = Math.max(30, Math.min(150, width * 0.06));
+    
+        let svgContent = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+            <foreignObject width="100%" height="100%">
+                <div xmlns="http://www.w3.org/1999/xhtml">
+                    <style>
+                        .mesh-container {
+                            position: relative;
+                            width: ${width}px;
+                            height: ${height}px;
+                            overflow: hidden;
+                            background-color: #000000;
+                        }
+                        .mesh-inner {
+                            position: absolute;
+                            inset: 0;
+                            transform: scale(1.2);
+                        }
+                        .mesh-point {
+                            position: absolute;
+                            mix-blend-mode: screen;
+                            filter: blur(${exportBlurRadius.toFixed(0)}px);
+                            border-radius: 50%;
+                        }
+                    </style>
+                    <div class="mesh-container">
+                        <div class="mesh-inner">
+                            ${points.map(p => `
+                                <div class="mesh-point" style="
+                                    left: ${p.x.toFixed(1)}%;
+                                    top: ${p.y.toFixed(1)}%;
+                                    width: ${p.spreadX * 2}%;
+                                    height: ${p.spreadY * 2}%;
+                                    transform: translate(-50%, -50%) rotate(${p.rotation}deg);
+                                    background-image: radial-gradient(ellipse, ${p.color} 0px, transparent ${p.strength}%);
+                                "></div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </foreignObject>
+        </svg>`;
+    
+        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const svgUrl = URL.createObjectURL(svgBlob);
+    
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(img, 0, 0, width, height);
+                const pngUrl = canvas.toDataURL('image/png');
+                
+                const link = document.createElement('a');
+                link.href = pngUrl;
+                link.download = `gradient-mesh.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(svgUrl);
+                toast({ title: "Mesh Exported as PNG!" });
+            }
+        };
+        img.onerror = (err) => {
+            console.error("Failed to load SVG for PNG conversion", err);
+            toast({ title: "Failed to export as PNG", variant: 'destructive' });
+            URL.revokeObjectURL(svgUrl);
+        };
+        img.src = svgUrl;
+    
+    }, [points, toast]);
     
     const gradientCss = useMemo(() => {
         const containerCss = `
@@ -442,6 +521,10 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
                                     {isCodeVisible ? 'Hide Code' : 'Show Code'}
                                 </Button>
                                 <Button onClick={handleCopyCss} size="sm">Copy CSS</Button>
+                                <Button onClick={handleExportPng} size="sm">
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Export PNG
+                                </Button>
                             </div>
                         </div>
                         {isCodeVisible && (
@@ -463,5 +546,3 @@ ${points.map((_, i) => `    <div class="mesh-point mesh-point-${i + 1}"></div>`)
         </Card>
     );
 };
-
-    
