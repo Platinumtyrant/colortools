@@ -12,6 +12,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const navItems = [
     { href: '/', label: 'Palette Builder' },
     { href: '/mesh-gradient', label: 'Gradient Builder' },
+    { href: '/camera-identifier', label: 'Camera Identifier' },
     { href: '/color-wheel', label: 'Color Wheel' },
     { href: '/inspiration', label: 'Inspiration' },
     { href: '/pantone-guide', label: 'Pantone Guide' },
