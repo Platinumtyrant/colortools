@@ -283,8 +283,7 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
             </foreignObject>
         </svg>`;
     
-        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-        const svgUrl = URL.createObjectURL(svgBlob);
+        const svgDataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgContent)))}`;
     
         const img = new Image();
         img.onload = () => {
@@ -303,16 +302,14 @@ export const GradientMeshBuilder = ({ initialColors }: GradientMeshBuilderProps)
                 link.click();
                 document.body.removeChild(link);
                 
-                URL.revokeObjectURL(svgUrl);
                 toast({ title: "Mesh Exported as PNG!" });
             }
         };
         img.onerror = (err) => {
             console.error("Failed to load SVG for PNG conversion", err);
             toast({ title: "Failed to export as PNG", variant: 'destructive' });
-            URL.revokeObjectURL(svgUrl);
         };
-        img.src = svgUrl;
+        img.src = svgDataUrl;
     
     }, [points, toast]);
     
