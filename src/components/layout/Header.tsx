@@ -27,20 +27,24 @@ export function Header() {
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background px-4 sm:px-6">
             <div className="flex items-center gap-4">
                 
-                <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
-                    {navItems.map((item) => (
-                        <Button key={item.href} asChild variant="ghost" className="text-muted-foreground hover:text-primary">
+                <nav className="hidden md:flex items-center gap-1 text-sm font-medium bg-muted p-1 rounded-md">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href || (item.href === '/pantone-guide' && isPantoneActive);
+                        return (
                             <Link
+                                key={item.href}
                                 href={item.href!}
                                 className={cn(
-                                    "transition-colors",
-                                    pathname === item.href || (item.href === '/pantone-guide' && isPantoneActive) ? "text-primary" : "text-muted-foreground"
+                                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                    isActive
+                                        ? "bg-background text-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
                                 {item.label}
                             </Link>
-                        </Button>
-                    ))}
+                        )
+                    })}
                 </nav>
 
                 <div className="md:hidden">
