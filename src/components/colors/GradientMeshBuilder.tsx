@@ -20,11 +20,10 @@ interface Point {
 
 interface EditorPanelProps {
     activePoint: Point | undefined;
-    points: Point[];
-    setPoints: React.Dispatch<React.SetStateAction<Point[]>>;
+    onColorChange: (color: string) => void;
 }
 
-const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoints }) => {
+const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange }) => {
     if (!activePoint) {
         return (
             <Card className="h-full flex flex-col items-center justify-center p-8 text-center border-2 border-dashed">
@@ -39,13 +38,13 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoint
         <Card className="h-full flex flex-col">
             <CardHeader className="flex-shrink-0">
                 <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">Editing Point {points.findIndex(p => p.id === activePoint.id) + 1}</CardTitle>
+                    <CardTitle className="text-lg">Editing Point</CardTitle>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto p-0">
                 <ColorPickerClient
                     color={activePoint.color}
-                    onChange={(c: ColorResult) => setPoints(prev => prev.map(p => p.id === activePoint.id ? { ...p, color: c.hex } : p))}
+                    onChange={(c: ColorResult) => onColorChange(c.hex)}
                     className="border-0 shadow-none rounded-none"
                 />
             </CardContent>
@@ -54,44 +53,76 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, points, setPoint
 };
 
 
-const drawMesh = (canvas: HTMLCanvasElement, points: Point[]) => {
+const drawMesh = (canvas: HTMLCanvasElement, points: Point[], isPreview: boolean) => {
     const ctx = canvas.getContext('2d');
-    if (!ctx || points.length < 6) return;
+    if (!ctx || points.length === 0) return;
 
-    const width = canvas.width;
-    const height = canvas.height;
-    if (width === 0 || height === 0) return;
-    
-    const imageData = ctx.createImageData(width, height);
+    let { width, height } = canvas;
+    if (isPreview) {
+        // Render at a much lower resolution for speed, then scale up
+        width = Math.round(width / 8);
+        height = Math.round(height / 8);
+    }
+
+    if (width <= 0 || height <= 0) return;
+
+    // Use an offscreen canvas for rendering the pixels
+    const offscreenCanvas = new OffscreenCanvas(width, height);
+    const offscreenCtx = offscreenCanvas.getContext('2d');
+    if (!offscreenCtx) return;
+
+    const imageData = offscreenCtx.createImageData(width, height);
     const data = imageData.data;
 
-    const p = points.map(point => chroma(point.color));
-    
-    const c00 = p[0];
-    const c10 = p[1];
-    const c20 = p[2];
-    const c01 = p[3];
-    const c11 = p[4];
-    const c21 = p[5];
+    const pointColors = points.map(p => chroma(p.color).rgb());
+    const pointPositions = points.map(p => ({ x: (p.x / 100) * width, y: (p.y / 100) * height }));
 
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-            const u = x / (width - 1);
-            const v = y / (height - 1);
+            let totalWeight = 0;
+            let r = 0, g = 0, b = 0;
+            let exactMatch = false;
 
-            const topColor = chroma.bezier([c00, c10, c20])(u).rgb();
-            const bottomColor = chroma.bezier([c01, c11, c21])(u).rgb();
-            const finalColor = chroma.mix(topColor, bottomColor, v, 'rgb').rgb();
+            for (let i = 0; i < points.length; i++) {
+                const dx = x - pointPositions[i].x;
+                const dy = y - pointPositions[i].y;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < 0.1) {
+                    r = pointColors[i][0];
+                    g = pointColors[i][1];
+                    b = pointColors[i][2];
+                    exactMatch = true;
+                    break;
+                }
+                const weight = 1 / (distSq * distSq);
+                r += pointColors[i][0] * weight;
+                g += pointColors[i][1] * weight;
+                b += pointColors[i][2] * weight;
+                totalWeight += weight;
+            }
+
+            if (!exactMatch && totalWeight > 0) {
+                r /= totalWeight;
+                g /= totalWeight;
+                b /= totalWeight;
+            }
 
             const index = (y * width + x) * 4;
-            data[index] = finalColor[0];
-            data[index + 1] = finalColor[1];
-            data[index + 2] = finalColor[2];
+            data[index] = r;
+            data[index + 1] = g;
+            data[index + 2] = b;
             data[index + 3] = 255;
         }
     }
+    
+    offscreenCtx.putImageData(imageData, 0, 0);
 
-    ctx.putImageData(imageData, 0, 0);
+    // Draw the (potentially scaled) result to the visible canvas
+    ctx.imageSmoothingEnabled = isPreview;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(offscreenCanvas, 0, 0, canvas.width, canvas.height);
 };
 
 export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[] }) => {
@@ -101,6 +132,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     const [activePointId, setActivePointId] = useState<number | null>(null);
     const [draggingPointId, setDraggingPointId] = useState<number | null>(null);
     const { toast } = useToast();
+    const debounceTimeout = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
         const defaultColors = ['#f8cdda', '#1d2b64', '#fdfcfb', '#fde2e4', '#e6e6ea', '#fbfbfb'];
@@ -123,42 +155,37 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
+        const isPreview = draggingPointId !== null;
+        drawMesh(canvas, points, isPreview);
+    }, [points, draggingPointId]);
+    
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
         const observer = new ResizeObserver(entries => {
             for (const entry of entries) {
                 const { width, height } = entry.contentRect;
                 canvas.width = width;
                 canvas.height = height;
-                drawMesh(canvas, points);
+                const isPreview = draggingPointId !== null;
+                drawMesh(canvas, points, isPreview);
             }
         });
 
         observer.observe(canvas);
-
-        return () => {
-            if (canvas) {
-                observer.unobserve(canvas);
-            }
-        };
-    }, [points]); 
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-            drawMesh(canvas, points);
-        }
-    }, [points]);
+        return () => observer.disconnect();
+    }, [points, draggingPointId]); 
 
     const handleExportPng = useCallback(async () => {
         if (points.length < 6) return;
-
         const exportCanvas = document.createElement('canvas');
         const exportWidth = 1920;
         const exportHeight = 1080;
         exportCanvas.width = exportWidth;
         exportCanvas.height = exportHeight;
         
-        drawMesh(exportCanvas, points);
+        drawMesh(exportCanvas, points, false); // false for high quality
         
         const pngUrl = exportCanvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -169,7 +196,6 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         document.body.removeChild(link);
         
         toast({ title: "Mesh Exported as PNG!" });
-
     }, [points, toast]);
 
 
@@ -207,16 +233,24 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
             setDraggingPointId(null);
         }
     };
+    
+    const handleColorChange = useCallback((newColor: string) => {
+        if (!activePointId) return;
+        
+        // Update points for instant visual feedback on the color picker itself
+        setPoints(prev => prev.map(p => p.id === activePointId ? { ...p, color: newColor } : p));
+        
+        // Debounce the re-rendering of the canvas
+        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = setTimeout(() => {
+            // The useEffect already handles re-rendering, this just ensures it happens after a pause
+        }, 50);
 
-
-    const handlePointClick = (index: number) => {
-        setActivePointId(points[index].id);
-    };
+    }, [activePointId]);
 
     const activePoint = useMemo(() => points.find(p => p.id === activePointId), [points, activePointId]);
     const gridConnections = [
-        [0, 1], [1, 2], [3, 4], [4, 5],
-        [0, 3], [1, 4], [2, 5], 
+        [0, 1], [1, 2], [3, 4], [4, 5], [0, 3], [1, 4], [2, 5], 
     ];
 
     return (
@@ -254,39 +288,42 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                             onPointerLeave={handlePointerUp}
                         >
                             <canvas ref={canvasRef} className="w-full h-full" />
-                            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
-                                {points.length === 6 && gridConnections.map(([p1Index, p2Index], i) => (
-                                    <line
-                                        key={`line-${i}`}
-                                        x1={`${points[p1Index].x}%`} y1={`${points[p1Index].y}%`}
-                                        x2={`${points[p2Index].x}%`} y2={`${points[p2Index].y}%`}
-                                        stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="4 4"
-                                    />
-                                ))}
-                            </svg>
-                            <div className="absolute inset-0">
-                                {points.length === 6 && points.map((point) => (
-                                    <div
-                                        key={point.id}
-                                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-grab active:cursor-grabbing rounded-full"
-                                        style={{
-                                            left: `${point.x}%`,
-                                            top: `${point.y}%`,
-                                            backgroundColor: point.color,
-                                            boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
-                                            zIndex: 10,
-                                        }}
-                                        onPointerDown={(e) => handlePointerDown(e, point.id)}
-                                    />
-                                ))}
-                            </div>
+                            {points.length === 6 && (
+                                <>
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
+                                        {gridConnections.map(([p1Index, p2Index], i) => (
+                                            <line
+                                                key={`line-${i}`}
+                                                x1={`${points[p1Index].x}%`} y1={`${points[p1Index].y}%`}
+                                                x2={`${points[p2Index].x}%`} y2={`${points[p2Index].y}%`}
+                                                stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="4 4"
+                                            />
+                                        ))}
+                                    </svg>
+                                    <div className="absolute inset-0">
+                                        {points.map((point) => (
+                                            <div
+                                                key={point.id}
+                                                className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/75 shadow-lg cursor-grab active:cursor-grabbing rounded-full"
+                                                style={{
+                                                    left: `${point.x}%`,
+                                                    top: `${point.y}%`,
+                                                    backgroundColor: point.color,
+                                                    boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
+                                                    zIndex: 10,
+                                                }}
+                                                onPointerDown={(e) => handlePointerDown(e, point.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
                     <EditorPanel 
                         activePoint={activePoint} 
-                        points={points}
-                        setPoints={setPoints}
+                        onColorChange={handleColorChange}
                     />
                  </div>
             </CardContent>
