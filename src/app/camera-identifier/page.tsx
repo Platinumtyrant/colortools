@@ -138,7 +138,7 @@ export default function CameraIdentifierPage() {
         const centerY = video.videoHeight / 2;
         
         const pixelData = context.getImageData(centerX, centerY, 1, 1).data;
-        const hex = `#${("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6)}`;
+        const hex = "#" + ("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6);
         
         setIdentifiedColor(hex);
         animationFrameId.current = requestAnimationFrame(detectColorFromVideo);
@@ -232,7 +232,7 @@ export default function CameraIdentifierPage() {
         const canvasY = imageYRatio * imageHeight;
         
         const pixelData = context.getImageData(canvasX, canvasY, 1, 1).data;
-        const hex = `#${("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | (pixelData[2]).toString(16)).slice(-6)}`;
+        const hex = "#" + ("000000" + ((pixelData[0] << 16) | (pixelData[1] << 8) | pixelData[2]).toString(16)).slice(-6);
         setIdentifiedColor(hex);
     }, [snapshot, transform.scale, transform.x, transform.y]);
 
@@ -278,8 +278,14 @@ export default function CameraIdentifierPage() {
 
     const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
         if (lastDragPosition.current) {
+            const distDragged = Math.sqrt(
+                Math.pow(e.clientX - (pointerDownPosition.current?.x || 0), 2) +
+                Math.pow(e.clientY - (pointerDownPosition.current?.y || 0), 2)
+            );
             lastDragPosition.current = null;
-            return; // It was a drag, so don't process as a tap
+            if (distDragged > 5) { // If it was a meaningful drag, don't process as a tap
+                return;
+            }
         }
         
         if (pointerDownPosition.current) {
@@ -350,6 +356,7 @@ export default function CameraIdentifierPage() {
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
                         onDoubleClick={handleDoubleClick}
+                        style={{ transformOrigin: '0 0' }}
                     >
                          {!isStreamActive && !snapshot && (
                              <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2 text-center p-4">
@@ -376,7 +383,6 @@ export default function CameraIdentifierPage() {
                                     backgroundRepeat: 'no-repeat',
                                     backgroundPosition: 'center',
                                     cursor: isZoomed ? 'grab' : 'zoom-in',
-                                    transformOrigin: '0 0',
                                 }}
                                 animate={{ scale: transform.scale, x: transform.x, y: transform.y }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -457,5 +463,3 @@ export default function CameraIdentifierPage() {
         </main>
     );
 }
-
-    
