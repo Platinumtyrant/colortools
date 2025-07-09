@@ -84,26 +84,29 @@ const colorSpaceInfo: Record<ColorSpace, { name: string; components: string[]; d
   srgb: { name: 'sRGB', components: ['R', 'G', 'B'], descriptions: ['Red (0-255)', 'Green (0-255)', 'Blue (0-255)'] },
 };
 
-const getGraphData = (colors: string[], space: ColorSpace) => {
+const getGraphData = (colors: string[]) => {
     if (!colors || colors.length === 0) return [];
     
-    let components: [number, number, number][] = [];
-    switch (space) {
-        case 'lch':   components = colors.map(c => chroma(c).lch()); break;
-        case 'lab':   components = colors.map(c => chroma(c).lab()); break;
-        case 'hsl':   components = colors.map(c => chroma(c).hsl()); break;
-        case 'hwb':   components = colors.map(c => colord(c).toHwb()).map(o => [o.h, o.w, o.b]); break;
-        case 'srgb':  components = colors.map(c => chroma(c).rgb()); break;
-        default:      components = colors.map(c => chroma(c).lch());
-    }
+    // Using colord for HSL conversion and normalizing S and L to be 0-1 to match chroma's scale.
+    const components = colors.map(c => {
+        const hsl = colord(c).toHsl();
+        return [
+            hsl.h,       // Hue (0-360) from colord is fine
+            hsl.s / 100, // Saturation (colord is 0-100, we need 0-1)
+            hsl.l / 100, // Lightness (colord is 0-100, we need 0-1)
+        ];
+    });
 
-    return components[0].map((_, i) => ({
+    const displayInfo = colorSpaceInfo['hsl'];
+
+    // We know we only have 3 components, so we can map over displayInfo.components directly.
+    return displayInfo.components.map((_, i) => ({
       data: components.map((c, j) => ({
         name: j + 1,
         value: isNaN(c[i]) ? 0 : c[i]
       })),
-      title: colorSpaceInfo[space].components[i],
-      description: colorSpaceInfo[space].descriptions[i]
+      title: displayInfo.components[i],
+      description: displayInfo.descriptions[i]
     }));
 };
 
@@ -467,6 +470,7 @@ function PaletteBuilderPage() {
     }, [currentAnalysisColors, fgColor, bgColor]);
     
     const interpolationMode = useMemo(() => {
+        // Force lch for color spaces chroma.scale doesn't support directly
         if (colorSpace === 'hwb' || colorSpace === 'srgb') return 'lch';
         return colorSpace;
     }, [colorSpace]);
@@ -489,7 +493,7 @@ function PaletteBuilderPage() {
         return analysisSourcePalette.map(color => simulate(color, simulationType));
     }, [analysisSourcePalette, simulationType]);
   
-    const graphData = useMemo(() => getGraphData(analysisSourcePalette, 'hsl'), [analysisSourcePalette]);
+    const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
     
     const isPaletteColorblindSafe = useMemo(() => {
         if (currentAnalysisColors.length < 2) return true;
@@ -961,5 +965,6 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
 
 
