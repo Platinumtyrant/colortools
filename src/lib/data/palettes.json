@@ -1,0 +1,1016 @@
+[
+  {
+    "image": "Layer 1.jpg",
+    "palettes": [
+      {
+        "name": "Windows 98",
+        "colors": ["#C0C0C0", "#808080", "#FFFFFF", "#000000", "#000080", "#800080", "#008080", "#800000"]
+      },
+      {
+        "name": "Tints of Light Grey",
+        "colors": ["#D3D3D3", "#DDDDDD", "#E5E5E5", "#EEEEEE", "#F6F6F6", "#FFFFFF"]
+      },
+      {
+        "name": "Discord Embed Color | Hex code: #2F3136",
+        "colors": ["#2F3136", "#36393F", "#202225"]
+      },
+      {
+        "name": "Glitch color palette",
+        "colors": ["#FF0000", "#00FF00", "#0000FF", "#FFFFFF", "#000000", "#800080", "#FF00FF", "#00FFFF"]
+      },
+      {
+        "name": "Dark theme minimal dark ui colors palette",
+        "colors": ["#212121", "#303030", "#424242", "#616161", "#757575", "#9E9E9E", "#BDBDBD", "#E0E0E0", "#F5F5F5"]
+      },
+      {
+        "name": "Grey",
+        "colors": ["#CCCCCC", "#AAAAAA", "#888888", "#666666", "#444444"]
+      },
+      {
+        "name": "Material Design Deep Purple",
+        "colors": ["#673AB7", "#5E35B1", "#512DA8", "#4527AE", "#311B92"]
+      },
+      {
+        "name": "Tints of Light Pink",
+        "colors": ["#FFB6C1", "#FFC1CC", "#FFCCD7", "#FFD7E2", "#FFE2ED", "#FFEEF8", "#FFFFFF"]
+      },
+      {
+        "name": "Space color palette",
+        "colors": ["#000000", "#1A0033", "#330066", "#6600CC", "#9933FF", "#CC66FF", "#FF99FF"]
+      },
+      {
+        "name": "Shades of Burgundy x",
+        "colors": ["#800020", "#66001A", "#4D0013", "#33000D", "#1A0006"]
+      },
+      {
+        "name": "Best color for CTA button",
+        "colors": ["#FFD700", "#008000", "#0000FF", "#FF0000"]
+      },
+      {
+        "name": "Night Sky colors",
+        "colors": ["#0A0A2A", "#1C1C4C", "#333366", "#4D4D80", "#666699"]
+      },
+      {
+        "name": "Tea matcha packaging branding colors",
+        "colors": ["#A2CD5A", "#7EC0EE", "#3D9970", "#2E8B57", "#1E6C40", "#134B2E"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 2.jpg",
+    "palettes": [
+      {
+        "name": "Gucci logo colors",
+        "colors": ["#008000", "#B8860B", "#FFD700", "#FFFFFF", "#000000"]
+      },
+      {
+        "name": "Mix of blue and red make purple color",
+        "colors": ["#0000FF", "#FF0000", "#800080"]
+      },
+      {
+        "name": "Rubik's Cube colors palette",
+        "colors": ["#FFD700", "#FF0000", "#0000FF", "#008000", "#FFA500", "#FFFFFF"]
+      },
+      {
+        "name": "Logo website coffeeshop colors palette",
+        "colors": ["#A0522D", "#D2B48C", "#F5DEB3", "#DEB887", "#CD853F"]
+      },
+      {
+        "name": "India flag colors",
+        "colors": ["#FF9933", "#FFFFFF", "#138808", "#000080"]
+      },
+      {
+        "name": "Tints XKCD Color pink red",
+        "colors": ["#F5054F", "#FF3366", "#FF6699", "#FF99CC", "#FFCCE6"]
+      },
+      {
+        "name": "Tints of Light Sky Blue #87CEFA hex color",
+        "colors": ["#87CEFA", "#ADD8E6", "#B0E0E6", "#C0EDF5", "#D0F5FA"]
+      },
+      {
+        "name": "Tetris Basic Color Scheme",
+        "colors": ["#00FFFF", "#0000FF", "#FFA500", "#FFFF00", "#008000", "#800080", "#FF0000"]
+      },
+      {
+        "name": "Pastel rainbow",
+        "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF"]
+      },
+      {
+        "name": "Red tints 7 colors",
+        "colors": ["#FF0000", "#E00000", "#C00000", "#A00000", "#800000", "#600000", "#400000"]
+      },
+      {
+        "name": "Bootstrap 4 Alerts colors",
+        "colors": ["#CFF4FC", "#D4EDDA", "#FFF3CD", "#F8D7DA", "#E2E3E5", "#D1ECF1", "#E2F0D9", "#FFF7EB", "#FCE8E6"]
+      },
+      {
+        "name": "Charts pie chart line board",
+        "colors": ["#6B4E99", "#4B8EAE", "#7FD3ED", "#C0D6E2", "#A8D1EA", "#6DABD7"]
+      },
+      {
+        "name": "Pride Colors",
+        "colors": ["#E50000", "#FF8D00", "#FFF100", "#008121", "#004CFF", "#760088"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 3.jpg",
+    "palettes": [
+      {
+        "name": "Website linktree design branding colours",
+        "colors": ["#62D2C6", "#D9ED91", "#DDC6E6", "#A6A6EA"]
+      },
+      {
+        "name": "Sunset color palette",
+        "colors": ["#FF6347", "#FF7F50", "#FFA07A", "#FFB6C1", "#FFC0CB"]
+      },
+      {
+        "name": "Pastel Rainbow",
+        "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF"]
+      },
+      {
+        "name": "Cryptocurrency crypto website colors palette",
+        "colors": ["#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#FF0000", "#0000FF", "#800080"]
+      },
+      {
+        "name": "US dollar scheme",
+        "colors": ["#8FBC8F", "#C0C0C0", "#A9A9A9", "#696969"]
+      },
+      {
+        "name": "Baker's Chocolate",
+        "colors": ["#5C3317", "#7A4523", "#98572F", "#B6693B", "#D47B47"]
+      },
+      {
+        "name": "Orange shades",
+        "colors": ["#FF7F50", "#FF6347", "#FF4500", "#FFA07A", "#FF8C00"]
+      },
+      {
+        "name": "Shades of Navy",
+        "colors": ["#000080", "#000066", "#00004D", "#000033", "#00001A"]
+      },
+      {
+        "name": "Visual Studio Code logo color",
+        "colors": ["#007ACC", "#3C99D4", "#66B2DA"]
+      },
+      {
+        "name": "Tints XKCD Color light orange #fda48 hex",
+        "colors": ["#FDAA48", "#FFC179", "#FFD7AB", "#FFEEDC", "#FFFFFF"]
+      },
+      {
+        "name": "Miami Vice",
+        "colors": ["#FF00FF", "#00FFFF", "#0000FF", "#FF0000", "#FFFF00"]
+      },
+      {
+        "name": "Shades of Rust color #B7410E hex",
+        "colors": ["#B7410E", "#9C380C", "#812F0A", "#662608", "#4B1D06"]
+      },
+      {
+        "name": "Shades of Sandy Brown #F4A460 hex color",
+        "colors": ["#F4A460", "#D29C57", "#B0934E", "#8E8A45", "#6C813C"]
+      },
+      {
+        "name": "Apricot Crush",
+        "colors": ["#FFDAB9", "#FFE4B5", "#FFEBCD", "#FFF0DB", "#FFF5E7"]
+      },
+      {
+        "name": "neon rainbow",
+        "colors": ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0000", "#00FF00", "#0000FF", "#FFA500"]
+      },
+      {
+        "name": "Shades of Olive Drab #6B8E23 hex color",
+        "colors": ["#6B8E23", "#5A771E", "#496019", "#384914", "#27320F"]
+      },
+      {
+        "name": "Design branding icon logitech colors",
+        "colors": ["#00FF00", "#00BFFF", "#FF0000", "#FFFF00", "#000000", "#FFFFFF"]
+      },
+      {
+        "name": "Bright colors palette",
+        "colors": ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 4.jpg",
+    "palettes": [
+      {
+        "name": "Pixel art colors palette",
+        "colors": ["#A0522D", "#CD853F", "#F4A460", "#D2B48C", "#F5DEB3", "#A52A2A", "#8B4513"]
+      },
+      {
+        "name": "Discord colors palette",
+        "colors": ["#7289DA", "#99AAB5", "#2C2F33", "#23272A"]
+      },
+      {
+        "name": "Ukraine flag colors",
+        "colors": ["#005BBB", "#FFD500"]
+      },
+      {
+        "name": "Bootstrap 4 colors",
+        "colors": ["#007BFF", "#6C757D", "#28A745", "#DC3545", "#FFC107", "#17A2B8", "#F8F9FA", "#343A40"]
+      },
+      {
+        "name": "Rainbow colors palette",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#EE82EE"]
+      },
+      {
+        "name": "Human skin tone color palette",
+        "colors": ["#F5DEB3", "#FFE4C4", "#FFEBCD", "#F0DCB2", "#DEB887"]
+      },
+      {
+        "name": "8 Color Palette",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
+      },
+      {
+        "name": "Steam colors palette",
+        "colors": ["#1B2838", "#2A475E", "#4169E1", "#66C0F4", "#FFFFFF"]
+      },
+      {
+        "name": "Abstract Blue color palette",
+        "colors": ["#007FFF", "#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF"]
+      },
+      {
+        "name": "Discord Roles",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
+      },
+      {
+        "name": "12 Color Rainbow",
+        "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#00CED1", "#00BFFF", "#0000FF", "#8A2BE2", "#EE82EE"]
+      },
+      {
+        "name": "Shades of Light Grey",
+        "colors": ["#D3D3D3", "#DDDDDD", "#E5E5E5", "#EEEEEE", "#F6F6F6", "#FFFFFF"]
+      },
+      {
+        "name": "Shades Apple iOS Blue #007AFF hex",
+        "colors": ["#007AFF", "#3399FF", "#66B2FF", "#99CCFF", "#CCEEFF"]
+      },
+      {
+        "name": "Bootstrap 4 background colors (classes) palette",
+        "colors": ["#F8F9FA", "#E9ECEF", "#E2E3E5", "#D1ECF1", "#D4EDDA", "#FFF3CD", "#F8D7DA", "#CCE5FF", "#D6D8D9", "#FDFDFD"]
+      },
+      {
+        "name": "Shades of Material Design Green",
+        "colors": ["#4CAF50", "#43A047", "#388E3C", "#2E7D32", "#1B5E20"]
+      },
+      {
+        "name": "Telegram color code",
+        "colors": ["#0088CC", "#23272A", "#81D4FA"]
+      },
+      {
+        "name": "Electric blue colors palette",
+        "colors": ["#7DF9FF", "#00FFFF", "#00BFFF", "#0000FF", "#0000CD", "#00008B"]
+      },
+      {
+        "name": "7 Color Palette",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#FF00FF"]
+      },
+      {
+        "name": "Shades of Dark Red",
+        "colors": ["#8B0000", "#660000", "#440000", "#220000", "#000000"]
+      },
+      {
+        "name": "12 Pastel Colors",
+        "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF", "#F0E68C", "#90EE90", "#ADD8E6", "#FFB6C1", "#FFFACD", "#E6E6FA"]
+      },
+      {
+        "name": "Hacker scheme colors",
+        "colors": ["#00FF00", "#00FF7F", "#00BFFF", "#00FFFF", "#7FFF00", "#32CD32", "#008000"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 5.jpg",
+    "palettes": [
+      {
+        "name": "Harry Potter 4 House Colors",
+        "colors": ["#740001", "#FFD700", "#1A472A", "#C0C0C0", "#222F5B", "#626262", "#6F7273"]
+      },
+      {
+        "name": "Germany flag colors",
+        "colors": ["#000000", "#DD0000", "#FFCC00"]
+      },
+      {
+        "name": "Figma app design logo colours",
+        "colors": ["#FF3366", "#FFB6C1", "#FFD700", "#00BFFF", "#8A2BE2"]
+      },
+      {
+        "name": "Trello Purple colors palette",
+        "colors": ["#7A42A5", "#9E6AC8", "#B98BE0", "#D2B7F1", "#EBE0FC"]
+      },
+      {
+        "name": "Midjourney ui concept ai colors",
+        "colors": ["#202225", "#2C2F33", "#36393F", "#7289DA", "#99AAB5"]
+      },
+      {
+        "name": "ACTUAL discord palette",
+        "colors": ["#7289DA", "#99AAB5", "#2C2F33", "#23272A"]
+      },
+      {
+        "name": "Tints of Light Gray #D3D3D3 hex color",
+        "colors": ["#D3D3D3", "#DDDDDD", "#E5E5E5", "#EEEEEE", "#F6F6F6", "#FFFFFF"]
+      },
+      {
+        "name": "WhatsApp colors palette",
+        "colors": ["#25D366", "#128C7E", "#075E54", "#DCF8C6", "#FFE5B4", "#34B7F1"]
+      },
+      {
+        "name": "Tints of Web Safe Color Black #000000",
+        "colors": ["#000000", "#111111", "#222222", "#333333", "#444444"]
+      },
+      {
+        "name": "Washington Commanders (Football Team) logo colors",
+        "colors": ["#5A1B28", "#E21B32", "#FFB81C", "#F4F4F4"]
+      },
+      {
+        "name": "Elegant colors",
+        "colors": ["#36454F", "#5D6D7E", "#AAB7B8", "#D6DBDF", "#EAECEE", "#F2F3F4"]
+      },
+      {
+        "name": "Shell primary colour palette",
+        "colors": ["#FFD700", "#FF0000", "#FFFFFF"]
+      },
+      {
+        "name": "Green blue shades",
+        "colors": ["#00FF00", "#00FFFF", "#00BFFF", "#0000FF", "#0000CD", "#00008B", "#20B2AA"]
+      },
+      {
+        "name": "Anime colors palette",
+        "colors": ["#FFDAB9", "#FFC0CB", "#ADD8E6", "#90EE90", "#FFFFE0", "#F0F8FF"]
+      },
+      {
+        "name": "TypeScript logo colors",
+        "colors": ["#007ACC", "#3178C6", "#FFFFFF"]
+      },
+      {
+        "name": "Samsung logo colors",
+        "colors": ["#0000FF", "#3366FF", "#6699FF", "#99CCFF", "#CCEEFF"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 6.jpg",
+    "palettes": [
+      {
+        "name": "Tints of Old Rose color #C02E4C hex",
+        "colors": ["#C02E4C", "#D44265", "#E8567E", "#FCAAAA", "#FFBBDC"]
+      },
+      {
+        "name": "Lowpoly 3d blender low poly colors palette",
+        "colors": ["#FCEE21", "#00A6DA", "#E30613", "#1A1A1A", "#F3F1ED"]
+      },
+      {
+        "name": "Shades XKCD Color dark gold #b59410 hex",
+        "colors": ["#B59410", "#9A7B0E", "#7E620C", "#63490A", "#483008"]
+      },
+      {
+        "name": "Fitness application colors palette",
+        "colors": ["#5A2D81", "#7A3FA3", "#9A52C5", "#B0E0E6", "#66CDAA", "#FFC0CB"]
+      },
+      {
+        "name": "Spotify colors palette",
+        "colors": ["#1DB954", "#1ED760", "#191414", "#FFFFFF"]
+      },
+      {
+        "name": "10 Shades of Purple - Light",
+        "colors": ["#E6E6FA", "#D8BFD8", "#DDA0DD", "#EE82EE", "#DA70D6", "#BA55D3", "#9932CC", "#8A2BE2", "#800080", "#9370DB"]
+      },
+      {
+        "name": "Tints of Light Blue #ADD8E6 hex color",
+        "colors": ["#ADD8E6", "#C0EDF5", "#D0F5FA", "#E0FAFF", "#F0FFFF"]
+      },
+      {
+        "name": "Trello Pink colors palette",
+        "colors": ["#FF69B4", "#FF82B2", "#FF9BCD", "#FFB6E8", "#FFD1FC"]
+      },
+      {
+        "name": "Facebook Logo (2019)",
+        "colors": ["#3B5998", "#8B9DC3", "#DFE3EE", "#F7F7F7"]
+      },
+      {
+        "name": "Pastel colors palette",
+        "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF"]
+      },
+      {
+        "name": "Luxiem",
+        "colors": ["#CD853F", "#FFA07A", "#FFDAB9", "#F5DEB3", "#B8860B", "#8B4513"]
+      },
+      {
+        "name": "Flat UI colors",
+        "colors": ["#1ABC9C", "#2ECC71", "#3498DB", "#9B59B6", "#34495E", "#16A085", "#27AE60", "#2980B9", "#8E44AD", "#2C3E50"]
+      },
+      {
+        "name": "JavaScript Logo colors palette",
+        "colors": ["#F0DB4F", "#323330", "#606060", "#909090", "#C0C0C0"]
+      },
+      {
+        "name": "6 Colors Palette",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080"]
+      },
+      {
+        "name": "Brown shades colours",
+        "colors": ["#A52A2A", "#8B4513", "#A0522D", "#CD853F", "#D2B48C", "#F5DEB3"]
+      },
+      {
+        "name": "Energy Blue colors palette",
+        "colors": ["#0000FF", "#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF"]
+      },
+      {
+        "name": "Parking app car rental automotive design hex colors",
+        "colors": ["#A9A9A9", "#696969", "#404040", "#202020", "#000000", "#FF0000", "#FFA500"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 7.jpg",
+    "palettes": [
+      {
+        "name": "FedEx Logo Colors",
+        "colors": ["#4D148C", "#FF6600"]
+      },
+      {
+        "name": "Shades of Dark Pink color #E75480 hex",
+        "colors": ["#E75480", "#EB6B90", "#F082A1", "#F498B2", "#F9AFC3"]
+      },
+      {
+        "name": "Color of stars",
+        "colors": ["#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE", "#F8F8FF", "#F5F5DC"]
+      },
+      {
+        "name": "Shades of Maroon",
+        "colors": ["#800000", "#660000", "#4D0000", "#330000", "#1A0000"]
+      },
+      {
+        "name": "iPhone 11 Pro and Pro Max colors",
+        "colors": ["#1C1C1E", "#3A3A3C", "#4D4D4F", "#8E8E93", "#AEAEB2", "#C0C0C0", "#D1D1D6", "#E5E5EA", "#F2F2F7", "#F5F5F5"]
+      },
+      {
+        "name": "United Kingdom flag colors",
+        "colors": ["#C8102E", "#00247D", "#FFFFFF"]
+      },
+      {
+        "name": "7 Rainbow Colors",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#4B0082", "#EE82EE"]
+      },
+      {
+        "name": "Standard Rainbow (20 colors)",
+        "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#32CD32", "#008000", "#20B2AA", "#00CED1", "#00BFFF", "#0000FF", "#4169E1", "#0000CD", "#00008B", "#8A2BE2", "#800080", "#9932CC", "#EE82EE"]
+      },
+      {
+        "name": "Japan flag colors",
+        "colors": ["#BC002D", "#FFFFFF"]
+      },
+      {
+        "name": "#colorswall random #682 colors palette",
+        "colors": ["#B0E0E6", "#87CEFA", "#ADD8E6", "#E0FFFF", "#F0FFFF", "#AFEEEE"]
+      },
+      {
+        "name": "Neutral colors for room",
+        "colors": ["#F5F5DC", "#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE"]
+      },
+      {
+        "name": "Shades XKCD Color military green #667c3e hex",
+        "colors": ["#667C3E", "#7A9049", "#8DA454", "#A1B85F", "#B4CC6A"]
+      },
+      {
+        "name": "Green flat UI colors palette",
+        "colors": ["#1ABC9C", "#2ECC71", "#16A085", "#27AE60"]
+      },
+      {
+        "name": "Tints of Metallic Gold color #D4AF37 hex",
+        "colors": ["#D4AF37", "#E8C154", "#FCDF71", "#FFE08E", "#FFF1AC"]
+      },
+      {
+        "name": "Russia flag colors",
+        "colors": ["#FFFFFF", "#0033A0", "#D52B1E"]
+      },
+      {
+        "name": "Shades of Dark Cyan #008B8B hex color",
+        "colors": ["#008B8B", "#007777", "#006363", "#004F4F", "#003B3B"]
+      },
+      {
+        "name": "New Holland",
+        "colors": ["#FFFF00", "#FF0000", "#0000FF"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 8.jpg",
+    "palettes": [
+      {
+        "name": "7 Pastel Colors",
+        "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF", "#FFFACD"]
+      },
+      {
+        "name": "Shades of White #FFFFFF hex color",
+        "colors": ["#FFFFFF", "#F5F5F5", "#EEEEEE", "#E0E0E0", "#D3D3D3"]
+      },
+      {
+        "name": "10 Shades of Blue",
+        "colors": ["#0000FF", "#0000CD", "#00008B", "#000080", "#191970", "#4169E1", "#6495ED", "#87CEFA", "#ADD8E6", "#B0E0E6"]
+      },
+      {
+        "name": "Shades of Pacific Blue color #009DC4 hex",
+        "colors": ["#009DC4", "#00B1DC", "#00C5F4", "#00D9FC", "#00EDFF"]
+      },
+      {
+        "name": "bootstrap 5 color (primary, secondary, success, danger, warning and info)",
+        "colors": ["#0D6EFD", "#6C757D", "#198754", "#DC3545", "#FFC107", "#0DCAF0"]
+      },
+      {
+        "name": "Trello Yellow colors palette",
+        "colors": ["#FCEE21", "#FFD700", "#FFFACD", "#FFFFCC"]
+      },
+      {
+        "name": "Tints of Dark Pink color #E75480 hex",
+        "colors": ["#E75480", "#EB6B90", "#F082A1", "#F498B2", "#F9AFC3"]
+      },
+      {
+        "name": "Rolex logo colors",
+        "colors": ["#B8860B", "#FFD700", "#008000"]
+      },
+      {
+        "name": "Shades X11 color Navy Blue #000080 hex",
+        "colors": ["#000080", "#000066", "#00004D", "#000033", "#00001A"]
+      },
+      {
+        "name": "Yellow Aesthetic",
+        "colors": ["#FCEE21", "#FFD700", "#FFFF00", "#FFFACD", "#FFF8DC"]
+      },
+      {
+        "name": "Shades of Material Design Blue Gray color #607D8B hex",
+        "colors": ["#607D8B", "#546E7A", "#455A64", "#37474F", "#263238"]
+      },
+      {
+        "name": "Muted colors palette",
+        "colors": ["#A9A9A9", "#808080", "#696969", "#404040", "#202020", "#000000"]
+      },
+      {
+        "name": "Backrooms Level 0",
+        "colors": ["#E9DB8F", "#E1D685", "#D9D17A", "#D1CB70", "#C9C665", "#C1C15A"]
+      },
+      {
+        "name": "Ethereum web design isometric colors palette",
+        "colors": ["#3C3C3C", "#5C5C5C", "#7C7C7C", "#9C9C9C", "#BCCCDC", "#DCDCEC"]
+      },
+      {
+        "name": "Tints of Dark Olive Green #556B2F hex color",
+        "colors": ["#556B2F", "#667D3A", "#778F45", "#88A150", "#99B35B"]
+      },
+      {
+        "name": "Mexican flag colors",
+        "colors": ["#006C35", "#FFFFFF", "#CE1126"]
+      },
+      {
+        "name": "Shades of Gray",
+        "colors": ["#808080", "#A9A9A9", "#C0C0C0", "#D3D3D3", "#E0E0E0", "#EEEEEE", "#F5F5F5", "#F8F8F8", "#FFFFFF"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 9.jpg",
+    "palettes": [
+      {
+        "name": "Quirky vector weird color colours",
+        "colors": ["#6B4E99", "#4B8EAE", "#7FD3ED", "#C0D6E2", "#A8D1EA", "#6DABD7"]
+      },
+      {
+        "name": "Shades X11 color Dark Violet #9400D3 hex",
+        "colors": ["#9400D3", "#7A00B1", "#610090", "#47006E", "#2E004C"]
+      },
+      {
+        "name": "Chilli red shades palette",
+        "colors": ["#E41A2D", "#C61726", "#A7131F", "#890F19", "#6B0C14"]
+      },
+      {
+        "name": "Google Logo colors palette",
+        "colors": ["#4285F4", "#EA4335", "#FBBC05", "#34A853"]
+      },
+      {
+        "name": "Adobe Illustrator logo flat hex colors",
+        "colors": ["#FF9A00", "#F70000", "#400080", "#FFFFFF", "#000000"]
+      },
+      {
+        "name": "cottagecore dust",
+        "colors": ["#F0E68C", "#DDA0DD", "#ADD8E6", "#90EE90", "#FFC0CB", "#F5DEB3"]
+      },
+      {
+        "name": "Modern Payment card colors",
+        "colors": ["#FFFFFF", "#E2E3E5", "#D6D8D9", "#CCE5FF", "#D4EDDA", "#FFF3CD", "#F8D7DA"]
+      },
+      {
+        "name": "Tints of Material Design Orange color #FF9800 hex",
+        "colors": ["#FF9800", "#FFA726", "#FFB74D", "#FFCC80", "#FFE0B2"]
+      },
+      {
+        "name": "Teal color shades",
+        "colors": ["#008080", "#004D4D", "#003333", "#001A1A", "#000000"]
+      },
+      {
+        "name": "Tints XKCD Color dark taupe #7f684e hex",
+        "colors": ["#7F684E", "#947E64", "#A99379", "#BEA88F", "#D3BDA4"]
+      },
+      {
+        "name": "Shades XKCD Color cherry red #7f022a hex",
+        "colors": ["#7F022A", "#940233", "#A9033C", "#BE0445", "#D3044E"]
+      },
+      {
+        "name": "Shades of Pantone 19-1664 2002 True Red color #BF1932 hex",
+        "colors": ["#BF1932", "#A01529", "#801020", "#600C18", "#400810"]
+      },
+      {
+        "name": "Shades X11 Sandy Brown #F4A460 hex",
+        "colors": ["#F4A460", "#D29C57", "#B0934E", "#8E8A45", "#6C813C"]
+      },
+      {
+        "name": "Blue shades palette",
+        "colors": ["#0000FF", "#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF", "#F0FFFF"]
+      },
+      {
+        "name": "Dr. Pepper brand colors",
+        "colors": ["#8B0000", "#DC143C", "#A020F0", "#800080", "#FF00FF", "#FFFFFF"]
+      },
+      {
+        "name": "Butt ghost dick penis",
+        "colors": ["#9932CC", "#8A2BE2", "#800080", "#4B0082", "#6A0DAD"]
+      },
+      {
+        "name": "Least Used Color Rainbow",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
+      },
+      {
+        "name": "Synthwave font art 80s colours",
+        "colors": ["#FF00FF", "#00FFFF", "#FFD700", "#FF0000", "#00FF00", "#0000FF"]
+      },
+      {
+        "name": "Cold blue scheme colors",
+        "colors": ["#4682B4", "#5F9EA0", "#6A5ACD", "#87CEEB", "#B0E0E6"]
+      },
+      {
+        "name": "14 Color Palette",
+        "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#00CED1", "#00BFFF", "#0000FF", "#8A2BE2", "#800080", "#EE82EE", "#FF00FF"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 10.jpg",
+    "palettes": [
+      {
+        "name": "Green Colour Palette",
+        "colors": ["#00FF00", "#32CD32", "#008000", "#228B22", "#556B2F"]
+      },
+      {
+        "name": "France flag colors",
+        "colors": ["#002395", "#FFFFFF", "#ED2939"]
+      },
+      {
+        "name": "Shades of Material Design Light Blue color #03A9F4 hex",
+        "colors": ["#03A9F4", "#29B6F6", "#4FC3F7", "#81D4FA", "#B3E5FC"]
+      },
+      {
+        "name": "Neon color palette",
+        "colors": ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0000", "#00FF00", "#0000FF"]
+      },
+      {
+        "name": "Tints of Teal #008080 hex color",
+        "colors": ["#008080", "#009999", "#00B2B2", "#00CCCC", "#00E5E5"]
+      },
+      {
+        "name": "Orange tints colours",
+        "colors": ["#FFA500", "#FFB74D", "#FFC97D", "#FFDBAA", "#FFEDD7"]
+      },
+      {
+        "name": "Rainbow Colors 8",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
+      },
+      {
+        "name": "Purple Dark Theme",
+        "colors": ["#2C2F33", "#23272A", "#800080", "#4B0082", "#6A0DAD", "#9932CC"]
+      },
+      {
+        "name": "Black and Gold website scheme",
+        "colors": ["#000000", "#FFD700", "#A0522D", "#D2B48C", "#F5DEB3"]
+      },
+      {
+        "name": "Shades of New Midnight Blue color #00009C hex",
+        "colors": ["#00009C", "#000082", "#000067", "#00004D", "#000033"]
+      },
+      {
+        "name": "Sunset Palette",
+        "colors": ["#FF6347", "#FF7F50", "#FFA07A", "#FFB6C1", "#FFC0CB"]
+      },
+      {
+        "name": "Pale Skin",
+        "colors": ["#FFE0B2", "#FFCC99", "#FFB366", "#FF9933", "#FF8000"]
+      },
+      {
+        "name": "Tints XKCD Color pastel blue #a2bffc hex",
+        "colors": ["#A2BFFC", "#B8D0FC", "#CEE0FC", "#E4F1FD", "#FAFAFE"]
+      },
+      {
+        "name": "home interior color palette",
+        "colors": ["#F5F5DC", "#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE"]
+      },
+      {
+        "name": "Logo design gaming gamers colors palette",
+        "colors": ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"]
+      },
+      {
+        "name": "Material Design color palette",
+        "colors": ["#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722"]
+      },
+      {
+        "name": "Footer design web colors palette",
+        "colors": ["#2F3136", "#36393F", "#202225", "#99AAB5", "#7289DA"]
+      },
+      {
+        "name": "PHP logo colors",
+        "colors": ["#777BB4", "#8892BF", "#A0A9DA", "#B8C0E2", "#D0D7EC"]
+      },
+      {
+        "name": "Shades of Very Dark Brown color #5C4033 hex",
+        "colors": ["#5C4033", "#4B3329", "#3A261F", "#2A1A14", "#190D0A"]
+      },
+      {
+        "name": "Nail colors 2018",
+        "colors": ["#FF69B4", "#FFB6C1", "#F0E68C", "#ADD8E6", "#90EE90", "#F5DEB3"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 11.jpg",
+    "palettes": [
+      {
+        "name": "Shades Flat UI color Silver #BDC3C7 hex",
+        "colors": ["#BDC3C7", "#CACFD2", "#D8DDE1", "#E5E8EB", "#F2F4F5"]
+      },
+      {
+        "name": "Shades of Dark Gray #A9A9A9 hex color",
+        "colors": ["#A9A9A9", "#BDBDBD", "#D3D3D3", "#E0E0E0", "#EEEEEE"]
+      },
+      {
+        "name": "Matrix colors palette",
+        "colors": ["#00FF00", "#33FF33", "#66FF66", "#99FF99", "#CCFFCC"]
+      },
+      {
+        "name": "Space Gray tints colors",
+        "colors": ["#36393F", "#2C2F33", "#23272A", "#4D4D4D", "#666666", "#808080"]
+      },
+      {
+        "name": "Shades of Light Gray #D3D3D3 hex color",
+        "colors": ["#D3D3D3", "#DDDDDD", "#E5E5E5", "#EEEEEE", "#F6F6F6", "#FFFFFF"]
+      },
+      {
+        "name": "Shades of Steel Blue color #4682B4 hex",
+        "colors": ["#4682B4", "#3A6992", "#2E5070", "#22374E", "#161E2B"]
+      },
+      {
+        "name": "Reese's Logo",
+        "colors": ["#FF7F24", "#FFB900", "#000000", "#FFFFFF"]
+      },
+      {
+        "name": "Christmas colors scheme",
+        "colors": ["#FF0000", "#008000", "#FFFFFF", "#FFFF00", "#0000FF"]
+      },
+      {
+        "name": "Rainbow of 11",
+        "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#00CED1", "#00BFFF", "#0000FF", "#8A2BE2"]
+      },
+      {
+        "name": "Tints XKCD Color light red #ff474c hex",
+        "colors": ["#FF474C", "#FF666A", "#FF8085", "#FF999F", "#FFB3B8"]
+      },
+      {
+        "name": "Shades XKCD Color dark navy blue #00022e hex",
+        "colors": ["#00022E", "#000236", "#00023E", "#000246", "#00024E"]
+      },
+      {
+        "name": "nude",
+        "colors": ["#F0D4A8", "#E2BBA4", "#D5A39B", "#C78B92", "#BA7288"]
+      },
+      {
+        "name": "Dunkin' Donuts brand colors",
+        "colors": ["#FF8B00", "#CD1133", "#FFFFFF", "#8B4513"]
+      },
+      {
+        "name": "Lips colors 2018 palette",
+        "colors": ["#FFC0CB", "#FF69B4", "#CD5C5C", "#E9967A", "#FFA07A"]
+      },
+      {
+        "name": "UI/UX Healthcare app colors palette",
+        "colors": ["#ADD8E6", "#87CEFA", "#B0E0E6", "#D0F5FA", "#E0FFFF", "#F0FFFF", "#98FB98", "#66CDAA", "#3CB371"]
+      },
+      {
+        "name": "Cv template resume design ux colours",
+        "colors": ["#20B2AA", "#98FB98", "#E0FFFF", "#D0F5FA", "#ADD8E6", "#87CEFA"]
+      },
+      {
+        "name": "Modern Dashboard colors",
+        "colors": ["#3498DB", "#2ECC71", "#9B59B6", "#E74C3C", "#F1C40F", "#34495E"]
+      },
+      {
+        "name": "JAVA logo colors",
+        "colors": ["#E65100", "#FF3D00", "#FF6F00", "#FF9100", "#FFA200"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 12.jpg",
+    "palettes": [
+      {
+        "name": "Diagram points color palette",
+        "colors": ["#8A2BE2", "#EE82EE", "#DA70D6", "#FF00FF", "#C71585", "#DB7093", "#FFC0CB", "#FFD1DC"]
+      },
+      {
+        "name": "Desert color palette",
+        "colors": ["#D2B48C", "#F5DEB3", "#CD853F", "#A0522D", "#8B4513"]
+      },
+      {
+        "name": "Shades of Burnt Orange color #FF7F34 hex",
+        "colors": ["#FF7F34", "#FF8D4A", "#FF9C60", "#FFAB77", "#FFBA8D"]
+      },
+      {
+        "name": "Shades of Material Design Brown color #795548 hex",
+        "colors": ["#795548", "#6D4C41", "#5D4037", "#4E342E", "#3E2723"]
+      },
+      {
+        "name": "TV no signal color bars",
+        "colors": ["#FFFF00", "#00FFFF", "#00FF00", "#FF00FF", "#0000FF", "#FF0000", "#000000", "#FFFFFF"]
+      },
+      {
+        "name": "Bootstrap 3 colors",
+        "colors": ["#007BFF", "#6C757D", "#28A745", "#DC3545", "#FFC107", "#17A2B8", "#F8F9FA", "#343A40"]
+      },
+      {
+        "name": "Tints of Material Design Light Green color #8BC34A hex",
+        "colors": ["#8BC34A", "#9CCC65", "#AED581", "#C5E1A5", "#DCEDC8"]
+      },
+      {
+        "name": "UX cyberpunk 2077 design ui colors palette",
+        "colors": ["#FCEE21", "#00A6DA", "#E30613", "#1A1A1A", "#F3F1ED"]
+      },
+      {
+        "name": "Chrome Music Lab Notes Colors",
+        "colors": ["#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#0000FF", "#800080"]
+      },
+      {
+        "name": "Shades of red colors palette",
+        "colors": ["#FF0000", "#E60000", "#CC0000", "#B30000", "#990000", "#800000"]
+      },
+      {
+        "name": "Tints of Material Design Light Blue color #03A9F4 hex",
+        "colors": ["#03A9F4", "#29B6F6", "#4FC3F7", "#81D4FA", "#B3E5FC"]
+      },
+      {
+        "name": "Purple shades 6 colors",
+        "colors": ["#800080", "#4B0082", "#6A0DAD", "#9932CC", "#BA55D3", "#DDA0DD"]
+      },
+      {
+        "name": "M&M's colors palette",
+        "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#A0522D"]
+      },
+      {
+        "name": "Shades of Maroon #800000 hex color",
+        "colors": ["#800000", "#660000", "#4D0000", "#330000", "#1A0000"]
+      },
+      {
+        "name": "Windows 10 blue color",
+        "colors": ["#0078D4", "#005A9E", "#003F6C"]
+      },
+      {
+        "name": "Wood doors colors palette",
+        "colors": ["#A0522D", "#CD853F", "#D2B48C", "#F5DEB3", "#8B4513"]
+      },
+      {
+        "name": "Shades of Material Design Cyan color #00BCD4 hex",
+        "colors": ["#00BCD4", "#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2"]
+      },
+      {
+        "name": "Blur",
+        "colors": ["#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF", "#F0FFFF"]
+      },
+      {
+        "name": "Flower Color Palettes",
+        "colors": ["#FFC0CB", "#FF69B4", "#CD5C5C", "#E9967A", "#FFA07A", "#DDA0DD"]
+      },
+      {
+        "name": "15 Rainbow Color Palette",
+        "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#32CD32", "#008000", "#20B2AA", "#00CED1", "#00BFFF", "#0000FF", "#4169E1", "#8A2BE2"]
+      },
+      {
+        "name": "Blue shades colours",
+        "colors": ["#0000FF", "#0000CD", "#00008B", "#000080", "#191970"]
+      },
+      {
+        "name": "Navbar color",
+        "colors": ["#23272A", "#2C2F33", "#36393F", "#7289DA", "#99AAB5", "#800080", "#00BFFF"]
+      },
+      {
+        "name": "Red Bull brand colors",
+        "colors": ["#FF0000", "#FFFF00", "#0000FF", "#23272A", "#FFFFFF"]
+      },
+      {
+        "name": "Charcoal color shades",
+        "colors": ["#36454F", "#2C3539", "#292929", "#282828", "#333333", "#404040"]
+      },
+      {
+        "name": "Microsoft Office",
+        "colors": ["#FF0000", "#008000", "#0000FF", "#FFC0CB", "#FFFF00", "#FFA500"]
+      },
+      {
+        "name": "bd flag color code (Bangladesh)",
+        "colors": ["#006A4E", "#F42A41"]
+      },
+      {
+        "name": "Microsoft logo colors palette",
+        "colors": ["#F25022", "#7FBA00", "#00A4EF", "#FFB900"]
+      },
+      {
+        "name": "Trello Blue colors palette",
+        "colors": ["#0079BF", "#0080FF", "#0099FF", "#00B2FF", "#00CCFF"]
+      },
+      {
+        "name": "Black tints 5 colours",
+        "colors": ["#000000", "#1A1A1A", "#333333", "#4D4D4D", "#666666"]
+      },
+      {
+        "name": "Login page design sign in screen colors palette",
+        "colors": ["#2196F3", "#1976D2", "#1565C0", "#0D47A1", "#800080", "#6A0DAD", "#4B0082", "#9932CC"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 14.jpg",
+    "palettes": [
+      {
+        "name": "Creative template google slides slide palette",
+        "colors": ["#00FF00", "#98FB98", "#C0C0C0", "#DCDCDC", "#E8E8E8", "#F4F4F4"]
+      },
+      {
+        "name": "Paleta de color rosa pastel",
+        "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF"]
+      },
+      {
+        "name": "10 Shades of Purple - Dark",
+        "colors": ["#800080", "#6A0DAD", "#4B0082", "#9400D3", "#9932CC", "#BA55D3", "#DDA0DD", "#EE82EE", "#DA70D6", "#FF00FF"]
+      },
+      {
+        "name": "Brazil flag colors",
+        "colors": ["#009739", "#FEDD00", "#000080", "#228B22", "#FFFFFF"]
+      },
+      {
+        "name": "10 Rainbow Colors",
+        "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#00BFFF", "#0000FF", "#800080"]
+      },
+      {
+        "name": "Light blue tints 5 colors",
+        "colors": ["#ADD8E6", "#B0E0E6", "#C0EDF5", "#D0F5FA", "#E0FFFF"]
+      },
+      {
+        "name": "BMW M Series colors palette",
+        "colors": ["#E30613", "#0074D9", "#009F81", "#FFC107", "#F8F9FA", "#23272A"]
+      },
+      {
+        "name": "Shades of Royal Blue #4169E1 hex color",
+        "colors": ["#4169E1", "#3359C0", "#264A9E", "#1A3A7D", "#0D2B5C"]
+      },
+      {
+        "name": "French dispatch shadow wes anderson type palette",
+        "colors": ["#FCEE21", "#FFA500", "#E30613", "#00A6DA", "#1A1A1A", "#F3F1ED"]
+      },
+      {
+        "name": "#Purple colors palette",
+        "colors": ["#800080", "#4B0082", "#6A0DAD", "#9932CC", "#BA55D3", "#DDA0DD", "#EE82EE", "#FF00FF"]
+      },
+      {
+        "name": "Material Design Color Palette (16 colors)",
+        "colors": ["#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722"]
+      },
+      {
+        "name": "Shades of Dark Blue #00008B hex color",
+        "colors": ["#00008B", "#00006F", "#000054", "#000039", "#00001E"]
+      },
+      {
+        "name": "Amazon website colors",
+        "colors": ["#FF9900", "#FFD700", "#000000", "#FFFFFF", "#00A6DA", "#FF4500"]
+      }
+    ]
+  },
+  {
+    "image": "Layer 15.jpg",
+    "palettes": [
+      {
+        "name": "apple music",
+        "colors": ["#FD2C53", "#FB104E", "#FA0049", "#F90044", "#F8003F", "#F7003A", "#F60035", "#F50030"]
+      },
+      {
+        "name": "Pantone Colors (SpongeBob Yellow and Patrick Star Pink)",
+        "colors": ["#FEDD00", "#EE82EE", "#DDA0DD", "#FFC0CB", "#FF69B4", "#FFB6C1"]
+      },
+      {
+        "name": "Bootstrap 5 colors",
+        "colors": ["#0D6EFD", "#6C757D", "#198754", "#DC3545", "#FFC107", "#0DCAF0", "#212529", "#F8F9FA", "#FFFFFF"]
+      }
+    ]
+  }
+]

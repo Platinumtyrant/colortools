@@ -5,6 +5,9 @@ import { sortPantoneNumerically, createPantoneLookup } from './pantone-colors';
 import { pantonePmsColors } from './data/pantone-pms';
 import { pantoneFhiColors } from './data/pantone-fhi';
 import { colord } from 'colord';
+import fs from 'fs';
+import path from 'path';
+
 
 export interface PrebuiltPalette {
   name: string;
@@ -114,9 +117,29 @@ const categorizePalette = (colors: string[], name: string): string => {
 
 
 export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
-    // This function can be uncommented and adapted if a new palettes.txt file is provided.
-    // For now, it returns an empty array as the data source has been removed.
-    return [];
+    try {
+        const filePath = path.join(process.cwd(), 'src', 'lib', 'data', 'palettes.json');
+        const fileContents = fs.readFileSync(filePath, 'utf8');
+        const data = JSON.parse(fileContents);
+
+        if (!Array.isArray(data)) {
+            console.error("palettes.json is not an array");
+            return [];
+        }
+
+        const allPalettes: CategorizedPalette[] = data.flatMap((layer: any) => {
+            if (!layer.palettes || !Array.isArray(layer.palettes)) return [];
+            return layer.palettes.map((p: PrebuiltPalette) => ({
+                ...p,
+                category: categorizePalette(p.colors, p.name)
+            }));
+        });
+        
+        return allPalettes;
+    } catch (error) {
+        console.error("Error reading or parsing palettes.json:", error);
+        return [];
+    }
 };
 
 const categorizeColorByHue = (hex: string): string => {
