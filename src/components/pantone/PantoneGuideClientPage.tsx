@@ -38,7 +38,12 @@ const useContainerSize = (ref: React.RefObject<HTMLElement>) => {
             updateSize(); // Initial size
         }
         
-        return () => resizeObserver.disconnect();
+        return () => {
+            if (ref.current) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+                resizeObserver.unobserve(ref.current);
+            }
+        }
     }, [ref]);
 
     return size;
@@ -79,7 +84,7 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
   const [libraryColors, setLibraryColors] = useState<string[]>([]);
   const [isClient, setIsClient] = useState(false);
   const gridContainerRef = useRef<HTMLDivElement>(null);
-  const { width } = useContainerSize(gridContainerRef);
+  const { width, height } = useContainerSize(gridContainerRef);
 
 
   const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
@@ -126,17 +131,27 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
     toast({ title: 'Color removed from palette.' });
   }, [setPalette, toast]);
 
-  const sortedPmsColors = useMemo(() => pmsColors.sort(sortPantoneNumerically), [pmsColors]);
-  const sortedFhiColors = useMemo(() => fhiColors.sort(sortPantoneNumerically), [fhiColors]);
+  const validPmsColors = useMemo(() => pmsColors.filter(c => c && c.hex && colord(c.hex).isValid()).sort(sortPantoneNumerically), [pmsColors]);
+  const validFhiColors = useMemo(() => fhiColors.filter(c => c && c.hex && colord(c.hex).isValid()).sort(sortPantoneNumerically), [fhiColors]);
   
   const renderColorGrid = (colors: PantoneColor[]) => {
     const columnWidth = 176; // w-40 (160px) + gap-4 (16px)
-    const rowHeight = 88; // h-9 (36px) + p-2 (8*2=16px) + text + gap-4 = ~88px
+    const rowHeight = 88; // h-[72px] + p-2*2 + gap-y
     
     const columnCount = Math.max(1, Math.floor(width / columnWidth));
     const rowCount = Math.ceil(colors.length / columnCount);
 
-    if (!isClient || width === 0) {
+    const itemData = useMemo(() => ({
+        colors,
+        columnCount,
+        handleToggleLibrary,
+        handleAddToPalette,
+        handleRemoveFromPalette,
+        libraryHexes,
+        paletteHexes,
+    }), [colors, columnCount, handleToggleLibrary, handleAddToPalette, handleRemoveFromPalette, libraryHexes, paletteHexes]);
+
+    if (!isClient || width === 0 || height === 0) {
         return (
             <div className="flex flex-wrap gap-4">
                 {[...Array(50)].map((_, i) => (
@@ -148,22 +163,13 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
     
     return (
         <Grid
-            className="virtual-grid"
-            height={600} // A reasonable default height
+            height={height}
             width={width}
             columnCount={columnCount}
             columnWidth={columnWidth}
             rowCount={rowCount}
             rowHeight={rowHeight}
-            itemData={{
-                colors,
-                columnCount,
-                handleToggleLibrary,
-                handleAddToPalette,
-                handleRemoveFromPalette,
-                libraryHexes,
-                paletteHexes,
-            }}
+            itemData={itemData}
         >
             {ColorCell}
         </Grid>
@@ -184,12 +190,12 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
                     <TabsTrigger value="fhi">FHI (Fashion, Home + Interiors)</TabsTrigger>
                 </TabsList>
 
-                <div ref={gridContainerRef} className="flex-grow mt-6 min-h-[600px]">
-                  <TabsContent value="pms" className="h-full">
-                      {sortedPmsColors.length > 0 ? renderColorGrid(sortedPmsColors) : <p>No PMS color data available.</p>}
+                <div ref={gridContainerRef} className="flex-grow mt-6">
+                  <TabsContent value="pms" className="h-full w-full">
+                      {validPmsColors.length > 0 ? renderColorGrid(validPmsColors) : <p>No PMS color data available.</p>}
                   </TabsContent>
-                  <TabsContent value="fhi" className="h-full">
-                      {sortedFhiColors.length > 0 ? renderColorGrid(sortedFhiColors) : <p>No FHI color data available.</p>}
+                  <TabsContent value="fhi" className="h-full w-full">
+                      {validFhiColors.length > 0 ? renderColorGrid(validFhiColors) : <p>No FHI color data available.</p>}
                   </TabsContent>
                 </div>
             </Tabs>
