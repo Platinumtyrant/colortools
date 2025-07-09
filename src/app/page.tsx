@@ -371,7 +371,7 @@ function PaletteBuilderPage() {
             const newPalette = {
                 id: Date.now(),
                 name: newPaletteName,
-                colors: palette.map(p => c.hex)
+                colors: palette.map(p => p.hex)
             };
             savedPalettes.push(newPalette);
             toast({ title: "Palette Saved!", description: `"${newPaletteName}" saved to your library.` });
@@ -413,7 +413,7 @@ function PaletteBuilderPage() {
             } else if (colorBefore) {
                 newHex = chroma(colorBefore).set('lch.l', '*0.8').hex();
             } else if (colorAfter) {
-                newHex = chroma(after).set('lch.l', '*1.2').hex();
+                newHex = chroma(colorAfter).set('lch.l', '*1.2').hex();
             } else {
                 newHex = getRandomColor();
             }
@@ -489,7 +489,7 @@ function PaletteBuilderPage() {
         return analysisSourcePalette.map(color => simulate(color, simulationType));
     }, [analysisSourcePalette, simulationType]);
   
-    const graphData = useMemo(() => getGraphData(analysisSourcePalette, colorSpace), [analysisSourcePalette, colorSpace]);
+    const graphData = useMemo(() => getGraphData(analysisSourcePalette, 'hsl'), [analysisSourcePalette]);
     
     const isPaletteColorblindSafe = useMemo(() => {
         if (currentAnalysisColors.length < 2) return true;
@@ -673,7 +673,7 @@ function PaletteBuilderPage() {
                             </RadioGroup>
                         </div>
                         <div className="space-y-1.5">
-                            <Label className="text-sm">Graph Color Space</Label>
+                            <Label className="text-sm">Interpolation Color Space</Label>
                             <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select colorspace..." />
@@ -961,4 +961,5 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
 
