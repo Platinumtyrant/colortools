@@ -4,7 +4,6 @@ export const usafColors: PantoneColor[] = [
   { "name": "Black", "hex": "#231f20" },
   { "name": "Smoke", "hex": "#53575a" },
   { "name": "Silver Grey", "hex": "#9ea0a1" },
-  { "name": "White", "hex": "#ffffff" },
   { "name": "Air Force Yellow", "hex": "#ffce06" },
   { "name": "Yellow", "hex": "#febe3b" },
   { "name": "Golden Orange", "hex": "#f99d20" },
