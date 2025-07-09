@@ -1,8 +1,4 @@
-import type { PantoneColor } from '../pantone-colors';
 
-// Source: pantone-number.json
-// Note: CMYK values are not available in the source JSON for FHI colors and are therefore omitted.
-export const pantoneFhiColors: PantoneColor[] = [
   { name: '11-0103 Egret', hex: '#f3ece0' },
   { name: '11-0602 Snow White', hex: '#f2f0eb' },
   { name: '11-0601 Bright White', hex: '#f4f5f0' },

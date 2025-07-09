@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -226,11 +225,11 @@ const ColorBoxInner = ({
                         </div>
                     </div>
                     <div className="p-2 flex-grow">
-                        <div className="flex items-center justify-between">
-                            <p className="font-semibold text-xs truncate" title={primary.name}>{primary.name}</p>
-                            {primary.source === 'Pantone' && (
+                        <div className="flex items-center gap-2">
+                             {primary.source === 'Pantone' && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
                             )}
+                            <p className="font-semibold text-xs truncate" title={primary.name}>{primary.name}</p>
                         </div>
                         <p className="text-xs text-muted-foreground font-mono">{color.toUpperCase()}</p>
                         {info && <p className="text-xs text-muted-foreground font-mono truncate">{info}</p>}
