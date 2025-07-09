@@ -13,17 +13,22 @@ import { colord } from 'colord';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 
 interface PantoneGuideClientPageProps {
   pmsColors: PantoneColor[];
   fhiColors: PantoneColor[];
 }
 
+const COLORS_PER_PAGE = 70; // Roughly 7 rows on a standard desktop
+
 export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideClientPageProps) {
   const { toast } = useToast();
   const { palette, setPalette } = usePaletteBuilder();
   const [libraryColors, setLibraryColors] = useState<string[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [pmsCurrentPage, setPmsCurrentPage] = useState(1);
+  const [fhiCurrentPage, setFhiCurrentPage] = useState(1);
 
   const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
   const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
@@ -72,6 +77,23 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
   const validPmsColors = useMemo(() => pmsColors.filter(c => c && c.hex && colord(c.hex).isValid()).sort(sortPantoneNumerically), [pmsColors]);
   const validFhiColors = useMemo(() => fhiColors.filter(c => c && c.hex && colord(c.hex).isValid()).sort(sortPantoneNumerically), [fhiColors]);
   
+  // PMS Pagination
+  const pmsTotalPages = Math.ceil(validPmsColors.length / COLORS_PER_PAGE);
+  const pmsPaginatedColors = useMemo(() => {
+      const startIndex = (pmsCurrentPage - 1) * COLORS_PER_PAGE;
+      const endIndex = startIndex + COLORS_PER_PAGE;
+      return validPmsColors.slice(startIndex, endIndex);
+  }, [validPmsColors, pmsCurrentPage]);
+
+  // FHI Pagination
+  const fhiTotalPages = Math.ceil(validFhiColors.length / COLORS_PER_PAGE);
+  const fhiPaginatedColors = useMemo(() => {
+      const startIndex = (fhiCurrentPage - 1) * COLORS_PER_PAGE;
+      const endIndex = startIndex + COLORS_PER_PAGE;
+      return validFhiColors.slice(startIndex, endIndex);
+  }, [validFhiColors, fhiCurrentPage]);
+
+  
   const renderColorGrid = (colors: PantoneColor[]) => {
     if (!isClient) {
         return (
@@ -106,6 +128,17 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
         </div>
     );
   }
+  
+  const PaginationControls = ({ currentPage, totalPages, onPageChange }: { currentPage: number, totalPages: number, onPageChange: (page: number) => void }) => {
+    if (totalPages <= 1) return null;
+    return (
+        <div className="flex items-center justify-center space-x-4 mt-8">
+            <Button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</Button>
+            <span className="text-sm font-medium">Page {currentPage} of {totalPages}</span>
+            <Button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</Button>
+        </div>
+    )
+  }
 
   return (
     <div className="flex-1 w-full p-4 md:p-8 flex flex-col">
@@ -125,14 +158,16 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
                   <TabsContent value="pms" className="h-full w-full">
                       <ScrollArea className="h-full">
                         <div className="pr-4">
-                            {validPmsColors.length > 0 ? renderColorGrid(validPmsColors) : <p>No PMS color data available.</p>}
+                            {validPmsColors.length > 0 ? renderColorGrid(pmsPaginatedColors) : <p>No PMS color data available.</p>}
+                             <PaginationControls currentPage={pmsCurrentPage} totalPages={pmsTotalPages} onPageChange={setPmsCurrentPage} />
                         </div>
                       </ScrollArea>
                   </TabsContent>
                   <TabsContent value="fhi" className="h-full w-full">
                       <ScrollArea className="h-full">
                          <div className="pr-4">
-                            {validFhiColors.length > 0 ? renderColorGrid(validFhiColors) : <p>No FHI color data available.</p>}
+                            {validFhiColors.length > 0 ? renderColorGrid(fhiPaginatedColors) : <p>No FHI color data available.</p>}
+                            <PaginationControls currentPage={fhiCurrentPage} totalPages={fhiTotalPages} onPageChange={setFhiCurrentPage} />
                          </div>
                       </ScrollArea>
                   </TabsContent>
