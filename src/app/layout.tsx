@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
-import { getCombinedPantoneLookup } from "@/lib/palette-server";
+import { getCombinedPantoneLookup } from "@/lib/palette-parser";
 import { PantoneProvider } from "@/contexts/SidebarExtensionContext";
 import { PaletteBuilderProvider } from "@/contexts/PaletteBuilderContext";
 
