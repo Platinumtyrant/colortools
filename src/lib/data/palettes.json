@@ -1,3 +1,4 @@
+
 [
   {
     "name": "Classic Windows 98",
@@ -132,10 +133,6 @@
     "colors": ["#007ACC", "#3C99D4", "#66B2DA"]
   },
   {
-    "name": "Miami Vice Inspired",
-    "colors": ["#FF00FF", "#00FFFF", "#0000FF", "#FF0000", "#FFFF00"]
-  },
-  {
     "name": "Rust Color Shades",
     "colors": ["#B7410E", "#9C380C", "#812F0A", "#662608", "#4B1D06"]
   },
@@ -160,10 +157,6 @@
     "colors": ["#00FF00", "#00BFFF", "#FF0000", "#FFFF00", "#000000", "#FFFFFF"]
   },
   {
-    "name": "Bright General",
-    "colors": ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500"]
-  },
-  {
     "name": "Pixel Art Tones",
     "colors": ["#A0522D", "#CD853F", "#F4A460", "#D2B48C", "#F5DEB3", "#A52A2A", "#8B4513"]
   },
@@ -182,10 +175,6 @@
   {
     "name": "Human Skin Tones",
     "colors": ["#F5DEB3", "#FFE4C4", "#FFEBCD", "#F0DCB2", "#DEB887"]
-  },
-  {
-    "name": "8 Color Spectrum",
-    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
   },
   {
     "name": "Steam Branding",
@@ -222,10 +211,6 @@
   {
     "name": "Electric Blue",
     "colors": ["#7DF9FF", "#00FFFF", "#00BFFF", "#0000FF", "#0000CD", "#00008B"]
-  },
-  {
-    "name": "7 Color Spectrum",
-    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#FF00FF"]
   },
   {
     "name": "Dark Red Shades",
@@ -342,10 +327,6 @@
   {
     "name": "JavaScript Logo",
     "colors": ["#F0DB4F", "#323330", "#606060", "#909090", "#C0C0C0"]
-  },
-  {
-    "name": "6 Color Spectrum",
-    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080"]
   },
   {
     "name": "Brown Shades",
@@ -568,10 +549,6 @@
     "colors": ["#FFA500", "#FFB74D", "#FFC97D", "#FFDBAA", "#FFEDD7"]
   },
   {
-    "name": "8 Color Rainbow",
-    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
-  },
-  {
     "name": "Black and Gold Website",
     "colors": ["#000000", "#FFD700", "#A0522D", "#D2B48C", "#F5DEB3"]
   },
@@ -644,10 +621,6 @@
     "colors": ["#FF0000", "#008000", "#FFFFFF", "#FFFF00", "#0000FF"]
   },
   {
-    "name": "11 Color Rainbow",
-    "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#00CED1", "#00BFFF", "#0000FF", "#8A2BE2"]
-  },
-  {
     "name": "Nude Skin Tones",
     "colors": ["#F0D4A8", "#E2BBA4", "#D5A39B", "#C78B92", "#BA7288"]
   },
@@ -717,7 +690,7 @@
   },
   {
     "name": "Purple Shades",
-    "colors": ["#800080", "#4B0082", "#6A0DAD", "#9932CC", "#BA55D3", "#DDA0DD"]
+    "colors": ["#800080", "#4B0082", "#6A0DAD", "#9932CC", "#BA55D3", "#DDA0DD", "#EE82EE", "#FF00FF"]
   },
   {
     "name": "M&M's Candies",
@@ -796,10 +769,6 @@
     "colors": ["#009739", "#FEDD00", "#000080", "#228B22", "#FFFFFF"]
   },
   {
-    "name": "10 Color Rainbow",
-    "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#00BFFF", "#0000FF", "#800080"]
-  },
-  {
     "name": "Light Blue Tints (5 Shades)",
     "colors": ["#ADD8E6", "#B0E0E6", "#C0EDF5", "#D0F5FA", "#E0FFFF"]
   },
@@ -814,10 +783,6 @@
   {
     "name": "General Purple",
     "colors": ["#800080", "#4B0082", "#6A0DAD", "#9932CC", "#BA55D3", "#DDA0DD", "#EE82EE", "#FF00FF"]
-  },
-  {
-    "name": "Material Design (16 Colors)",
-    "colors": ["#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722"]
   },
   {
     "name": "Dark Blue Shades",
@@ -836,3 +801,5 @@
     "colors": ["#0D6EFD", "#6C757D", "#198754", "#DC3545", "#FFC107", "#0DCAF0", "#212529", "#F8F9FA", "#FFFFFF"]
   }
 ]
+
+    
