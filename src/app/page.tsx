@@ -40,7 +40,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { motion, AnimatePresence } from 'framer-motion';
 import { simulate, type SimulationType } from '@/lib/colorblind';
 import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
-import { ContrastGrid } from '@/components/colors/ContrastGrid';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { cn } from '@/lib/utils';
 import { getComplementary, getAnalogous, getSplitComplementary, getTriadic, getSquare, getRectangular } from '@/lib/colors';
@@ -948,9 +947,13 @@ function PaletteBuilderPage() {
                                 </TabsContent>
                                 <TabsContent value="contrast-checker" className="p-4 flex-grow min-h-0">
                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-4">
-                                             <ContrastGrid colors={currentAnalysisColors} />
+                                        <div
+                                            className="p-4 rounded-lg text-center border-2 border-dashed flex items-center justify-center h-full min-h-[250px]"
+                                            style={{ backgroundColor: bgColor, color: fgColor }}
+                                        >
+                                            <p className="font-bold text-[64pt]">Aa</p>
                                         </div>
+
                                         <div className="space-y-4">
                                              <div className="grid grid-cols-2 gap-4">
                                                  <div>
@@ -982,14 +985,6 @@ function PaletteBuilderPage() {
                                                     </Popover>
                                                 </div>
                                              </div>
-                                            
-                                            <div
-                                                className="p-4 rounded-lg text-center border-2 border-dashed flex items-center justify-center h-40"
-                                                style={{ backgroundColor: bgColor, color: fgColor }}
-                                            >
-                                                <p className="font-bold text-[64pt]">Aa</p>
-                                            </div>
-                                            
                                             <WCAGDisplay textColor={fgColor} bgColor={bgColor} />
                                         </div>
                                     </div>
