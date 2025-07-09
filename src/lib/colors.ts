@@ -220,21 +220,3 @@ export const removeColorFromLibrary = (color: string): { success: boolean; messa
     return { success: false, message: 'There was an error removing the color.' };
   }
 };
-
-const greenAnchors = ['#dcfce7', '#4ade80', '#16a34a', '#14532d'];
-const blueAnchors = ['#dbeafe', '#60a5fa', '#2563eb', '#1e3a8a'];
-const redAnchors = ['#fee2e2', '#f87171', '#dc2626', '#7f1d1d'];
-const orangeAnchors = ['#ffedd5', '#fb923c', '#ea580c', '#7c2d12'];
-const purpleAnchors = ['#f5d0fe', '#c084fc', '#9333ea', '#581c87'];
-const yellowAnchors = ['#fefce8', '#facc15', '#ca8a04', '#713f12'];
-const grayAnchors = ['#f8fafc', '#9ca3af', '#4b5563', '#111827'];
-
-export const swatches = {
-  green: chroma.scale(greenAnchors).mode('lch').colors(60),
-  blue: chroma.scale(blueAnchors).mode('lch').colors(60),
-  red: chroma.scale(redAnchors).mode('lch').colors(60),
-  orange: chroma.scale(orangeAnchors).mode('lch').colors(60),
-  purple: chroma.scale(purpleAnchors).mode('lch').colors(60),
-  yellow: chroma.scale(yellowAnchors).mode('lch').colors(60),
-  gray: chroma.scale(grayAnchors).mode('lch').colors(60),
-};
