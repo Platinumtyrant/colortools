@@ -134,7 +134,7 @@ const ColorBoxInner = ({
     const allDescriptiveColorNames = useAllDescriptiveColorNames(color);
 
     const primary = name 
-        ? { name, source: 'USAF' } // Assume provided name is USAF if manually passed
+        ? { name, source: 'USAF' }
         : allDescriptiveColorNames.primary;
         
     const allNames = name 
@@ -184,32 +184,17 @@ const ColorBoxInner = ({
                     </div>
                 </div>
                 <CardContent className="p-4 flex-grow flex flex-col justify-start">
-                    <div className="text-center mb-4">
-                        <p className="font-semibold text-lg" title={primary.name}>{primary.name}</p>
-                        <div className="mt-1 flex justify-center">
-                            {primary.source === 'Pantone' && (
-                                <Badge variant="outline" className="border-primary/50 text-primary/80">PANTONE</Badge>
-                            )}
-                            {primary.source === 'USAF' && (
-                                <Badge variant="outline" className="border-green-600/50 bg-green-500/10 text-green-700 dark:border-green-400/50 dark:text-green-400/80">USAF</Badge>
-                            )}
-                            {primary.source !== 'Pantone' && primary.source !== 'USAF' && (
-                               <p className="text-xs text-muted-foreground">{primary.source}</p>
-                            )}
-                        </div>
-                    </div>
-
                     <div className="space-y-4">
                         <ColorDetails color={color} />
-                        {allNames.length > 1 && (
+                        {allNames.length > 0 && (
                             <>
                                 <Separator className="my-4" />
                                 <div className="space-y-1 text-sm">
-                                    <h4 className="font-medium text-xs text-muted-foreground mb-2">OTHER NAMES</h4>
-                                    {allNames.slice(1).map((nameObj) => (
-                                        <div key={nameObj.source} className="grid grid-cols-2 items-center gap-x-2 text-xs">
-                                            <span className="text-muted-foreground whitespace-nowrap">{nameObj.source}</span>
-                                            <span className="font-medium text-right truncate">{nameObj.name}</span> 
+                                    <h4 className="font-medium text-xs text-muted-foreground mb-2 uppercase tracking-wider">Descriptive Names</h4>
+                                    {allNames.map((nameObj) => (
+                                        <div key={nameObj.name} className="flex justify-between items-baseline gap-x-2 text-xs">
+                                            <span className="font-medium truncate" title={nameObj.name}>{nameObj.name}</span>
+                                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">{nameObj.source}</Badge>
                                         </div>
                                     ))}
                                 </div>
@@ -236,7 +221,7 @@ const ColorBoxInner = ({
                              <TooltipProvider delayDuration={200}>
                                 {onSetActiveColor && <ActionIcon onClick={() => onSetActiveColor()} title="Set as Active Color"><MousePointerClick className="h-4 w-4" /></ActionIcon>}
                                 {onLockToggle && <ActionIcon onClick={() => onLockToggle()} title={isLocked ? "Unlock Color" : "Lock Color"}>{isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}</ActionIcon>}
-                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>
+                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>}
                                 {onAddToLibrary && <ActionIcon onClick={() => onAddToLibrary()} title="Save to Library"><Library className="h-4 w-4" /></ActionIcon>}
                                 {onRemoveFromLibrary && <ActionIcon onClick={() => onRemoveFromLibrary()} title="Remove from Library" variant="destructive"><Trash2 className="h-4 w-4" /></ActionIcon>}
                                 {onAddToPalette && <ActionIcon onClick={() => onAddToPalette()} title="Add to Current Palette"><PaletteIcon className="h-4 w-4" /></ActionIcon>}
@@ -264,15 +249,15 @@ const ColorBoxInner = ({
                 <div className="p-3">
                     <p className="font-semibold text-base text-center mb-2" title={primary.name}>{primary.name}</p>
                     <ColorDetails color={color} />
-                     {allNames.length > 1 && (
+                     {allNames.length > 0 && (
                         <>
                             <Separator className="my-3"/>
                             <div className="space-y-1 text-sm">
-                                <h4 className="font-medium text-xs text-muted-foreground mb-2">OTHER NAMES</h4>
-                                {allNames.slice(1).map((nameObj) => (
-                                    <div key={nameObj.source} className="grid grid-cols-2 items-center gap-x-2 text-xs">
-                                        <span className="text-muted-foreground whitespace-nowrap">{nameObj.source}</span>
-                                        <span className="font-medium text-right truncate">{nameObj.name}</span> 
+                                <h4 className="font-medium text-xs text-muted-foreground mb-2 uppercase tracking-wider">Descriptive Names</h4>
+                                {allNames.map((nameObj) => (
+                                    <div key={nameObj.name} className="flex justify-between items-baseline gap-x-2 text-xs">
+                                        <span className="font-medium truncate" title={nameObj.name}>{nameObj.name}</span>
+                                        <span className="text-muted-foreground whitespace-nowrap shrink-0">{nameObj.source}</span> 
                                     </div>
                                 ))}
                             </div>
@@ -292,5 +277,3 @@ const ColorBoxInner = ({
 
 export const ColorBox = React.memo(ColorBoxInner);
 ColorBox.displayName = 'ColorBox';
-
-    
