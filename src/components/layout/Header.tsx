@@ -1,11 +1,10 @@
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Brush, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -35,16 +34,21 @@ export function Header() {
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0">
-                         <div className="p-6">
-                            <Link
-                                href="/"
-                                className="flex items-center gap-2 text-lg font-semibold mb-4"
-                            >
-                                <Brush className="h-6 w-6" />
-                                <span>Color Tools</span>
-                            </Link>
-                         </div>
-                        <nav className="grid gap-2 text-lg font-medium px-6">
+                         <SheetHeader className="p-6 border-b">
+                            <SheetTitle asChild>
+                                <Link
+                                    href="/"
+                                    className="flex items-center gap-2 text-lg font-semibold"
+                                >
+                                    <Brush className="h-6 w-6" />
+                                    <span>Color Tools</span>
+                                </Link>
+                            </SheetTitle>
+                            <SheetDescription className="sr-only">
+                                A list of pages to navigate to.
+                            </SheetDescription>
+                         </SheetHeader>
+                        <nav className="grid gap-2 text-lg font-medium p-6">
                             {navItems.map((item) => (
                                 <SheetClose asChild key={item.href}>
                                     <Link
