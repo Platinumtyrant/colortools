@@ -3,7 +3,7 @@
 export interface PantoneColor {
   name: string;
   hex: string;
-  cmyk: string;
+  cmyk?: string;
 }
 
 export interface PantoneCategory {

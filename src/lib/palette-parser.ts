@@ -4,6 +4,7 @@ import type { PantoneCategory, PantoneColor } from './pantone-colors';
 import { sortPantoneNumerically, createPantoneLookup } from './pantone-colors';
 import { pantonePmsColors } from './data/pantone-pms';
 import { pantoneFhiColors } from './data/pantone-fhi';
+import { usafColors } from './data/usaf-colors';
 import { colord } from 'colord';
 import fs from 'fs';
 import path from 'path';
@@ -204,6 +205,13 @@ export function getCombinedPantoneLookup(): Map<string, string> {
     
     addToLookup(pmsCategories);
     addToLookup(fhiCategories);
+
+    for (const color of usafColors) {
+        const hexKey = colord(color.hex).toHex();
+        if (!lookup.has(hexKey)) {
+            lookup.set(hexKey, color.name);
+        }
+    }
 
     return lookup;
 }
