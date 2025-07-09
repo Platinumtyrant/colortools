@@ -472,10 +472,10 @@ function PaletteBuilderPage() {
     }, [colorSpace]);
     
     const analysisSourcePalette = useMemo(() => {
-        if (currentAnalysisColors.length < 2) return currentAnalysisColors;
-        if (!useBezier && !correctLightness) {
-            return currentAnalysisColors;
+        if (currentAnalysisColors.length < 2) {
+          return currentAnalysisColors;
         }
+    
         const interpolator = useBezier ? chroma.bezier(currentAnalysisColors) : currentAnalysisColors;
         let scale = chroma.scale(interpolator).mode(interpolationMode as any);
         if (correctLightness) {
@@ -486,9 +486,8 @@ function PaletteBuilderPage() {
   
     const simulatedPalette = useMemo(() => {
         if (analysisSourcePalette.length === 0) return [];
-        const source = (useBezier || correctLightness) ? analysisSourcePalette : currentAnalysisColors;
-        return source.map(color => simulate(color, simulationType));
-    }, [analysisSourcePalette, currentAnalysisColors, simulationType, useBezier, correctLightness]);
+        return analysisSourcePalette.map(color => simulate(color, simulationType));
+    }, [analysisSourcePalette, simulationType]);
   
     const graphData = useMemo(() => getGraphData(analysisSourcePalette, colorSpace), [analysisSourcePalette, colorSpace]);
     
@@ -962,3 +961,4 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
