@@ -21,7 +21,7 @@ interface PantoneGuideClientPageProps {
   fhiColors: PantoneColor[];
 }
 
-const COLORS_PER_PAGE = 72; // Roughly 9 rows of 8 colors on a standard desktop
+const COLORS_PER_PAGE = 63; // 9 rows of 7 colors
 
 export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideClientPageProps) {
   const { toast } = useToast();
@@ -96,7 +96,7 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
 
   
   const renderColorGrid = (colors: PantoneColor[]) => {
-    const gridClasses = "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4";
+    const gridClasses = "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4";
     if (!isClient) {
         return (
             <div className={gridClasses}>
