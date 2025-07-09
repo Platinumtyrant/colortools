@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { getPrebuiltPalettes } from '@/lib/palette-parser';
+import { getPrebuiltPalettes } from '@/lib/palette-server';
 import { InspirationClientPage } from '@/components/palettes/InspirationClientPage';
 
 export default async function InspirationPage() {
