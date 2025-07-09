@@ -59,6 +59,14 @@ function getBrandFromPaletteName(name: string): string | null {
   return null;
 }
 
+const mainCategories: Record<string, string[]> = {
+    'Warm': ['Red', 'Orange', 'Yellow'],
+    'Cool': ['Green', 'Cyan', 'Blue', 'Purple'],
+    'Neutral': ['Monochrome'],
+    'Other': ['Multicolor', 'Brands', 'Flags'],
+};
+const mainCategoryOrder = ['Warm', 'Cool', 'Neutral', 'Other'];
+
 
 interface InspirationClientPageProps {
     allPalettes: CategorizedPalette[];
@@ -159,9 +167,6 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
     return acc;
   }, {} as Record<string, CategorizedPalette[]>);
 
-  const categoryOrder = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Monochrome', 'Multicolor', 'Brands', 'Flags'];
-  const orderedCategories = categoryOrder.filter(cat => palettesByCategory[cat]);
-
   const renderPalette = (palette: CategorizedPalette, paletteIndex: number) => (
       <div className="group/palette" key={`${palette.name}-${paletteIndex}`}>
           <div className="flex items-center gap-2 mb-2">
@@ -207,55 +212,71 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
   );
 
   return (
-    <Tabs defaultValue={orderedCategories[0]} className="w-full">
+    <Tabs defaultValue={mainCategoryOrder[0]} className="w-full">
       <div className="flex justify-center">
         <TabsList className="h-auto flex-wrap justify-center">
-          {orderedCategories.map(category => (
+          {mainCategoryOrder.map(category => (
             <TabsTrigger key={category} value={category}>{category}</TabsTrigger>
           ))}
         </TabsList>
       </div>
       
-      {orderedCategories.map(category => {
-        if (category === 'Brands') {
-            const brands = palettesByCategory[category].reduce((acc, palette) => {
-              const brandName = getBrandFromPaletteName(palette.name) || 'Other Brands';
-              if (!acc[brandName]) {
-                acc[brandName] = [];
-              }
-              acc[brandName].push(palette);
-              return acc;
-            }, {} as Record<string, CategorizedPalette[]>);
-    
-            const sortedBrands = Object.keys(brands).sort((a, b) => {
-                if (a === 'Other Brands') return 1;
-                if (b === 'Other Brands') return -1;
-                return a.localeCompare(b);
-            });
+      {mainCategoryOrder.map(mainCategory => {
+        const subCategories = mainCategories[mainCategory as keyof typeof mainCategories];
 
-            return (
-                <TabsContent key={category} value={category} className="mt-6">
-                    <div className="space-y-10">
-                        {sortedBrands.map(brandName => (
-                            <div key={brandName}>
-                                <h3 className="text-xl font-semibold mb-4 border-b pb-2">{brandName}</h3>
-                                <div className="grid grid-cols-1 gap-y-8">
-                                    {brands[brandName].map(renderPalette)}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </TabsContent>
-            )
-        }
-        
         return (
-            <TabsContent key={category} value={category} className="mt-6">
-              <div className="grid grid-cols-1 gap-y-8">
-                {palettesByCategory[category].map(renderPalette)}
-              </div>
-            </TabsContent>
-        )
+          <TabsContent key={mainCategory} value={mainCategory} className="mt-6">
+            <div className="space-y-12">
+              {subCategories.map(subCategory => {
+                if (subCategory === 'Brands') {
+                    const brands = (palettesByCategory[subCategory] || []).reduce((acc, palette) => {
+                      const brandName = getBrandFromPaletteName(palette.name) || 'Other Brands';
+                      if (!acc[brandName]) {
+                        acc[brandName] = [];
+                      }
+                      acc[brandName].push(palette);
+                      return acc;
+                    }, {} as Record<string, CategorizedPalette[]>);
+
+                    const sortedBrands = Object.keys(brands).sort((a, b) => {
+                        if (a === 'Other Brands') return 1;
+                        if (b === 'Other Brands') return -1;
+                        return a.localeCompare(b);
+                    });
+                    if (sortedBrands.length === 0) return null;
+
+                    return (
+                        <div key={subCategory}>
+                            <h2 className="text-2xl font-bold mb-6 border-b pb-2">{subCategory}</h2>
+                            <div className="space-y-10">
+                                {sortedBrands.map(brandName => (
+                                    <div key={brandName}>
+                                        <h3 className="text-xl font-semibold mb-4">{brandName}</h3>
+                                        <div className="space-y-8">
+                                            {brands[brandName].map(renderPalette)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+                
+                const palettes = palettesByCategory[subCategory] || [];
+                if (palettes.length === 0) return null;
+
+                return (
+                    <div key={subCategory}>
+                      <h2 className="text-2xl font-bold mb-6 border-b pb-2">{subCategory}</h2>
+                      <div className="space-y-8">
+                        {palettes.map(renderPalette)}
+                      </div>
+                    </div>
+                )
+              })}
+            </div>
+          </TabsContent>
+        );
       })}
     </Tabs>
   );
