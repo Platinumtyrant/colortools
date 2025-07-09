@@ -53,10 +53,6 @@
     "colors": ["#008000", "#B8860B", "#FFD700", "#FFFFFF", "#000000"]
   },
   {
-    "name": "Blue Red Purple Mix",
-    "colors": ["#0000FF", "#FF0000", "#800080"]
-  },
-  {
     "name": "Rubik's Cube",
     "colors": ["#FFD700", "#FF0000", "#0000FF", "#008000", "#FFA500", "#FFFFFF"]
   },
@@ -277,10 +273,6 @@
     "colors": ["#FCEE21", "#00A6DA", "#E30613", "#1A1A1A", "#F3F1ED"]
   },
   {
-    "name": "Fitness App",
-    "colors": ["#5A2D81", "#7A3FA3", "#9A52C5", "#B0E0E6", "#66CDAA", "#FFC0CB"]
-  },
-  {
     "name": "Spotify Branding",
     "colors": ["#1DB954", "#1ED760", "#191414", "#FFFFFF"]
   },
@@ -371,10 +363,6 @@
   {
     "name": "Dark Cyan Shades",
     "colors": ["#008B8B", "#007777", "#006363", "#004F4F", "#003B3B"]
-  },
-  {
-    "name": "New Holland Branding",
-    "colors": ["#FFFF00", "#FF0000", "#0000FF"]
   },
   {
     "name": "7 Pastel Colors",
@@ -509,10 +497,6 @@
     "colors": ["#03A9F4", "#29B6F6", "#4FC3F7", "#81D4FA", "#B3E5FC"]
   },
   {
-    "name": "General Neon",
-    "colors": ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0000", "#00FF00", "#0000FF"]
-  },
-  {
     "name": "Orange Shade Spectrum",
     "colors": ["#FFA500", "#FFB74D", "#FFC97D", "#FFDBAA", "#FFEDD7"]
   },
@@ -531,10 +515,6 @@
   {
     "name": "Home Interior Decor",
     "colors": ["#F5F5DC", "#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE"]
-  },
-  {
-    "name": "Gaming Logo Design",
-    "colors": ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"]
   },
   {
     "name": "Material Design Standard",
