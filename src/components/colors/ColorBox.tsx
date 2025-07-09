@@ -216,7 +216,7 @@ const ColorBoxInner = ({
             <PopoverTrigger asChild>
                 <button
                     type="button"
-                    className="group/container flex flex-col h-full w-full cursor-pointer text-card-foreground shadow-sm overflow-hidden rounded-md text-left"
+                    className="group/container flex flex-col h-full w-full cursor-pointer text-card-foreground overflow-hidden rounded-md text-left"
                 >
                     <div
                         className="relative h-9 w-full rounded-b-md"
