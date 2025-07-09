@@ -27,50 +27,36 @@ const brandKeywords = [
     'shell', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
     'snapchat', 'youtube', 'illustrator', 'us dollar',
     'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui',
-    'chrome music lab'
+    'chrome music lab', 'linktree website branding'
 ];
 
 const flagKeywords = [
     'flag', 'india', 'ukraine', 'germany', 'japan', 'russia', 'france', 'uk ', 'united kingdom', 
-    'brazil', 'mexico', 'bangladesh'
+    'brazil', 'mexico', 'bangladesh', 'american flag'
 ];
 
 const usafKeywords = ['usaf'];
-const pastelKeywords = ['pastel'];
+const pastelKeywords = [
+    'pastel', 'starry colors', 'neutral room decor', 'modern payment card', 'anime style', 'home interior decor'
+];
 
 
 // Function to determine the primary color category of a palette
 const categorizePalette = (colors: string[], name: string): string => {
   const lowerCaseName = name.toLowerCase();
 
-  for (const keyword of usafKeywords) {
-    if (lowerCaseName.includes(keyword)) {
+  // Specific keyword-based categorization
+  if (usafKeywords.some(keyword => lowerCaseName.includes(keyword))) {
       return 'USAF';
-    }
   }
-
-  for (const keyword of pastelKeywords) {
-    if (lowerCaseName.includes(keyword)) {
+  if (pastelKeywords.some(keyword => lowerCaseName.includes(keyword))) {
       return 'Pastels';
-    }
   }
-
-  // Specific keywords to force into 'Brands' category
-  const brandForcedKeywords = ['material design', 'bootstrap', 'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui', 'chrome music lab'];
-  if (brandForcedKeywords.some(keyword => lowerCaseName.includes(keyword))) {
-    return 'Brands';
-  }
-
-  for (const keyword of flagKeywords) {
-    if (lowerCaseName.includes(keyword)) {
+  if (flagKeywords.some(keyword => lowerCaseName.includes(keyword))) {
       return 'Flags';
-    }
   }
-  
-  for (const keyword of brandKeywords) {
-    if (lowerCaseName.includes(keyword)) {
-      return 'Brands';
-    }
+  if (brandKeywords.some(keyword => lowerCaseName.includes(keyword))) {
+    return 'Brands';
   }
 
   if (colors.length === 0) return 'Monochrome';
@@ -120,13 +106,14 @@ const categorizePalette = (colors: string[], name: string): string => {
   // Determine dominant hue
   const avgHue = hues.reduce((sum, h) => sum + h, 0) / hues.length;
 
-  if (avgHue >= 340 || avgHue < 20) return 'Red';
-  if (avgHue < 50) return 'Orange';
+  if (avgHue >= 330 || avgHue < 15) return 'Red';
+  if (avgHue < 45) return 'Orange';
   if (avgHue < 70) return 'Yellow';
   if (avgHue < 160) return 'Green';
   if (avgHue < 200) return 'Cyan';
   if (avgHue < 260) return 'Blue';
-  return 'Purple';
+  if (avgHue < 330) return 'Purple';
+  return 'Multicolor'; // Fallback
 };
 
 
