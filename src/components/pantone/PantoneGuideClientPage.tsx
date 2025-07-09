@@ -20,7 +20,7 @@ interface PantoneGuideClientPageProps {
   fhiColors: PantoneColor[];
 }
 
-const COLORS_PER_PAGE = 70; // Roughly 7 rows on a standard desktop
+const COLORS_PER_PAGE = 49; // Roughly 7 rows of 7 colors on a standard desktop
 
 export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideClientPageProps) {
   const { toast } = useToast();
