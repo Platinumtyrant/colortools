@@ -392,7 +392,7 @@ export default function LibraryPage() {
         Library is empty
       </h3>
       <p className="mb-4 mt-2 text-sm text-muted-foreground">
-        Go to the Palette Builder to create and save your first one, or add one from the Inspiration page.
+        Go to the Palette Builder to create and save your first one, or add one from the Pre-built Palettes page.
       </p>
     </div>
   );
@@ -404,7 +404,7 @@ export default function LibraryPage() {
       <main className="flex-1 w-full p-4 md:p-8 space-y-8">
         <CardHeader className="p-0">
           <CardTitle className="text-3xl">My Library</CardTitle>
-          <CardDescription>Browse and manage your saved palettes and colors. Find pre-built collections on the Inspiration page.</CardDescription>
+          <CardDescription>Browse and manage your saved palettes and colors. Find pre-built collections on the Pre-built Palettes page.</CardDescription>
         </CardHeader>
         <div className="space-y-10">
           <div>
@@ -431,7 +431,7 @@ export default function LibraryPage() {
     <main className="flex-1 w-full p-4 md:p-8 space-y-8">
        <CardHeader className="p-0">
         <CardTitle className="text-3xl">My Library</CardTitle>
-        <CardDescription>Browse and manage your saved palettes and colors. Find pre-built collections on the Inspiration page.</CardDescription>
+        <CardDescription>Browse and manage your saved palettes and colors. Find pre-built collections on the Pre-built Palettes page.</CardDescription>
       </CardHeader>
       
       {!hasItems ? (
