@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -21,7 +20,7 @@ export const PrebuiltGradients = ({ onSelectGradient, className }: PrebuiltGradi
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[30rem] scroll-fade">
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-4 pr-4">
+          <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-14 gap-4 pr-4">
             {prebuiltGradients.map((gradient) => (
               <div
                 key={gradient.name}
@@ -30,7 +29,7 @@ export const PrebuiltGradients = ({ onSelectGradient, className }: PrebuiltGradi
                 title={gradient.name}
               >
                 <div
-                  className="w-full aspect-square rounded-full shadow-md transition-transform group-hover:scale-105 border"
+                  className="w-full aspect-[2.35/1] rounded-md shadow-md transition-transform group-hover:scale-105 border"
                   style={{ background: `linear-gradient(45deg, ${gradient.colors.join(', ')})` }}
                 />
               </div>
