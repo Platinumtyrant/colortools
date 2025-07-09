@@ -1,9 +1,9 @@
 
 import chroma from 'chroma-js';
-import { getTints, getShades } from './colors';
+import { getTints, getShades, getTones } from './colors';
 import { simulate, type SimulationType } from './colorblind';
 
-export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades';
+export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades' | 'tones';
 
 export interface PaletteColor {
   id: number;
@@ -85,6 +85,9 @@ export function generatePalette(options: GenerationOptions): string[] {
     }
     if (type === 'shades') {
         return getShades(baseColor, numColors);
+    }
+    if (type === 'tones') {
+        return getTones(baseColor, numColors);
     }
     
     const baseLCH = chroma(baseColor).lch();

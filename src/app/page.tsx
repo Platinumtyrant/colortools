@@ -71,7 +71,7 @@ const ColorWheel = dynamic(() => import('@uiw/react-color-wheel').then(mod => mo
   )
 });
 
-const allGenerationTypes: GenerationType[] = ['analogous', 'triadic', 'complementary', 'tints', 'shades'];
+const allGenerationTypes: GenerationType[] = ['analogous', 'triadic', 'complementary', 'tints', 'shades', 'tones'];
 
 type ColorSpace = 'lch' | 'lab' | 'hsl' | 'hwb' | 'srgb';
 
