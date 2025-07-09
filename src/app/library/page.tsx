@@ -19,7 +19,7 @@ import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { removeColorFromLibrary } from '@/lib/colors';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getCombinedPantoneLookup } from '@/lib/palette-parser';
+import { getCombinedPantoneLookup } from '@/lib/palette-server';
 import type { ColorLookupEntry } from '@/lib/pantone-colors';
 import namer from 'color-namer';
 
@@ -52,32 +52,57 @@ const capitalize = (str: string) => {
         .join(' ');
 };
 
-const getColorName = (hexColor: string, lookup: Map<string, ColorLookupEntry>): string => {
+const getAllColorNames = (hexColor: string, lookup: Map<string, ColorLookupEntry>): { source: string; name: string }[] => {
+    const allNames: { source: string; name: string }[] = [];
+
     if (!colord(hexColor).isValid()) {
-        return "Invalid Color";
+        return [{ name: "Invalid Color", source: 'HEX' }];
     }
+
     const lowerHex = colord(hexColor).toHex().toLowerCase();
 
+    // 1. Pantone & USAF Lookup
     if (lookup.has(lowerHex)) {
         const entry = lookup.get(lowerHex)!;
-        return entry.name;
+        allNames.push({ source: entry.source, name: entry.name });
     }
 
+    // 2. Namer (NTC & Basic)
     try {
         const names = namer(lowerHex);
         const ntcName = names.ntc[0]?.name;
-        if (ntcName) return capitalize(ntcName);
+        if (ntcName) {
+            allNames.push({ source: 'NTC', name: capitalize(ntcName) });
+        }
         const basicName = names.basic[0]?.name;
-        if (basicName) return capitalize(basicName);
+        if (basicName) {
+            allNames.push({ source: 'Basic', name: capitalize(basicName) });
+        }
     } catch (e) {
-        console.error("Error with color-namer:", e);
+        console.error("Error getting color name from color-namer:", e);
+    }
+
+    // 3. Colord
+    const colordName = colord(lowerHex).toName({ closest: true });
+    if (colordName) {
+        allNames.push({ source: 'Colord', name: capitalize(colordName) });
     }
     
-    const colordName = colord(lowerHex).toName({ closest: true });
-    if (colordName) return capitalize(colordName);
+    // Deduplicate names, giving priority to earlier sources
+    const uniqueNames = allNames.reduce((acc, current) => {
+        if (!acc.find(item => item.name.toLowerCase() === current.name.toLowerCase())) {
+            acc.push(current);
+        }
+        return acc;
+    }, [] as { source: string; name: string }[]);
 
-    return hexColor.toUpperCase();
-}
+
+    if (uniqueNames.length > 0) {
+        return uniqueNames;
+    }
+
+    return [{ name: lowerHex.toUpperCase(), source: 'HEX' }];
+};
 
 
 const createSvgContent = (palette: { name: string; colors: string[] }, lookup: Map<string, ColorLookupEntry>) => {
@@ -92,6 +117,19 @@ const createSvgContent = (palette: { name: string; colors: string[] }, lookup: M
 
     const svgWidth = padding * 2 + numCols * swatchSize + (numCols > 1 ? (numCols - 1) * spacing : 0);
     const svgHeight = padding * 2 + numRows * swatchSize + (numRows > 1 ? (numRows - 1) * spacing : 0);
+    
+    const escapeXml = (unsafe: string) => {
+        return unsafe.replace(/[<>&'"]/g, function (c) {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+                default: return c;
+            }
+        });
+    };
 
     let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" style="background-color: #1E1E1E;">`;
 
@@ -110,35 +148,49 @@ const createSvgContent = (palette: { name: string; colors: string[] }, lookup: M
         const cmyk = `cmyk(${cmykObj.c}, ${cmykObj.m}, ${cmykObj.y}, ${cmykObj.k})`;
         const lchObj = colorInstance.toLch();
         const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
-        const colorName = getColorName(color, lookup);
+        const allNames = getAllColorNames(color, lookup);
         
         svgContent += `<rect x="${xPos}" y="${yPos}" width="${swatchSize}" height="${swatchSize}" fill="${color}" rx="${cornerRadius}" />`;
         
-        const textX = xPos + 12;
-        let textY = yPos + swatchSize - 12;
+        const textXStart = xPos + 16;
+        let textY = yPos + 30; // Start from top
 
-        const renderText = (label: string, value: string) => {
-            const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" style="font-family: monospace;">${label}: ${value}</text>`;
-            textY -= 16;
-            return content;
-        };
+        const renderLine = (text: string, options: { fontSize?: number, fontWeight?: string, yOffset?: number, family?: string } = {}) => {
+             const { fontSize = 12, fontWeight = 'normal', yOffset = 18, family = 'sans-serif' } = options;
+             const content = `<text x="${textXStart}" y="${textY}" fill="${textColor}" font-size="${fontSize}" font-weight="${fontWeight}" style="font-family: ${family};">${escapeXml(text)}</text>`;
+             textY += yOffset;
+             return content;
+        }
 
-        const renderBoldText = (label: string, value: string) => {
-            const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" font-weight="bold" style="font-family: monospace;">${label}: ${value}</text>`;
-            textY -= 16;
+        const renderValue = (label: string, value: string) => {
+            const content = `<text x="${textXStart}" y="${textY}" fill="${textColor}" font-size="12" style="font-family: monospace;">
+                <tspan font-weight="bold">${label}:</tspan> ${escapeXml(value)}
+            </text>`;
+            textY += 18;
             return content;
-        };
+        }
+
+        // Primary Name
+        if(allNames.length > 0) {
+            svgContent += renderLine(allNames[0].name, { fontSize: 16, fontWeight: 'bold', yOffset: 24 });
+        }
+
+        // Color Values
+        textY += 5;
+        svgContent += renderValue('HEX', color.toUpperCase());
+        svgContent += renderValue('RGB', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+        svgContent += renderValue('HSL', `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`);
+        svgContent += renderValue('CMYK', cmyk);
+        svgContent += renderValue('LCH', lch);
         
-        const renderName = (name: string) => {
-            return `<text x="${xPos + swatchSize / 2}" y="${yPos + 30}" fill="${textColor}" font-size="16" font-weight="bold" text-anchor="middle" style="font-family: sans-serif;">${name}</text>`;
-        };
-
-        svgContent += renderName(colorName);
-        svgContent += renderText('LCH', lch);
-        svgContent += renderText('CMYK', cmyk);
-        svgContent += renderText('HSL', `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`);
-        svgContent += renderText('RGB', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
-        svgContent += renderBoldText('HEX', color.toUpperCase());
+        // Other Names
+        if (allNames.length > 1) {
+            textY += 10;
+            svgContent += renderLine("Other Names", { fontSize: 10, fontWeight: 'bold', yOffset: 16 });
+            allNames.slice(1).forEach(nameObj => {
+                 svgContent += renderLine(`${nameObj.name} (${nameObj.source})`, { fontSize: 12, yOffset: 16 });
+            });
+        }
     });
 
     svgContent += `</svg>`;
