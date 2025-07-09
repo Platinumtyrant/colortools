@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -121,6 +122,15 @@ const ColorBoxInner = ({
     onSetActiveColor,
     isLocked,
 }: ColorBoxProps) => {
+
+    if (!color || !colord(color).isValid()) {
+      return (
+        <div className="w-40 h-[72px] rounded-md border border-destructive bg-destructive/10 flex items-center justify-center p-2">
+            <p className="text-xs text-center text-destructive">Invalid color data provided.</p>
+        </div>
+      )
+    }
+
     const allDescriptiveNames = useAllDescriptiveColorNames(color);
 
     const primary = name 
@@ -269,3 +279,5 @@ const ColorBoxInner = ({
 
 export const ColorBox = React.memo(ColorBoxInner);
 ColorBox.displayName = 'ColorBox';
+
+    
