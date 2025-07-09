@@ -19,7 +19,7 @@ import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { removeColorFromLibrary } from '@/lib/colors';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getCombinedPantoneLookup } from '@/lib/palette-server';
+import { usePantone } from '@/contexts/SidebarExtensionContext';
 import type { ColorLookupEntry } from '@/lib/pantone-colors';
 import namer from 'color-namer';
 
@@ -52,7 +52,7 @@ const capitalize = (str: string) => {
         .join(' ');
 };
 
-const getAllColorNames = (hexColor: string, lookup: Map<string, ColorLookupEntry>): { source: string; name: string }[] => {
+const getAllColorNames = (hexColor: string, lookup: Map<string, ColorLookupEntry> | null): { source: string; name: string }[] => {
     const allNames: { source: string; name: string }[] = [];
 
     if (!colord(hexColor).isValid()) {
@@ -62,7 +62,7 @@ const getAllColorNames = (hexColor: string, lookup: Map<string, ColorLookupEntry
     const lowerHex = colord(hexColor).toHex().toLowerCase();
 
     // 1. Pantone & USAF Lookup
-    if (lookup.has(lowerHex)) {
+    if (lookup && lookup.has(lowerHex)) {
         const entry = lookup.get(lowerHex)!;
         allNames.push({ source: entry.source, name: entry.name });
     }
@@ -105,7 +105,11 @@ const getAllColorNames = (hexColor: string, lookup: Map<string, ColorLookupEntry
 };
 
 
-const createSvgContent = (palette: { name: string; colors: string[] }, lookup: Map<string, ColorLookupEntry>) => {
+const createSvgContent = (palette: { name: string; colors: string[] }, lookup: Map<string, ColorLookupEntry> | null) => {
+    if (!lookup) {
+        return { svgContent: '<svg width="100" height="50" xmlns="http://www.w3.org/2000/svg"><text x="10" y="30" fill="red">Error: Data not loaded.</text></svg>', svgWidth: 100, svgHeight: 50 };
+    }
+
     const swatchSize = 220;
     const padding = 20;
     const spacing = 20;
@@ -207,7 +211,7 @@ export default function LibraryPage() {
   const { palette, setPalette, loadPalette } = usePaletteBuilder();
   const router = useRouter();
 
-  const pantoneLookup = useMemo(() => getCombinedPantoneLookup(), []);
+  const pantoneLookup = usePantone();
 
   const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
 
@@ -320,6 +324,8 @@ export default function LibraryPage() {
     if (!palette || !palette.colors) return;
     
     const { svgContent, svgWidth, svgHeight } = createSvgContent(palette, pantoneLookup);
+    if (!svgContent) return;
+
     const svgBlob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
     const svgUrl = URL.createObjectURL(svgBlob);
 
