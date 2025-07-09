@@ -94,7 +94,6 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
                     <div key={color.name} className="w-40">
                         <ColorBox
                             color={color.hex}
-                            name={color.name}
                             variant="compact"
                             onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
                             onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(color.hex) : undefined}
