@@ -36,6 +36,7 @@ const flagKeywords = [
 ];
 
 const usafKeywords = ['usaf'];
+const pastelKeywords = ['pastel'];
 
 
 // Function to determine the primary color category of a palette
@@ -45,6 +46,12 @@ const categorizePalette = (colors: string[], name: string): string => {
   for (const keyword of usafKeywords) {
     if (lowerCaseName.includes(keyword)) {
       return 'USAF';
+    }
+  }
+
+  for (const keyword of pastelKeywords) {
+    if (lowerCaseName.includes(keyword)) {
+      return 'Pastels';
     }
   }
 

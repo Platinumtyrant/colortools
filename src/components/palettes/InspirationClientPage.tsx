@@ -64,7 +64,7 @@ const mainCategoryToSubCategories: Record<string, string[]> = {
     'Cool': ['Green', 'Cyan', 'Blue', 'Purple'],
     'Neutral': ['Monochrome'],
 };
-const topLevelCategories = ['Warm', 'Cool', 'Neutral', 'Multicolor', 'Brands', 'Flags', 'USAF'];
+const topLevelCategories = ['Warm', 'Cool', 'Neutral', 'Multicolor', 'Pastels', 'Brands', 'Flags', 'USAF'];
 
 
 interface InspirationClientPageProps {
