@@ -131,18 +131,18 @@ const ColorBoxInner = ({
       )
     }
 
-    const allDescriptiveNames = useAllDescriptiveColorNames(color);
+    const allDescriptiveColorNames = useAllDescriptiveColorNames(color);
 
     const primary = name 
         ? { name, source: 'Pantone' } 
-        : allDescriptiveNames.primary;
+        : allDescriptiveColorNames.primary;
         
     const allNames = name 
         ? [
             { source: 'Pantone', name },
-            ...allDescriptiveNames.all.filter(n => n.name.toLowerCase() !== name.toLowerCase())
+            ...allDescriptiveColorNames.all.filter(n => n.name.toLowerCase() !== name.toLowerCase())
           ]
-        : allDescriptiveNames.all;
+        : allDescriptiveColorNames.all;
         
     const { toast } = useToast();
     
@@ -157,7 +157,7 @@ const ColorBoxInner = ({
     if (variant === 'default') {
         return (
              <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col cursor-pointer">
-                <div className="relative h-60 w-full" style={{ backgroundColor: color }}>
+                <div className="relative w-full aspect-[2.35/1]" style={{ backgroundColor: color }}>
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
                         <TooltipProvider>
                             {onAddToLibrary && (
