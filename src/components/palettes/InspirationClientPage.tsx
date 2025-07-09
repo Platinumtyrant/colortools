@@ -239,7 +239,7 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
                         {sortedBrands.map(brandName => (
                             <div key={brandName}>
                                 <h3 className="text-xl font-semibold mb-4 border-b pb-2">{brandName}</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
+                                <div className="grid grid-cols-1 gap-y-8">
                                     {brands[brandName].map(renderPalette)}
                                 </div>
                             </div>
@@ -251,7 +251,7 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
         
         return (
             <TabsContent key={category} value={category} className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
+              <div className="grid grid-cols-1 gap-y-8">
                 {palettesByCategory[category].map(renderPalette)}
               </div>
             </TabsContent>
