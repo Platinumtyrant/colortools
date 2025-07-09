@@ -474,6 +474,16 @@ export default function CameraIdentifierPage() {
 
                 {/* Order 2 on mobile, part of grid on desktop */}
                 <div className="p-4 flex flex-col gap-4 border-t lg:border-none lg:p-0 bg-background lg:bg-transparent">
+                     <div className="relative group/container w-full">
+                        <ColorBox
+                            color={identifiedColor}
+                            variant={isMobile ? "compact" : "default"}
+                            onAddToLibrary={!isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
+                            onRemoveFromLibrary={isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
+                            onAddToPalette={!isIdentifiedInPalette ? () => handleAddToPalette(identifiedColor) : undefined}
+                            onRemoveFromPalette={isIdentifiedInPalette ? () => handleRemoveFromPalette(identifiedColor) : undefined}
+                        />
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                         {isStreamActive ? (
                             <Button onClick={stopCamera} variant="outline"><CameraOff className="mr-2 h-4 w-4" /> Stop Camera</Button>
@@ -500,16 +510,6 @@ export default function CameraIdentifierPage() {
                              <ZoomOut className="mr-2 h-4 w-4" />
                              Reset Zoom
                          </Button>
-                    </div>
-                    <div className="relative group/container w-full">
-                        <ColorBox
-                            color={identifiedColor}
-                            variant={isMobile ? "compact" : "default"}
-                            onAddToLibrary={!isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
-                            onRemoveFromLibrary={isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
-                            onAddToPalette={!isIdentifiedInPalette ? () => handleAddToPalette(identifiedColor) : undefined}
-                            onRemoveFromPalette={isIdentifiedInPalette ? () => handleRemoveFromPalette(identifiedColor) : undefined}
-                        />
                     </div>
                 </div>
 
