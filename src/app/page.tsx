@@ -694,175 +694,177 @@ function PaletteBuilderPage() {
                 </DialogContent>
             </Dialog>
 
-            <main className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
-                <div className="flex flex-col items-center justify-center gap-8">
-                     <section className="flex flex-col lg:flex-row items-center justify-center gap-8 w-full">
-                        <div className="w-full lg:w-auto flex justify-center">
-                            <div className="flex items-center justify-center gap-4">
-                                <div className="flex flex-col items-center gap-4">
-                                    <ColorWheel
-                                        color={mainColor}
-                                        onChange={(color: ColorResult) => setMainColor(color.hex)}
-                                        width={280}
-                                        height={280}
-                                    />
-                                    <div className="flex items-center gap-2 w-[280px]">
-                                        <Input
-                                            value={inputValue.toUpperCase()}
-                                            onChange={handleInputChange}
-                                            onBlur={handleInputBlur}
-                                            className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+            <main className="flex-1 flex flex-col gap-4 md:gap-8 p-4 md:p-8 overflow-y-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+                    <div className="flex flex-col items-center justify-center gap-8">
+                         <section className="flex flex-col lg:flex-row items-center justify-center gap-8 w-full">
+                            <div className="w-full lg:w-auto flex justify-center">
+                                <div className="flex items-center justify-center gap-4">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <ColorWheel
+                                            color={mainColor}
+                                            onChange={(color: ColorResult) => setMainColor(color.hex)}
+                                            width={280}
+                                            height={280}
                                         />
-                                        <TooltipProvider>
-                                            <ShadTooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
-                                                        <Pipette className="h-4 w-4" />
-                                                        <span className="sr-only">Pick from screen</span>
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>Pick a color from your screen</p>
-                                                </TooltipContent>
-                                            </ShadTooltip>
-                                        </TooltipProvider>
+                                        <div className="flex items-center gap-2 w-[280px]">
+                                            <Input
+                                                value={inputValue.toUpperCase()}
+                                                onChange={handleInputChange}
+                                                onBlur={handleInputBlur}
+                                                className="flex-1 p-2 h-9 rounded-md bg-muted text-center font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-ring"
+                                            />
+                                            <TooltipProvider>
+                                                <ShadTooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button onClick={handleEyeDropper} variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+                                                            <Pipette className="h-4 w-4" />
+                                                            <span className="sr-only">Pick from screen</span>
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Pick a color from your screen</p>
+                                                    </TooltipContent>
+                                                </ShadTooltip>
+                                            </TooltipProvider>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex gap-4 h-[280px]">
-                                    <div className="flex flex-col items-center gap-2">
-                                        <Slider
-                                            orientation="vertical"
-                                            value={[mainHsl.s]}
-                                            onValueChange={handleSaturationChange}
-                                            max={100}
-                                            step={1}
-                                        />
-                                        <Label className="text-xs text-muted-foreground">S</Label>
-                                    </div>
-                                    <div className="flex flex-col items-center gap-2">
-                                        <Slider
-                                            orientation="vertical"
-                                            value={[mainHsl.l]}
-                                            onValueChange={handleLightnessChange}
-                                            max={100}
-                                            step={1}
-                                        />
-                                        <Label className="text-xs text-muted-foreground">L</Label>
+                                    <div className="flex gap-4 h-[280px]">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Slider
+                                                orientation="vertical"
+                                                value={[mainHsl.s]}
+                                                onValueChange={handleSaturationChange}
+                                                max={100}
+                                                step={1}
+                                            />
+                                            <Label className="text-xs text-muted-foreground">S</Label>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Slider
+                                                orientation="vertical"
+                                                value={[mainHsl.l]}
+                                                onValueChange={handleLightnessChange}
+                                                max={100}
+                                                step={1}
+                                            />
+                                            <Label className="text-xs text-muted-foreground">L</Label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="w-full lg:w-auto flex justify-center">
-                             <div className="w-full max-w-sm relative group/container" onClick={() => setEditingColorId(null)} >
-                                 {isClient ? (
-                                     <ColorBox
-                                        variant="default"
-                                        color={mainColor}
-                                        onAddToLibrary={!libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
-                                        onRemoveFromLibrary={libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
-                                    />
-                                 ) : (
-                                    <Skeleton className="w-full h-[450px] max-w-sm" />
-                                 )}
+                            <div className="w-full lg:w-auto flex justify-center">
+                                 <div className="w-full max-w-sm relative group/container" onClick={() => setEditingColorId(null)} >
+                                     {isClient ? (
+                                         <ColorBox
+                                            variant="default"
+                                            color={mainColor}
+                                            onAddToLibrary={!libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
+                                            onRemoveFromLibrary={libraryHexes.has(colord(mainColor).toHex()) ? () => handleToggleLibrary(mainColor) : undefined}
+                                        />
+                                     ) : (
+                                        <Skeleton className="w-full h-[450px] max-w-sm" />
+                                     )}
+                                </div>
                             </div>
-                        </div>
+                        </section>
+                    </div>
+                    
+                    <section className="flex flex-col min-h-0">
+                        {isClient ? (
+                            <Palette
+                                palette={palette}
+                                editingColorId={editingColorId}
+                                onLockToggle={handleLockToggle}
+                                onRemoveColor={handleRemoveColor}
+                                onAddColor={handleAddColorAtIndex}
+                                onSetActiveColor={handleSetActiveColor}
+                                actions={paletteActions}
+                                onToggleLibrary={handleToggleLibrary}
+                                libraryHexes={libraryHexes}
+                            />
+                        ) : (
+                            <Card className="bg-card/50 overflow-hidden flex flex-col flex-grow">
+                                <CardHeader className="p-4 border-b">
+                                    <Skeleton className="h-10 w-full max-w-xs" />
+                                    <Skeleton className="h-9 w-40" />
+                                </CardHeader>
+                                <CardContent className="p-4 flex flex-col flex-grow min-w-0">
+                                     <div className="flex flex-wrap gap-x-4 gap-y-6 content-start">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Skeleton key={i} className="w-40 h-[72px] rounded-md" />
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                     </section>
                 </div>
                 
-                <section className="flex flex-col min-h-0 gap-4 md:gap-8">
-                    {isClient ? (
-                        <Palette
-                            palette={palette}
-                            editingColorId={editingColorId}
-                            onLockToggle={handleLockToggle}
-                            onRemoveColor={handleRemoveColor}
-                            onAddColor={handleAddColorAtIndex}
-                            onSetActiveColor={handleSetActiveColor}
-                            actions={paletteActions}
-                            onToggleLibrary={handleToggleLibrary}
-                            libraryHexes={libraryHexes}
-                        />
-                    ) : (
-                        <Card className="bg-card/50 overflow-hidden flex flex-col">
-                            <CardHeader className="p-4 border-b">
-                                <Skeleton className="h-10 w-full max-w-xs" />
-                                <Skeleton className="h-9 w-40" />
-                            </CardHeader>
-                            <CardContent className="p-4 flex flex-col flex-grow min-w-0">
-                                 <div className="flex flex-wrap gap-x-4 gap-y-6 content-start">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Skeleton key={i} className="w-40 h-[72px] rounded-md" />
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    
-                    {isClient && palette.length > 0 && (
-                        <Card>
-                            <CardContent className="p-4">
-                                <Tabs defaultValue="palette-analysis" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-2">
-                                        <TabsTrigger value="palette-analysis">Palette Analysis</TabsTrigger>
-                                        <TabsTrigger value="contrast-checker">Contrast Checker</TabsTrigger>
-                                    </TabsList>
-                                    <TabsContent value="palette-analysis" className="p-4 flex-grow min-h-0">
-                                       {renderAnalysisPanel()}
-                                    </TabsContent>
-                                    <TabsContent value="contrast-checker" className="p-4 flex-grow min-h-0">
-                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            <div className="space-y-4">
-                                                 <ContrastGrid colors={paletteHexes} />
-                                            </div>
-                                            <div className="space-y-4">
-                                                 <div className="grid grid-cols-2 gap-4">
-                                                     <div>
-                                                        <Label className="text-sm font-medium mb-2 block">Text Color</Label>
-                                                        <Popover>
-                                                            <PopoverTrigger asChild>
-                                                                <Button variant="outline" className="justify-start gap-2 w-full">
-                                                                    <div className="w-4 h-4 rounded border" style={{backgroundColor: fgColor}}></div>
-                                                                    {fgColor.toUpperCase()}
-                                                                </Button>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="p-0">
-                                                                <ColorPickerClient color={fgColor} onChange={(c) => setFgColor(c.hex)} />
-                                                            </PopoverContent>
-                                                        </Popover>
-                                                    </div>
-                                                     <div>
-                                                        <Label className="text-sm font-medium mb-2 block">Background Color</Label>
-                                                        <Popover>
-                                                            <PopoverTrigger asChild>
-                                                                <Button variant="outline" className="justify-start gap-2 w-full">
-                                                                    <div className="w-4 h-4 rounded border" style={{backgroundColor: bgColor}}></div>
-                                                                    {bgColor.toUpperCase()}
-                                                                </Button>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="p-0">
-                                                                <ColorPickerClient color={bgColor} onChange={(c) => setBgColor(c.hex)} />
-                                                            </PopoverContent>
-                                                        </Popover>
-                                                    </div>
-                                                 </div>
-                                                
-                                                <div
-                                                    className="p-4 rounded-lg text-center border-2 border-dashed flex items-center justify-center h-40"
-                                                    style={{ backgroundColor: bgColor, color: fgColor }}
-                                                >
-                                                    <p className="font-bold text-[64pt]">Aa</p>
-                                                </div>
-                                                
-                                                <WCAGDisplay textColor={fgColor} bgColor={bgColor} />
-                                            </div>
+                {isClient && palette.length > 0 && (
+                    <Card>
+                        <CardContent className="p-4">
+                            <Tabs defaultValue="palette-analysis" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="palette-analysis">Palette Analysis</TabsTrigger>
+                                    <TabsTrigger value="contrast-checker">Contrast Checker</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="palette-analysis" className="p-4 flex-grow min-h-0">
+                                   {renderAnalysisPanel()}
+                                </TabsContent>
+                                <TabsContent value="contrast-checker" className="p-4 flex-grow min-h-0">
+                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                             <ContrastGrid colors={paletteHexes} />
                                         </div>
-                                    </TabsContent>
-                                </Tabs>
-                            </CardContent>
-                        </Card>
-                    )}
-                </section>
+                                        <div className="space-y-4">
+                                             <div className="grid grid-cols-2 gap-4">
+                                                 <div>
+                                                    <Label className="text-sm font-medium mb-2 block">Text Color</Label>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <Button variant="outline" className="justify-start gap-2 w-full">
+                                                                <div className="w-4 h-4 rounded border" style={{backgroundColor: fgColor}}></div>
+                                                                {fgColor.toUpperCase()}
+                                                            </Button>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="p-0">
+                                                            <ColorPickerClient color={fgColor} onChange={(c) => setFgColor(c.hex)} />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                </div>
+                                                 <div>
+                                                    <Label className="text-sm font-medium mb-2 block">Background Color</Label>
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <Button variant="outline" className="justify-start gap-2 w-full">
+                                                                <div className="w-4 h-4 rounded border" style={{backgroundColor: bgColor}}></div>
+                                                                {bgColor.toUpperCase()}
+                                                            </Button>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="p-0">
+                                                            <ColorPickerClient color={bgColor} onChange={(c) => setBgColor(c.hex)} />
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                </div>
+                                             </div>
+                                            
+                                            <div
+                                                className="p-4 rounded-lg text-center border-2 border-dashed flex items-center justify-center h-40"
+                                                style={{ backgroundColor: bgColor, color: fgColor }}
+                                            >
+                                                <p className="font-bold text-[64pt]">Aa</p>
+                                            </div>
+                                            
+                                            <WCAGDisplay textColor={fgColor} bgColor={bgColor} />
+                                        </div>
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
+                        </CardContent>
+                    </Card>
+                )}
             </main>
         </div>
     );
