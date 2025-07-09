@@ -14,6 +14,7 @@ import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 
 interface PantoneGuideClientPageProps {
   pmsColors: PantoneColor[];
@@ -132,10 +133,24 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
   const PaginationControls = ({ currentPage, totalPages, onPageChange }: { currentPage: number, totalPages: number, onPageChange: (page: number) => void }) => {
     if (totalPages <= 1) return null;
     return (
-        <div className="flex items-center justify-center space-x-4 mt-8">
-            <Button onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>Previous</Button>
-            <span className="text-sm font-medium">Page {currentPage} of {totalPages}</span>
-            <Button onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next</Button>
+        <div className="flex items-center justify-center space-x-2 mt-8">
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(1)} disabled={currentPage === 1}>
+                <ChevronsLeft className="h-4 w-4" />
+                <span className="sr-only">First page</span>
+            </Button>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Previous page</span>
+            </Button>
+            <span className="text-sm font-medium px-2">Page {currentPage} of {totalPages}</span>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Next page</span>
+            </Button>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(totalPages)} disabled={currentPage === totalPages}>
+                <ChevronsRight className="h-4 w-4" />
+                <span className="sr-only">Last page</span>
+            </Button>
         </div>
     )
   }
