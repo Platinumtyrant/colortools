@@ -86,27 +86,32 @@ const colorSpaceInfo: Record<ColorSpace, { name: string; components: string[]; d
 
 const getGraphData = (colors: string[]) => {
     if (!colors || colors.length === 0) return [];
-    
-    // Using colord for HSL conversion and normalizing S and L to be 0-1 to match chroma's scale.
-    const components = colors.map(c => {
-        const hsl = colord(c).toHsl();
+
+    const components = colors.map(hex => {
+        if (!colord(hex).isValid()) {
+            return { h: 0, s: 0, l: 0 };
+        }
+        const { h, s, l } = colord(hex).toHsl();
         return {
-            h: hsl.h,       // Hue (0-360) from colord is fine
-            s: hsl.s / 100, // Saturation (colord is 0-100, we need 0-1)
-            l: hsl.l / 100, // Lightness (colord is 0-100, we need 0-1)
+            h: isNaN(h) ? 0 : h,
+            s: s / 100, // Normalize to 0-1
+            l: l / 100, // Normalize to 0-1
         };
     });
 
     const displayInfo = colorSpaceInfo['hsl'];
 
-    return displayInfo.components.map((component, i) => ({
-      data: components.map((c, j) => ({
-        name: j + 1,
-        value: isNaN(c[component.toLowerCase() as keyof typeof c]) ? 0 : c[component.toLowerCase() as keyof typeof c]
-      })),
-      title: displayInfo.components[i],
-      description: displayInfo.descriptions[i]
-    }));
+    return displayInfo.components.map((component, i) => {
+        const key = component.toLowerCase() as 'h' | 's' | 'l';
+        return {
+            data: components.map((c, j) => ({
+                name: j + 1,
+                value: c[key]
+            })),
+            title: displayInfo.components[i],
+            description: displayInfo.descriptions[i]
+        };
+    });
 };
 
 const ChartDisplay = ({ data, title, color, description }: { data: { name: number; value: number }[], title: string, color: string, description: string }) => (
@@ -465,6 +470,44 @@ function PaletteBuilderPage() {
             console.log("EyeDropper cancelled");
         }
     };
+
+    const handleFgEyeDropper = async () => {
+        if (!window.EyeDropper) {
+            toast({
+                title: "Unsupported Browser",
+                description: "The eyedropper feature is not available in your browser.",
+                variant: "destructive",
+            });
+            return;
+        }
+        try {
+            const eyeDropper = new window.EyeDropper();
+            const { sRGBHex } = await eyeDropper.open();
+            setFgColor(sRGBHex);
+            toast({ title: "Color Picked!", description: `Set foreground color to ${sRGBHex}` });
+        } catch (e) {
+            console.log("EyeDropper cancelled");
+        }
+    };
+
+    const handleBgEyeDropper = async () => {
+        if (!window.EyeDropper) {
+            toast({
+                title: "Unsupported Browser",
+                description: "The eyedropper feature is not available in your browser.",
+                variant: "destructive",
+            });
+            return;
+        }
+        try {
+            const eyeDropper = new window.EyeDropper();
+            const { sRGBHex } = await eyeDropper.open();
+            setBgColor(sRGBHex);
+            toast({ title: "Color Picked!", description: `Set background color to ${sRGBHex}` });
+        } catch (e) {
+            console.log("EyeDropper cancelled");
+        }
+    };
     
     // Analysis & Harmonies Logic
     const currentAnalysisColors = useMemo(() => palette.map(p => p.hex), [palette]);
@@ -484,7 +527,7 @@ function PaletteBuilderPage() {
         return colorSpace;
     }, [colorSpace]);
     
-    const analysisSourcePalette = useMemo(() => {
+    const interpolatedPalette = useMemo(() => {
         if (currentAnalysisColors.length < 2) {
           return currentAnalysisColors;
         }
@@ -498,11 +541,14 @@ function PaletteBuilderPage() {
     }, [currentAnalysisColors, useBezier, correctLightness, interpolationMode]);
   
     const simulatedPalette = useMemo(() => {
-        if (analysisSourcePalette.length === 0) return [];
-        return analysisSourcePalette.map(color => simulate(color, simulationType));
-    }, [analysisSourcePalette, simulationType]);
-  
-    const graphData = useMemo(() => getGraphData(analysisSourcePalette), [analysisSourcePalette]);
+      if (interpolatedPalette.length === 0) return [];
+      return interpolatedPalette.map(color => simulate(color, simulationType));
+    }, [interpolatedPalette, simulationType]);
+
+    const graphData = useMemo(() => {
+        if (interpolatedPalette.length === 0) return [];
+        return getGraphData(interpolatedPalette);
+    }, [interpolatedPalette]);
     
     const isPaletteColorblindSafe = useMemo(() => {
         if (currentAnalysisColors.length < 2) return true;
@@ -565,9 +611,18 @@ function PaletteBuilderPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                     <ShadTooltip>
                         <TooltipTrigger asChild>
-                           <Button onClick={handleMix} size="sm"><Dices className="mr-2 h-4 w-4" />Mix</Button>
+                           <Button onClick={handleMix} size="sm" disabled={!isHarmonyLocked && hasLockedColors}>
+                             <Dices className="mr-2 h-4 w-4" />Mix
+                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent><p>{isHarmonyLocked ? 'Re-generate palette with the locked harmony' : 'Generates a new palette using a different harmony.'}</p></TooltipContent>
+                        <TooltipContent>
+                           {isHarmonyLocked 
+                               ? 'Re-generate palette with the locked harmony' 
+                               : hasLockedColors 
+                               ? 'Unlock colors to mix with a new harmony'
+                               : 'Generates a new palette using a different harmony.'
+                           }
+                        </TooltipContent>
                     </ShadTooltip>
                      <ShadTooltip>
                         <TooltipTrigger asChild><Button onClick={handleRandomize} size="sm" variant="outline"><Sparkles className="mr-2 h-4 w-4" />Randomize</Button></TooltipTrigger>
@@ -638,7 +693,7 @@ function PaletteBuilderPage() {
 
     const renderPaletteAnalysisPanel = () => (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                     <div className="flex justify-between items-center text-sm">
                         <Label>Simulated View</Label>
@@ -908,7 +963,7 @@ function PaletteBuilderPage() {
                                                             </Button>
                                                         </PopoverTrigger>
                                                         <PopoverContent className="p-0">
-                                                            <ColorPickerClient color={fgColor} onChange={(c) => setFgColor(c.hex)} />
+                                                            <ColorPickerClient color={fgColor} onChange={(c) => setFgColor(c.hex)} onEyeDropperClick={handleFgEyeDropper} />
                                                         </PopoverContent>
                                                     </Popover>
                                                 </div>
@@ -922,7 +977,7 @@ function PaletteBuilderPage() {
                                                             </Button>
                                                         </PopoverTrigger>
                                                         <PopoverContent className="p-0">
-                                                            <ColorPickerClient color={bgColor} onChange={(c) => setBgColor(c.hex)} />
+                                                            <ColorPickerClient color={bgColor} onChange={(c) => setBgColor(c.hex)} onEyeDropperClick={handleBgEyeDropper} />
                                                         </PopoverContent>
                                                     </Popover>
                                                 </div>
@@ -976,7 +1031,4 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
-
-
-
 
