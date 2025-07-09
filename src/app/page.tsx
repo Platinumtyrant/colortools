@@ -43,6 +43,8 @@ import { WCAGDisplay } from '@/components/colors/WCAGDisplay';
 import { ContrastGrid } from '@/components/colors/ContrastGrid';
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { cn } from '@/lib/utils';
+import { getComplementary, getAnalogous, getSplitComplementary, getTriadic, getSquare, getRectangular } from '@/lib/colors';
+import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
 
 
 // Type definition for the experimental EyeDropper API
@@ -161,6 +163,7 @@ function PaletteBuilderPage() {
     const [libraryColors, setLibraryColors] = useState<string[]>([]);
     const [isClient, setIsClient] = useState(false);
     const libraryHexes = useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
+    const paletteHexes = useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
 
     const { toast } = useToast();
     const router = useRouter();
@@ -198,6 +201,22 @@ function PaletteBuilderPage() {
             setLibraryColors(newLibrary);
         }
     }, [libraryColors, libraryHexes, toast]);
+
+    const handleAddToPalette = useCallback((color: string) => {
+        if (palette.length >= 20) {
+            toast({ title: "Palette is full (20 colors max).", variant: "destructive" });
+            return;
+        }
+        const newPaletteColor = { id: Date.now(), hex: color, locked: false };
+        setPalette(p => [...p, newPaletteColor]);
+        toast({ title: "Color added to palette!" });
+    }, [palette.length, setPalette, toast]);
+
+    const handleRemoveFromPalette = useCallback((color: string) => {
+        const normalizedColor = colord(color).toHex();
+        setPalette(currentPalette => currentPalette.filter(p => colord(p.hex).toHex() !== normalizedColor));
+        toast({ title: 'Color removed from palette.' });
+    }, [setPalette, toast]);
   
     const hasLockedColors = useMemo(() => palette.some(c => c.locked), [palette]);
 
@@ -435,17 +454,17 @@ function PaletteBuilderPage() {
         }
     };
     
-    // Analysis Logic
-    const paletteHexes = useMemo(() => palette.map(p => p.hex), [palette]);
+    // Analysis & Harmonies Logic
+    const currentAnalysisColors = useMemo(() => palette.map(p => p.hex), [palette]);
     
     useEffect(() => {
-      if (paletteHexes.length > 0 && fgColor === '#000000' && bgColor === '#FFFFFF') {
-          setFgColor(paletteHexes[0]);
-          if(paletteHexes.length > 1) {
-            setBgColor(paletteHexes[paletteHexes.length - 1]);
+      if (currentAnalysisColors.length > 0 && fgColor === '#000000' && bgColor === '#FFFFFF') {
+          setFgColor(currentAnalysisColors[0]);
+          if(currentAnalysisColors.length > 1) {
+            setBgColor(currentAnalysisColors[currentAnalysisColors.length - 1]);
           }
       }
-    }, [paletteHexes, fgColor, bgColor]);
+    }, [currentAnalysisColors, fgColor, bgColor]);
     
     const interpolationMode = useMemo(() => {
         if (colorSpace === 'hwb' || colorSpace === 'srgb') return 'lch';
@@ -453,28 +472,28 @@ function PaletteBuilderPage() {
     }, [colorSpace]);
     
     const analysisSourcePalette = useMemo(() => {
-        if (paletteHexes.length < 2) return paletteHexes;
+        if (currentAnalysisColors.length < 2) return currentAnalysisColors;
         if (!useBezier && !correctLightness) {
-            return paletteHexes;
+            return currentAnalysisColors;
         }
-        const interpolator = useBezier ? chroma.bezier(paletteHexes) : paletteHexes;
+        const interpolator = useBezier ? chroma.bezier(currentAnalysisColors) : currentAnalysisColors;
         let scale = chroma.scale(interpolator).mode(interpolationMode as any);
         if (correctLightness) {
             scale = scale.correctLightness();
         }
-        return scale.colors(paletteHexes.length);
-    }, [paletteHexes, useBezier, correctLightness, interpolationMode]);
+        return scale.colors(currentAnalysisColors.length);
+    }, [currentAnalysisColors, useBezier, correctLightness, interpolationMode]);
   
     const simulatedPalette = useMemo(() => {
         if (analysisSourcePalette.length === 0) return [];
-        const source = (useBezier || correctLightness) ? analysisSourcePalette : paletteHexes;
+        const source = (useBezier || correctLightness) ? analysisSourcePalette : currentAnalysisColors;
         return source.map(color => simulate(color, simulationType));
-    }, [analysisSourcePalette, paletteHexes, simulationType, useBezier, correctLightness]);
+    }, [analysisSourcePalette, currentAnalysisColors, simulationType, useBezier, correctLightness]);
   
     const graphData = useMemo(() => getGraphData(analysisSourcePalette, colorSpace), [analysisSourcePalette, colorSpace]);
     
     const isPaletteColorblindSafe = useMemo(() => {
-        if (paletteHexes.length < 2) return true;
+        if (currentAnalysisColors.length < 2) return true;
 
         for(let i=0; i < simulatedPalette.length - 1; i++){
             if(chroma.contrast(simulatedPalette[i], simulatedPalette[i+1]) < 1.15){
@@ -482,7 +501,51 @@ function PaletteBuilderPage() {
             }
         }
         return true;
-    }, [paletteHexes, simulatedPalette]);
+    }, [currentAnalysisColors, simulatedPalette]);
+
+    const harmonies = useMemo(() => ({
+        complementary: getComplementary(mainColor),
+        analogous: getAnalogous(mainColor),
+        splitComplementary: getSplitComplementary(mainColor),
+        triadic: getTriadic(mainColor),
+        tetradic: getRectangular(mainColor),
+        square: getSquare(mainColor),
+    }), [mainColor]);
+
+    const harmonyInfo = useMemo(() => [
+        { name: "Complementary", colors: harmonies.complementary },
+        { name: "Analogous", colors: harmonies.analogous },
+        { name: "Split Complementary", colors: harmonies.splitComplementary },
+        { name: "Triadic", colors: harmonies.triadic },
+        { name: "Square", colors: harmonies.square },
+        { name: "Tetradic", colors: harmonies.tetradic },
+    ], [harmonies]);
+
+    const renderHarmonyColorGrid = useCallback((colors: string[]) => (
+        <div className="flex flex-wrap justify-center gap-4">
+            {colors.map((c, i) => {
+                if (!isClient) {
+                    return <Skeleton key={i} className="w-40 h-[72px]" />;
+                }
+                const normalizedColor = colord(c).toHex();
+                const isInLibrary = libraryHexes.has(normalizedColor);
+                const isInPalette = paletteHexes.has(normalizedColor);
+                return (
+                    <div key={`${c}-${i}`} className="w-40">
+                        <ColorBox
+                            color={c}
+                            variant="compact"
+                            onAddToLibrary={!isInLibrary ? () => handleToggleLibrary(c) : undefined}
+                            onRemoveFromLibrary={isInLibrary ? () => handleToggleLibrary(c) : undefined}
+                            onAddToPalette={!isInPalette ? () => handleAddToPalette(c) : undefined}
+                            onRemoveFromPalette={isInPalette ? () => handleRemoveFromPalette(c) : undefined}
+                        />
+                    </div>
+                );
+            })}
+        </div>
+    ), [isClient, libraryHexes, paletteHexes, handleToggleLibrary, handleAddToPalette, handleRemoveFromPalette]);
+
 
     const paletteActions = (
         <TooltipProvider>
@@ -559,7 +622,7 @@ function PaletteBuilderPage() {
         </TooltipProvider>
     );
 
-    const renderAnalysisPanel = () => (
+    const renderPaletteAnalysisPanel = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -805,18 +868,19 @@ function PaletteBuilderPage() {
                 {isClient && palette.length > 0 && (
                     <Card>
                         <CardContent className="p-4">
-                            <Tabs defaultValue="harmony-analysis" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="harmony-analysis">Harmony Analysis</TabsTrigger>
+                            <Tabs defaultValue="palette-analysis" className="w-full">
+                                <TabsList className="grid w-full grid-cols-3">
+                                    <TabsTrigger value="palette-analysis">Palette Analysis</TabsTrigger>
                                     <TabsTrigger value="contrast-checker">Contrast Checker</TabsTrigger>
+                                    <TabsTrigger value="harmony-analysis">Harmony Analysis</TabsTrigger>
                                 </TabsList>
-                                <TabsContent value="harmony-analysis" className="p-4 flex-grow min-h-0">
-                                   {renderAnalysisPanel()}
+                                <TabsContent value="palette-analysis" className="p-4 flex-grow min-h-0">
+                                   {renderPaletteAnalysisPanel()}
                                 </TabsContent>
                                 <TabsContent value="contrast-checker" className="p-4 flex-grow min-h-0">
                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-4">
-                                             <ContrastGrid colors={paletteHexes} />
+                                             <ContrastGrid colors={currentAnalysisColors} />
                                         </div>
                                         <div className="space-y-4">
                                              <div className="grid grid-cols-2 gap-4">
@@ -860,6 +924,33 @@ function PaletteBuilderPage() {
                                             <WCAGDisplay textColor={fgColor} bgColor={bgColor} />
                                         </div>
                                     </div>
+                                </TabsContent>
+                                <TabsContent value="harmony-analysis" className="p-4 flex-grow min-h-0">
+                                    <Tabs defaultValue={harmonyInfo[0].name} className="w-full">
+                                        <TabsList className="flex flex-wrap h-auto justify-center">
+                                            {harmonyInfo.map((harmony) => (
+                                                <TabsTrigger key={harmony.name} value={harmony.name}>
+                                                    {harmony.name}
+                                                </TabsTrigger>
+                                            ))}
+                                        </TabsList>
+                                        {harmonyInfo.map(harmony => (
+                                            <TabsContent key={harmony.name} value={harmony.name}>
+                                                <motion.div
+                                                    key={harmony.name}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ duration: 0.5 }}
+                                                    className="mt-6 grid md:grid-cols-2 items-center gap-8 p-4"
+                                                >
+                                                    <div className="mx-auto">
+                                                        <HarmonyColorWheel colors={harmony.colors} size={200} />
+                                                    </div>
+                                                    {renderHarmonyColorGrid(harmony.colors)}
+                                                </motion.div>
+                                            </TabsContent>
+                                        ))}
+                                    </Tabs>
                                 </TabsContent>
                             </Tabs>
                         </CardContent>
