@@ -90,20 +90,19 @@ const getGraphData = (colors: string[]) => {
     // Using colord for HSL conversion and normalizing S and L to be 0-1 to match chroma's scale.
     const components = colors.map(c => {
         const hsl = colord(c).toHsl();
-        return [
-            hsl.h,       // Hue (0-360) from colord is fine
-            hsl.s / 100, // Saturation (colord is 0-100, we need 0-1)
-            hsl.l / 100, // Lightness (colord is 0-100, we need 0-1)
-        ];
+        return {
+            h: hsl.h,       // Hue (0-360) from colord is fine
+            s: hsl.s / 100, // Saturation (colord is 0-100, we need 0-1)
+            l: hsl.l / 100, // Lightness (colord is 0-100, we need 0-1)
+        };
     });
 
     const displayInfo = colorSpaceInfo['hsl'];
 
-    // We know we only have 3 components, so we can map over displayInfo.components directly.
-    return displayInfo.components.map((_, i) => ({
+    return displayInfo.components.map((component, i) => ({
       data: components.map((c, j) => ({
         name: j + 1,
-        value: isNaN(c[i]) ? 0 : c[i]
+        value: isNaN(c[component.toLowerCase() as keyof typeof c]) ? 0 : c[component.toLowerCase() as keyof typeof c]
       })),
       title: displayInfo.components[i],
       description: displayInfo.descriptions[i]
@@ -306,11 +305,21 @@ function PaletteBuilderPage() {
     }, [paletteToLoad, clearPaletteToLoad, setPalette, setMainColor, mainColor, palette.length, toast]);
 
     const handleMix = useCallback(() => {
-        const newType = allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)];
-        setGenerationType(newType);
-        regeneratePalette(mainColor, newType);
-        toast({ title: `Generated ${newType} palette`});
-    }, [regeneratePalette, mainColor, setGenerationType, toast]);
+        if (isHarmonyLocked) {
+            // Regenerate with the current locked harmony
+            regeneratePalette(mainColor, generationType);
+            toast({ title: `Regenerated ${generationType} palette` });
+        } else {
+            // Pick a new harmony and regenerate
+            let newType = generationType;
+            while (newType === generationType) { // Ensure we get a different type
+                newType = allGenerationTypes[Math.floor(Math.random() * allGenerationTypes.length)];
+            }
+            setGenerationType(newType);
+            regeneratePalette(mainColor, newType);
+            toast({ title: `Generated ${newType} palette` });
+        }
+    }, [isHarmonyLocked, mainColor, generationType, regeneratePalette, setGenerationType, toast]);
 
     const handleRandomize = useCallback(() => {
         setEditingPaletteId(null);
@@ -555,8 +564,10 @@ function PaletteBuilderPage() {
             <div className="flex w-full flex-col gap-4">
                 <div className="flex items-center gap-2 flex-wrap">
                     <ShadTooltip>
-                        <TooltipTrigger asChild><Button onClick={handleMix} size="sm" disabled={isHarmonyLocked}><Dices className="mr-2 h-4 w-4" />Mix</Button></TooltipTrigger>
-                        <TooltipContent><p>Generates a new palette using a different harmony.</p></TooltipContent>
+                        <TooltipTrigger asChild>
+                           <Button onClick={handleMix} size="sm"><Dices className="mr-2 h-4 w-4" />Mix</Button>
+                        </TooltipTrigger>
+                        <TooltipContent><p>{isHarmonyLocked ? 'Re-generate palette with the locked harmony' : 'Generates a new palette using a different harmony.'}</p></TooltipContent>
                     </ShadTooltip>
                      <ShadTooltip>
                         <TooltipTrigger asChild><Button onClick={handleRandomize} size="sm" variant="outline"><Sparkles className="mr-2 h-4 w-4" />Randomize</Button></TooltipTrigger>
@@ -965,6 +976,7 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
+
 
 
 
