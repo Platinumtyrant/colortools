@@ -21,7 +21,7 @@ export const PrebuiltGradients = ({ onSelectGradient, className }: PrebuiltGradi
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[30rem] scroll-fade">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pr-4">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-4 pr-4">
             {prebuiltGradients.map((gradient) => (
               <div
                 key={gradient.name}
@@ -33,7 +33,6 @@ export const PrebuiltGradients = ({ onSelectGradient, className }: PrebuiltGradi
                   className="w-full aspect-square rounded-full shadow-md transition-transform group-hover:scale-105 border"
                   style={{ background: `linear-gradient(45deg, ${gradient.colors.join(', ')})` }}
                 />
-                <p className="text-center text-xs mt-2 text-muted-foreground truncate">{gradient.name}</p>
               </div>
             ))}
           </div>
