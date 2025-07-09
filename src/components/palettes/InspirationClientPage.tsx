@@ -18,7 +18,7 @@ const brandKeywords = [
     'instagram', 'twitch', 'joomla', 'netflix', 'microsoft', 'apple', 'bmw', 'amazon', 'fedex', 
     'google', 'telegram', 'steam', 'valorant', 'rolex', 'samsung', 'logitech', 'figma', 
     'whatsapp', 'vs code', 'visual studio', 'typescript', 'javascript', 'php', 'java', 
-    'shell', 'kpmg', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
+    'shell', 'dr. pepper', 'reese\'s', 'dunkin', 'red bull', 'm&m', 'coca-cola', 'pepsi', 
     'snapchat', 'youtube', 'illustrator', 'us dollar',
     'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui'
 ];
@@ -164,7 +164,7 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
 
   const renderPalette = (palette: CategorizedPalette, paletteIndex: number) => (
       <div className="group/palette" key={`${palette.name}-${paletteIndex}`}>
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2 mb-2">
               <p className="text-sm font-medium truncate cursor-pointer" title={palette.name} onClick={() => handleSavePalette(palette)}>{palette.name}</p>
                 <TooltipProvider>
                     <Tooltip>

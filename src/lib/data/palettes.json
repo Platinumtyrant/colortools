@@ -37,10 +37,6 @@
     "colors": ["#000000", "#1A0033", "#330066", "#6600CC", "#9933FF", "#CC66FF", "#FF99FF"]
   },
   {
-    "name": "Deep Burgundy",
-    "colors": ["#800020", "#66001A", "#4D0013", "#33000D", "#1A0006"]
-  },
-  {
     "name": "Call-to-Action Buttons",
     "colors": ["#FFD700", "#008000", "#0000FF", "#FF0000"]
   },
@@ -83,10 +79,6 @@
   {
     "name": "Pastel Rainbow",
     "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF"]
-  },
-  {
-    "name": "Red Tints (7 Shades)",
-    "colors": ["#FF0000", "#E00000", "#C00000", "#A00000", "#800000", "#600000", "#400000"]
   },
   {
     "name": "Bootstrap 4 Alerts",
@@ -187,10 +179,6 @@
   {
     "name": "Discord Roles",
     "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
-  },
-  {
-    "name": "12 Color Rainbow",
-    "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#00CED1", "#00BFFF", "#0000FF", "#8A2BE2", "#EE82EE"]
   },
   {
     "name": "Apple iOS Blue",
@@ -353,10 +341,6 @@
     "colors": ["#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE", "#F8F8FF", "#F5F5DC"]
   },
   {
-    "name": "Deep Maroon Shades",
-    "colors": ["#800000", "#660000", "#4D0000", "#330000", "#1A0000"]
-  },
-  {
     "name": "iPhone 11 Pro Colors",
     "colors": ["#1C1C1E", "#3A3A3C", "#4D4D4F", "#8E8E93", "#AEAEB2", "#C0C0C0", "#D1D1D6", "#E5E5EA", "#F2F2F7", "#F5F5F5"]
   },
@@ -365,16 +349,8 @@
     "colors": ["#C8102E", "#00247D", "#FFFFFF"]
   },
   {
-    "name": "Standard Rainbow (20 Colors)",
-    "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#32CD32", "#008000", "#20B2AA", "#00CED1", "#00BFFF", "#0000FF", "#4169E1", "#0000CD", "#00008B", "#8A2BE2", "#800080", "#9932CC", "#EE82EE"]
-  },
-  {
     "name": "Japan Flag",
     "colors": ["#BC002D", "#FFFFFF"]
-  },
-  {
-    "name": "Colorswall Random 682",
-    "colors": ["#B0E0E6", "#87CEFA", "#ADD8E6", "#E0FFFF", "#F0FFFF", "#AFEEEE"]
   },
   {
     "name": "Neutral Room Decor",
@@ -445,10 +421,6 @@
     "colors": ["#A9A9A9", "#808080", "#696969", "#404040", "#202020", "#000000"]
   },
   {
-    "name": "Backrooms Level 0",
-    "colors": ["#E9DB8F", "#E1D685", "#D9D17A", "#D1CB70", "#C9C665", "#C1C15A"]
-  },
-  {
     "name": "Ethereum Web Design",
     "colors": ["#3C3C3C", "#5C5C5C", "#7C7C7C", "#9C9C9C", "#BCCCDC", "#DCDCEC"]
   },
@@ -515,10 +487,6 @@
   {
     "name": "Dr. Pepper Branding",
     "colors": ["#8B0000", "#DC143C", "#A020F0", "#800080", "#FF00FF", "#FFFFFF"]
-  },
-  {
-    "name": "Least Used Rainbow",
-    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
   },
   {
     "name": "Synthwave 80s",
@@ -781,10 +749,6 @@
     "colors": ["#4169E1", "#3359C0", "#264A9E", "#1A3A7D", "#0D2B5C"]
   },
   {
-    "name": "General Purple",
-    "colors": ["#800080", "#4B0082", "#6A0DAD", "#9932CC", "#BA55D3", "#DDA0DD", "#EE82EE", "#FF00FF"]
-  },
-  {
     "name": "Dark Blue Shades",
     "colors": ["#00008B", "#00006F", "#000054", "#000039", "#00001E"]
   },
@@ -799,7 +763,13 @@
   {
     "name": "Bootstrap 5 Extended",
     "colors": ["#0D6EFD", "#6C757D", "#198754", "#DC3545", "#FFC107", "#0DCAF0", "#212529", "#F8F9FA", "#FFFFFF"]
+  },
+  {
+    "name": "Least Used Rainbow",
+    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
+  },
+  {
+    "name": "Standard Rainbow (20 Colors)",
+    "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#32CD32", "#008000", "#20B2AA", "#00CED1", "#00BFFF", "#0000FF", "#4169E1", "#0000CD", "#00008B", "#8A2BE2", "#800080", "#9932CC", "#EE82EE"]
   }
 ]
-
-    
