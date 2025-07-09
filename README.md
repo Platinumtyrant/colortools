@@ -42,7 +42,7 @@ The central hub of the application where users can:
 
 ### 5. Pantone Guide
 - A comprehensive reference for official Pantone color systems.
-- Browse both the PMS (Pantone Matching System) for print and FHI (Fashion, Home + Interiors) color libraries.
+- Browse both the Solid Coated (for graphic design) and FHI (Fashion, Home + Interiors) color libraries.
 
 ### 6. Library
 - A personal space to manage all saved assets.

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -161,12 +160,12 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
         <div className="flex-grow flex flex-col min-h-0">
             <CardHeader className="p-0 mb-8 space-y-2">
                 <CardTitle className="text-3xl">Pantone Color Guides</CardTitle>
-                <CardDescription>Browse official Pantone color systems. PMS is for print, while FHI is for fashion, home, and interiors.</CardDescription>
+                <CardDescription>Browse official Pantone color systems. The Solid Coated library is for graphic design (print, packaging, digital), while FHI is for fashion, home, and interiors.</CardDescription>
             </CardHeader>
 
             <Tabs defaultValue="pms" className="w-full flex flex-col flex-grow">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="pms">PMS (Print)</TabsTrigger>
+                    <TabsTrigger value="pms">Solid Coated (Graphic Design)</TabsTrigger>
                     <TabsTrigger value="fhi">FHI (Fashion, Home + Interiors)</TabsTrigger>
                 </TabsList>
 
