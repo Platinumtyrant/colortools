@@ -5,12 +5,12 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
-import { getCombinedPantoneLookup } from "@/lib/palette-parser";
+import { getCombinedPantoneLookup } from "@/lib/palette-server";
 import { PantoneProvider } from "@/contexts/SidebarExtensionContext";
 import { PaletteBuilderProvider } from "@/contexts/PaletteBuilderContext";
 
 export const metadata: Metadata = {
-  title: "Palette Prodigy",
+  title: "Color Tools",
   description: "A powerful color palette and gradient mesh builder.",
 };
 

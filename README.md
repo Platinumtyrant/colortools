@@ -1,2 +1,2 @@
-# Color palette tool 
+# Color Tools
 This is a NextJS app started in Firebase Studio.

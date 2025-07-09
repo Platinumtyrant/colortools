@@ -41,7 +41,7 @@ export function Header() {
                                 className="flex items-center gap-2 text-lg font-semibold mb-4"
                             >
                                 <Brush className="h-6 w-6" />
-                                <span>Palette Prodigy</span>
+                                <span>Color Tools</span>
                             </Link>
                          </div>
                         <nav className="grid gap-2 text-lg font-medium px-6">
@@ -89,7 +89,7 @@ export function Header() {
                     className="flex items-center gap-2 text-lg font-semibold"
                 >
                     <Brush className="h-6 w-6" />
-                    <span>Palette Prodigy</span>
+                    <span>Color Tools</span>
                 </Link>
             </div>
 
