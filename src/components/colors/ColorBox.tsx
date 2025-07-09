@@ -221,7 +221,7 @@ const ColorBoxInner = ({
                              <TooltipProvider delayDuration={200}>
                                 {onSetActiveColor && <ActionIcon onClick={() => onSetActiveColor()} title="Set as Active Color"><MousePointerClick className="h-4 w-4" /></ActionIcon>}
                                 {onLockToggle && <ActionIcon onClick={() => onLockToggle()} title={isLocked ? "Unlock Color" : "Lock Color"}>{isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}</ActionIcon>}
-                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>}
+                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>
                                 {onAddToLibrary && <ActionIcon onClick={() => onAddToLibrary()} title="Save to Library"><Library className="h-4 w-4" /></ActionIcon>}
                                 {onRemoveFromLibrary && <ActionIcon onClick={() => onRemoveFromLibrary()} title="Remove from Library" variant="destructive"><Trash2 className="h-4 w-4" /></ActionIcon>}
                                 {onAddToPalette && <ActionIcon onClick={() => onAddToPalette()} title="Add to Current Palette"><PaletteIcon className="h-4 w-4" /></ActionIcon>}
@@ -277,3 +277,5 @@ const ColorBoxInner = ({
 
 export const ColorBox = React.memo(ColorBoxInner);
 ColorBox.displayName = 'ColorBox';
+
+    
