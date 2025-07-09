@@ -140,7 +140,7 @@ export default function LibraryPage() {
   }, [savedPalettes, toast, editingPaletteId]);
 
   const createSvgContent = (palette: { name: string; colors: string[] }) => {
-    const swatchSize = 150;
+    const swatchSize = 200;
     const padding = 20;
     const spacing = 20;
     const colorsPerRow = 10;
@@ -166,6 +166,10 @@ export default function LibraryPage() {
       
       const rgb = colorInstance.toRgb();
       const hsl = colorInstance.toHsl();
+      const cmykObj = colorInstance.toCmyk();
+      const cmyk = `cmyk(${cmykObj.c}, ${cmykObj.m}, ${cmykObj.y}, ${cmykObj.k})`;
+      const lchObj = colorInstance.toLch();
+      const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
       
       svgContent += `<rect x="${xPos}" y="${yPos}" width="${swatchSize}" height="${swatchSize}" fill="${color}" rx="${cornerRadius}" />`;
       
@@ -184,6 +188,8 @@ export default function LibraryPage() {
         return content;
       };
       
+      svgContent += renderText('LCH', lch);
+      svgContent += renderText('CMYK', cmyk);
       svgContent += renderText('HSL', `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`);
       svgContent += renderText('RGB', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
       svgContent += renderBoldText('HEX', color.toUpperCase());
