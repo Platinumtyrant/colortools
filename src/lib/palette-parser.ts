@@ -104,7 +104,7 @@ const categorizePalette = (colors: string[], name: string): string => {
   // Determine dominant hue
   const avgHue = hues.reduce((sum, h) => sum + h, 0) / hues.length;
 
-  if (avgHue >= 330 || avgHue < 20) return 'Red';
+  if (avgHue >= 340 || avgHue < 20) return 'Red';
   if (avgHue < 50) return 'Orange';
   if (avgHue < 70) return 'Yellow';
   if (avgHue < 160) return 'Green';
@@ -123,17 +123,14 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
         const data = JSON.parse(fileContents);
 
         if (!Array.isArray(data)) {
-            console.error("palettes.json is not an array");
+            console.error("palettes.json is not an array of palettes");
             return [];
         }
 
-        const allPalettes: CategorizedPalette[] = data.flatMap((layer: any) => {
-            if (!layer.palettes || !Array.isArray(layer.palettes)) return [];
-            return layer.palettes.map((p: PrebuiltPalette) => ({
-                ...p,
-                category: categorizePalette(p.colors, p.name)
-            }));
-        });
+        const allPalettes: CategorizedPalette[] = data.map((p: PrebuiltPalette) => ({
+            ...p,
+            category: categorizePalette(p.colors, p.name)
+        }));
         
         return allPalettes;
     } catch (error) {
