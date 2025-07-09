@@ -174,7 +174,7 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
                       <ScrollArea className="h-full">
                         <div className="pr-4">
                             {validPmsColors.length > 0 ? renderColorGrid(pmsPaginatedColors) : <p>No PMS color data available.</p>}
-                             <PaginationControls currentPage={pmsCurrentPage} totalPages={pmsTotalPages} onPageChange={setPmsCurrentPage} />
+                             {isClient && <PaginationControls currentPage={pmsCurrentPage} totalPages={pmsTotalPages} onPageChange={setPmsCurrentPage} />}
                         </div>
                       </ScrollArea>
                   </TabsContent>
@@ -182,7 +182,7 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
                       <ScrollArea className="h-full">
                          <div className="pr-4">
                             {validFhiColors.length > 0 ? renderColorGrid(fhiPaginatedColors) : <p>No FHI color data available.</p>}
-                            <PaginationControls currentPage={fhiCurrentPage} totalPages={fhiTotalPages} onPageChange={setFhiCurrentPage} />
+                            {isClient && <PaginationControls currentPage={fhiCurrentPage} totalPages={fhiTotalPages} onPageChange={setFhiCurrentPage} />}
                          </div>
                       </ScrollArea>
                   </TabsContent>
