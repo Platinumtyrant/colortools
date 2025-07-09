@@ -352,7 +352,7 @@ function PaletteBuilderPage() {
             const newPalette = {
                 id: Date.now(),
                 name: newPaletteName,
-                colors: palette.map(p => p.hex)
+                colors: palette.map(p => c.hex)
             };
             savedPalettes.push(newPalette);
             toast({ title: "Palette Saved!", description: `"${newPaletteName}" saved to your library.` });
@@ -805,12 +805,12 @@ function PaletteBuilderPage() {
                 {isClient && palette.length > 0 && (
                     <Card>
                         <CardContent className="p-4">
-                            <Tabs defaultValue="palette-analysis" className="w-full">
+                            <Tabs defaultValue="harmony-analysis" className="w-full">
                                 <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="palette-analysis">Palette Analysis</TabsTrigger>
+                                    <TabsTrigger value="harmony-analysis">Harmony Analysis</TabsTrigger>
                                     <TabsTrigger value="contrast-checker">Contrast Checker</TabsTrigger>
                                 </TabsList>
-                                <TabsContent value="palette-analysis" className="p-4 flex-grow min-h-0">
+                                <TabsContent value="harmony-analysis" className="p-4 flex-grow min-h-0">
                                    {renderAnalysisPanel()}
                                 </TabsContent>
                                 <TabsContent value="contrast-checker" className="p-4 flex-grow min-h-0">
