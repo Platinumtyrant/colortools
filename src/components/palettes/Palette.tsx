@@ -50,7 +50,7 @@ export const Palette = ({
       <CardHeader className="p-4 border-b">
         {actions}
       </CardHeader>
-      <CardContent className="p-4 flex flex-col flex-grow min-w-0">
+      <CardContent className="p-4 flex flex-col flex-grow min-w-0 h-96 overflow-y-auto">
         <div className="flex flex-wrap gap-x-4 gap-y-6 content-start">
           <AnimatePresence>
             {palette.map((color, index) => {
