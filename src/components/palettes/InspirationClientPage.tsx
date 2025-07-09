@@ -64,7 +64,7 @@ const mainCategoryToSubCategories: Record<string, string[]> = {
     'Cool': ['Green', 'Cyan', 'Blue', 'Purple'],
     'Neutral': ['Monochrome'],
 };
-const topLevelCategories = ['Warm', 'Cool', 'Neutral', 'Multicolor', 'Brands', 'Flags'];
+const topLevelCategories = ['Warm', 'Cool', 'Neutral', 'Multicolor', 'Brands', 'Flags', 'USAF'];
 
 
 interface InspirationClientPageProps {
@@ -275,3 +275,5 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
     </Tabs>
   );
 }
+
+    

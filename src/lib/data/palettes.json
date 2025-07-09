@@ -755,5 +755,27 @@
   {
     "name": "USAF",
     "colors": ["#231f20", "#53575a", "#9ea0a1", "#ffffff", "#ffce06", "#febe3b", "#f99d20", "#f05023", "#e91d2c", "#c12033", "#a51d53", "#8b2433", "#6e263d", "#572a30", "#613293", "#a2c5d3", "#2c70b8", "#5c7f95", "#2a317d", "#1e2859", "#081f40", "#222d65", "#19bfd2", "#003e52", "#799b3e", "#60a644", "#038442", "#1b5632", "#014c45", "#0a5540", "#2a4734", "#cdc3a6", "#bb945c", "#8d704c", "#bb6228", "#753a1b", "#623d21", "#b3a77f", "#695b25", "#9f9233", "#b31942", "#0a3161"]
+  },
+  {
+    "name": "USAF Desert /Black",
+    "colors": ["#231f20", "#753a1b", "#b3a77f"]
+  },
+  {
+    "name": "USAF Operation Enduring Freedom",
+    "colors": ["#231f20", "#b3a77f", "#695b25", "#9f9233"]
+  },
+  {
+    "name": "USAF Woodland Forest Subdued",
+    "colors": ["#231f20", "#081f40", "#6e263d", "#014c45", "#695b25"]
+  },
+  {
+    "name": "USAF Spice Brown (OCP) Subdued",
+    "colors": ["#231f20", "#753a1b", "#9f9233", "#695b25"]
+  },
+  {
+    "name": "American Flag",
+    "colors": ["#b31942", "#0a3161", "#ffffff"]
   }
 ]
+
+    

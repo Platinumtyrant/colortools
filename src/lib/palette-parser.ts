@@ -35,10 +35,18 @@ const flagKeywords = [
     'brazil', 'mexico', 'bangladesh'
 ];
 
+const usafKeywords = ['usaf'];
+
 
 // Function to determine the primary color category of a palette
 const categorizePalette = (colors: string[], name: string): string => {
   const lowerCaseName = name.toLowerCase();
+
+  for (const keyword of usafKeywords) {
+    if (lowerCaseName.includes(keyword)) {
+      return 'USAF';
+    }
+  }
 
   // Specific keywords to force into 'Brands' category
   const brandForcedKeywords = ['material design', 'bootstrap', 'rubik\'s cube', 'tetris', 'harry potter', 'washington commanders', 'blender', 'flat ui', 'chrome music lab'];
@@ -130,8 +138,6 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
             ...p,
             category: categorizePalette(p.colors, p.name)
         }));
-        
-        allPalettes.push({ name: 'USAF', colors: usafColors.map(c => c.hex), category: 'Brands' });
 
         return allPalettes;
     } catch (error) {
@@ -215,3 +221,5 @@ export function getCombinedPantoneLookup(): Map<string, ColorLookupEntry> {
 
     return lookup;
 }
+
+    
