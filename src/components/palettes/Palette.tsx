@@ -46,7 +46,7 @@ export const Palette = ({
   };
   
   return (
-    <Card className="bg-card/50 overflow-hidden flex flex-col h-full">
+    <Card className="bg-card/50 overflow-hidden flex flex-col">
       <CardHeader className="p-4 border-b">
         {actions}
       </CardHeader>
