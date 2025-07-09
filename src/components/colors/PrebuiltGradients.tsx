@@ -19,7 +19,7 @@ export const PrebuiltGradients = ({ onSelectGradient, className }: PrebuiltGradi
         <CardDescription>Select a gradient to use as a starting point for your mesh.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[30rem]">
+        <ScrollArea className="h-[15rem]">
           <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 xl:grid-cols-14 gap-4 pr-4">
             {prebuiltGradients.map((gradient) => (
               <div
