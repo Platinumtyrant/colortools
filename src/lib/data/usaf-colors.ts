@@ -40,7 +40,7 @@ export const usafColors: PantoneColor[] = [
   { "name": "Brown", "hex": "#623d21" },
   { "name": "Khaki", "hex": "#b3a77f" },
   { "name": "Olive Drab", "hex": "#695b25" },
-  { "name": "Baggy Green", "hex": "#9f9233" },
+  { "name": "Babgy Green", "hex": "#9f9233" },
   { "name": "Old Glory Red", "hex": "#b31942" },
   { "name": "Old Glory Blue", "hex": "#0a3161" },
 ];
