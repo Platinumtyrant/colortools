@@ -12,6 +12,7 @@ import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { colord } from 'colord';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const getAverageColor = (data: Uint8ClampedArray): string => {
     let r = 0, g = 0, b = 0;
@@ -52,19 +53,18 @@ export default function CameraIdentifierPage() {
     const [crosshairPosition, setCrosshairPosition] = useState<{ x: number; y: number } | null>(null);
     const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
     
-    const [isClient, setIsClient] = useState(false);
     const { palette, setPalette } = usePaletteBuilder();
     const [libraryColors, setLibraryColors] = useState<string[]>([]);
     
-    const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
-    const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
-    
     const isMobile = useIsMobile();
+    
+    const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
+    const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors, isMobile]);
+    
     const isStreamActive = !!stream;
     const isZoomed = transform.scale > 1;
 
     useEffect(() => {
-        setIsClient(true);
         try {
             const savedColorsJSON = localStorage.getItem('saved_individual_colors');
             if (savedColorsJSON) {
@@ -371,10 +371,10 @@ export default function CameraIdentifierPage() {
     };
 
     const normalizedIdentifiedColor = colord(identifiedColor).toHex();
-    const isIdentifiedInLibrary = isClient && libraryHexes.has(normalizedIdentifiedColor);
-    const isIdentifiedInPalette = isClient && paletteHexes.has(normalizedIdentifiedColor);
+    const isIdentifiedInLibrary = libraryHexes.has(normalizedIdentifiedColor);
+    const isIdentifiedInPalette = paletteHexes.has(normalizedIdentifiedColor);
     
-    if (!isClient) {
+    if (isMobile === undefined) {
         return (
              <main className="flex-1 w-full p-4 md:p-8 flex flex-col space-y-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto w-full">
@@ -402,11 +402,12 @@ export default function CameraIdentifierPage() {
     }
 
     return (
-        <main className="flex-1 w-full p-4 md:p-8 flex flex-col space-y-8">
+        <main className="flex-1 w-full flex flex-col lg:p-8">
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto w-full">
-                <Card className="relative aspect-video flex items-center justify-center overflow-hidden bg-muted">
+
+            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-2 lg:gap-8 lg:max-w-6xl lg:mx-auto lg:w-full">
+                {/* Order 1 on mobile, part of grid on desktop */}
+                <Card className="flex-1 lg:flex-initial relative flex items-center justify-center overflow-hidden bg-muted rounded-none lg:rounded-lg border-y lg:border lg:aspect-video">
                     <div
                         className="w-full h-full relative cursor-crosshair"
                         ref={imageContainerRef}
@@ -415,66 +416,64 @@ export default function CameraIdentifierPage() {
                         onPointerUp={handlePointerUp}
                         onDoubleClick={handleDoubleClick}
                     >
-                         {!isStreamActive && !snapshot && (
-                             <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2 text-center p-4">
-                                <ImageIcon className="h-10 w-10 text-muted-foreground" />
-                                <p className="font-semibold mt-2">Identify Colors</p>
-                                <p className="text-sm text-muted-foreground">
-                                    Start your camera or upload an image.
-                                    <br />
-                                    (Max 5MB recommended for performance)
-                                </p>
+                        {!isStreamActive && !snapshot && (
+                            <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center gap-2 text-center p-4">
+                            <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                            <p className="font-semibold mt-2">Identify Colors</p>
+                            <p className="text-sm text-muted-foreground">
+                                Start your camera or upload an image.
+                                <br />
+                                (Max 5MB recommended for performance)
+                            </p>
                             </div>
-                         )}
+                        )}
 
-                         <video ref={videoRef} className={`h-full w-full object-cover ${!isStreamActive || snapshot ? 'hidden' : 'block'}`} autoPlay muted playsInline />
-                         <canvas ref={canvasRef} className="hidden" />
-                         
-                         {snapshot && (
-                            <div
-                                className="h-full w-full"
-                                style={{
-                                    backgroundImage: `url(${snapshot})`,
-                                    backgroundSize: 'contain',
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'center',
-                                    cursor: isZoomed ? 'grab' : 'zoom-in',
-                                    transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
-                                    transformOrigin: '0 0',
-                                    willChange: 'transform',
-                                }}
+                        <video ref={videoRef} className={`h-full w-full object-cover ${!isStreamActive || snapshot ? 'hidden' : 'block'}`} autoPlay muted playsInline />
+                        <canvas ref={canvasRef} className="hidden" />
+                        
+                        {snapshot && (
+                        <div
+                            className="h-full w-full"
+                            style={{
+                                backgroundImage: `url(${snapshot})`,
+                                backgroundSize: 'contain',
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'center',
+                                cursor: isZoomed ? 'grab' : 'zoom-in',
+                                transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+                                transformOrigin: '0 0',
+                                willChange: 'transform',
+                            }}
+                        />
+                        )}
+
+                        {snapshot ? (
+                        crosshairPosition && (
+                            <Crosshair 
+                                className="absolute transform -translate-x-1/2 -translate-y-1/2 text-white/80 pointer-events-none" 
+                                style={{ left: `${crosshairPosition.x}px`, top: `${crosshairPosition.y}px` }} 
                             />
-                         )}
-
-                         {snapshot ? (
-                            crosshairPosition && (
-                                <Crosshair 
-                                    className="absolute transform -translate-x-1/2 -translate-y-1/2 text-white/80 pointer-events-none" 
-                                    style={{ left: `${crosshairPosition.x}px`, top: `${crosshairPosition.y}px` }} 
-                                />
-                            )
-                         ) : (
-                            isStreamActive && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <div className="w-8 h-8 border-2 border-white/75 rounded-full" />
-                                    <div className="absolute w-1 h-8 bg-white/75 rounded-full" />
-                                    <div className="absolute w-8 h-1 bg-white/75 rounded-full" />
-                                </div>
-                            )
-                         )}
-
+                        )
+                        ) : (
+                        isStreamActive && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="w-8 h-8 border-2 border-white/75 rounded-full" />
+                                <div className="absolute w-1 h-8 bg-white/75 rounded-full" />
+                                <div className="absolute w-8 h-1 bg-white/75 rounded-full" />
+                            </div>
+                        )
+                        )}
                     </div>
-
-                    {isRequestingPermission && (
+                     {isRequestingPermission && (
                          <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-2">
                              <Camera className="h-8 w-8 animate-pulse text-muted-foreground" />
                              <p className="text-muted-foreground">Requesting camera access...</p>
                          </div>
                     )}
-
                 </Card>
 
-                <div className="flex flex-col gap-4">
+                {/* Order 2 on mobile, part of grid on desktop */}
+                <div className="p-4 flex flex-col gap-4 border-t lg:border-none lg:p-0 bg-background lg:bg-transparent">
                     <div className="grid grid-cols-2 gap-2">
                         {isStreamActive ? (
                             <Button onClick={stopCamera} variant="outline"><CameraOff className="mr-2 h-4 w-4" /> Stop Camera</Button>
@@ -492,7 +491,6 @@ export default function CameraIdentifierPage() {
                              )
                         )}
                     </div>
-                    
                     <div className="grid grid-cols-2 gap-2">
                         <Button onClick={() => setIsDetecting(p => !p)} disabled={!isStreamActive || !!snapshot}>
                             {isDetecting ? <ZapOff className="mr-2 h-4 w-4" /> : <Zap className="mr-2 h-4 w-4" />}
@@ -503,9 +501,8 @@ export default function CameraIdentifierPage() {
                              Reset Zoom
                          </Button>
                     </div>
-
-                     <div className="relative group/container w-full" >
-                         <ColorBox
+                    <div className="relative group/container w-full">
+                        <ColorBox
                             color={identifiedColor}
                             variant={isMobile ? "compact" : "default"}
                             onAddToLibrary={!isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
@@ -515,13 +512,18 @@ export default function CameraIdentifierPage() {
                         />
                     </div>
                 </div>
+
+                {/* Order 3 on mobile, footer on desktop */}
+                 <CardHeader className="order-last lg:col-span-2 p-4 text-center border-t lg:border-none lg:p-0 lg:max-w-4xl lg:mx-auto lg:mt-auto pt-2 lg:pt-8 bg-background lg:bg-transparent">
+                    <CardTitle className="text-xl lg:text-3xl">Live Color Identifier</CardTitle>
+                    <CardDescription className="text-xs lg:text-sm">
+                       {isMobile 
+                            ? "Point camera or upload image. Freeze, then tap to identify or double-tap to zoom."
+                            : "Point your camera or upload an image to identify colors. Freeze the frame, then double-tap to zoom for precise selection."
+                        }
+                    </CardDescription>
+                </CardHeader>
             </div>
-            <CardHeader className="p-0 text-center max-w-4xl mx-auto mt-auto pt-8">
-                <CardTitle className="text-3xl">Live Color Identifier</CardTitle>
-                <CardDescription>
-                    Point your camera or upload an image to identify colors. Freeze the frame, then double-tap to zoom for precise selection.
-                </CardDescription>
-            </CardHeader>
         </main>
     );
 }
