@@ -751,5 +751,9 @@
   {
     "name": "Standard Rainbow (20 Colors)",
     "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#32CD32", "#008000", "#20B2AA", "#00CED1", "#00BFFF", "#0000FF", "#4169E1", "#0000CD", "#00008B", "#8A2BE2", "#800080", "#9932CC", "#EE82EE"]
+  },
+  {
+    "name": "USAF OCP Color Scheme",
+    "colors": ["#753a1b", "#623d21", "#799b3e", "#2a4734", "#cdc3a6", "#bb945c"]
   }
 ]
