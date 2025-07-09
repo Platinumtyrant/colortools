@@ -201,7 +201,7 @@
     "colors": ["#8B0000", "#660000", "#440000", "#220000", "#000000"]
   },
   {
-    "name": "12 Pastel Hues",
+    "name": "Pastel Rainbow Expanded",
     "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF", "#F0E68C", "#90EE90", "#ADD8E6", "#FFB6C1", "#FFFACD", "#E6E6FA"]
   },
   {
@@ -293,10 +293,6 @@
     "colors": ["#3B5998", "#8B9DC3", "#DFE3EE", "#F7F7F7"]
   },
   {
-    "name": "General Pastel",
-    "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF"]
-  },
-  {
     "name": "Luxiem Influencer",
     "colors": ["#CD853F", "#FFA07A", "#FFDAB9", "#F5DEB3", "#B8860B", "#8B4513"]
   },
@@ -345,10 +341,6 @@
     "colors": ["#BC002D", "#FFFFFF"]
   },
   {
-    "name": "Neutral Room Decor",
-    "colors": ["#F5F5DC", "#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE"]
-  },
-  {
     "name": "Green Flat UI",
     "colors": ["#1ABC9C", "#2ECC71", "#16A085", "#27AE60"]
   },
@@ -363,10 +355,6 @@
   {
     "name": "Dark Cyan Shades",
     "colors": ["#008B8B", "#007777", "#006363", "#004F4F", "#003B3B"]
-  },
-  {
-    "name": "7 Pastel Colors",
-    "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF", "#FFFACD"]
   },
   {
     "name": "Pure White Shades",
