@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Camera, Zap, ZapOff, CameraOff, Image as ImageIcon, Crosshair, X, ZoomOut } from 'lucide-react';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
@@ -372,6 +373,33 @@ export default function CameraIdentifierPage() {
     const normalizedIdentifiedColor = colord(identifiedColor).toHex();
     const isIdentifiedInLibrary = isClient && libraryHexes.has(normalizedIdentifiedColor);
     const isIdentifiedInPalette = isClient && paletteHexes.has(normalizedIdentifiedColor);
+    
+    if (!isClient) {
+        return (
+             <main className="flex-1 w-full p-4 md:p-8 flex flex-col space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto w-full">
+                    <Skeleton className="aspect-video w-full rounded-lg" />
+                    <div className="flex flex-col gap-4">
+                        <div className="grid grid-cols-2 gap-2">
+                           <Skeleton className="h-10 w-full rounded-md" />
+                           <Skeleton className="h-10 w-full rounded-md" />
+                        </div>
+                         <div className="grid grid-cols-2 gap-2">
+                           <Skeleton className="h-10 w-full rounded-md" />
+                           <Skeleton className="h-10 w-full rounded-md" />
+                        </div>
+                        <Skeleton className="h-[250px] md:h-[450px] w-full rounded-lg" />
+                    </div>
+                </div>
+                 <CardHeader className="p-0 text-center max-w-4xl mx-auto mt-auto pt-8">
+                    <CardTitle className="text-3xl">Live Color Identifier</CardTitle>
+                    <CardDescription>
+                        Point your camera or upload an image to identify colors. Freeze the frame, then double-tap to zoom for precise selection.
+                    </CardDescription>
+                </CardHeader>
+            </main>
+        )
+    }
 
     return (
         <main className="flex-1 w-full p-4 md:p-8 flex flex-col space-y-8">
@@ -480,10 +508,10 @@ export default function CameraIdentifierPage() {
                          <ColorBox
                             color={identifiedColor}
                             variant={isMobile ? "compact" : "default"}
-                            onAddToLibrary={isClient && !isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
-                            onRemoveFromLibrary={isClient && isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
-                            onAddToPalette={isClient && !isIdentifiedInPalette ? () => handleAddToPalette(identifiedColor) : undefined}
-                            onRemoveFromPalette={isClient && isIdentifiedInPalette ? () => handleRemoveFromPalette(identifiedColor) : undefined}
+                            onAddToLibrary={!isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
+                            onRemoveFromLibrary={isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
+                            onAddToPalette={!isIdentifiedInPalette ? () => handleAddToPalette(identifiedColor) : undefined}
+                            onRemoveFromPalette={isIdentifiedInPalette ? () => handleRemoveFromPalette(identifiedColor) : undefined}
                         />
                     </div>
                 </div>
