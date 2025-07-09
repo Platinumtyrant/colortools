@@ -140,51 +140,53 @@ export default function LibraryPage() {
   }, [savedPalettes, toast, editingPaletteId]);
 
   const createSvgContent = (palette: { name: string; colors: string[] }) => {
-    const swatchWidth = 150;
-    const swatchHeight = 320;
+    const swatchSize = 150;
     const padding = 20;
     const spacing = 20;
+    const colorsPerRow = 10;
+    const cornerRadius = 12;
 
-    const svgWidth = padding * 2 + (palette.colors.length * swatchWidth) + (palette.colors.length > 1 ? (palette.colors.length - 1) * spacing : 0);
-    const svgHeight = padding * 2 + swatchHeight;
+    const numColors = palette.colors.length;
+    const numRows = Math.ceil(numColors / colorsPerRow);
+    const numCols = Math.min(numColors, colorsPerRow);
 
-    let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" style="background-color: #1E1E1E;">`;
+    const svgWidth = padding * 2 + numCols * swatchSize + (numCols > 1 ? (numCols - 1) * spacing : 0);
+    const svgHeight = padding * 2 + numRows * swatchSize + (numRows > 1 ? (numRows - 1) * spacing : 0);
+
+    let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" style="background-color: #1E1E1E;">`;
 
     palette.colors.forEach((color, index) => {
-      const xPos = padding + index * (swatchWidth + spacing);
+      const col = index % colorsPerRow;
+      const row = Math.floor(index / colorsPerRow);
+      const xPos = padding + col * (swatchSize + spacing);
+      const yPos = padding + row * (swatchSize + spacing);
+      
       const colorInstance = colord(color);
       const textColor = colorInstance.isLight() ? '#000000' : '#FFFFFF';
       
       const rgb = colorInstance.toRgb();
       const hsl = colorInstance.toHsl();
-      const cmyk = colorInstance.toCmyk();
-      const lch = colorInstance.toLch();
-      const lab = colorInstance.toLab();
-
-      svgContent += `<rect x="${xPos}" y="${padding}" width="${swatchWidth}" height="${swatchHeight}" fill="${color}" />`;
       
-      const textX = xPos + 15;
-      let textY = padding + swatchHeight - 15;
+      svgContent += `<rect x="${xPos}" y="${yPos}" width="${swatchSize}" height="${swatchSize}" fill="${color}" rx="${cornerRadius}" />`;
+      
+      const textX = xPos + 12;
+      let textY = yPos + swatchSize - 12;
 
       const renderText = (label: string, value: string) => {
-        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12">${label}: ${value}</text>`;
-        textY -= 18;
+        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" style="font-family: monospace;">${label}: ${value}</text>`;
+        textY -= 16;
         return content;
       };
 
       const renderBoldText = (label: string, value: string) => {
-        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" font-weight="bold">${label}: ${value}</text>`;
-        textY -= 18;
+        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" font-weight="bold" style="font-family: monospace;">${label}: ${value}</text>`;
+        textY -= 16;
         return content;
       };
       
-      svgContent += renderText('CIELAB', `lab(${lab.l.toFixed(0)}, ${lab.a.toFixed(0)}, ${lab.b.toFixed(0)})`);
-      svgContent += renderText('LCH', `lch(${lch.l.toFixed(0)}, ${lch.c.toFixed(0)}, ${lch.h.toFixed(0)})`);
-      svgContent += renderText('CMYK', `cmyk(${cmyk.c}, ${cmyk.m}, ${cmyk.y}, ${cmyk.k})`);
       svgContent += renderText('HSL', `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`);
       svgContent += renderText('RGB', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
       svgContent += renderBoldText('HEX', color.toUpperCase());
-
     });
 
     svgContent += `</svg>`;
