@@ -1,7 +1,7 @@
 
 import chroma from 'chroma-js';
-import type { PantoneCategory, PantoneColor } from './pantone-colors';
-import { sortPantoneNumerically, createPantoneLookup } from './pantone-colors';
+import type { PantoneCategory, PantoneColor, ColorLookupEntry } from './pantone-colors';
+import { sortPantoneNumerically } from './pantone-colors';
 import { pantonePmsColors } from './data/pantone-pms';
 import { pantoneFhiColors } from './data/pantone-fhi';
 import { usafColors } from './data/usaf-colors';
@@ -111,9 +111,7 @@ const categorizePalette = (colors: string[], name: string): string => {
   if (avgHue < 160) return 'Green';
   if (avgHue < 200) return 'Cyan';
   if (avgHue < 260) return 'Blue';
-  if (avgHue < 330) return 'Purple';
-
-  return 'Multicolor';
+  return 'Purple';
 };
 
 
@@ -133,6 +131,8 @@ export const getPrebuiltPalettes = async (): Promise<CategorizedPalette[]> => {
             category: categorizePalette(p.colors, p.name)
         }));
         
+        allPalettes.push({ name: 'USAF', colors: usafColors.map(c => c.hex), category: 'Brands' });
+
         return allPalettes;
     } catch (error) {
         console.error("Error reading or parsing palettes.json:", error);
@@ -187,29 +187,29 @@ export function getPantoneFhiCategories(): PantoneCategory[] {
     return categorizeColors(pantoneFhiColors);
 }
 
-export function getCombinedPantoneLookup(): Map<string, string> {
+export function getCombinedPantoneLookup(): Map<string, ColorLookupEntry> {
     const pmsCategories = getPantonePmsCategories();
     const fhiCategories = getPantoneFhiCategories();
-    const lookup = new Map<string, string>();
+    const lookup = new Map<string, ColorLookupEntry>();
 
-    const addToLookup = (categories: PantoneCategory[]) => {
+    const addToLookup = (categories: PantoneCategory[], source: string) => {
         for (const category of categories) {
             for (const color of category.colors) {
                 const hexKey = colord(color.hex).toHex(); // normalize
                 if (!lookup.has(hexKey)) {
-                    lookup.set(hexKey, color.name);
+                    lookup.set(hexKey, { name: color.name, source });
                 }
             }
         }
     };
     
-    addToLookup(pmsCategories);
-    addToLookup(fhiCategories);
+    addToLookup(pmsCategories, 'Pantone');
+    addToLookup(fhiCategories, 'Pantone');
 
     for (const color of usafColors) {
         const hexKey = colord(color.hex).toHex();
         if (!lookup.has(hexKey)) {
-            lookup.set(hexKey, color.name);
+            lookup.set(hexKey, { name: color.name, source: 'USAF' });
         }
     }
 

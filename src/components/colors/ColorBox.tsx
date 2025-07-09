@@ -134,12 +134,12 @@ const ColorBoxInner = ({
     const allDescriptiveColorNames = useAllDescriptiveColorNames(color);
 
     const primary = name 
-        ? { name, source: 'Pantone' } 
+        ? { name, source: 'USAF' } // Assume provided name is USAF if manually passed
         : allDescriptiveColorNames.primary;
         
     const allNames = name 
         ? [
-            { source: 'Pantone', name },
+            { source: 'USAF', name },
             ...allDescriptiveColorNames.all.filter(n => n.name.toLowerCase() !== name.toLowerCase())
           ]
         : allDescriptiveColorNames.all;
@@ -186,7 +186,17 @@ const ColorBoxInner = ({
                 <CardContent className="p-4 flex-grow flex flex-col justify-start">
                     <div className="text-center mb-4">
                         <p className="font-semibold text-lg" title={primary.name}>{primary.name}</p>
-                        <p className="text-xs text-muted-foreground">{primary.source}</p>
+                        <div className="mt-1 flex justify-center">
+                            {primary.source === 'Pantone' && (
+                                <Badge variant="outline" className="border-primary/50 text-primary/80">PANTONE</Badge>
+                            )}
+                            {primary.source === 'USAF' && (
+                                <Badge variant="outline" className="border-green-600/50 bg-green-500/10 text-green-700 dark:border-green-400/50 dark:text-green-400/80">USAF</Badge>
+                            )}
+                            {primary.source !== 'Pantone' && primary.source !== 'USAF' && (
+                               <p className="text-xs text-muted-foreground">{primary.source}</p>
+                            )}
+                        </div>
                     </div>
 
                     <div className="space-y-4">
@@ -226,7 +236,7 @@ const ColorBoxInner = ({
                              <TooltipProvider delayDuration={200}>
                                 {onSetActiveColor && <ActionIcon onClick={() => onSetActiveColor()} title="Set as Active Color"><MousePointerClick className="h-4 w-4" /></ActionIcon>}
                                 {onLockToggle && <ActionIcon onClick={() => onLockToggle()} title={isLocked ? "Unlock Color" : "Lock Color"}>{isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}</ActionIcon>}
-                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>
+                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>}
                                 {onAddToLibrary && <ActionIcon onClick={() => onAddToLibrary()} title="Save to Library"><Library className="h-4 w-4" /></ActionIcon>}
                                 {onRemoveFromLibrary && <ActionIcon onClick={() => onRemoveFromLibrary()} title="Remove from Library" variant="destructive"><Trash2 className="h-4 w-4" /></ActionIcon>}
                                 {onAddToPalette && <ActionIcon onClick={() => onAddToPalette()} title="Add to Current Palette"><PaletteIcon className="h-4 w-4" /></ActionIcon>}
@@ -238,6 +248,9 @@ const ColorBoxInner = ({
                         <div className="flex items-center gap-2">
                              {primary.source === 'Pantone' && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
+                            )}
+                             {primary.source === 'USAF' && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-green-600/50 bg-green-500/10 text-green-700 dark:border-green-400/50 dark:text-green-400/80 shrink-0">USAF</Badge>
                             )}
                             <p className="font-semibold text-xs truncate" title={primary.name}>{primary.name}</p>
                         </div>

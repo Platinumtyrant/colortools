@@ -28,7 +28,7 @@ export interface AllDescriptiveNamesResult {
 }
 
 export const useAllDescriptiveColorNames = (hexColor: string): AllDescriptiveNamesResult => {
-    const pantoneLookup = usePantone();
+    const colorLookup = usePantone();
     const allNames: { source: string; name: string }[] = [];
 
     if (!colord(hexColor).isValid()) {
@@ -38,9 +38,10 @@ export const useAllDescriptiveColorNames = (hexColor: string): AllDescriptiveNam
 
     const lowerHex = colord(hexColor).toHex().toLowerCase();
 
-    // 1. Pantone
-    if (pantoneLookup && pantoneLookup.has(lowerHex)) {
-        allNames.push({ source: 'Pantone', name: pantoneLookup.get(lowerHex)! });
+    // 1. Pantone & USAF Lookup
+    if (colorLookup && colorLookup.has(lowerHex)) {
+        const entry = colorLookup.get(lowerHex)!;
+        allNames.push({ source: entry.source, name: entry.name });
     }
 
     // 2. Namer (NTC & Basic)

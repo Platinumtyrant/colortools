@@ -11,6 +11,11 @@ export interface PantoneCategory {
     colors: PantoneColor[];
 }
 
+export interface ColorLookupEntry {
+  name: string;
+  source: string;
+}
+
 export const sortPantoneNumerically = (a: PantoneColor, b: PantoneColor): number => {
   const regex = /(\d+(\.\d+)?)/g;
   

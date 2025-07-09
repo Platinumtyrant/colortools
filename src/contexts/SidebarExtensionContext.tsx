@@ -2,12 +2,13 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from 'react';
+import type { ColorLookupEntry } from '@/lib/pantone-colors';
 
-type PantoneLookup = Map<string, string>;
+type ColorLookup = Map<string, ColorLookupEntry>;
 
-const PantoneContext = createContext<PantoneLookup | null>(null);
+const PantoneContext = createContext<ColorLookup | null>(null);
 
-export const PantoneProvider = ({ children, lookup }: { children: ReactNode; lookup: PantoneLookup }) => {
+export const PantoneProvider = ({ children, lookup }: { children: ReactNode; lookup: ColorLookup }) => {
   return (
     <PantoneContext.Provider value={lookup}>
       {children}
@@ -15,6 +16,6 @@ export const PantoneProvider = ({ children, lookup }: { children: ReactNode; loo
   );
 };
 
-export const usePantone = (): PantoneLookup | null => {
+export const usePantone = (): ColorLookup | null => {
   return useContext(PantoneContext);
 };
