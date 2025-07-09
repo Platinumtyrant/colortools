@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,10 @@ import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { removeColorFromLibrary } from '@/lib/colors';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getCombinedPantoneLookup } from '@/lib/palette-parser';
+import type { ColorLookupEntry } from '@/lib/pantone-colors';
+import namer from 'color-namer';
+
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -40,6 +44,107 @@ const migratePalettes = (palettes: any): SavedPalette[] => {
   }));
 };
 
+const capitalize = (str: string) => {
+    if (!str) return '';
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
+
+const getColorName = (hexColor: string, lookup: Map<string, ColorLookupEntry>): string => {
+    if (!colord(hexColor).isValid()) {
+        return "Invalid Color";
+    }
+    const lowerHex = colord(hexColor).toHex().toLowerCase();
+
+    if (lookup.has(lowerHex)) {
+        const entry = lookup.get(lowerHex)!;
+        return entry.name;
+    }
+
+    try {
+        const names = namer(lowerHex);
+        const ntcName = names.ntc[0]?.name;
+        if (ntcName) return capitalize(ntcName);
+        const basicName = names.basic[0]?.name;
+        if (basicName) return capitalize(basicName);
+    } catch (e) {
+        console.error("Error with color-namer:", e);
+    }
+    
+    const colordName = colord(lowerHex).toName({ closest: true });
+    if (colordName) return capitalize(colordName);
+
+    return hexColor.toUpperCase();
+}
+
+
+const createSvgContent = (palette: { name: string; colors: string[] }, lookup: Map<string, ColorLookupEntry>) => {
+    const swatchSize = 220;
+    const padding = 20;
+    const spacing = 20;
+    const cornerRadius = 16;
+    
+    const numColors = palette.colors.length;
+    const numCols = Math.ceil(Math.sqrt(numColors));
+    const numRows = Math.ceil(numColors / numCols);
+
+    const svgWidth = padding * 2 + numCols * swatchSize + (numCols > 1 ? (numCols - 1) * spacing : 0);
+    const svgHeight = padding * 2 + numRows * swatchSize + (numRows > 1 ? (numRows - 1) * spacing : 0);
+
+    let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" style="background-color: #1E1E1E;">`;
+
+    palette.colors.forEach((color, index) => {
+        const col = index % numCols;
+        const row = Math.floor(index / numCols);
+        const xPos = padding + col * (swatchSize + spacing);
+        const yPos = padding + row * (swatchSize + spacing);
+        
+        const colorInstance = colord(color);
+        const textColor = colorInstance.isLight() ? '#000000' : '#FFFFFF';
+        
+        const rgb = colorInstance.toRgb();
+        const hsl = colorInstance.toHsl();
+        const cmykObj = colorInstance.toCmyk();
+        const cmyk = `cmyk(${cmykObj.c}, ${cmykObj.m}, ${cmykObj.y}, ${cmykObj.k})`;
+        const lchObj = colorInstance.toLch();
+        const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
+        const colorName = getColorName(color, lookup);
+        
+        svgContent += `<rect x="${xPos}" y="${yPos}" width="${swatchSize}" height="${swatchSize}" fill="${color}" rx="${cornerRadius}" />`;
+        
+        const textX = xPos + 12;
+        let textY = yPos + swatchSize - 12;
+
+        const renderText = (label: string, value: string) => {
+            const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" style="font-family: monospace;">${label}: ${value}</text>`;
+            textY -= 16;
+            return content;
+        };
+
+        const renderBoldText = (label: string, value: string) => {
+            const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" font-weight="bold" style="font-family: monospace;">${label}: ${value}</text>`;
+            textY -= 16;
+            return content;
+        };
+        
+        const renderName = (name: string) => {
+            return `<text x="${xPos + swatchSize / 2}" y="${yPos + 30}" fill="${textColor}" font-size="16" font-weight="bold" text-anchor="middle" style="font-family: sans-serif;">${name}</text>`;
+        };
+
+        svgContent += renderName(colorName);
+        svgContent += renderText('LCH', lch);
+        svgContent += renderText('CMYK', cmyk);
+        svgContent += renderText('HSL', `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`);
+        svgContent += renderText('RGB', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+        svgContent += renderBoldText('HEX', color.toUpperCase());
+    });
+
+    svgContent += `</svg>`;
+    return { svgContent, svgWidth, svgHeight };
+}
+
 export default function LibraryPage() {
   const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>([]);
   const [savedIndividualColors, setSavedIndividualColors] = useState<string[]>([]);
@@ -49,6 +154,8 @@ export default function LibraryPage() {
   const { toast } = useToast();
   const { palette, setPalette, loadPalette } = usePaletteBuilder();
   const router = useRouter();
+
+  const pantoneLookup = useMemo(() => getCombinedPantoneLookup(), []);
 
   const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
 
@@ -139,70 +246,11 @@ export default function LibraryPage() {
     toast({ title: "Palette Deleted" });
   }, [savedPalettes, toast, editingPaletteId]);
 
-  const createSvgContent = (palette: { name: string; colors: string[] }) => {
-    const swatchSize = 200;
-    const padding = 20;
-    const spacing = 20;
-    const colorsPerRow = 10;
-    const cornerRadius = 12;
-
-    const numColors = palette.colors.length;
-    const numRows = Math.ceil(numColors / colorsPerRow);
-    const numCols = Math.min(numColors, colorsPerRow);
-
-    const svgWidth = padding * 2 + numCols * swatchSize + (numCols > 1 ? (numCols - 1) * spacing : 0);
-    const svgHeight = padding * 2 + numRows * swatchSize + (numRows > 1 ? (numRows - 1) * spacing : 0);
-
-    let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg" style="background-color: #1E1E1E;">`;
-
-    palette.colors.forEach((color, index) => {
-      const col = index % colorsPerRow;
-      const row = Math.floor(index / colorsPerRow);
-      const xPos = padding + col * (swatchSize + spacing);
-      const yPos = padding + row * (swatchSize + spacing);
-      
-      const colorInstance = colord(color);
-      const textColor = colorInstance.isLight() ? '#000000' : '#FFFFFF';
-      
-      const rgb = colorInstance.toRgb();
-      const hsl = colorInstance.toHsl();
-      const cmykObj = colorInstance.toCmyk();
-      const cmyk = `cmyk(${cmykObj.c}, ${cmykObj.m}, ${cmykObj.y}, ${cmykObj.k})`;
-      const lchObj = colorInstance.toLch();
-      const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
-      
-      svgContent += `<rect x="${xPos}" y="${yPos}" width="${swatchSize}" height="${swatchSize}" fill="${color}" rx="${cornerRadius}" />`;
-      
-      const textX = xPos + 12;
-      let textY = yPos + swatchSize - 12;
-
-      const renderText = (label: string, value: string) => {
-        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" style="font-family: monospace;">${label}: ${value}</text>`;
-        textY -= 16;
-        return content;
-      };
-
-      const renderBoldText = (label: string, value: string) => {
-        const content = `<text x="${textX}" y="${textY}" fill="${textColor}" font-size="12" font-weight="bold" style="font-family: monospace;">${label}: ${value}</text>`;
-        textY -= 16;
-        return content;
-      };
-      
-      svgContent += renderText('LCH', lch);
-      svgContent += renderText('CMYK', cmyk);
-      svgContent += renderText('HSL', `hsl(${hsl.h.toFixed(0)}, ${hsl.s.toFixed(0)}%, ${hsl.l.toFixed(0)}%)`);
-      svgContent += renderText('RGB', `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
-      svgContent += renderBoldText('HEX', color.toUpperCase());
-    });
-
-    svgContent += `</svg>`;
-    return { svgContent, svgWidth, svgHeight };
-  }
 
   const exportPaletteAsSvg = useCallback((palette: {name: string, colors: string[]}) => {
     if (!palette || !palette.colors) return;
     
-    const { svgContent } = createSvgContent(palette);
+    const { svgContent } = createSvgContent(palette, pantoneLookup);
     const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -214,12 +262,12 @@ export default function LibraryPage() {
     URL.revokeObjectURL(url);
 
     toast({ title: "Palette Exported as SVG!" });
-  }, [toast]);
+  }, [toast, pantoneLookup]);
 
   const exportPaletteAsPng = useCallback((palette: { name: string, colors: string[] }) => {
     if (!palette || !palette.colors) return;
     
-    const { svgContent, svgWidth, svgHeight } = createSvgContent(palette);
+    const { svgContent, svgWidth, svgHeight } = createSvgContent(palette, pantoneLookup);
     const svgBlob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
     const svgUrl = URL.createObjectURL(svgBlob);
 
@@ -250,7 +298,7 @@ export default function LibraryPage() {
         URL.revokeObjectURL(svgUrl);
     }
     img.src = svgUrl;
-  }, [toast]);
+  }, [toast, pantoneLookup]);
 
   const exportPaletteAsJson = useCallback((palette: { name: string, colors: string[] }) => {
     if (!palette || !palette.colors) return;
