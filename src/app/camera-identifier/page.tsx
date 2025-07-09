@@ -10,6 +10,7 @@ import { ColorBox } from '@/components/colors/ColorBox';
 import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { colord } from 'colord';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const getAverageColor = (data: Uint8ClampedArray): string => {
     let r = 0, g = 0, b = 0;
@@ -56,7 +57,8 @@ export default function CameraIdentifierPage() {
     
     const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
     const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors]);
-
+    
+    const isMobile = useIsMobile();
     const isStreamActive = !!stream;
     const isZoomed = transform.scale > 1;
 
@@ -372,16 +374,10 @@ export default function CameraIdentifierPage() {
     const isIdentifiedInPalette = isClient && paletteHexes.has(normalizedIdentifiedColor);
 
     return (
-        <main className="flex-1 w-full p-4 md:p-8 space-y-8">
+        <main className="flex-1 w-full p-4 md:p-8 flex flex-col space-y-8">
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-            <CardHeader className="p-0 text-center max-w-4xl mx-auto">
-                <CardTitle className="text-3xl">Live Color Identifier</CardTitle>
-                <CardDescription>
-                    Point your camera or upload an image to identify colors. Freeze the frame, then double-tap to zoom for precise selection.
-                </CardDescription>
-            </CardHeader>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto w-full">
                 <Card className="relative aspect-video flex items-center justify-center overflow-hidden bg-muted">
                     <div
                         className="w-full h-full relative cursor-crosshair"
@@ -483,7 +479,7 @@ export default function CameraIdentifierPage() {
                      <div className="relative group/container w-full" >
                          <ColorBox
                             color={identifiedColor}
-                            variant="default"
+                            variant={isMobile ? "compact" : "default"}
                             onAddToLibrary={isClient && !isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
                             onRemoveFromLibrary={isClient && isIdentifiedInLibrary ? () => handleToggleLibrary(identifiedColor) : undefined}
                             onAddToPalette={isClient && !isIdentifiedInPalette ? () => handleAddToPalette(identifiedColor) : undefined}
@@ -492,6 +488,12 @@ export default function CameraIdentifierPage() {
                     </div>
                 </div>
             </div>
+            <CardHeader className="p-0 text-center max-w-4xl mx-auto mt-auto pt-8">
+                <CardTitle className="text-3xl">Live Color Identifier</CardTitle>
+                <CardDescription>
+                    Point your camera or upload an image to identify colors. Freeze the frame, then double-tap to zoom for precise selection.
+                </CardDescription>
+            </CardHeader>
         </main>
     );
 }
