@@ -21,7 +21,7 @@ interface PantoneGuideClientPageProps {
   fhiColors: PantoneColor[];
 }
 
-const COLORS_PER_PAGE = 49; // Roughly 7 rows of 7 colors on a standard desktop
+const COLORS_PER_PAGE = 72; // Roughly 9 rows of 8 colors on a standard desktop
 
 export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideClientPageProps) {
   const { toast } = useToast();
@@ -96,25 +96,26 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
 
   
   const renderColorGrid = (colors: PantoneColor[]) => {
+    const gridClasses = "grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4";
     if (!isClient) {
         return (
-            <div className="flex flex-wrap gap-4">
-                {[...Array(50)].map((_, i) => (
-                    <Skeleton key={i} className="w-40 h-[72px] rounded-md" />
+            <div className={gridClasses}>
+                {[...Array(COLORS_PER_PAGE)].map((_, i) => (
+                    <Skeleton key={i} className="h-[72px] w-full rounded-md" />
                 ))}
             </div>
         );
     }
     
     return (
-        <div className="flex flex-wrap gap-4">
+        <div className={gridClasses}>
             {colors.map((color) => {
                 const normalizedColor = colord(color.hex).toHex();
                 const isInLibrary = libraryHexes.has(normalizedColor);
                 const isInPalette = paletteHexes.has(normalizedColor);
 
                 return (
-                    <div key={color.name} className="w-40">
+                    <div key={color.name}>
                         <ColorBox
                             color={color.hex}
                             variant="compact"
@@ -174,7 +175,7 @@ export function PantoneGuideClientPage({ pmsColors, fhiColors }: PantoneGuideCli
                       <ScrollArea className="h-full">
                         <div className="pr-4">
                             {validPmsColors.length > 0 ? renderColorGrid(pmsPaginatedColors) : <p>No PMS color data available.</p>}
-                             {isClient && <PaginationControls currentPage={pmsCurrentPage} totalPages={pmsTotalPages} onPageChange={setPmsCurrentPage} />}
+                            {isClient && <PaginationControls currentPage={pmsCurrentPage} totalPages={pmsTotalPages} onPageChange={setPmsCurrentPage} />}
                         </div>
                       </ScrollArea>
                   </TabsContent>
