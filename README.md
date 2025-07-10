@@ -1,6 +1,6 @@
 # Color Tools
 
-This is a comprehensive color utility application built with Next.js and deployed on Firebase. It provides a suite of tools for designers, developers, and artists to create, analyze, and manage color palettes and gradients.
+This is a comprehensive color utility application built with Next.js. It provides a suite of tools for designers, developers, and artists to create, analyze, and manage color palettes and gradients.
 
 ## Technologies Used
 
@@ -11,7 +11,6 @@ This is a comprehensive color utility application built with Next.js and deploye
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Color Manipulation**: `colord`, `chroma-js`, `color-namer`
 - **State Management**: React Context API
-- **Desktop Wrapper**: [Electron](https://www.electronjs.org/)
 
 ## Pages & Features
 
