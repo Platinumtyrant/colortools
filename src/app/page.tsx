@@ -685,96 +685,97 @@ function PaletteBuilderPage() {
         </TooltipProvider>
     );
 
-    // Correctly structured renderPaletteAnalysisPanel function
-    const renderPaletteAnalysisPanel = () => (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center text-sm">
-                        <Label>Simulated View</Label>
-                        <AnimatePresence>
-                            {isPaletteColorblindSafe ? (
-                                <motion.span
-                                    key="safe"
-                                    initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
-                                    className="flex items-center text-xs text-green-500 gap-1.5"
-                                >
-                                    <CheckCircle2 className="h-3.5 w-3.5" /> Adjacent contrast OK
-                                </motion.span>
-                            ) : (
-                                 <motion.span
-                                    key="unsafe"
-                                    initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
-                                    className="flex items-center text-xs text-amber-500 gap-1.5"
-                                >
-                                    <AlertTriangle className="h-3.5 w-3.5" /> Low adjacent contrast
-                                </motion.span>
-                            )}
-                        </AnimatePresence>
-                    </div>
+    const renderPaletteAnalysisPanel = () => {
+        return (
+            <div className="space-y-6"> {/* This is the wrapper div for the entire panel content */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center text-sm">
+                            <Label>Simulated View</Label>
+                            <AnimatePresence>
+                                {isPaletteColorblindSafe ? (
+                                    <motion.span
+                                        key="safe"
+                                        initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                                        className="flex items-center text-xs text-green-500 gap-1.5"
+                                    >
+                                        <CheckCircle2 className="h-3.5 w-3.5" /> Adjacent contrast OK
+                                    </motion.span>
+                                ) : (
+                                     <motion.span
+                                        key="unsafe"
+                                        initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                                        className="flex items-center text-xs text-amber-500 gap-1.5"
+                                    >
+                                        <AlertTriangle className="h-3.5 w-3.5" /> Low adjacent contrast
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </div>
 
-                    <div className="relative group/palette w-full h-16 rounded-md overflow-hidden border">
-                        <div className="h-full w-full flex">
-                            {simulatedPalette.map((color, index) => (
-                                <div key={index} style={{ backgroundColor: color }} className="flex-1" />
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-4">
-                       <div className="space-y-1.5">
-                            <Label className="text-sm">Simulate Deficiency</Label>
-                            <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
-                                <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
-                                <Label htmlFor="sb-normal" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
-                                <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
-                                <Label htmlFor="sb-deutan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
-                                <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className="sr-only" />
-                                <Label htmlFor="sb-deuteranomaly" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
-                                <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
-                                <Label htmlFor="sb-protan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
-                                <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
-                                <Label htmlFor="sb-tritan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
-                            </RadioGroup>
-                        </div>
-                        <div className="space-y-1.5">
-                            <Label className="text-sm">Interpolation Color Space</Label>
-                            <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select colorspace..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {Object.entries(colorSpaceInfo).map(([key, value]) => (
-                                        <SelectItem key={key} value={key}>{value.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
-                                <TooltipProvider>
-                                    <ShadTooltip>
-                                        <TooltipTrigger asChild>
-                                            <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
-                                        </TooltipContent>
-                                    </ShadTooltip>
-                                </TooltipProvider>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
-                                <Label htmlFor="correctLightness">Correct lightness</Label>
+                        <div className="relative group/palette w-full h-16 rounded-md overflow-hidden border">
+                            <div className="h-full w-full flex">
+                                {simulatedPalette.map((color, index) => (
+                                    <div key={index} style={{ backgroundColor: color }} className="flex-1" />
+                                ))}
                             </div>
                         </div>
+
+                        <div className="flex flex-col gap-4">
+                           <div className="space-y-1.5">
+                                <Label className="text-sm">Simulate Deficiency</Label>
+                                <RadioGroup defaultValue="normal" value={simulationType} onValueChange={(value) => setSimulationType(value as SimulationType)} className="flex flex-wrap items-center gap-1 border rounded-md p-1">
+                                    <RadioGroupItem value="normal" id="sb-normal" className="sr-only" />
+                                    <Label htmlFor="sb-normal" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'normal' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Normal</Label>
+                                    <RadioGroupItem value="deutan" id="sb-deutan" className="sr-only" />
+                                    <Label htmlFor="sb-deutan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deutan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deutan</Label>
+                                    <RadioGroupItem value="deuteranomaly" id="sb-deuteranomaly" className={cn("sr-only", "")} />
+                                    <Label htmlFor="sb-deuteranomaly" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'deuteranomaly' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Deuteranomaly</Label>
+                                    <RadioGroupItem value="protan" id="sb-protan" className="sr-only" />
+                                    <Label htmlFor="sb-protan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'protan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Protan</Label>
+                                    <RadioGroupItem value="tritan" id="sb-tritan" className="sr-only" />
+                                    <Label htmlFor="sb-tritan" className={cn("px-2 py-1 cursor-pointer text-xs rounded-sm", simulationType === 'tritan' ? 'bg-muted text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}>Tritan</Label>
+                                </RadioGroup>
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-sm">Interpolation Color Space</Label>
+                                <Select value={colorSpace} onValueChange={(v) => setColorSpace(v as ColorSpace)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select colorspace..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(colorSpaceInfo).map(([key, value]) => (
+                                            <SelectItem key={key} value={key}>{value.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id="useBezier" checked={useBezier} onCheckedChange={(checked) => setUseBezier(!!checked)} />
+                                    <TooltipProvider>
+                                        <ShadTooltip>
+                                            <TooltipTrigger asChild>
+                                                <Label htmlFor="useBezier" className="cursor-help underline decoration-dotted decoration-from-font">Bezier interpolation</Label>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p className="max-w-xs">Smooths the line between colors using a curve, creating a more natural transition.</p>
+                                            </TooltipContent>
+                                        </ShadTooltip>
+                                    </TooltipProvider>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id="correctLightness" checked={correctLightness} onCheckedChange={(checked) => setCorrectLightness(!!checked)} />
+                                    <Label htmlFor="correctLightness">Correct lightness</Label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </motion.div>
+                </div>
+                {/* Moved motion.div content here */}
             </div>
-        </div>
-    );
-
+        );
+    };
     return (
         <div className="flex h-full overflow-hidden">
             <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
