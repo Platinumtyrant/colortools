@@ -32,7 +32,7 @@ type SavedPalette = {
   colors: string[];
 };
 
-const migratePalettes = (palettes: any): SavedPalette[] => {
+const migratePalettes = (palettes: unknown): SavedPalette[] => {
   if (!palettes || !Array.isArray(palettes)) return [];
   if (palettes.length > 0 && typeof palettes[0] === 'object' && palettes[0] !== null && 'id' in palettes[0]) {
     return palettes as SavedPalette[];

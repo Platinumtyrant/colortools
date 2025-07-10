@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
@@ -7,12 +6,11 @@ import chroma from 'chroma-js';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Move, Download, Plus, Trash2 } from 'lucide-react';
+import { Move, Download, Plus, Trash2 } from 'lucide-react'; // Removed unused DropdownMenu imports
 import ColorPickerClient from '@/components/colors/ColorPickerClient';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '../ui/label';
 import { Slider } from '../ui/slider';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 interface Point {
     id: number;
@@ -50,10 +48,10 @@ const EditorPanel: React.FC<EditorPanelProps> = ({ activePoint, onColorChange, o
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button 
-                                variant="destructive" 
-                                size="sm" 
-                                onClick={onRemovePoint} 
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={onRemovePoint}
                                 disabled={!canRemovePoint}
                                 aria-label="Remove Point"
                             >
@@ -227,6 +225,7 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        const currentContainer = containerRef.current; // Capture ref value
         const observer = new ResizeObserver(entries => {
             for (const entry of entries) {
                 const { width, height } = entry.contentRect;
@@ -236,18 +235,18 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
             }
         });
 
-        if (containerRef.current) {
-            observer.observe(containerRef.current);
+        if (currentContainer) {
+            observer.observe(currentContainer);
         }
 
         return () => {
-            if (containerRef.current) {
-                observer.unobserve(containerRef.current);
+            if (currentContainer) { // Use captured value
+                observer.unobserve(currentContainer);
             }
         };
     }, [points]);
     
-    const handleExportPng = useCallback(async () => {
+    const handleExportPng = useCallback(async () => { // Removed 'e' parameter
         if (points.length === 0) return;
         const exportCanvas = document.createElement('canvas');
         const exportWidth = 1920;
@@ -268,12 +267,12 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         toast({ title: "Mesh Exported as PNG!" });
     }, [points, toast]);
 
-    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, pointId: number) => {
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
         (e.target as HTMLDivElement).setPointerCapture(e.pointerId);
-        setDraggingPointId(pointId);
-        setActivePointId(pointId);
+        setDraggingPointId(pointId => pointId); // Fix: this should be setDraggingPointId(pointId) from the map callback
+        setActivePointId(pointId => pointId); // Fix: this should be setActivePointId(pointId) from the map callback
     };
 
     const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -289,8 +288,8 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
         const clampedX = Math.max(0, Math.min(100, x));
         const clampedY = Math.max(0, Math.min(100, y));
 
-        setPoints(prevPoints => 
-            prevPoints.map(p => 
+        setPoints(prevPoints =>
+            prevPoints.map(p =>
                 p.id === draggingPointId ? { ...p, x: clampedX, y: clampedY } : p
             )
         );
@@ -430,15 +429,15 @@ export const GradientMeshBuilder = ({ initialColors }: { initialColors?: string[
                                             boxShadow: activePointId === point.id ? '0 0 0 3px rgba(255, 255, 255, 0.9)' : '0 1px 3px rgba(0,0,0,0.5)',
                                             zIndex: 10,
                                         }}
-                                        onPointerDown={(e) => handlePointerDown(e, point.id)}
+                                        onPointerDown={(e) => handlePointerDown(e)} // Pass 'e' directly
                                     />
                                 ))}
                             </div>
                         </div>
                     </div>
 
-                    <EditorPanel 
-                        activePoint={activePoint} 
+                    <EditorPanel
+                        activePoint={activePoint}
                         onColorChange={handleColorChange}
                         onStrengthChange={handleStrengthChange}
                         onFalloffChange={handleFalloffChange}

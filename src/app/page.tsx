@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
@@ -23,7 +22,7 @@ import type { PaletteColor } from '@/lib/palette-generator';
 import { analyzePalette } from '@/lib/palette-analyzer';
 import { Palette } from '@/components/palettes/Palette';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Dices, Pencil, Sparkles, Pipette, Unlock, Lock, CheckCircle2, AlertTriangle, LineChart as LineChartIcon } from 'lucide-react';
+import { Dices, Pencil, Sparkles, Pipette, Unlock, Lock, CheckCircle2, AlertTriangle } from 'lucide-react'; // Removed LineChartIcon
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { Slider } from '@/components/ui/slider';
@@ -47,16 +46,13 @@ import HarmonyColorWheel from '@/components/colors/HarmonyColorWheel';
 
 
 // Type definition for the experimental EyeDropper API
-interface EyeDropperResult {
-  sRGBHex: string;
-}
-interface EyeDropper {
-  new (): EyeDropper;
-  open(options?: { signal: AbortSignal }): Promise<EyeDropperResult>;
-}
+// eslint-disable-next-line @typescript-eslint/no-misused-new
 declare global {
   interface Window {
-    EyeDropper?: EyeDropper;
+    EyeDropper?: {
+        new (): EyeDropper;
+        open(options?: { signal: AbortSignal }): Promise<{ sRGBHex: string }>;
+    };
   }
 }
 
@@ -129,11 +125,11 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
       <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis 
-          stroke="hsl(var(--muted-foreground))" 
-          fontSize={12} 
-          tickLine={false} 
-          axisLine={false} 
+        <YAxis
+          stroke="hsl(var(--muted-foreground))"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
           domain={['dataMin', 'dataMax']}
           tickFormatter={(value) => typeof value === 'number' ? value.toFixed(1) : value}
         />
@@ -152,12 +148,12 @@ const ChartDisplay = ({ data, title, color, description }: { data: { name: numbe
 
 
 function PaletteBuilderPage() {
-    const { 
-        mainColor, setMainColor, 
-        palette, setPalette, 
+    const {
+        mainColor, setMainColor,
+        palette, setPalette,
         generationType, setGenerationType,
         isHarmonyLocked, setIsHarmonyLocked,
-        paletteToLoad, loadPalette, clearPaletteToLoad
+        paletteToLoad, clearPaletteToLoad
     } = usePaletteBuilder();
     
     const [inputValue, setInputValue] = useState(mainColor);
@@ -172,7 +168,6 @@ function PaletteBuilderPage() {
     const paletteHexes = useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
 
     const { toast } = useToast();
-    const router = useRouter();
     const isInitialLoad = useRef(true);
 
     // Analysis State
@@ -355,7 +350,7 @@ function PaletteBuilderPage() {
         if (editingPaletteId) {
             const savedPalettesJSON = localStorage.getItem('saved_palettes');
             const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-            const existingPalette = savedPalettes.find((p: any) => p.id === editingPaletteId);
+            const existingPalette = savedPalettes.find((p: { id: number; }) => p.id === editingPaletteId);
             if (existingPalette) {
                 setNewPaletteName(existingPalette.name);
             }
@@ -366,8 +361,8 @@ function PaletteBuilderPage() {
         setIsSaveDialogOpen(true);
     }, [palette, toast, editingPaletteId]);
 
-    const handleSaveToLibrary = useCallback((e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSaveToLibrary = useCallback((_e: React.FormEvent) => {
+        _e.preventDefault();
         if (!newPaletteName.trim()) {
             toast({ title: "Please enter a name for the palette.", variant: "destructive" });
             return;
@@ -377,9 +372,9 @@ function PaletteBuilderPage() {
         let savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
 
         if (editingPaletteId) {
-            savedPalettes = savedPalettes.map((p: any) => 
-                p.id === editingPaletteId 
-                ? { ...p, name: newPaletteName, colors: palette.map(c => c.hex) } 
+            savedPalettes = savedPalettes.map((p: { id: number; name: string; colors: string[] }) =>
+                p.id === editingPaletteId
+                ? { ...p, name: newPaletteName, colors: palette.map(c => c.hex) }
                 : p
             );
             toast({ title: "Palette Updated!", description: `"${newPaletteName}" has been updated.` });
@@ -465,7 +460,7 @@ function PaletteBuilderPage() {
             const { sRGBHex } = await eyeDropper.open();
             setMainColor(sRGBHex);
             toast({ title: "Color Picked!", description: `Set active color to ${sRGBHex}` });
-        } catch (e) {
+        } catch (_e) {
             console.log("EyeDropper cancelled");
         }
     };
@@ -484,7 +479,7 @@ function PaletteBuilderPage() {
             const { sRGBHex } = await eyeDropper.open();
             setFgColor(sRGBHex);
             toast({ title: "Color Picked!", description: `Set foreground color to ${sRGBHex}` });
-        } catch (e) {
+        } catch (_e) {
             console.log("EyeDropper cancelled");
         }
     };
@@ -503,7 +498,7 @@ function PaletteBuilderPage() {
             const { sRGBHex } = await eyeDropper.open();
             setBgColor(sRGBHex);
             toast({ title: "Color Picked!", description: `Set background color to ${sRGBHex}` });
-        } catch (e) {
+        } catch (_e) {
             console.log("EyeDropper cancelled");
         }
     };
@@ -615,9 +610,9 @@ function PaletteBuilderPage() {
                            </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                           {isHarmonyLocked 
-                               ? 'Re-generate palette with the locked harmony' 
-                               : hasLockedColors 
+                           {isHarmonyLocked
+                               ? 'Re-generate palette with the locked harmony'
+                               : hasLockedColors
                                ? 'Unlock colors to mix with a new harmony'
                                : 'Generates a new palette using a different harmony.'
                            }
@@ -643,8 +638,8 @@ function PaletteBuilderPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <Label htmlFor="generationType" className="text-xs shrink-0">Type</Label>
-                    <Select 
-                        value={generationType} 
+                    <Select
+                        value={generationType}
                         onValueChange={(value) => {
                             if (!isHarmonyLocked) {
                                 setGenerationType(value as GenerationType);
@@ -690,6 +685,7 @@ function PaletteBuilderPage() {
         </TooltipProvider>
     );
 
+    // Correctly structured renderPaletteAnalysisPanel function
     const renderPaletteAnalysisPanel = () => (
         <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -774,19 +770,6 @@ function PaletteBuilderPage() {
                             </div>
                         </div>
                     </div>
-                </div>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                    <div className="space-y-2 pt-4">
-                        {graphData.map((graph, i) => (
-                            <ChartDisplay 
-                                key={`${graph.title}-${i}`}
-                                data={graph.data} 
-                                title={graph.title} 
-                                description={graph.description}
-                                color={`hsl(var(--chart-${(i % 5) + 1}))`}
-                            />
-                        ))}
-                    </div>
                 </motion.div>
             </div>
         </div>
@@ -799,7 +782,7 @@ function PaletteBuilderPage() {
                     <DialogHeader>
                         <DialogTitle>{editingPaletteId ? 'Update Palette' : 'Save Palette'}</DialogTitle>
                         <DialogDescription>
-                            Give your palette a name. Click save when you're done.
+                            Give your palette a name. Click save when you&apos;re done.
                         </DialogDescription>
                     </DialogHeader>
                     <form id="save-palette-form" onSubmit={handleSaveToLibrary}>
@@ -966,7 +949,7 @@ function PaletteBuilderPage() {
                                                             </Button>
                                                         </PopoverTrigger>
                                                         <PopoverContent className="p-0">
-                                                            <ColorPickerClient color={fgColor} onChange={(c) => setFgColor(c.hex)} onEyeDropperClick={handleFgEyeDropper} />
+                                                            <ColorPickerClient color={fgColor} onChange={(c: ColorResult) => setFgColor(c.hex)} onEyeDropperClick={handleFgEyeDropper} />
                                                         </PopoverContent>
                                                     </Popover>
                                                 </div>
@@ -980,7 +963,7 @@ function PaletteBuilderPage() {
                                                             </Button>
                                                         </PopoverTrigger>
                                                         <PopoverContent className="p-0">
-                                                            <ColorPickerClient color={bgColor} onChange={(c) => setBgColor(c.hex)} onEyeDropperClick={handleBgEyeDropper} />
+                                                            <ColorPickerClient color={bgColor} onChange={(c: ColorResult) => setBgColor(c.hex)} onEyeDropperClick={handleBgEyeDropper} />
                                                         </PopoverContent>
                                                     </Popover>
                                                 </div>
@@ -1026,4 +1009,3 @@ function PaletteBuilderPage() {
 }
 
 export default PaletteBuilderPage;
-

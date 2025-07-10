@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import type { PaletteColor } from '@/lib/palette-generator';
 import { Button } from '@/components/ui/button';
-import { Lock, Unlock, Trash2, Copy, Plus, MousePointerClick } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ColorBox } from '@/components/colors/ColorBox';
 import { cn } from '@/lib/utils';
@@ -36,15 +36,6 @@ export const Palette = ({
 }: InteractivePaletteProps) => {
   const { toast } = useToast();
 
-  const handleCopyColor = (color: string) => {
-      navigator.clipboard.writeText(color).then(() => {
-          toast({
-              title: "Color Copied!",
-              description: `${color} has been copied to your clipboard.`
-          });
-      });
-  };
-  
   return (
     <Card className="bg-card/50 overflow-hidden flex flex-col">
       <CardHeader className="p-4 border-b">

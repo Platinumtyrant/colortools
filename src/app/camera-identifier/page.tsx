@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -12,7 +11,7 @@ import { usePaletteBuilder } from '@/contexts/PaletteBuilderContext';
 import { saveColorToLibrary, removeColorFromLibrary } from '@/lib/colors';
 import { colord } from 'colord';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils'; // cn is used in the skeleton fallback below
 
 const getAverageColor = (data: Uint8ClampedArray): string => {
     let r = 0, g = 0, b = 0;
@@ -58,7 +57,10 @@ export default function CameraIdentifierPage() {
     
     const isMobile = useIsMobile();
     
-    const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [palette]);
+    // This is the ONLY declaration for paletteHexes, corrected dependency array
+    const paletteHexes = React.useMemo(() => new Set(palette.map(p => colord(p.hex).toHex())), [
+        palette
+    ]);
     const libraryHexes = React.useMemo(() => new Set(libraryColors.map(c => colord(c).toHex())), [libraryColors, isMobile]);
     
     const isStreamActive = !!stream;
@@ -449,9 +451,9 @@ export default function CameraIdentifierPage() {
 
                         {snapshot ? (
                         crosshairPosition && (
-                            <Crosshair 
-                                className="absolute transform -translate-x-1/2 -translate-y-1/2 text-white/80 pointer-events-none" 
-                                style={{ left: `${crosshairPosition.x}px`, top: `${crosshairPosition.y}px` }} 
+                            <Crosshair
+                                className="absolute transform -translate-x-1/2 -translate-y-1/2 text-white/80 pointer-events-none"
+                                style={{ left: `${crosshairPosition.x}px`, top: `${crosshairPosition.y}px` }}
                             />
                         )
                         ) : (
@@ -517,7 +519,7 @@ export default function CameraIdentifierPage() {
                  <CardHeader className="order-last lg:col-span-2 p-4 text-center border-t lg:border-none lg:p-0 lg:max-w-4xl lg:mx-auto lg:mt-auto pt-2 lg:pt-8 bg-background lg:bg-transparent">
                     <CardTitle className="text-xl lg:text-3xl">Live Color Identifier</CardTitle>
                     <CardDescription className="text-xs lg:text-sm">
-                       {isMobile 
+                       {isMobile
                             ? "Point camera or upload image. Freeze, then tap to identify or double-tap to zoom."
                             : "Point your camera or upload an image to identify colors. Freeze the frame, then double-tap to zoom for precise selection."
                         }

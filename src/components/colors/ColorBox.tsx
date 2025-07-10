@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -11,7 +10,7 @@ import { useAllDescriptiveColorNames } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Trash2, Library, Palette as PaletteIcon, Copy, MousePointerClick, Lock, Unlock } from "lucide-react";
+import { Trash2, Library, Palette as PaletteIcon, Copy, MousePointerClick, Lock, Unlock } from "lucide-react"; // Removed Plus
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
@@ -38,12 +37,12 @@ interface ColorBoxProps {
 
 
 const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onCopy: () => void }) => (
-    <div 
+    <div
         className="grid grid-cols-[minmax(50px,max-content)_1fr] items-center gap-x-4 cursor-pointer p-1 -m-1 hover:bg-muted rounded-sm"
         onClick={onCopy}
     >
         <span className="text-muted-foreground whitespace-nowrap">{label}</span>
-        <span className="font-mono font-semibold text-right truncate">{value}</span> 
+        <span className="font-mono font-semibold text-right truncate">{value}</span>
     </div>
 );
 
@@ -78,21 +77,21 @@ export const ColorDetails = ({ color }: { color: string }) => {
     );
 };
 
-const ActionIcon = ({ children, onClick, title, variant='ghost', className }: { 
-    children: React.ReactNode, 
-    onClick: (e: React.MouseEvent | React.KeyboardEvent) => void, 
+const ActionIcon = ({ children, onClick, title, variant='ghost', className }: {
+    children: React.ReactNode,
+    onClick: (e: React.MouseEvent | React.KeyboardEvent) => void,
     title: string,
     variant?: 'ghost' | 'destructive',
     className?: string
 }) => {
-    const finalClassName = variant === 'destructive' 
-        ? "bg-rose-500/50 hover:bg-rose-500/80 text-white" 
+    const finalClassName = variant === 'destructive'
+        ? "bg-rose-500/50 hover:bg-rose-500/80 text-white"
         : "bg-black/20 hover:bg-black/40 text-white";
 
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <div 
+                <div
                     role="button"
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); onClick(e); }}
@@ -122,6 +121,9 @@ const ColorBoxInner = ({
     onSetActiveColor,
     isLocked,
 }: ColorBoxProps) => {
+    // Moved hook calls to top-level of the component
+    const allDescriptiveColorNames = useAllDescriptiveColorNames(color);
+    const { toast } = useToast();
 
     if (!color || !colord(color).isValid()) {
       return (
@@ -131,20 +133,17 @@ const ColorBoxInner = ({
       )
     }
 
-    const allDescriptiveColorNames = useAllDescriptiveColorNames(color);
-
-    const primary = name 
+    const primary = name
         ? { name, source: 'USAF' }
         : allDescriptiveColorNames.primary;
         
-    const allNames = name 
+    const allNames = name
         ? [
             { source: 'USAF', name },
             ...allDescriptiveColorNames.all.filter(n => n.name.toLowerCase() !== name.toLowerCase())
           ]
         : allDescriptiveColorNames.all;
         
-    const { toast } = useToast();
     
     const handleCopy = (e: React.MouseEvent | React.KeyboardEvent) => {
         e.stopPropagation(); // Prevent the popover from opening
@@ -257,7 +256,7 @@ const ColorBoxInner = ({
                                 {allNames.map((nameObj) => (
                                     <div key={nameObj.name} className="flex justify-between items-baseline gap-x-2 text-xs">
                                         <span className="font-medium truncate" title={nameObj.name}>{nameObj.name}</span>
-                                        <span className="text-muted-foreground whitespace-nowrap shrink-0">{nameObj.source}</span> 
+                                        <span className="text-muted-foreground whitespace-nowrap shrink-0">{nameObj.source}</span>
                                     </div>
                                 ))}
                             </div>
@@ -277,5 +276,3 @@ const ColorBoxInner = ({
 
 export const ColorBox = React.memo(ColorBoxInner);
 ColorBox.displayName = 'ColorBox';
-
-    

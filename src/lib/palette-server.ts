@@ -52,17 +52,17 @@ const categorizePalette = (colors: string[], name: string): string => {
   let validColors = 0;
 
   colors.forEach(hex => {
-    try {
-      if (chroma.valid(hex)) {
-        const [h, s, l] = chroma(hex).hsl();
-        if (!isNaN(h)) {
-          hues.push(h);
-        }
-        saturationSum += s;
-        lightnessSum += l;
-        validColors++;
-      }
-    } catch (e) {
+      try {
+          if (chroma.valid(hex)) {
+              const [h, s, l] = chroma(hex).hsl();
+              if (!isNaN(h)) {
+                  hues.push(h);
+              }
+              saturationSum += s;
+              lightnessSum += l;
+              validColors++;
+          }
+      } catch (_e) {
       // Ignore invalid colors
     }
   });

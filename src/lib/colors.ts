@@ -181,7 +181,7 @@ export const saveColorToLibrary = (color: string): { success: boolean; message: 
   try {
     const key = 'saved_individual_colors';
     const savedJSON = localStorage.getItem(key);
-    let saved: string[] = savedJSON ? JSON.parse(savedJSON) : [];
+      const saved = savedJSON ? JSON.parse(savedJSON) : [];
 
     const normalizedColor = colord(color).toHex();
 
@@ -204,7 +204,7 @@ export const removeColorFromLibrary = (color: string): { success: boolean; messa
   try {
     const key = 'saved_individual_colors';
     const savedJSON = localStorage.getItem(key);
-    let saved: string[] = savedJSON ? JSON.parse(savedJSON) : [];
+      const saved: string[] = savedJSON ? JSON.parse(savedJSON) : [];
     
     const normalizedColor = colord(color).toHex();
     const newSaved = saved.filter(c => colord(c).toHex() !== normalizedColor);

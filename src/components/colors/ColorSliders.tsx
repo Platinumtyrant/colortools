@@ -12,7 +12,7 @@ import { Pipette } from 'lucide-react';
 
 interface ColorSlidersProps {
     hsl: HSLColor;
-    onChange: (color: any) => void;
+    onChange: (color: ColorResult) => void;
     title?: string;
     onEyeDropperClick?: () => void;
 }

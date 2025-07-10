@@ -123,8 +123,7 @@ export function InspirationClientPage({ allPalettes }: InspirationClientPageProp
   const handleSavePalette = (palette: { name: string; colors: string[] }) => {
     try {
       const savedPalettesJSON = localStorage.getItem('saved_palettes');
-      let savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
-
+        const savedPalettes = savedPalettesJSON ? JSON.parse(savedPalettesJSON) : [];
       const isDuplicate = savedPalettes.some((p: { name: string; }) => p.name.toLowerCase() === palette.name.toLowerCase());
 
       if (isDuplicate) {

@@ -6,12 +6,6 @@ import { extend } from 'colord';
 
 extend([cmykPlugin]);
 
-// Helper function to calculate CMYK from HEX
-const getCmykString = (hex: string): string => {
-  const cmyk = colord(hex).toCmyk();
-  return `(${cmyk.c}, ${cmyk.m}, ${cmyk.y}, ${cmyk.k})`;
-};
-
 
 // Source: pantone-numbers.json provided by user
 export const pantoneFhiColors: PantoneColor[] = [
