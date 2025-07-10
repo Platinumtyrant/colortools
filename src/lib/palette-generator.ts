@@ -1,9 +1,9 @@
 
 import chroma from 'chroma-js';
-import { getTints, getShades } from './colors';
+import { getTints, getShades, getTones } from './colors';
 import { simulate, type SimulationType } from './colorblind';
 
-export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades';
+export type GenerationType = 'analogous' | 'triadic' | 'complementary' | 'tints' | 'shades' | 'tones';
 
 export interface PaletteColor {
   id: number;
@@ -14,7 +14,7 @@ export interface PaletteColor {
 interface GenerationOptions {
     numColors: number;
     type: GenerationType;
-    lockedColors?: string[];
+    baseColors: string[];
 }
 
 export function getRandomColor(): string {
@@ -69,80 +69,106 @@ export function adjustForColorblindSafety(palette: PaletteColor[]): PaletteColor
   return adjustedPalette;
 }
 
-
 export function generatePalette(options: GenerationOptions): string[] {
-    const { numColors, type, lockedColors } = options;
-
-    const colorsToScale = (lockedColors && lockedColors.length > 0) ? lockedColors : [getRandomColor()];
+    const { numColors, type, baseColors } = options;
+    if (numColors <= 0) return [];
     
-    if (colorsToScale.some(c => !chroma.valid(c))) {
-        throw new Error("Invalid base color provided.");
+    const baseColor = (baseColors && baseColors.length > 0) ? baseColors[0] : getRandomColor();
+
+    if (!chroma.valid(baseColor)) {
+        console.error("Invalid base color provided to generatePalette:", baseColor);
+        return Array.from({ length: numColors }, () => getRandomColor());
+    }
+
+    if (type === 'tints') {
+        return getTints(baseColor, numColors);
+    }
+    if (type === 'shades') {
+        return getShades(baseColor, numColors);
+    }
+    if (type === 'tones') {
+        return getTones(baseColor, numColors);
     }
     
-    let initialPalette: string[];
+    const baseLCH = chroma(baseColor).lch();
+    const l = baseLCH[0];
+    const c = baseLCH[1];
+    const h = isNaN(baseLCH[2]) ? 0 : baseLCH[2];
 
-    const sortbyHue = (a: string, b: string) => {
-        const hA = chroma(a).hsl()[0];
-        const hB = chroma(b).hsl()[0];
-        return (isNaN(hA) ? 0 : hA) - (isNaN(hB) ? 0 : hB);
+    const colors: string[] = [];
+
+    // Helper function to create subtle variations around a main anchor hue
+    const createVariations = (baseHue: number, count: number) => {
+        if (count <= 0) return [];
+        const variations: string[] = [];
+        for (let i = 0; i < count; i++) {
+            // Create small variations in Lightness and Chroma for a more organic feel
+            // The first color (i=0) is closer to the original, subsequent ones vary more.
+            const l_var = l + (Math.random() - 0.5) * (15 + i * 5);
+            const c_var = c + (Math.random() - 0.5) * (10 + i * 2.5);
+            const h_var = baseHue + (Math.random() - 0.5) * (10 + i * 2.5);
+            variations.push(
+                chroma.lch(
+                    Math.max(10, Math.min(95, l_var)), 
+                    Math.max(0, c_var), 
+                    (h_var + 360) % 360
+                ).hex()
+            );
+        }
+        return variations;
     };
 
     switch (type) {
         case 'analogous': {
-            const base = colorsToScale[0];
-            const baseHsl = chroma(base).hsl();
-            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
-            const s = baseHsl[1];
-            const l = baseHsl[2];
+            const angleRange = 60;
+            const angleStep = numColors > 1 ? angleRange / (numColors - 1) : 0;
+            for (let i = 0; i < numColors; i++) {
+                const hueOffset = -(angleRange / 2) + i * angleStep;
+                const newHue = (h + hueOffset + 360) % 360;
+                // Add some subtle variation in lightness and chroma for a more organic feel
+                 const lightnessVariation = (Math.sin((i / (numColors > 1 ? numColors - 1 : 1)) * Math.PI) * 10);
+                const newLightness = l + (i % 2 === 0 ? lightnessVariation : -lightnessVariation);
+                const newChroma = c * (0.9 + Math.random() * 0.2); // Vary chroma by +/- 10%
 
-            // Introduce slight variations in saturation and lightness for the scale's endpoints
-            // to create a more dynamic and visually distinct palette, especially for larger sets.
-            const firstAnalogous = chroma.hsl((h - 30 + 360) % 360, s * 0.9, l * 0.95).hex();
-            const secondAnalogous = chroma.hsl((h + 30) % 360, s * 0.9, l * 0.95).hex();
-            
-            // The scale will be generated through the two new analogous points and any locked colors.
-            const scalePoints = [firstAnalogous, ...colorsToScale, secondAnalogous].sort(sortbyHue);
-            
-            initialPalette = chroma.scale(scalePoints).mode('oklch').colors(numColors);
+                colors.push(chroma.lch(
+                    Math.max(10, Math.min(95, newLightness)), 
+                    Math.max(0, newChroma), 
+                    newHue
+                ).hex());
+            }
             break;
         }
+
+       case 'complementary':
         case 'triadic': {
-            const base = colorsToScale[0];
-            const baseHsl = chroma(base).hsl();
-            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
-            const s = baseHsl[1];
-            const l = baseHsl[2];
+            const anchors = type === 'complementary' 
+                ? [h, (h + 180) % 360] 
+                : [h, (h + 120) % 360, (h + 240) % 360];
 
-            const secondColor = chroma.hsl((h + 120) % 360, s, l).hex();
-            const thirdColor = chroma.hsl((h + 240) % 360, s, l).hex();
-            const fullScale = [...colorsToScale, secondColor, thirdColor].sort(sortbyHue);
-            initialPalette = chroma.scale(fullScale).mode('oklch').colors(numColors);
-            break;
-        }
-        case 'complementary': {
-            const base = colorsToScale[0];
-            const baseHsl = chroma(base).hsl();
-            const h = isNaN(baseHsl[0]) ? 0 : baseHsl[0];
-            const s = baseHsl[1];
-            const l = baseHsl[2];
+            const colorsPerAnchor = Array(anchors.length).fill(0);
+            for (let i = 0; i < numColors; i++) {
+                colorsPerAnchor[i % anchors.length]++;
+            }
 
-            const complement = chroma.hsl((h + 180) % 360, s, l).hex();
-            const fullScale = [...colorsToScale, complement].sort(sortbyHue);
-            initialPalette = chroma.scale(fullScale).mode('oklch').colors(numColors);
+            anchors.forEach((anchorHue, index) => {
+                colors.push(...createVariations(anchorHue, colorsPerAnchor[index]));
+            });
             break;
         }
-        case 'tints': {
-            initialPalette = getTints(colorsToScale[0], numColors);
-            break;
-        }
-        case 'shades': {
-            initialPalette = getShades(colorsToScale[0], numColors);
-            break;
-        }
+        
         default:
-            initialPalette = chroma.scale(colorsToScale).mode('oklch').colors(numColors);
+             // Fallback to analogous if type is unknown
+            for (let i = 0; i < numColors; i++) {
+                colors.push(chroma(baseColor).set('hsl.h', `+${i * 10}`).hex());
+            }
             break;
     }
-
-    return initialPalette;
+    
+    // Sort colors by hue to maintain a logical visual order
+    return colors.slice(0, numColors).sort((a, b) => {
+        const h1 = chroma(a).lch()[2];
+        const h2 = chroma(b).lch()[2];
+        if (isNaN(h1) || isNaN(h2)) return 0;
+        return h1-h2;
+    });
 }

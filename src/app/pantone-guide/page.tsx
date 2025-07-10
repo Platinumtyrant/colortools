@@ -1,12 +1,20 @@
 
 import React from 'react';
-import { pantoneCategories } from '@/lib/pantone-colors';
+import { getPantonePmsCategories, getPantoneFhiCategories } from '@/lib/palette-parser';
 import { PantoneGuideClientPage } from '@/components/pantone/PantoneGuideClientPage';
+import type { PantoneColor } from '@/lib/pantone-colors';
 
 export default function PantoneGuidePage() {
-    // The pantoneCategories are now fetched on the server at build time
-    // and passed as a prop to the client component.
+    const pmsCategories = getPantonePmsCategories();
+    const fhiCategories = getPantoneFhiCategories();
+
+    const pmsColors: PantoneColor[] = pmsCategories.flatMap(c => c.colors);
+    const fhiColors: PantoneColor[] = fhiCategories.flatMap(c => c.colors);
+    
     return (
-        <PantoneGuideClientPage pantoneCategories={pantoneCategories} />
+        <PantoneGuideClientPage 
+            pmsColors={pmsColors}
+            fhiColors={fhiColors}
+        />
     );
 }

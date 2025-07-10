@@ -7,12 +7,17 @@ import namesPlugin from "colord/plugins/names";
 import cmykPlugin from "colord/plugins/cmyk";
 import lchPlugin from 'colord/plugins/lch';
 import labPlugin from 'colord/plugins/lab';
-import { getDescriptiveColorName, saveColorToLibrary } from "@/lib/colors";
+import { useAllDescriptiveColorNames } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Info } from "lucide-react";
+import { Plus, Trash2, Library, Palette as PaletteIcon, Copy, MousePointerClick, Lock, Unlock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "../ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "../ui/button";
+
 
 extend([namesPlugin, cmykPlugin, lchPlugin, labPlugin]);
 
@@ -20,11 +25,17 @@ interface ColorBoxProps {
   color: string;
   name?: string;
   info?: string;
-  onActionClick?: (e: React.MouseEvent) => void;
-  actionIcon?: React.ReactNode;
-  actionTitle?: string;
   variant?: 'default' | 'compact';
+  popoverActions?: React.ReactNode;
+  onAddToLibrary?: () => void;
+  onRemoveFromLibrary?: () => void;
+  onAddToPalette?: () => void;
+  onRemoveFromPalette?: () => void;
+  onLockToggle?: () => void;
+  onSetActiveColor?: () => void;
+  isLocked?: boolean;
 }
+
 
 const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onCopy: () => void }) => (
     <div 
@@ -32,12 +43,12 @@ const DetailRow = ({ label, value, onCopy }: { label: string, value: string, onC
         onClick={onCopy}
     >
         <span className="text-muted-foreground whitespace-nowrap">{label}</span>
-        <span className="font-mono font-semibold text-right break-all">{value}</span> 
+        <span className="font-mono font-semibold text-right truncate">{value}</span> 
     </div>
 );
 
 
-const ColorDetails = ({ color }: { color: string }) => {
+export const ColorDetails = ({ color }: { color: string }) => {
     const { toast } = useToast();
     const colorInstance = colord(color);
     
@@ -50,7 +61,8 @@ const ColorDetails = ({ color }: { color: string }) => {
     const hex = colorInstance.toHex().toUpperCase();
     const rgb = colorInstance.toRgbString();
     const hsl = colorInstance.toHslString();
-    const cmyk = colorInstance.toCmykString();
+    const cmykObj = colorInstance.toCmyk();
+    const cmyk = `cmyk(${cmykObj.c}, ${cmykObj.m}, ${cmykObj.y}, ${cmykObj.k})`;
     const lchObj = colorInstance.toLch();
     const lch = `lch(${lchObj.l.toFixed(0)}, ${lchObj.c.toFixed(0)}, ${lchObj.h.toFixed(0)})`;
 
@@ -66,91 +78,204 @@ const ColorDetails = ({ color }: { color: string }) => {
     );
 };
 
+const ActionIcon = ({ children, onClick, title, variant='ghost', className }: { 
+    children: React.ReactNode, 
+    onClick: (e: React.MouseEvent | React.KeyboardEvent) => void, 
+    title: string,
+    variant?: 'ghost' | 'destructive',
+    className?: string
+}) => {
+    const finalClassName = variant === 'destructive' 
+        ? "bg-rose-500/50 hover:bg-rose-500/80 text-white" 
+        : "bg-black/20 hover:bg-black/40 text-white";
 
-export const ColorBox = React.memo(({
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div 
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); onClick(e); }}
+                    onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); onClick(e); }}}
+                    className={cn(buttonVariants({ variant: 'ghost', size: 'icon'}), "h-7 w-7", finalClassName, className)}
+                >
+                    {children}
+                </div>
+            </TooltipTrigger>
+            <TooltipContent><p>{title}</p></TooltipContent>
+        </Tooltip>
+    );
+};
+
+
+const ColorBoxInner = ({
     color,
     name,
     info,
-    onActionClick,
-    actionIcon,
-    actionTitle = "Save color to library",
-    variant = 'compact'
+    variant = 'compact',
+    popoverActions,
+    onAddToLibrary,
+    onRemoveFromLibrary,
+    onAddToPalette,
+    onRemoveFromPalette,
+    onLockToggle,
+    onSetActiveColor,
+    isLocked,
 }: ColorBoxProps) => {
+
+    if (!color || !colord(color).isValid()) {
+      return (
+        <div className="w-40 h-[72px] rounded-md border border-destructive bg-destructive/10 flex items-center justify-center p-2">
+            <p className="text-xs text-center text-destructive">Invalid color data provided.</p>
+        </div>
+      )
+    }
+
+    const allDescriptiveColorNames = useAllDescriptiveColorNames(color);
+
+    const primary = name 
+        ? { name, source: 'USAF' }
+        : allDescriptiveColorNames.primary;
+        
+    const allNames = name 
+        ? [
+            { source: 'USAF', name },
+            ...allDescriptiveColorNames.all.filter(n => n.name.toLowerCase() !== name.toLowerCase())
+          ]
+        : allDescriptiveColorNames.all;
+        
     const { toast } = useToast();
-    const descriptiveName = name || getDescriptiveColorName(color);
     
-    const handleSaveDefault = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const result = saveColorToLibrary(color);
-        toast({
-            title: result.message,
-            variant: result.success ? 'default' : 'destructive',
+    const handleCopy = (e: React.MouseEvent | React.KeyboardEvent) => {
+        e.stopPropagation(); // Prevent the popover from opening
+        const hex = colord(color).toHex().toUpperCase();
+        navigator.clipboard.writeText(hex).then(() => {
+            toast({ title: "Copied!", description: `${hex} copied to clipboard.` });
         });
     };
 
-    const finalActionClick = onActionClick || handleSaveDefault;
-    const finalActionIcon = actionIcon || <Plus className="h-4 w-4" />;
-
-    const handleCopyHex = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(color.toUpperCase()).then(() => {
-            toast({ title: 'HEX copied!', description: color.toUpperCase() });
-        });
-    };
-    
     if (variant === 'default') {
         return (
-             <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col">
-                <div className="relative h-80 w-full" style={{ backgroundColor: color }}>
-                     <div className="absolute top-2 right-2 flex gap-1">
-                        <Button size="icon" className="h-8 w-8" onClick={finalActionClick} title={actionTitle}>
-                            {finalActionIcon}
-                        </Button>
+             <Card className="overflow-hidden shadow-sm group w-full h-full flex flex-col cursor-pointer">
+                <div className="relative w-full aspect-[2.35/1]" style={{ backgroundColor: color }}>
+                    <div className="absolute top-2 right-2 flex flex-col gap-1">
+                        <TooltipProvider>
+                            {onAddToLibrary && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div role="button" tabIndex={0} onClick={(e) => {e.stopPropagation(); onAddToLibrary()}} onKeyDown={(e) => {if(e.key === 'Enter' || e.key === ' ') onAddToLibrary()}} className={cn(buttonVariants({size: 'icon'}), "h-8 w-8")}>
+                                      <Library className="h-4 w-4" />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent><p>Save to Library</p></TooltipContent>
+                                </Tooltip>
+                            )}
+                            {onRemoveFromLibrary && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div role="button" tabIndex={0} onClick={(e) => {e.stopPropagation(); onRemoveFromLibrary()}} onKeyDown={(e) => {if(e.key === 'Enter' || e.key === ' ') onRemoveFromLibrary()}} className={cn(buttonVariants({size: 'icon', variant: 'destructive'}), "h-8 w-8")}>
+                                      <Trash2 className="h-4 w-4" />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent><p>Remove from Library</p></TooltipContent>
+                                </Tooltip>
+                            )}
+                        </TooltipProvider>
                     </div>
                 </div>
-                <CardContent className="p-4 flex-grow flex flex-col justify-center">
-                    <p className="font-semibold text-lg text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
-                    <ColorDetails color={color} />
+                <CardContent className="p-4 flex-grow flex flex-col justify-start">
+                    <div className="space-y-4">
+                        <ColorDetails color={color} />
+                        {allNames.length > 0 && (
+                            <>
+                                <Separator className="my-4" />
+                                <div className="space-y-1 text-sm">
+                                    <h4 className="font-medium text-xs text-muted-foreground mb-2 uppercase tracking-wider">Descriptive Names</h4>
+                                    {allNames.map((nameObj) => (
+                                        <div key={nameObj.name} className="flex justify-between items-baseline gap-x-2 text-xs">
+                                            <span className="font-medium truncate" title={nameObj.name}>{nameObj.name}</span>
+                                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">{nameObj.source}</Badge>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         );
     }
     
     return (
-        <div className="w-40">
-            <Card className="overflow-hidden shadow-sm group w-full">
-                <div
-                    className="relative h-20 w-full cursor-pointer"
-                    style={{ backgroundColor: color }}
-                    onClick={handleCopyHex}
+        <Popover>
+            <PopoverTrigger asChild>
+                <button
+                    type="button"
+                    className="group/container flex flex-col h-full w-full cursor-pointer text-card-foreground overflow-hidden rounded-md text-left"
                 >
-                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={finalActionClick} title={actionTitle}>
-                            {finalActionIcon}
-                        </Button>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                 <Button size="icon" variant="ghost" className="h-7 w-7 bg-black/20 hover:bg-black/40 text-white" onClick={(e) => e.stopPropagation()} title="Show Details">
-                                    <Info className="h-4 w-4" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-75 p-0">
-                                <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
-                                <div className="p-3">
-                                    <p className="font-semibold text-base text-center mb-2" title={descriptiveName}>{descriptiveName}</p>
-                                    <ColorDetails color={color} />
-                                </div>
-                            </PopoverContent>
-                        </Popover>
+                    <div
+                        className="relative h-9 w-full rounded-b-md"
+                        style={{ backgroundColor: color }}
+                    >
+                        <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 transform flex-row gap-1 opacity-0 transition-opacity group-hover/container:opacity-100">
+                             <TooltipProvider delayDuration={200}>
+                                {onSetActiveColor && <ActionIcon onClick={() => onSetActiveColor()} title="Set as Active Color"><MousePointerClick className="h-4 w-4" /></ActionIcon>}
+                                {onLockToggle && <ActionIcon onClick={() => onLockToggle()} title={isLocked ? "Unlock Color" : "Lock Color"}>{isLocked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}</ActionIcon>}
+                                <ActionIcon onClick={handleCopy} title="Copy HEX"><Copy className="h-4 w-4" /></ActionIcon>
+                                {onAddToLibrary && <ActionIcon onClick={() => onAddToLibrary()} title="Save to Library"><Library className="h-4 w-4" /></ActionIcon>}
+                                {onRemoveFromLibrary && <ActionIcon onClick={() => onRemoveFromLibrary()} title="Remove from Library" variant="destructive"><Trash2 className="h-4 w-4" /></ActionIcon>}
+                                {onAddToPalette && <ActionIcon onClick={() => onAddToPalette()} title="Add to Current Palette"><PaletteIcon className="h-4 w-4" /></ActionIcon>}
+                                {onRemoveFromPalette && <ActionIcon onClick={() => onRemoveFromPalette()} title="Remove from Palette" variant="destructive"><Trash2 className="h-4 w-4" /></ActionIcon>}
+                            </TooltipProvider>
+                        </div>
                     </div>
+                    <div className="p-2 flex-grow">
+                        <div className="flex items-center gap-2">
+                             {primary.source === 'Pantone' && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-primary/50 text-primary/80 shrink-0">PANTONE</Badge>
+                            )}
+                             {primary.source === 'USAF' && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-auto border-green-600/50 bg-green-500/10 text-green-700 dark:border-green-400/50 dark:text-green-400/80 shrink-0">USAF</Badge>
+                            )}
+                            <p className="font-semibold text-xs truncate" title={primary.name}>{primary.name}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground font-mono">{color.toUpperCase()}</p>
+                        {info && <p className="text-xs text-muted-foreground font-mono truncate">{info}</p>}
+                    </div>
+                </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[300px] p-0">
+                <div className="h-24 w-full rounded-t-md" style={{backgroundColor: color}} />
+                <div className="p-3">
+                    <p className="font-semibold text-base text-center mb-2" title={primary.name}>{primary.name}</p>
+                    <ColorDetails color={color} />
+                     {allNames.length > 0 && (
+                        <>
+                            <Separator className="my-3"/>
+                            <div className="space-y-1 text-sm">
+                                <h4 className="font-medium text-xs text-muted-foreground mb-2 uppercase tracking-wider">Descriptive Names</h4>
+                                {allNames.map((nameObj) => (
+                                    <div key={nameObj.name} className="flex justify-between items-baseline gap-x-2 text-xs">
+                                        <span className="font-medium truncate" title={nameObj.name}>{nameObj.name}</span>
+                                        <span className="text-muted-foreground whitespace-nowrap shrink-0">{nameObj.source}</span> 
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                    {popoverActions && (
+                        <>
+                            <Separator className="my-3"/>
+                            {popoverActions}
+                        </>
+                    )}
                 </div>
-                <CardContent className="p-2 cursor-pointer" onClick={handleCopyHex}>
-                    <p className="font-semibold text-xs truncate" title={descriptiveName}>{descriptiveName}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{info || color.toUpperCase()}</p>
-                </CardContent>
-            </Card>
-        </div>
+            </PopoverContent>
+        </Popover>
     );
-});
+};
 
+export const ColorBox = React.memo(ColorBoxInner);
 ColorBox.displayName = 'ColorBox';
+
+    

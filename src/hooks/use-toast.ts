@@ -18,14 +18,6 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
-// const actionTypes = {
-//   ADD_TOAST: "ADD_TOAST",
-//   UPDATE_TOAST: "UPDATE_TOAST",
-//   DISMISS_TOAST: "DISMISS_TOAST",
-//   REMOVE_TOAST: "REMOVE_TOAST",
-// } as const
-// This variable is unused, its type can be defined directly.
-
 let count = 0
 
 function genId() {
@@ -33,11 +25,9 @@ function genId() {
   return count.toString()
 }
 
-// type ActionType = "ADD_TOAST" | "UPDATE_TOAST" | "DISMISS_TOAST" | "REMOVE_TOAST"; // This type alias is no longer used
-
 type Action =
   | {
-      type: "ADD_TOAST" // Directly use string literal types
+      type: "ADD_TOAST"
       toast: ToasterToast
     }
   | {

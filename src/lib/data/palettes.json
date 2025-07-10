@@ -1,0 +1,769 @@
+
+[
+  {
+    "name": "Classic Windows 98",
+    "colors": ["#C0C0C0", "#808080", "#FFFFFF", "#000000", "#000080", "#800080", "#008080", "#800000"]
+  },
+  {
+    "name": "Light Grey Tints",
+    "colors": ["#D3D3D3", "#DDDDDD", "#E5E5E5", "#EEEEEE", "#F6F6F6", "#FFFFFF"]
+  },
+  {
+    "name": "Discord UI Dark",
+    "colors": ["#2F3136", "#36393F", "#202225"]
+  },
+  {
+    "name": "Glitch Effect",
+    "colors": ["#FF0000", "#00FF00", "#0000FF", "#FFFFFF", "#000000", "#800080", "#FF00FF", "#00FFFF"]
+  },
+  {
+    "name": "Minimal Dark UI",
+    "colors": ["#212121", "#303030", "#424242", "#616161", "#757575", "#9E9E9E", "#BDBDBD", "#E0E0E0", "#F5F5F5"]
+  },
+  {
+    "name": "Standard Grey Scale",
+    "colors": ["#CCCCCC", "#AAAAAA", "#888888", "#666666", "#444444"]
+  },
+  {
+    "name": "Material Design Deep Purple",
+    "colors": ["#673AB7", "#5E35B1", "#512DA8", "#4527AE", "#311B92"]
+  },
+  {
+    "name": "Light Pink Tints",
+    "colors": ["#FFB6C1", "#FFC1CC", "#FFCCD7", "#FFD7E2", "#FFE2ED", "#FFEEF8", "#FFFFFF"]
+  },
+  {
+    "name": "Cosmic Space",
+    "colors": ["#000000", "#1A0033", "#330066", "#6600CC", "#9933FF", "#CC66FF", "#FF99FF"]
+  },
+  {
+    "name": "Call-to-Action Buttons",
+    "colors": ["#FFD700", "#008000", "#0000FF", "#FF0000"]
+  },
+  {
+    "name": "Night Sky Hues",
+    "colors": ["#0A0A2A", "#1C1C4C", "#333366", "#4D4D80", "#666699"]
+  },
+  {
+    "name": "Tea Matcha Branding",
+    "colors": ["#A2CD5A", "#7EC0EE", "#3D9970", "#2E8B57", "#1E6C40", "#134B2E"]
+  },
+  {
+    "name": "Gucci Logo",
+    "colors": ["#008000", "#B8860B", "#FFD700", "#FFFFFF", "#000000"]
+  },
+  {
+    "name": "Rubik's Cube",
+    "colors": ["#FFD700", "#FF0000", "#0000FF", "#008000", "#FFA500", "#FFFFFF"]
+  },
+  {
+    "name": "Coffee Shop Branding",
+    "colors": ["#A0522D", "#D2B48C", "#F5DEB3", "#DEB887", "#CD853F"]
+  },
+  {
+    "name": "India Flag",
+    "colors": ["#FF9933", "#FFFFFF", "#138808", "#000080"]
+  },
+  {
+    "name": "Light Sky Blue Tints",
+    "colors": ["#87CEFA", "#ADD8E6", "#B0E0E6", "#C0EDF5", "#D0F5FA"]
+  },
+  {
+    "name": "Tetris Basic",
+    "colors": ["#00FFFF", "#0000FF", "#FFA500", "#FFFF00", "#008000", "#800080", "#FF0000"]
+  },
+  {
+    "name": "Pastel Rainbow",
+    "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF"]
+  },
+  {
+    "name": "Bootstrap 4 Alerts",
+    "colors": ["#CFF4FC", "#D4EDDA", "#FFF3CD", "#F8D7DA", "#E2E3E5", "#D1ECF1", "#E2F0D9", "#FFF7EB", "#FCE8E6"]
+  },
+  {
+    "name": "Chart Line Board",
+    "colors": ["#6B4E99", "#4B8EAE", "#7FD3ED", "#C0D6E2", "#A8D1EA", "#6DABD7"]
+  },
+  {
+    "name": "Pride Flag",
+    "colors": ["#E50000", "#FF8D00", "#FFF100", "#008121", "#004CFF", "#760088"]
+  },
+  {
+    "name": "Linktree Website Branding",
+    "colors": ["#62D2C6", "#D9ED91", "#DDC6E6", "#A6A6EA"]
+  },
+  {
+    "name": "Sunset Gradient",
+    "colors": ["#FF6347", "#FF7F50", "#FFA07A", "#FFB6C1", "#FFC0CB"]
+  },
+  {
+    "name": "Cryptocurrency Website",
+    "colors": ["#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#FF0000", "#0000FF", "#800080"]
+  },
+  {
+    "name": "US Dollar Scheme",
+    "colors": ["#8FBC8F", "#C0C0C0", "#A9A9A9", "#696969"]
+  },
+  {
+    "name": "Baker's Chocolate",
+    "colors": ["#5C3317", "#7A4523", "#98572F", "#B6693B", "#D47B47"]
+  },
+  {
+    "name": "Orange Shade Spectrum",
+    "colors": ["#FF7F50", "#FF6347", "#FF4500", "#FFA07A", "#FF8C00"]
+  },
+  {
+    "name": "Navy Blue Shades",
+    "colors": ["#000080", "#000066", "#00004D", "#000033", "#00001A"]
+  },
+  {
+    "name": "Visual Studio Code Logo",
+    "colors": ["#007ACC", "#3C99D4", "#66B2DA"]
+  },
+  {
+    "name": "Rust Color Shades",
+    "colors": ["#B7410E", "#9C380C", "#812F0A", "#662608", "#4B1D06"]
+  },
+  {
+    "name": "Sandy Brown Shades",
+    "colors": ["#F4A460", "#D29C57", "#B0934E", "#8E8A45", "#6C813C"]
+  },
+  {
+    "name": "Apricot Crush",
+    "colors": ["#FFDAB9", "#FFE4B5", "#FFEBCD", "#FFF0DB", "#FFF5E7"]
+  },
+  {
+    "name": "Vibrant Neon Rainbow",
+    "colors": ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0000", "#00FF00", "#0000FF", "#FFA500"]
+  },
+  {
+    "name": "Olive Drab Shades",
+    "colors": ["#6B8E23", "#5A771E", "#496019", "#384914", "#27320F"]
+  },
+  {
+    "name": "Logitech Branding",
+    "colors": ["#00FF00", "#00BFFF", "#FF0000", "#FFFF00", "#000000", "#FFFFFF"]
+  },
+  {
+    "name": "Pixel Art Tones",
+    "colors": ["#A0522D", "#CD853F", "#F4A460", "#D2B48C", "#F5DEB3", "#A52A2A", "#8B4513"]
+  },
+  {
+    "name": "Discord Core",
+    "colors": ["#7289DA", "#99AAB5", "#2C2F33", "#23272A"]
+  },
+  {
+    "name": "Ukraine Flag",
+    "colors": ["#005BBB", "#FFD500"]
+  },
+  {
+    "name": "Bootstrap 4 Core",
+    "colors": ["#007BFF", "#6C757D", "#28A745", "#DC3545", "#FFC107", "#17A2B8", "#F8F9FA", "#343A40"]
+  },
+  {
+    "name": "Human Skin Tones",
+    "colors": ["#F5DEB3", "#FFE4C4", "#FFEBCD", "#F0DCB2", "#DEB887"]
+  },
+  {
+    "name": "Steam Branding",
+    "colors": ["#1B2838", "#2A475E", "#4169E1", "#66C0F4", "#FFFFFF"]
+  },
+  {
+    "name": "Abstract Blue",
+    "colors": ["#007FFF", "#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF"]
+  },
+  {
+    "name": "Discord Roles",
+    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
+  },
+  {
+    "name": "Apple iOS Blue",
+    "colors": ["#007AFF", "#3399FF", "#66B2FF", "#99CCFF", "#CCEEFF"]
+  },
+  {
+    "name": "Bootstrap 4 Backgrounds",
+    "colors": ["#F8F9FA", "#E9ECEF", "#E2E3E5", "#D1ECF1", "#D4EDDA", "#FFF3CD", "#F8D7DA", "#CCE5FF", "#D6D8D9", "#FDFDFD"]
+  },
+  {
+    "name": "Material Design Green",
+    "colors": ["#4CAF50", "#43A047", "#388E3C", "#2E7D32", "#1B5E20"]
+  },
+  {
+    "name": "Telegram App",
+    "colors": ["#0088CC", "#23272A", "#81D4FA"]
+  },
+  {
+    "name": "Electric Blue",
+    "colors": ["#7DF9FF", "#00FFFF", "#00BFFF", "#0000FF", "#0000CD", "#00008B"]
+  },
+  {
+    "name": "Dark Red Shades",
+    "colors": ["#8B0000", "#660000", "#440000", "#220000", "#000000"]
+  },
+  {
+    "name": "Pastel Rainbow Expanded",
+    "colors": ["#FFD1DC", "#FFECDA", "#FFFFCD", "#CDFFCD", "#DCD1FF", "#CCEEFF", "#F0E68C", "#90EE90", "#ADD8E6", "#FFB6C1", "#FFFACD", "#E6E6FA"]
+  },
+  {
+    "name": "Hacker Scheme",
+    "colors": ["#00FF00", "#00FF7F", "#00BFFF", "#00FFFF", "#7FFF00", "#32CD32", "#008000"]
+  },
+  {
+    "name": "Harry Potter House Colors",
+    "colors": ["#740001", "#FFD700", "#1A472A", "#C0C0C0", "#222F5B", "#626262", "#6F7273"]
+  },
+  {
+    "name": "Germany Flag",
+    "colors": ["#000000", "#DD0000", "#FFCC00"]
+  },
+  {
+    "name": "Figma App Logo",
+    "colors": ["#FF3366", "#FFB6C1", "#FFD700", "#00BFFF", "#8A2BE2"]
+  },
+  {
+    "name": "Trello Purple",
+    "colors": ["#7A42A5", "#9E6AC8", "#B98BE0", "#D2B7F1", "#EBE0FC"]
+  },
+  {
+    "name": "Midjourney AI Concept",
+    "colors": ["#202225", "#2C2F33", "#36393F", "#7289DA", "#99AAB5"]
+  },
+  {
+    "name": "WhatsApp Branding",
+    "colors": ["#25D366", "#128C7E", "#075E54", "#DCF8C6", "#FFE5B4", "#34B7F1"]
+  },
+  {
+    "name": "Web Safe Black Tints",
+    "colors": ["#000000", "#111111", "#222222", "#333333", "#444444"]
+  },
+  {
+    "name": "Washington Commanders Logo",
+    "colors": ["#5A1B28", "#E21B32", "#FFB81C", "#F4F4F4"]
+  },
+  {
+    "name": "Elegant Neutrals",
+    "colors": ["#36454F", "#5D6D7E", "#AAB7B8", "#D6DBDF", "#EAECEE", "#F2F3F4"]
+  },
+  {
+    "name": "Shell Primary",
+    "colors": ["#FFD700", "#FF0000", "#FFFFFF"]
+  },
+  {
+    "name": "Green Blue Spectrum",
+    "colors": ["#00FF00", "#00FFFF", "#00BFFF", "#0000FF", "#0000CD", "#00008B", "#20B2AA"]
+  },
+  {
+    "name": "Anime Style",
+    "colors": ["#FFDAB9", "#FFC0CB", "#ADD8E6", "#90EE90", "#FFFFE0", "#F0F8FF"]
+  },
+  {
+    "name": "TypeScript Logo",
+    "colors": ["#007ACC", "#3178C6", "#FFFFFF"]
+  },
+  {
+    "name": "Samsung Logo",
+    "colors": ["#0000FF", "#3366FF", "#6699FF", "#99CCFF", "#CCEEFF"]
+  },
+  {
+    "name": "Old Rose Tints",
+    "colors": ["#C02E4C", "#D44265", "#E8567E", "#FCAAAA", "#FFBBDC"]
+  },
+  {
+    "name": "Lowpoly 3D Blender",
+    "colors": ["#FCEE21", "#00A6DA", "#E30613", "#1A1A1A", "#F3F1ED"]
+  },
+  {
+    "name": "Spotify Branding",
+    "colors": ["#1DB954", "#1ED760", "#191414", "#FFFFFF"]
+  },
+  {
+    "name": "Light Purple Shades (10)",
+    "colors": ["#E6E6FA", "#D8BFD8", "#DDA0DD", "#EE82EE", "#DA70D6", "#BA55D3", "#9932CC", "#8A2BE2", "#800080", "#9370DB"]
+  },
+  {
+    "name": "Light Blue Tints",
+    "colors": ["#ADD8E6", "#C0EDF5", "#D0F5FA", "#E0FAFF", "#F0FFFF"]
+  },
+  {
+    "name": "Trello Pink",
+    "colors": ["#FF69B4", "#FF82B2", "#FF9BCD", "#FFB6E8", "#FFD1FC"]
+  },
+  {
+    "name": "Facebook Logo 2019",
+    "colors": ["#3B5998", "#8B9DC3", "#DFE3EE", "#F7F7F7"]
+  },
+  {
+    "name": "Luxiem Influencer",
+    "colors": ["#CD853F", "#FFA07A", "#FFDAB9", "#F5DEB3", "#B8860B", "#8B4513"]
+  },
+  {
+    "name": "Flat UI Core",
+    "colors": ["#1ABC9C", "#2ECC71", "#3498DB", "#9B59B6", "#34495E", "#16A085", "#27AE60", "#2980B9", "#8E44AD", "#2C3E50"]
+  },
+  {
+    "name": "JavaScript Logo",
+    "colors": ["#F0DB4F", "#323330", "#606060", "#909090", "#C0C0C0"]
+  },
+  {
+    "name": "Brown Shades",
+    "colors": ["#A52A2A", "#8B4513", "#A0522D", "#CD853F", "#D2B48C", "#F5DEB3"]
+  },
+  {
+    "name": "Energy Blue",
+    "colors": ["#0000FF", "#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF"]
+  },
+  {
+    "name": "Parking App & Auto Design",
+    "colors": ["#A9A9A9", "#696969", "#404040", "#202020", "#000000", "#FF0000", "#FFA500"]
+  },
+  {
+    "name": "FedEx Logo",
+    "colors": ["#4D148C", "#FF6600"]
+  },
+  {
+    "name": "Dark Pink Shades",
+    "colors": ["#E75480", "#EB6B90", "#F082A1", "#F498B2", "#F9AFC3"]
+  },
+  {
+    "name": "Starry Colors",
+    "colors": ["#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE", "#F8F8FF", "#F5F5DC"]
+  },
+  {
+    "name": "iPhone 11 Pro Colors",
+    "colors": ["#1C1C1E", "#3A3A3C", "#4D4D4F", "#8E8E93", "#AEAEB2", "#C0C0C0", "#D1D1D6", "#E5E5EA", "#F2F2F7", "#F5F5F5"]
+  },
+  {
+    "name": "United Kingdom Flag",
+    "colors": ["#C8102E", "#00247D", "#FFFFFF"]
+  },
+  {
+    "name": "Japan Flag",
+    "colors": ["#BC002D", "#FFFFFF"]
+  },
+  {
+    "name": "Green Flat UI",
+    "colors": ["#1ABC9C", "#2ECC71", "#16A085", "#27AE60"]
+  },
+  {
+    "name": "Metallic Gold Tints",
+    "colors": ["#D4AF37", "#E8C154", "#FCDF71", "#FFE08E", "#FFF1AC"]
+  },
+  {
+    "name": "Russia Flag",
+    "colors": ["#FFFFFF", "#0033A0", "#D52B1E"]
+  },
+  {
+    "name": "Dark Cyan Shades",
+    "colors": ["#008B8B", "#007777", "#006363", "#004F4F", "#003B3B"]
+  },
+  {
+    "name": "Pure White Shades",
+    "colors": ["#FFFFFF", "#F5F5F5", "#EEEEEE", "#E0E0E0", "#D3D3D3"]
+  },
+  {
+    "name": "Blue Shades (10)",
+    "colors": ["#0000FF", "#0000CD", "#00008B", "#000080", "#191970", "#4169E1", "#6495ED", "#87CEFA", "#ADD8E6", "#B0E0E6"]
+  },
+  {
+    "name": "Pacific Blue Shades",
+    "colors": ["#009DC4", "#00B1DC", "#00C5F4", "#00D9FC", "#00EDFF"]
+  },
+  {
+    "name": "Bootstrap 5 Primary",
+    "colors": ["#0D6EFD", "#6C757D", "#198754", "#DC3545", "#FFC107", "#0DCAF0"]
+  },
+  {
+    "name": "Trello Yellow",
+    "colors": ["#FCEE21", "#FFD700", "#FFFACD", "#FFFFCC"]
+  },
+  {
+    "name": "Rolex Logo",
+    "colors": ["#B8860B", "#FFD700", "#008000"]
+  },
+  {
+    "name": "X11 Navy Blue Shades",
+    "colors": ["#000080", "#000066", "#00004D", "#000033", "#00001A"]
+  },
+  {
+    "name": "Yellow Aesthetic",
+    "colors": ["#FCEE21", "#FFD700", "#FFFF00", "#FFFACD", "#FFF8DC"]
+  },
+  {
+    "name": "Material Design Blue Gray",
+    "colors": ["#607D8B", "#546E7A", "#455A64", "#37474F", "#263238"]
+  },
+  {
+    "name": "Muted Tones",
+    "colors": ["#A9A9A9", "#808080", "#696969", "#404040", "#202020", "#000000"]
+  },
+  {
+    "name": "Ethereum Web Design",
+    "colors": ["#3C3C3C", "#5C5C5C", "#7C7C7C", "#9C9C9C", "#BCCCDC", "#DCDCEC"]
+  },
+  {
+    "name": "Dark Olive Green Tints",
+    "colors": ["#556B2F", "#667D3A", "#778F45", "#88A150", "#99B35B"]
+  },
+  {
+    "name": "Mexican Flag",
+    "colors": ["#006C35", "#FFFFFF", "#CE1126"]
+  },
+  {
+    "name": "Comprehensive Grey Scale",
+    "colors": ["#808080", "#A9A9A9", "#C0C0C0", "#D3D3D3", "#E0E0E0", "#EEEEEE", "#F5F5F5", "#F8F8F8", "#FFFFFF"]
+  },
+  {
+    "name": "Quirky Vector",
+    "colors": ["#6B4E99", "#4B8EAE", "#7FD3ED", "#C0D6E2", "#A8D1EA", "#6DABD7"]
+  },
+  {
+    "name": "X11 Dark Violet Shades",
+    "colors": ["#9400D3", "#7A00B1", "#610090", "#47006E", "#2E004C"]
+  },
+  {
+    "name": "Chilli Red Shades",
+    "colors": ["#E41A2D", "#C61726", "#A7131F", "#890F19", "#6B0C14"]
+  },
+  {
+    "name": "Google Logo",
+    "colors": ["#4285F4", "#EA4335", "#FBBC05", "#34A853"]
+  },
+  {
+    "name": "Adobe Illustrator Logo",
+    "colors": ["#FF9A00", "#F70000", "#400080", "#FFFFFF", "#000000"]
+  },
+  {
+    "name": "Cottagecore Dust",
+    "colors": ["#F0E68C", "#DDA0DD", "#ADD8E6", "#90EE90", "#FFC0CB", "#F5DEB3"]
+  },
+  {
+    "name": "Modern Payment Card",
+    "colors": ["#FFFFFF", "#E2E3E5", "#D6D8D9", "#CCE5FF", "#D4EDDA", "#FFF3CD", "#F8D7DA"]
+  },
+  {
+    "name": "Material Design Orange Tints",
+    "colors": ["#FF9800", "#FFA726", "#FFB74D", "#FFCC80", "#FFE0B2"]
+  },
+  {
+    "name": "Teal Shades",
+    "colors": ["#008080", "#004D4D", "#003333", "#001A1A", "#000000"]
+  },
+  {
+    "name": "Pantone True Red Shades",
+    "colors": ["#BF1932", "#A01529", "#801020", "#600C18", "#400810"]
+  },
+  {
+    "name": "X11 Sandy Brown Shades",
+    "colors": ["#F4A460", "#D29C57", "#B0934E", "#8E8A45", "#6C813C"]
+  },
+  {
+    "name": "Blue Gradient",
+    "colors": ["#0000FF", "#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF", "#F0FFFF"]
+  },
+  {
+    "name": "Dr. Pepper Branding",
+    "colors": ["#8B0000", "#DC143C", "#A020F0", "#800080", "#FF00FF", "#FFFFFF"]
+  },
+  {
+    "name": "Synthwave 80s",
+    "colors": ["#FF00FF", "#00FFFF", "#FFD700", "#FF0000", "#00FF00", "#0000FF"]
+  },
+  {
+    "name": "Cold Blue Scheme",
+    "colors": ["#4682B4", "#5F9EA0", "#6A5ACD", "#87CEEB", "#B0E0E6"]
+  },
+  {
+    "name": "Green Color Spectrum",
+    "colors": ["#00FF00", "#32CD32", "#008000", "#228B22", "#556B2F"]
+  },
+  {
+    "name": "France Flag",
+    "colors": ["#002395", "#FFFFFF", "#ED2939"]
+  },
+  {
+    "name": "Material Design Light Blue",
+    "colors": ["#03A9F4", "#29B6F6", "#4FC3F7", "#81D4FA", "#B3E5FC"]
+  },
+  {
+    "name": "Orange Shade Spectrum",
+    "colors": ["#FFA500", "#FFB74D", "#FFC97D", "#FFDBAA", "#FFEDD7"]
+  },
+  {
+    "name": "Black and Gold Website",
+    "colors": ["#000000", "#FFD700", "#A0522D", "#D2B48C", "#F5DEB3"]
+  },
+  {
+    "name": "Midnight Blue Shades",
+    "colors": ["#00009C", "#000082", "#000067", "#00004D", "#000033"]
+  },
+  {
+    "name": "Pale Skin Tones",
+    "colors": ["#FFE0B2", "#FFCC99", "#FFB366", "#FF9933", "#FF8000"]
+  },
+  {
+    "name": "Home Interior Decor",
+    "colors": ["#F5F5DC", "#F0F8FF", "#FFFACD", "#FDF5E6", "#FFF5EE"]
+  },
+  {
+    "name": "Material Design Standard",
+    "colors": ["#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722"]
+  },
+  {
+    "name": "Footer Web Design",
+    "colors": ["#2F3136", "#36393F", "#202225", "#99AAB5", "#7289DA"]
+  },
+  {
+    "name": "PHP Logo",
+    "colors": ["#777BB4", "#8892BF", "#A0A9DA", "#B8C0E2", "#D0D7EC"]
+  },
+  {
+    "name": "Dark Brown Shades",
+    "colors": ["#5C4033", "#4B3329", "#3A261F", "#2A1A14", "#190D0A"]
+  },
+  {
+    "name": "Nail Colors 2018",
+    "colors": ["#FF69B4", "#FFB6C1", "#F0E68C", "#ADD8E6", "#90EE90", "#F5DEB3"]
+  },
+  {
+    "name": "Flat UI Silver Shades",
+    "colors": ["#BDC3C7", "#CACFD2", "#D8DDE1", "#E5E8EB", "#F2F4F5"]
+  },
+  {
+    "name": "Dark Gray Shades",
+    "colors": ["#A9A9A9", "#BDBDBD", "#D3D3D3", "#E0E0E0", "#EEEEEE"]
+  },
+  {
+    "name": "Matrix Code Green",
+    "colors": ["#00FF00", "#33FF33", "#66FF66", "#99FF99", "#CCFFCC"]
+  },
+  {
+    "name": "Space Gray Tones",
+    "colors": ["#36393F", "#2C2F33", "#23272A", "#4D4D4D", "#666666", "#808080"]
+  },
+  {
+    "name": "Light Gray Tones",
+    "colors": ["#D3D3D3", "#DDDDDD", "#E5E5E5", "#EEEEEE", "#F6F6F6", "#FFFFFF"]
+  },
+  {
+    "name": "Steel Blue Shades",
+    "colors": ["#4682B4", "#3A6992", "#2E5070", "#22374E", "#161E2B"]
+  },
+  {
+    "name": "Reese's Logo",
+    "colors": ["#FF7F24", "#FFB900", "#000000", "#FFFFFF"]
+  },
+  {
+    "name": "Christmas Holiday",
+    "colors": ["#FF0000", "#008000", "#FFFFFF", "#FFFF00", "#0000FF"]
+  },
+  {
+    "name": "Nude Skin Tones",
+    "colors": ["#F0D4A8", "#E2BBA4", "#D5A39B", "#C78B92", "#BA7288"]
+  },
+  {
+    "name": "Dunkin' Donuts Branding",
+    "colors": ["#FF8B00", "#CD1133", "#FFFFFF", "#8B4513"]
+  },
+  {
+    "name": "Lips Colors 2018",
+    "colors": ["#FFC0CB", "#FF69B4", "#CD5C5C", "#E9967A", "#FFA07A"]
+  },
+  {
+    "name": "Healthcare App UI/UX",
+    "colors": ["#ADD8E6", "#87CEFA", "#B0E0E6", "#D0F5FA", "#E0FFFF", "#F0FFFF", "#98FB98", "#66CDAA", "#3CB371"]
+  },
+  {
+    "name": "CV Template Design",
+    "colors": ["#20B2AA", "#98FB98", "#E0FFFF", "#D0F5FA", "#ADD8E6", "#87CEFA"]
+  },
+  {
+    "name": "Modern Dashboard",
+    "colors": ["#3498DB", "#2ECC71", "#9B59B6", "#E74C3C", "#F1C40F", "#34495E"]
+  },
+  {
+    "name": "JAVA Logo",
+    "colors": ["#E65100", "#FF3D00", "#FF6F00", "#FF9100", "#FFA200"]
+  },
+  {
+    "name": "Diagram Points",
+    "colors": ["#8A2BE2", "#EE82EE", "#DA70D6", "#FF00FF", "#C71585", "#DB7093", "#FFC0CB", "#FFD1DC"]
+  },
+  {
+    "name": "Desert Landscape",
+    "colors": ["#D2B48C", "#F5DEB3", "#CD853F", "#A0522D", "#8B4513"]
+  },
+  {
+    "name": "Burnt Orange Shades",
+    "colors": ["#FF7F34", "#FF8D4A", "#FF9C60", "#FFAB77", "#FFBA8D"]
+  },
+  {
+    "name": "Material Design Brown",
+    "colors": ["#795548", "#6D4C41", "#5D4037", "#4E342E", "#3E2723"]
+  },
+  {
+    "name": "TV Static Bars",
+    "colors": ["#FFFF00", "#00FFFF", "#00FF00", "#FF00FF", "#0000FF", "#FF0000", "#000000", "#FFFFFF"]
+  },
+  {
+    "name": "Bootstrap 3 Core",
+    "colors": ["#007BFF", "#6C757D", "#28A745", "#DC3545", "#FFC107", "#17A2B8", "#F8F9FA", "#343A40"]
+  },
+  {
+    "name": "Material Design Light Green",
+    "colors": ["#8BC34A", "#9CCC65", "#AED581", "#C5E1A5", "#DCEDC8"]
+  },
+  {
+    "name": "Chrome Music Lab Notes",
+    "colors": ["#FF0000", "#FF8000", "#FFFF00", "#00FF00", "#0000FF", "#800080"]
+  },
+  {
+    "name": "Red Shades",
+    "colors": ["#FF0000", "#E60000", "#CC0000", "#B30000", "#990000", "#800000"]
+  },
+  {
+    "name": "Light Blue Shades",
+    "colors": ["#03A9F4", "#29B6F6", "#4FC3F7", "#81D4FA", "#B3E5FC"]
+  },
+  {
+    "name": "Purple Shades",
+    "colors": ["#800080", "#4B0082", "#6A0DAD", "#9932CC", "#BA55D3", "#DDA0DD", "#EE82EE", "#FF00FF"]
+  },
+  {
+    "name": "M&M's Candies",
+    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#A0522D"]
+  },
+  {
+    "name": "Maroon Shades",
+    "colors": ["#800000", "#660000", "#4D0000", "#330000", "#1A0000"]
+  },
+  {
+    "name": "Windows 10 Interface",
+    "colors": ["#0078D4", "#005A9E", "#003F6C"]
+  },
+  {
+    "name": "Wood Doors",
+    "colors": ["#A0522D", "#CD853F", "#D2B48C", "#F5DEB3", "#8B4513"]
+  },
+  {
+    "name": "Cyan Shades",
+    "colors": ["#00BCD4", "#26C6DA", "#4DD0E1", "#80DEEA", "#B2EBF2"]
+  },
+  {
+    "name": "Blur Effect Blue",
+    "colors": ["#00BFFF", "#87CEFA", "#ADD8E6", "#E0FFFF", "#F0FFFF"]
+  },
+  {
+    "name": "Flower Hues",
+    "colors": ["#FFC0CB", "#FF69B4", "#CD5C5C", "#E9967A", "#FFA07A", "#DDA0DD"]
+  },
+  {
+    "name": "Primary Blue Shades",
+    "colors": ["#0000FF", "#0000CD", "#00008B", "#000080", "#191970"]
+  },
+  {
+    "name": "Navbar UI",
+    "colors": ["#23272A", "#2C2F33", "#36393F", "#7289DA", "#99AAB5", "#800080", "#00BFFF"]
+  },
+  {
+    "name": "Red Bull Branding",
+    "colors": ["#FF0000", "#FFFF00", "#0000FF", "#23272A", "#FFFFFF"]
+  },
+  {
+    "name": "Charcoal Shades",
+    "colors": ["#36454F", "#2C3539", "#292929", "#282828", "#333333", "#404040"]
+  },
+  {
+    "name": "Microsoft Office",
+    "colors": ["#FF0000", "#008000", "#0000FF", "#FFC0CB", "#FFFF00", "#FFA500"]
+  },
+  {
+    "name": "Bangladesh Flag",
+    "colors": ["#006A4E", "#F42A41"]
+  },
+  {
+    "name": "Microsoft Logo",
+    "colors": ["#F25022", "#7FBA00", "#00A4EF", "#FFB900"]
+  },
+  {
+    "name": "Trello Blue",
+    "colors": ["#0079BF", "#0080FF", "#0099FF", "#00B2FF", "#00CCFF"]
+  },
+  {
+    "name": "Black Tints (5 Shades)",
+    "colors": ["#000000", "#1A1A1A", "#333333", "#4D4D4D", "#666666"]
+  },
+  {
+    "name": "Login Page UI",
+    "colors": ["#2196F3", "#1976D2", "#1565C0", "#0D47A1", "#800080", "#6A0DAD", "#4B0082", "#9932CC"]
+  },
+  {
+    "name": "Creative Google Slides",
+    "colors": ["#00FF00", "#98FB98", "#C0C0C0", "#DCDCDC", "#E8E8E8", "#F4F4F4"]
+  },
+  {
+    "name": "Brazil Flag",
+    "colors": ["#009739", "#FEDD00", "#000080", "#228B22", "#FFFFFF"]
+  },
+  {
+    "name": "Light Blue Tints (5 Shades)",
+    "colors": ["#ADD8E6", "#B0E0E6", "#C0EDF5", "#D0F5FA", "#E0FFFF"]
+  },
+  {
+    "name": "BMW M Series",
+    "colors": ["#E30613", "#0074D9", "#009F81", "#FFC107", "#F8F9FA", "#23272A"]
+  },
+  {
+    "name": "Royal Blue Shades",
+    "colors": ["#4169E1", "#3359C0", "#264A9E", "#1A3A7D", "#0D2B5C"]
+  },
+  {
+    "name": "Dark Blue Shades",
+    "colors": ["#00008B", "#00006F", "#000054", "#000039", "#00001E"]
+  },
+  {
+    "name": "Amazon Website",
+    "colors": ["#FF9900", "#FFD700", "#000000", "#FFFFFF", "#00A6DA", "#FF4500"]
+  },
+  {
+    "name": "Apple Music Branding",
+    "colors": ["#FD2C53", "#FB104E", "#FA0049", "#F90044", "#F8003F", "#F7003A", "#F60035", "#F50030"]
+  },
+  {
+    "name": "Bootstrap 5 Extended",
+    "colors": ["#0D6EFD", "#6C757D", "#198754", "#DC3545", "#FFC107", "#0DCAF0", "#212529", "#F8F9FA", "#FFFFFF"]
+  },
+  {
+    "name": "Least Used Rainbow",
+    "colors": ["#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF", "#800080", "#00FFFF", "#FF00FF"]
+  },
+  {
+    "name": "Standard Rainbow (20 Colors)",
+    "colors": ["#FF0000", "#FF4500", "#FFA500", "#FFD700", "#FFFF00", "#ADFF2F", "#00FF00", "#32CD32", "#008000", "#20B2AA", "#00CED1", "#00BFFF", "#0000FF", "#4169E1", "#0000CD", "#00008B", "#8A2BE2", "#800080", "#9932CC", "#EE82EE"]
+  },
+  {
+    "name": "USAF",
+    "colors": ["#231f20", "#53575a", "#9ea0a1", "#ffffff", "#ffce06", "#febe3b", "#f99d20", "#f05023", "#e91d2c", "#c12033", "#a51d53", "#8b2433", "#6e263d", "#572a30", "#613293", "#a2c5d3", "#2c70b8", "#5c7f95", "#2a317d", "#1e2859", "#081f40", "#222d65", "#19bfd2", "#003e52", "#799b3e", "#60a644", "#038442", "#1b5632", "#014c45", "#0a5540", "#2a4734", "#cdc3a6", "#bb945c", "#8d704c", "#bb6228", "#753a1b", "#623d21", "#b3a77f", "#695b25", "#9f9233", "#b31942", "#0a3161"]
+  },
+  {
+    "name": "USAF Desert /Black",
+    "colors": ["#231f20", "#753a1b", "#b3a77f"]
+  },
+  {
+    "name": "USAF Operation Enduring Freedom",
+    "colors": ["#231f20", "#b3a77f", "#695b25", "#9f9233"]
+  },
+  {
+    "name": "USAF Woodland Forest Subdued",
+    "colors": ["#231f20", "#081f40", "#6e263d", "#014c45", "#695b25"]
+  },
+  {
+    "name": "USAF Spice Brown (OCP) Subdued",
+    "colors": ["#231f20", "#753a1b", "#9f9233", "#695b25"]
+  },
+  {
+    "name": "American Flag",
+    "colors": ["#b31942", "#0a3161", "#ffffff"]
+  }
+]
+
+    

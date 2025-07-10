@@ -1,4 +1,6 @@
 
+"use client";
+
 import { colord, extend, type HslColor } from 'colord';
 import hwbPlugin from 'colord/plugins/hwb';
 import labPlugin from 'colord/plugins/lab';
@@ -7,11 +9,77 @@ import a11yPlugin from 'colord/plugins/a11y';
 import mixPlugin from 'colord/plugins/mix';
 import namesPlugin from 'colord/plugins/names';
 import chroma from 'chroma-js';
+import namer from 'color-namer';
+import { usePantone } from '@/contexts/SidebarExtensionContext';
 
 extend([hwbPlugin, labPlugin, lchPlugin, a11yPlugin, mixPlugin, namesPlugin]);
 
-export const getDescriptiveColorName = (hexColor: string): string => {
-    return colord(hexColor).toName({ closest: true }) || hexColor;
+const capitalize = (str: string) => {
+    if (!str) return '';
+    return str
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
+
+export interface AllDescriptiveNamesResult {
+    primary: { name: string; source: string };
+    all: { source: string; name: string }[];
+}
+
+export const useAllDescriptiveColorNames = (hexColor: string): AllDescriptiveNamesResult => {
+    const colorLookup = usePantone();
+    const allNames: { source: string; name: string }[] = [];
+
+    if (!colord(hexColor).isValid()) {
+        const invalidResult = { name: "Invalid Color", source: 'HEX' };
+        return { primary: invalidResult, all: [invalidResult] };
+    }
+
+    const lowerHex = colord(hexColor).toHex().toLowerCase();
+
+    // 1. Pantone & USAF Lookup
+    if (colorLookup && colorLookup.has(lowerHex)) {
+        const entry = colorLookup.get(lowerHex)!;
+        allNames.push({ source: entry.source, name: entry.name });
+    }
+
+    // 2. Namer (NTC & Basic)
+    try {
+        const names = namer(lowerHex);
+        const ntcName = names.ntc[0]?.name;
+        if (ntcName) {
+            allNames.push({ source: 'NTC', name: capitalize(ntcName) });
+        }
+        const basicName = names.basic[0]?.name;
+        if (basicName) {
+            allNames.push({ source: 'Basic', name: capitalize(basicName) });
+        }
+    } catch (e) {
+        console.error("Error getting color name from color-namer:", e);
+    }
+
+    // 3. Colord
+    const colordName = colord(lowerHex).toName({ closest: true });
+    if (colordName) {
+        allNames.push({ source: 'Colord', name: capitalize(colordName) });
+    }
+    
+    // Deduplicate names, giving priority to earlier sources
+    const uniqueNames = allNames.reduce((acc, current) => {
+        if (!acc.find(item => item.name.toLowerCase() === current.name.toLowerCase())) {
+            acc.push(current);
+        }
+        return acc;
+    }, [] as { source: string; name: string }[]);
+
+
+    if (uniqueNames.length > 0) {
+        return { primary: uniqueNames[0], all: uniqueNames };
+    }
+
+    const hexResult = { name: lowerHex.toUpperCase(), source: 'HEX' };
+    return { primary: hexResult, all: [hexResult] };
 };
 
 
@@ -117,7 +185,7 @@ export const saveColorToLibrary = (color: string): { success: boolean; message: 
 
     const normalizedColor = colord(color).toHex();
 
-    if (saved.includes(normalizedColor)) {
+    if (saved.some(c => colord(c).toHex() === normalizedColor)) {
       return { success: false, message: 'Color is already in your library.' };
     }
     saved.push(normalizedColor);
@@ -129,20 +197,26 @@ export const saveColorToLibrary = (color: string): { success: boolean; message: 
   }
 };
 
-const greenAnchors = ['#dcfce7', '#4ade80', '#16a34a', '#14532d'];
-const blueAnchors = ['#dbeafe', '#60a5fa', '#2563eb', '#1e3a8a'];
-const redAnchors = ['#fee2e2', '#f87171', '#dc2626', '#7f1d1d'];
-const orangeAnchors = ['#ffedd5', '#fb923c', '#ea580c', '#7c2d12'];
-const purpleAnchors = ['#f5d0fe', '#c084fc', '#9333ea', '#581c87'];
-const yellowAnchors = ['#fefce8', '#facc15', '#ca8a04', '#713f12'];
-const grayAnchors = ['#f8fafc', '#9ca3af', '#4b5563', '#111827'];
+export const removeColorFromLibrary = (color: string): { success: boolean; message: string } => {
+  if (typeof window === 'undefined') {
+    return { success: false, message: 'Cannot remove on server.' };
+  }
+  try {
+    const key = 'saved_individual_colors';
+    const savedJSON = localStorage.getItem(key);
+    let saved: string[] = savedJSON ? JSON.parse(savedJSON) : [];
+    
+    const normalizedColor = colord(color).toHex();
+    const newSaved = saved.filter(c => colord(c).toHex() !== normalizedColor);
 
-export const swatches = {
-  green: chroma.scale(greenAnchors).mode('lch').colors(60),
-  blue: chroma.scale(blueAnchors).mode('lch').colors(60),
-  red: chroma.scale(redAnchors).mode('lch').colors(60),
-  orange: chroma.scale(orangeAnchors).mode('lch').colors(60),
-  purple: chroma.scale(purpleAnchors).mode('lch').colors(60),
-  yellow: chroma.scale(yellowAnchors).mode('lch').colors(60),
-  gray: chroma.scale(grayAnchors).mode('lch').colors(60),
+    if (saved.length === newSaved.length) {
+      return { success: false, message: 'Color not found in library.' };
+    }
+
+    localStorage.setItem(key, JSON.stringify(newSaved));
+    return { success: true, message: 'Color removed from library!' };
+  } catch (e) {
+    console.error('Could not remove color:', e);
+    return { success: false, message: 'There was an error removing the color.' };
+  }
 };

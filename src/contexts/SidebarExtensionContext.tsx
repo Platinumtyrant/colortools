@@ -1,16 +1,21 @@
+
 "use client";
 
-import React, { ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
+import type { ColorLookupEntry } from '@/lib/pantone-colors';
 
-// This context is no longer used.
-// The sidebar logic is now handled directly within the Palette Builder page.
-export const SidebarExtensionProvider = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
+type ColorLookup = Map<string, ColorLookupEntry>;
+
+const PantoneContext = createContext<ColorLookup | null>(null);
+
+export const PantoneProvider = ({ children, lookup }: { children: ReactNode; lookup: ColorLookup }) => {
+  return (
+    <PantoneContext.Provider value={lookup}>
+      {children}
+    </PantoneContext.Provider>
+  );
 };
 
-export const useSidebarExtension = () => {
-  return {
-    extension: null,
-    setExtension: (node: ReactNode | null) => {},
-  };
+export const usePantone = (): ColorLookup | null => {
+  return useContext(PantoneContext);
 };
