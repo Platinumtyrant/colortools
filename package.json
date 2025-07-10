@@ -9,9 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "electron": "electron .",
-    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:9002 && npm run electron\"",
-    "electron-package": "npm run build && electron-builder"
+   
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.7",
@@ -71,35 +69,5 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
-    "electron": "^31.0.0",
-    "electron-builder": "^24.13.3",
-    "concurrently": "^9.0.0",
-    "wait-on": "^7.2.0"
-  },
-  "build": {
-    "appId": "YGDesign",
-    "productName": "Color Tools",
-    "files": [
-      "out/**/*",
-      "main.js",
-      "preload.js",
-      "package.json"
-    ],
-    "directories": {
-      "output": "release",
-      "buildResources": "assets"
-    },
-    "mac": {
-      "target": "dmg",
-      "icon": "assets/icon.icns"
-    },
-    "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png"
-    }
+  
   }
-}
